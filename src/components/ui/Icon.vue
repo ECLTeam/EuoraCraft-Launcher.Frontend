@@ -16,7 +16,7 @@
       <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
       <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
     </svg>
-    <Icon v-else :icon="`tabler:${getIconName(name)}`" :width="iconSize" :height="iconSize" aria-hidden="true" />
+    <Icon v-else :icon="`tabler:${getIconName(name)}`" :width="iconSize" :height="iconSize" :aria-hidden="true" />
   </span>
 </template>
 
