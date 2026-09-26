@@ -668,6 +668,22 @@ export function createShowcaseTransport(): BackendTransport {
         } satisfies PluginInfo)
         emit('plugin:status_changed', { name: 'installed-showcase-plugin', action: 'install', result: 'success' })
         return success()
+      case 'plugin_package_inspect':
+        return success({
+          package: {
+            name: 'installed-showcase-plugin',
+            version: '1.0.0',
+            manifest_sha256: 'a'.repeat(64),
+            file_count: 2,
+            total_uncompressed_bytes: 1024,
+          },
+          target_tag: 'windows-x86_64-cp312',
+          python_dependencies: [],
+          wheel_count: 0,
+          has_target_lock: false,
+          unverified_source: true,
+          runtime_ready: true,
+        })
       case 'plugin_get_routes':
         return success([])
       case 'plugin_get_slots':
@@ -764,7 +780,9 @@ export function createShowcaseTransport(): BackendTransport {
       case 'select_java':
         return success({ path: 'Showcase/Java/bin/javaw.exe' })
       case 'select_file':
-        return success({ path: 'Showcase/SelectedFile.zip' })
+        return success({
+          path: payload.purpose === 'plugin-package' ? 'Showcase/Example.eclplugin' : 'Showcase/SelectedFile.zip',
+        })
       case 'select_save_file':
         return success({ path: `Showcase/${String(payload.default_name || 'SavedFile')}` })
       case 'select_image':

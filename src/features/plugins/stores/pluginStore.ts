@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
-import type { PluginInfo, PluginSettingsData } from '@/types/plugins'
+import type { PluginInfo, PluginPackageSelection, PluginSettingsData } from '@/types/plugins'
 
 export const usePluginStore = defineStore('plugins', () => {
   const plugins = ref<PluginInfo[]>([])
@@ -68,8 +68,23 @@ export const usePluginStore = defineStore('plugins', () => {
 
   async function install(): Promise<boolean> {
     const installed = await pluginManagementApi.installFromDirectory()
-    if (installed) await load()
+    if (installed) await load(true)
     return installed
+  }
+
+  async function selectPackage(): Promise<PluginPackageSelection | null> {
+    const path = await pluginManagementApi.selectPackage()
+    if (!path) return null
+    return { path, preflight: await pluginManagementApi.inspectPackage(path) }
+  }
+
+  async function installPackage(
+    selection: PluginPackageSelection,
+    options: { allowNetwork: boolean; offlineRuntimePack: string | null }
+  ): Promise<void> {
+    await runOperation(`install:${selection.preflight.package.name}`, () =>
+      pluginManagementApi.installPackage(selection.path, options)
+    )
   }
 
   async function getSettings(pluginName: string): Promise<PluginSettingsData> {
@@ -122,6 +137,8 @@ export const usePluginStore = defineStore('plugins', () => {
     reload,
     unload,
     install,
+    selectPackage,
+    installPackage,
     getSettings,
     updateSetting,
     start,

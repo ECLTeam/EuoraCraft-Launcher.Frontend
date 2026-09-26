@@ -72,6 +72,7 @@ import type {
 } from '@/types/mods'
 import type {
   PluginInfo,
+  PluginPackagePreflight,
   PluginRoute,
   PluginSettingsData,
   PluginSlotItem,
@@ -331,7 +332,12 @@ export interface CommandPayloadMap {
   select_java: undefined
   select_image: { purpose?: 'background' | 'skin' | 'cape' | 'instance_icon' } | undefined
   select_background_video: undefined
-  select_file: { purpose?: 'crash-analysis' | 'modpack' | 'world-import' | 'theme-preset' } | undefined
+  select_file:
+    | {
+        purpose?:
+          'crash-analysis' | 'modpack' | 'world-import' | 'theme-preset' | 'plugin-package' | 'plugin-runtime-pack'
+      }
+    | undefined
   select_files: { purpose?: 'resource-files' }
   select_save_file: {
     purpose:
@@ -530,7 +536,13 @@ export interface CommandPayloadMap {
   plugin_disable: { plugin_name: string; force?: boolean }
   plugin_unload: { plugin_name: string }
   plugin_reload: { plugin_name: string; cascade?: boolean }
-  plugin_install: { plugin_path: string }
+  plugin_install: {
+    plugin_path: string
+    confirm_unverified_source?: boolean
+    allow_network?: boolean
+    offline_runtime_pack?: string | null
+  }
+  plugin_package_inspect: { plugin_path: string }
   plugin_get_routes: { plugin_id?: string }
   plugin_get_slots: Record<string, never>
   plugin_get_vue_slots: Record<string, never>
@@ -820,6 +832,7 @@ export const COMMAND_NAMES = {
   plugin_unload: 'plugin_unload',
   plugin_reload: 'plugin_reload',
   plugin_install: 'plugin_install',
+  plugin_package_inspect: 'plugin_package_inspect',
   plugin_get_routes: 'plugin_get_routes',
   plugin_get_slots: 'plugin_get_slots',
   plugin_get_vue_slots: 'plugin_get_vue_slots',
@@ -1088,6 +1101,7 @@ export interface CommandResponseMap {
   plugin_unload: void
   plugin_reload: void
   plugin_install: void
+  plugin_package_inspect: PluginPackagePreflight
   plugin_get_routes: PluginRoute[]
   plugin_get_slots: Record<string, PluginSlotItem[]>
   plugin_get_vue_slots: Record<string, VueSlotItem[]>

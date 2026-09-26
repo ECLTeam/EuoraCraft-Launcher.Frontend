@@ -26,10 +26,12 @@
           </NRadioButton>
         </NRadioGroup>
 
-        <NButton type="primary" size="small" @click="installPlugin">
-          <template #icon><UiIcon name="add" :size="14" /></template>
-          {{ t('plugins.install') }}
-        </NButton>
+        <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
+          <NButton type="primary" size="small">
+            <template #icon><UiIcon name="add" :size="14" /></template>
+            {{ t('plugins.install') }}
+          </NButton>
+        </NDropdown>
       </header>
 
       <PluginSlotHost slotId="plugin-slot-plugins-toolbar-after" class="plugin-slot-container" />
@@ -106,7 +108,7 @@
             :description="activeFilter === 'disabled' ? t('plugins.noDisabledPlugins') : t('plugins.noPlugins')"
           >
             <template #extra>
-              <NButton v-if="activeFilter !== 'disabled'" type="primary" size="small" @click="installPlugin">
+              <NButton v-if="activeFilter !== 'disabled'" type="primary" size="small" @click="selectPackage">
                 {{ t('plugins.installFirst') }}
               </NButton>
             </template>
@@ -121,11 +123,29 @@
       :plugin="settingsTarget"
       @close="settingsModalVisible = false"
     />
+    <PluginPackageInstallModal
+      v-model:visible="packageModalVisible"
+      :selection="packageSelection"
+      @installed="packageModalVisible = false"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { NButton, NEmpty, NInput, NPopconfirm, NRadioButton, NRadioGroup, NSpace, NTab, NTabs, NTag } from 'naive-ui'
+import {
+  NButton,
+  NDropdown,
+  NEmpty,
+  NInput,
+  NPopconfirm,
+  NRadioButton,
+  NRadioGroup,
+  NSpace,
+  NTab,
+  NTabs,
+  NTag,
+  type DropdownOption,
+} from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -133,10 +153,11 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
+import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
-import type { PluginInfo } from '@/types/plugins'
+import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
 
 const { t } = useI18n()
 const { isFolia } = useUiSkin()
@@ -147,6 +168,13 @@ const searchQuery = ref('')
 const activeFilter = ref('all')
 const settingsModalVisible = ref(false)
 const settingsTarget = ref<PluginInfo | null>(null)
+const packageModalVisible = ref(false)
+const packageSelection = ref<PluginPackageSelection | null>(null)
+
+const installOptions = computed<DropdownOption[]>(() => [
+  { key: 'package', label: t('plugins.installPackage') },
+  { key: 'directory', label: t('plugins.installDirectory') },
+])
 
 const filters = computed(() => [
   { key: 'all', label: t('plugins.filterAll') },
@@ -217,13 +245,28 @@ async function unloadPlugin(plugin: PluginInfo) {
   })
 }
 
-async function installPlugin() {
+async function installDirectory() {
   await run(async () => pluginStore.install(), {
     showSuccess: true,
     successMessage: t('plugins.installSuccess'),
     showError: true,
     errorMessage: t('plugins.installFailed'),
   })
+}
+
+async function selectPackage() {
+  const selection = await run(() => pluginStore.selectPackage(), {
+    showError: true,
+    errorMessage: t('plugins.packageInspectFailed'),
+  })
+  if (!selection) return
+  packageSelection.value = selection
+  packageModalVisible.value = true
+}
+
+function handleInstallSelect(key: string | number) {
+  if (key === 'package') void selectPackage()
+  if (key === 'directory') void installDirectory()
 }
 
 function openSettings(plugin: PluginInfo) {

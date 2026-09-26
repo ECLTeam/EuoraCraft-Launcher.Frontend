@@ -11,6 +11,10 @@ vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
     reload: vi.fn(),
     unload: vi.fn(),
     installFromDirectory: vi.fn(),
+    selectPackage: vi.fn(),
+    inspectPackage: vi.fn(),
+    installPackage: vi.fn(),
+    selectRuntimePack: vi.fn(),
     onStatusChanged: vi.fn(() => vi.fn()),
   },
 }))
@@ -87,5 +91,49 @@ describe('pluginStore', () => {
     await expect(store.install()).resolves.toBe(false)
 
     expect(pluginManagementApi.list).not.toHaveBeenCalled()
+  })
+
+  it('目录安装成功后重新读取列表', async () => {
+    vi.mocked(pluginManagementApi.installFromDirectory).mockResolvedValue(true)
+    const store = usePluginStore()
+
+    await expect(store.install()).resolves.toBe(true)
+
+    expect(pluginManagementApi.list).toHaveBeenCalledOnce()
+  })
+
+  it('取消插件包选择时不预检，确认后安装并刷新列表', async () => {
+    const preflight = {
+      package: {
+        name: 'demo',
+        version: '1.0.0',
+        manifest_sha256: 'a'.repeat(64),
+        file_count: 2,
+        total_uncompressed_bytes: 123,
+      },
+      target_tag: 'windows-x86_64-cp312',
+      python_dependencies: ['example>=1'],
+      wheel_count: 1,
+      has_target_lock: true,
+      unverified_source: true,
+      runtime_ready: false,
+    }
+    const store = usePluginStore()
+    vi.mocked(pluginManagementApi.selectPackage).mockResolvedValueOnce(null)
+    await expect(store.selectPackage()).resolves.toBeNull()
+    expect(pluginManagementApi.inspectPackage).not.toHaveBeenCalled()
+
+    vi.mocked(pluginManagementApi.selectPackage).mockResolvedValueOnce('C:/demo.eclplugin')
+    vi.mocked(pluginManagementApi.inspectPackage).mockResolvedValueOnce(preflight)
+    const selection = await store.selectPackage()
+    expect(selection).toEqual({ path: 'C:/demo.eclplugin', preflight })
+    expect(pluginManagementApi.installPackage).not.toHaveBeenCalled()
+
+    await store.installPackage(selection!, { allowNetwork: false, offlineRuntimePack: 'C:/runtime.zip' })
+    expect(pluginManagementApi.installPackage).toHaveBeenCalledWith('C:/demo.eclplugin', {
+      allowNetwork: false,
+      offlineRuntimePack: 'C:/runtime.zip',
+    })
+    expect(pluginManagementApi.list).toHaveBeenCalledOnce()
   })
 })

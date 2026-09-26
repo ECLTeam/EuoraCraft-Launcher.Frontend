@@ -1,6 +1,6 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
-import type { PluginInfo, PluginSettingsData } from '@/types/plugins'
+import type { PluginInfo, PluginPackagePreflight, PluginSettingsData } from '@/types/plugins'
 
 export const pluginManagementApi = {
   async list(): Promise<PluginInfo[]> {
@@ -29,6 +29,37 @@ export const pluginManagementApi = {
     if (!selected.data?.path) return false
     assertSuccess(await backend.command('plugin_install', { plugin_path: selected.data.path }), '安装插件')
     return true
+  },
+
+  async selectPackage(): Promise<string | null> {
+    const selected = await backend.command('select_file', { purpose: 'plugin-package' })
+    if (!selected.success) throw new Error(selected.message || '选择插件包失败')
+    return selected.data?.path || null
+  },
+
+  async selectRuntimePack(): Promise<string | null> {
+    const selected = await backend.command('select_file', { purpose: 'plugin-runtime-pack' })
+    if (!selected.success) throw new Error(selected.message || '选择运行时离线包失败')
+    return selected.data?.path || null
+  },
+
+  async inspectPackage(path: string): Promise<PluginPackagePreflight> {
+    return assertSuccess(await backend.command('plugin_package_inspect', { plugin_path: path }), '预检插件包')
+  },
+
+  async installPackage(
+    path: string,
+    options: { allowNetwork: boolean; offlineRuntimePack: string | null }
+  ): Promise<void> {
+    assertSuccess(
+      await backend.command('plugin_install', {
+        plugin_path: path,
+        confirm_unverified_source: true,
+        allow_network: options.allowNetwork,
+        offline_runtime_pack: options.offlineRuntimePack,
+      }),
+      '安装插件包'
+    )
   },
 
   onStatusChanged(handler: () => void): () => void {

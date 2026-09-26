@@ -1,0 +1,126 @@
+.package-install {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.package-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.package-heading > :deep(.icon) {
+  color: var(--primary);
+  flex: none;
+}
+
+.package-heading-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.package-heading-text strong,
+.package-heading-text span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.package-heading-text strong {
+  font-size: 14px;
+}
+
+.package-heading-text span {
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+}
+
+.package-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+
+.package-facts > div {
+  min-width: 0;
+}
+
+.package-facts dt {
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+}
+
+.package-facts dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.package-dependencies {
+  max-height: 76px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.package-warning {
+  font-size: 12px;
+}
+
+.package-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ecl-border);
+}
+
+.package-option-row,
+.package-runtime-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.package-option-row span,
+.package-runtime-row span {
+  font-size: 12px;
+}
+
+.package-runtime-row span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ecl-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.package-requirement {
+  color: var(--warning);
+  font-size: 11px;
+}
+
+.package-installing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .package-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

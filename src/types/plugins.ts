@@ -22,6 +22,27 @@ export interface PluginInfo {
   is_system: boolean
 }
 
+export interface PluginPackagePreflight {
+  package: {
+    name: string
+    version: string
+    manifest_sha256: string
+    file_count: number
+    total_uncompressed_bytes: number
+  }
+  target_tag: string
+  python_dependencies: string[]
+  wheel_count: number
+  has_target_lock: boolean
+  unverified_source: boolean
+  runtime_ready: boolean
+}
+
+export interface PluginPackageSelection {
+  path: string
+  preflight: PluginPackagePreflight
+}
+
 export interface PluginRoute {
   plugin: string
   path: string
