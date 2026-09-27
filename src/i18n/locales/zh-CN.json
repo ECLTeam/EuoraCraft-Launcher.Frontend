@@ -12,7 +12,6 @@
     "versions": "实例",
     "instances": "实例管理",
     "more": "更多",
-    "plugins": "插件",
     "settings": "设置",
     "debug": "调试",
     "debugTitle": "组件调试",
@@ -23,6 +22,7 @@
     "description": "创建或加入 Minecraft 联机房间",
     "nav": {
       "room": "联机",
+      "plugins": "插件",
       "tools": "工具"
     },
     "copy": "复制",

@@ -12,7 +12,6 @@
     "versions": "Instances",
     "instances": "Instances",
     "more": "More",
-    "plugins": "Plugins",
     "settings": "Settings",
     "debug": "Debug",
     "debugTitle": "Component Debug",
@@ -23,6 +22,7 @@
     "description": "Create or join a Minecraft multiplayer room",
     "nav": {
       "room": "Connect",
+      "plugins": "Plugins",
       "tools": "Tools"
     },
     "copy": "Copy",

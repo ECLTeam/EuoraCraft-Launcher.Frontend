@@ -2,11 +2,6 @@
   <div class="plugins-page">
     <section class="plugins-panel ecl-surface">
       <header class="plugins-toolbar">
-        <div class="plugins-title">
-          <UiIcon name="plugin" :size="17" />
-          <span>{{ t('sidebar.plugins') }}</span>
-        </div>
-
         <NInput
           v-model:value="searchQuery"
           class="plugins-search"

@@ -13,6 +13,5 @@ export const MENU_ITEMS: MenuItem[] = [
   { path: '/versions', labelKey: 'sidebar.versions', iconName: 'cube' },
   { path: '/more', labelKey: 'sidebar.more', iconName: 'more' },
   { path: '/download', labelKey: 'download.title', iconName: 'download' },
-  { path: '/plugins', labelKey: 'sidebar.plugins', iconName: 'puzzle' },
   { path: '/settings', labelKey: 'sidebar.settings', iconName: 'settings' },
 ]

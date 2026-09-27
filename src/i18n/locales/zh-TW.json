@@ -12,7 +12,6 @@
     "versions": "實例",
     "instances": "實例管理",
     "more": "更多",
-    "plugins": "外掛",
     "settings": "設定",
     "debug": "除錯",
     "debugTitle": "元件除錯",
@@ -23,6 +22,7 @@
     "description": "建立或加入 Minecraft 聯機房間",
     "nav": {
       "room": "連線",
+      "plugins": "外掛",
       "tools": "工具"
     },
     "copy": "複製",

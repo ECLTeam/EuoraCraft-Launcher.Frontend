@@ -15,6 +15,7 @@ vi.mock('@/features/connect/composables/useConnector', () => ({
 const Host = defineComponent({ template: '<RouterView />' })
 
 const RoomStub = { template: '<div class="stub-room">联机子页</div>' }
+const PluginsStub = { template: '<div class="stub-plugins">插件子页</div>' }
 const ToolsStub = { template: '<div class="stub-tools">工具子页</div>' }
 
 function createTestRouter(): Router {
@@ -28,9 +29,11 @@ function createTestRouter(): Router {
         redirect: '/more/room',
         children: [
           { path: 'room', name: 'more-room', component: RoomStub },
+          { path: 'plugins', name: 'more-plugins', component: PluginsStub },
           { path: 'tools', name: 'more-tools', component: ToolsStub },
         ],
       },
+      { path: '/plugins', redirect: '/more/plugins' },
     ],
   })
 }
@@ -49,13 +52,14 @@ describe('Connect shell', () => {
     mocks.useConnector.mockReset().mockReturnValue({})
   })
 
-  it('renders the in-page menu with both sub-pages', async () => {
+  it('renders the in-page menu with all three sub-pages', async () => {
     const { wrapper } = await mountShell()
 
     const menuItems = wrapper.findAll('.n-menu-item')
-    expect(menuItems).toHaveLength(2)
+    expect(menuItems).toHaveLength(3)
     expect(menuItems[0]?.text()).toContain('联机')
-    expect(menuItems[1]?.text()).toContain('工具')
+    expect(menuItems[1]?.text()).toContain('插件')
+    expect(menuItems[2]?.text()).toContain('工具')
   })
 
   it('lands on the room sub-page by default', async () => {
@@ -64,6 +68,26 @@ describe('Connect shell', () => {
     expect(router.currentRoute.value.path).toBe('/more/room')
     expect(wrapper.find('.stub-room').exists()).toBe(true)
     expect(wrapper.find('.stub-tools').exists()).toBe(false)
+  })
+
+  it('renders the plugins sub-page when the menu target changes', async () => {
+    const { wrapper, router } = await mountShell()
+
+    await router.push('/more/plugins')
+    await flushPromises()
+
+    expect(wrapper.find('.stub-plugins').exists()).toBe(true)
+    expect(wrapper.find('.stub-room').exists()).toBe(false)
+  })
+
+  it('redirects the legacy /plugins path to the more plugins sub-page', async () => {
+    const { wrapper, router } = await mountShell()
+
+    await router.push('/plugins')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/more/plugins')
+    expect(wrapper.find('.stub-plugins').exists()).toBe(true)
   })
 
   it('swaps the rendered sub-page when the menu target changes', async () => {

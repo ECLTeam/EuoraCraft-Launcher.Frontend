@@ -12,7 +12,6 @@
     "versions": "Instanzen",
     "instances": "Instanzverwaltung",
     "more": "Mehr",
-    "plugins": "Plugins",
     "settings": "Einstellungen",
     "debug": "Debug",
     "debugTitle": "Komponenten-Debug",
@@ -23,6 +22,7 @@
     "description": "Erstelle einen Mehrspieler-Raum für Minecraft oder tritt einem bei",
     "nav": {
       "room": "Verbindung",
+      "plugins": "Plugins",
       "tools": "Werkzeuge"
     },
     "copy": "Kopieren",
