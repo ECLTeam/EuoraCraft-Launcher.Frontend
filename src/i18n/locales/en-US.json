@@ -338,7 +338,8 @@
       "dropHint": "Drop a .zip / .mcworld world file here to import",
       "importSuccess": "World imported successfully",
       "empty": "Select a target instance and import a world to see it here"
-    }
+    },
+    "modpack": "Modpacks"
   },
   "crashPick": {
     "title": "Analyze Crash Log",
@@ -1781,6 +1782,8 @@
     "versionName": "Instance Name",
     "versionNamePlaceholder": "Enter instance name",
     "versionNameHint": "Used as the instance folder name",
+    "onlinePack": "Online Modpack",
+    "installPack": "Install Modpack",
     "import": "Import",
     "success": "Modpack import task created",
     "dropHint": "Release to import modpack"

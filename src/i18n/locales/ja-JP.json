@@ -338,7 +338,8 @@
       "dropHint": ".zip / .mcworld ワールドファイルをここにドロップしてインポート",
       "importSuccess": "ワールドをインポートしました",
       "empty": "対象のインスタンスを選択してワールドをインポートすると、ここに表示されます"
-    }
+    },
+    "modpack": "Modパック"
   },
   "crashPick": {
     "title": "クラッシュログを解析",
@@ -1787,6 +1788,8 @@
     "versionName": "インスタンス名",
     "versionNamePlaceholder": "インスタンス名を入力",
     "versionNameHint": "インスタンスフォルダー名として使用されます",
+    "onlinePack": "オンラインModパック",
+    "installPack": "Modパックをインストール",
     "import": "インポート",
     "success": "Modパックのインポートタスクを作成しました",
     "dropHint": "離してModパックをインポート"

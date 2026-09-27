@@ -9,7 +9,7 @@ import type { CommandPayloadMap } from '@/types/api'
 import type { MinecraftVersionCatalog, ScannedVersion } from '@/types/instances'
 import type { ModSearchResult, ModSourceConfig } from '@/types/mods'
 
-export type DownloadResourceType = 'mod' | 'resourcepack' | 'shaderpack' | 'datapack' | 'world'
+export type DownloadResourceType = 'mod' | 'resourcepack' | 'shaderpack' | 'datapack' | 'modpack' | 'world'
 
 const resourceTypes: DownloadResourceType[] = ['mod', 'resourcepack', 'shaderpack', 'datapack', 'world']
 const catalogTtl = 10 * 60 * 1000

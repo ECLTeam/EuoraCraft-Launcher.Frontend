@@ -71,7 +71,7 @@
         </div>
       </div>
 
-      <div class="instance-selector-row">
+      <div v-if="!isModpack" class="instance-selector-row">
         <span class="instance-selector-label">{{ t('mods.selectInstance') }}</span>
         <ResourceInstanceSelect
           :target="target"
@@ -413,7 +413,17 @@
         </UiLoading>
       </div>
 
-      <template v-if="!usesDirectVersionAction" #footer>
+      <template v-if="isModpack" #footer>
+        <div class="mod-detail-footer">
+          <div class="mod-detail-install">
+            <NButton type="primary" :disabled="!selectedFileId" @click="openModpackOnlineInstall">
+              <template #icon><UiIcon name="download" :size="15" /></template>
+              {{ t('modpackImport.installPack') }}
+            </NButton>
+          </div>
+        </div>
+      </template>
+      <template v-else-if="!usesDirectVersionAction" #footer>
         <div class="mod-detail-footer">
           <NButton secondary :disabled="!selectedFileId" :loading="savingAs" @click="handleSaveAs">
             <template #icon><UiIcon name="save" :size="15" /></template>
@@ -511,6 +521,7 @@ import {
 } from '@/features/download/model/downloadPrefetch'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
+import { useModpackImportStore } from '@/features/instances/stores/modpackImportStore'
 import { modApi } from '@/features/mods/api/modApi'
 import {
   aprilFoolsAnchor,
@@ -548,6 +559,8 @@ const { t, locale } = useI18n()
 const resourceTypeLabel = computed(() =>
   props.resourceType === 'world' ? t('download.world.title') : t(`download.${props.resourceType}`)
 )
+const isModpack = computed(() => props.resourceType === 'modpack')
+const modpackImportStore = useModpackImportStore()
 const usesDirectVersionAction = computed(() =>
   ['mod', 'resourcepack', 'shaderpack', 'datapack', 'world'].includes(props.resourceType)
 )
@@ -847,11 +860,15 @@ const loaderOptions = computed(() => {
 })
 
 const curseforgeAvailable = ref(true)
-const sourceOptions = computed(() => [
-  { label: t('mods.allSources'), value: '' },
-  { label: 'Modrinth', value: 'modrinth' },
-  { label: 'CurseForge', value: 'curseforge', disabled: !curseforgeAvailable.value },
-])
+const sourceOptions = computed(() => {
+  const options = [
+    { label: t('mods.allSources'), value: '' },
+    { label: 'Modrinth', value: 'modrinth' },
+    { label: 'CurseForge', value: 'curseforge', disabled: !curseforgeAvailable.value },
+  ]
+  if (isModpack.value) options.push({ label: 'FTB', value: 'ftb' })
+  return options
+})
 const sortOptions = [
   { label: t('mods.sortDefault'), value: '' },
   { label: t('mods.sortRelevance'), value: 'relevance' },
@@ -1023,7 +1040,7 @@ let dependencyRequestId = 0
 async function loadProjectInfo(
   source: ModInfo['source'],
   projectId: string,
-  resourceType: GameResourceType | 'world' = props.resourceType
+  resourceType: GameResourceType | 'world' | 'modpack' = props.resourceType
 ): Promise<ModInfo> {
   const cacheKey = `mod-project-info:${source}:${resourceType}:${projectId}`
   const cached = globalCache.get<ModInfo>(cacheKey)
@@ -1083,6 +1100,11 @@ async function selectVersionFile(group: ModVersionGroup, file: ModVersion): Prom
   selectedGroupKey.value = group.key
   selectedFileId.value = file.id
   selectedVersionContext.value = { gameVersion: group.gameVersion, loader: group.loader }
+  // 整合包不绑定现有实例：选中版本后直接打开在线安装对话框
+  if (isModpack.value) {
+    openModpackOnlineInstall()
+    return
+  }
   // 兼容实例始终继承所选 mod 的项目级兼容选项（openDetails 已按 mod.gameVersions/loaders 设置），
   // 不随所选文件收窄，保证弹窗「选择兼容实例」与下载页保持一致。
   if (props.resourceType === 'mod') void loadRequiredDependencies(file, group.key)
@@ -1093,6 +1115,21 @@ async function selectVersionFile(group: ModVersionGroup, file: ModVersion): Prom
     return
   }
   await handleSaveAs()
+}
+
+/** 打开在线整合包安装对话框：预填当前来源与所选版本文件。 */
+function openModpackOnlineInstall(): void {
+  const mod = selectedMod.value
+  const platform = activeSourceRef.value
+  const fileId = selectedFileId.value
+  if (!mod || !platform || !fileId) return
+  detailsVisible.value = false
+  void modpackImportStore.openOnline({
+    source: platform.source,
+    projectId: platform.projectId,
+    fileId,
+    title: mod.displayTitle,
+  })
 }
 
 function toggleVersionGroup(group: ModVersionGroup): void {
@@ -1563,6 +1600,8 @@ function lastLaunchedResourceDirectory(): string {
           resourcepack: 'resourcepacks',
           shaderpack: 'shaderpacks',
           datapack: 'datapacks',
+          // 整合包不支持另存为，仅为类型完备
+          modpack: 'mods',
           schematic: 'schematics',
         }[props.resourceType]
   return joinLocalPath(fallback.path, directory)
@@ -1645,6 +1684,10 @@ async function handleDrop(event: DragEvent) {
     return
   }
   try {
+    if (props.resourceType === 'modpack') {
+      // 整合包拖放由全局拖放层（App.vue）接管，不装入现有实例
+      return
+    }
     if (props.resourceType === 'mod') {
       for (const path of paths) await instanceWorkspaceApi.addMod(workspaceTarget(inst), path)
     } else if (props.resourceType === 'world') {

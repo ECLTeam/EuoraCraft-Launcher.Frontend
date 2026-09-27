@@ -338,7 +338,8 @@
       "dropHint": "Zieh eine Weltdatei (.zip / .mcworld) hierher, um sie zu importieren",
       "importSuccess": "Welt erfolgreich importiert",
       "empty": "Wähle eine Zielinstanz und importiere eine Welt – dann erscheint sie hier"
-    }
+    },
+    "modpack": "Modpacks"
   },
   "crashPick": {
     "title": "Absturzprotokoll analysieren",
@@ -1787,6 +1788,8 @@
     "versionName": "Instanzname",
     "versionNamePlaceholder": "Instanznamen eingeben",
     "versionNameHint": "Wird als Name des Instanzordners verwendet",
+    "onlinePack": "Online-Modpaket",
+    "installPack": "Modpaket installieren",
     "import": "Importieren",
     "success": "Importaufgabe für das Modpaket wurde erstellt",
     "dropHint": "Loslassen, um das Modpaket zu importieren"

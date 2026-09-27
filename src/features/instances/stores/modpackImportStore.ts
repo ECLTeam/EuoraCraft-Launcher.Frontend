@@ -26,8 +26,19 @@ export function extractPackPath(files: ArrayLike<File> | undefined): string | un
 }
 
 /**
+ * 在线整合包安装的预填信息：来源平台、项目与文件 ID、展示标题。
+ */
+export interface OnlinePackTarget {
+  source: 'modrinth' | 'curseforge' | 'ftb'
+  projectId: string
+  fileId: string
+  title: string
+}
+
+/**
  * 整合包导入对话框的全局状态。
  * 由「导入整合包」按钮与全局文件拖放共同打开；导入为全新安装，用户选择安装目录与实例名。
+ * 在线安装（下载页整合包 Tab）复用同一对话框，仅预填来源与文件标识，跳过本地文件选择。
  */
 export const useModpackImportStore = defineStore('modpackImport', () => {
   const visible = ref(false)
@@ -36,8 +47,15 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
   const gamePath = ref('')
   const gamePaths = ref<{ value: string; label: string }[]>([])
   const importing = ref(false)
+  const onlinePack = ref<OnlinePackTarget | null>(null)
 
-  const canImport = computed(() => Boolean(sourcePath.value && versionName.value.trim() && gamePath.value))
+  const isOnline = computed(() => Boolean(onlinePack.value))
+  const onlineTitle = computed(() => onlinePack.value?.title || '')
+  const canImport = computed(() =>
+    onlinePack.value
+      ? Boolean(versionName.value.trim() && gamePath.value)
+      : Boolean(sourcePath.value && versionName.value.trim() && gamePath.value)
+  )
 
   async function loadGamePaths(): Promise<string> {
     const settings = useSettingsStore()
@@ -59,8 +77,19 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
   }
 
   async function open(opts?: { sourcePath?: string }) {
+    onlinePack.value = null
     sourcePath.value = opts?.sourcePath || ''
     versionName.value = derivePackName(sourcePath.value)
+    importing.value = false
+    gamePath.value = await loadGamePaths()
+    visible.value = true
+  }
+
+  /** 打开在线整合包安装对话框：预填来源与文件，跳过本地文件选择。 */
+  async function openOnline(target: OnlinePackTarget) {
+    onlinePack.value = { ...target }
+    sourcePath.value = ''
+    versionName.value = target.title
     importing.value = false
     gamePath.value = await loadGamePaths()
     visible.value = true
@@ -79,6 +108,18 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     if (!canImport.value || importing.value) return { ok: false }
     importing.value = true
     try {
+      if (onlinePack.value) {
+        const response = await backend.command('game_modpack_online_install', {
+          source: onlinePack.value.source,
+          project_id: onlinePack.value.projectId,
+          file_id: onlinePack.value.fileId,
+          game_path: gamePath.value,
+          new_version_id: versionName.value.trim(),
+        })
+        if (!response.success) return { ok: false, error: response.message || '安装整合包失败' }
+        visible.value = false
+        return { ok: true }
+      }
       const response = await backend.command('game_instance_import', {
         game_path: gamePath.value,
         source_path: sourcePath.value,
@@ -101,8 +142,12 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     gamePath,
     gamePaths,
     importing,
+    onlinePack,
+    isOnline,
+    onlineTitle,
     canImport,
     open,
+    openOnline,
     close,
     setSource,
     importPack,

@@ -42,7 +42,7 @@ export interface ModInfo {
   body: string
   iconUrl?: string
   code: string
-  source: 'modrinth' | 'curseforge'
+  source: 'modrinth' | 'curseforge' | 'ftb'
   resourceType?: string
   loaders: string[]
   gameVersions: string[]
@@ -96,7 +96,7 @@ export interface ModpackTypeInfo {
 // ═══════════════════════════════════════════════════════════════════
 
 export interface ModSourceReference {
-  source: 'modrinth' | 'curseforge'
+  source: 'modrinth' | 'curseforge' | 'ftb'
   projectId: string
   slug: string
   projectUrl: string
@@ -123,7 +123,7 @@ export interface ModSearchItem {
   downloads: number
   follows: number
   dateModified?: string
-  source: 'modrinth' | 'curseforge'
+  source: 'modrinth' | 'curseforge' | 'ftb'
   projectUrl: string
   categories: string[]
   loaders: string[]

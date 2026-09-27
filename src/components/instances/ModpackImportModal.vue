@@ -8,12 +8,16 @@
     @update:visible="store.close()"
   >
     <div class="modpack-import-fields">
-      <label class="mp-field">
+      <label v-if="!store.isOnline" class="mp-field">
         <span>{{ t('modpackImport.fileLabel') }}</span>
         <div class="mp-file-row">
           <NInput :value="store.sourcePath" readonly :placeholder="t('modpackImport.filePlaceholder')" />
           <NButton @click="selectSourceFile">{{ t('modpackImport.selectFile') }}</NButton>
         </div>
+      </label>
+      <label v-else class="mp-field">
+        <span>{{ t('modpackImport.onlinePack') }}</span>
+        <NInput :value="store.onlineTitle" readonly />
       </label>
 
       <label class="mp-field">
@@ -44,7 +48,7 @@
       </NButton>
       <NButton type="primary" :loading="store.importing" :disabled="!store.canImport" @click="handleImport">
         <template #icon><UiIcon name="upload" :size="15" /></template>
-        {{ t('modpackImport.import') }}
+        {{ store.isOnline ? t('modpackImport.installPack') : t('modpackImport.import') }}
       </NButton>
     </template>
   </Modal>

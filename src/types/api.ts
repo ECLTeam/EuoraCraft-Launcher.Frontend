@@ -393,6 +393,13 @@ export interface CommandPayloadMap {
     output_path: string
     pack_format: 'modrinth'
   }
+  game_modpack_online_install: {
+    source: 'modrinth' | 'curseforge' | 'ftb' | 'ftb'
+    project_id: string
+    file_id: string
+    game_path: string
+    new_version_id: string
+  }
   game_instance_files_check: InstanceTargetPayload
   game_instance_files_repair: InstanceTargetPayload
   game_instance_delete: InstanceTargetPayload
@@ -606,7 +613,7 @@ export interface CommandPayloadMap {
   }
   download_mod: {
     mod_id: string
-    source: 'modrinth' | 'curseforge'
+    source: 'modrinth' | 'curseforge' | 'ftb'
     file_id: string
     game_path: string
     instance_id: string
@@ -618,7 +625,7 @@ export interface CommandPayloadMap {
   }
   download_mod_to_path: {
     mod_id: string
-    source: 'modrinth' | 'curseforge'
+    source: 'modrinth' | 'curseforge' | 'ftb'
     file_id: string
     save_path: string
     resource_type?: string
@@ -765,6 +772,7 @@ export const COMMAND_NAMES = {
   game_instance_clone: 'game_instance_clone',
   game_instance_import: 'game_instance_import',
   game_instance_export: 'game_instance_export',
+  game_modpack_online_install: 'game_modpack_online_install',
   game_instance_files_check: 'game_instance_files_check',
   game_instance_files_repair: 'game_instance_files_repair',
   game_instance_delete: 'game_instance_delete',
@@ -1018,6 +1026,7 @@ export interface CommandResponseMap {
   game_instance_clone: GameOperation
   game_instance_import: GameOperation
   game_instance_export: GameOperation
+  game_modpack_online_install: GameOperation
   game_instance_files_check: {
     issues: Array<{ kind: string; path: string; size?: number; message?: string }>
     downloadBytes: number

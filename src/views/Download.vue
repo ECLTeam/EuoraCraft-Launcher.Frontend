@@ -24,6 +24,7 @@
         <OnlineModSearch v-else-if="activeTab === 'resourcepack'" :key="activeTab" :resourceType="'resourcepack'" />
         <OnlineModSearch v-else-if="activeTab === 'shaderpack'" :key="activeTab" :resourceType="'shaderpack'" />
         <OnlineModSearch v-else-if="activeTab === 'datapack'" :key="activeTab" :resourceType="'datapack'" />
+        <OnlineModSearch v-else-if="activeTab === 'modpack'" :key="activeTab" :resourceType="'modpack'" />
         <OnlineModSearch
           v-else-if="activeTab === 'world'"
           :key="activeTab"
@@ -47,9 +48,9 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-type DownloadTab = 'instances' | 'mod' | 'resourcepack' | 'shaderpack' | 'datapack' | 'world'
+type DownloadTab = 'instances' | 'mod' | 'resourcepack' | 'shaderpack' | 'datapack' | 'modpack' | 'world'
 
-const validTabs: DownloadTab[] = ['instances', 'mod', 'resourcepack', 'shaderpack', 'datapack', 'world']
+const validTabs: DownloadTab[] = ['instances', 'mod', 'resourcepack', 'shaderpack', 'datapack', 'modpack', 'world']
 
 const navItems = computed(() => [
   { id: 'instances' as const, icon: 'cube', label: t('download.instanceDownload') },
@@ -57,6 +58,7 @@ const navItems = computed(() => [
   { id: 'resourcepack' as const, icon: 'image', label: t('download.resourcepack') },
   { id: 'shaderpack' as const, icon: 'sparkles', label: t('download.shaderpack') },
   { id: 'datapack' as const, icon: 'layers', label: t('download.datapack') },
+  { id: 'modpack' as const, icon: 'package', label: t('download.modpack') },
   { id: 'world' as const, icon: 'globe', label: t('download.world.title') },
 ])
 

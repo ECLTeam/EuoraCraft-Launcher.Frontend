@@ -338,7 +338,8 @@
       "dropHint": "拖入 .zip / .mcworld 存档文件到此处导入",
       "importSuccess": "存档导入成功",
       "empty": "选择目标实例并导入存档后，会显示在这里"
-    }
+    },
+    "modpack": "整合包"
   },
   "crashPick": {
     "title": "分析崩溃日志",
@@ -1691,6 +1692,8 @@
     "versionName": "实例名称",
     "versionNamePlaceholder": "输入实例名称",
     "versionNameHint": "将作为实例文件夹名",
+    "onlinePack": "在线整合包",
+    "installPack": "安装整合包",
     "import": "导入",
     "success": "整合包导入任务已创建",
     "dropHint": "松开以导入整合包"
