@@ -23,20 +23,8 @@
     "title": "联机",
     "description": "创建或加入 Minecraft 联机房间",
     "nav": {
-      "createHint": "分享你的世界",
-      "joinHint": "连接好友房间",
-      "service": "联机服务",
-      "checking": "检测中",
-      "available": "可用",
-      "unavailable": "不可用",
-      "ready": "已就绪",
-      "notReady": "未就绪"
-    },
-    "entry": {
-      "title": "选择联机方式",
-      "description": "创建自己的房间，或者使用房间码加入好友",
-      "createDescription": "启动本地实例，将你的 Minecraft 世界分享给好友",
-      "joinDescription": "输入好友分享的房间码，加入同一个虚拟局域网"
+      "room": "联机",
+      "tools": "工具"
     },
     "copy": "复制",
     "copied": "已复制到剪贴板",
@@ -62,16 +50,14 @@
       "udpBlocked": "UDP 不可用",
       "ipv6Available": "支持公网 IPv6"
     },
-    "easyTier": {
-      "title": "EasyTier 联机组件",
-      "idle": "联机组件尚未安装",
-      "resolving": "正在测速并选择下载源...",
-      "downloading": "正在下载联机组件...",
-      "extracting": "正在解压联机组件...",
-      "installed": "联机组件已就绪",
-      "failed": "联机组件下载失败",
-      "install": "安装组件",
-      "retry": "重试"
+    "tools": {
+      "natCardTitle": "NAT 类型检测",
+      "natCardDesc": "检测当前网络的 NAT 类型，判断联机穿透能力",
+      "detecting": "正在检测网络类型...",
+      "detectFailed": "检测失败",
+      "idleTitle": "尚未检测网络类型",
+      "idleDesc": "点击右上角「NAT 检测」开始。结果仅用于判断能否直连，不影响已建立的房间。",
+      "publicAddress": "公网地址"
     },
     "create": {
       "tab": "创建房间",

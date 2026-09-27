@@ -23,20 +23,8 @@
     "title": "Connect",
     "description": "Create or join a Minecraft multiplayer room",
     "nav": {
-      "createHint": "Share your world",
-      "joinHint": "Connect to friends",
-      "service": "Service",
-      "checking": "Checking",
-      "available": "Available",
-      "unavailable": "Unavailable",
-      "ready": "Ready",
-      "notReady": "Not ready"
-    },
-    "entry": {
-      "title": "Choose how to connect",
-      "description": "Create your own room or join a friend with a room code",
-      "createDescription": "Launch a local instance and share your Minecraft world with friends",
-      "joinDescription": "Enter a room code to join your friend's virtual LAN"
+      "room": "Connect",
+      "tools": "Tools"
     },
     "copy": "Copy",
     "copied": "Copied to clipboard",
@@ -62,16 +50,14 @@
       "udpBlocked": "UDP unavailable",
       "ipv6Available": "Public IPv6 available"
     },
-    "easyTier": {
-      "title": "EasyTier multiplayer component",
-      "idle": "The multiplayer component is not installed",
-      "resolving": "Selecting the fastest download source...",
-      "downloading": "Downloading the multiplayer component...",
-      "extracting": "Extracting the multiplayer component...",
-      "installed": "The multiplayer component is ready",
-      "failed": "The multiplayer component download failed",
-      "install": "Install component",
-      "retry": "Retry"
+    "tools": {
+      "natCardTitle": "NAT Type Detection",
+      "natCardDesc": "Detect this network's NAT type to estimate direct-connection capability",
+      "detecting": "Detecting network type...",
+      "detectFailed": "Detection failed",
+      "idleTitle": "Network type not detected yet",
+      "idleDesc": "Click “NAT Detection” in the top right to start. The result only estimates direct connectivity and does not affect an existing room.",
+      "publicAddress": "Public address"
     },
     "create": {
       "tab": "Create room",

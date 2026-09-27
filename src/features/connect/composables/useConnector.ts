@@ -1,11 +1,10 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { connectorApi } from '@/features/connect/api/connectorApi'
-import type { ConnectorPlayer, ConnectorStatus, EasyTierStatus, NatTypeResult } from '@/types/connect'
+import type { ConnectorPlayer, ConnectorStatus, EasyTierStatus } from '@/types/connect'
 import type { InstanceTargetPayload } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 
 const STATUS_POLL_MS = 2_000
-const EASYTIER_POLL_MS = 1_000
 const PORT_SCAN_MS = 1_000
 const MAX_SEARCH_MISSES = 5
 
@@ -31,10 +30,7 @@ export function useConnector(options: UseConnectorOptions = {}) {
   const unavailableReason = ref('')
   const status = ref<ConnectorStatus>(idleStatus())
   const easyTier = ref<EasyTierStatus | null>(null)
-  const natType = ref<NatTypeResult | null>(null)
   const busy = ref(false)
-  const easyTierBusy = ref(false)
-  const natBusy = ref(false)
   const scanning = ref(false)
   const detectedPort = ref<number | null>(null)
   const scanPhase = ref<'detecting' | 'searching'>('detecting')
@@ -42,7 +38,6 @@ export function useConnector(options: UseConnectorOptions = {}) {
   let searchMisses = 0
 
   let statusTimer: ReturnType<typeof setInterval> | null = null
-  let easyTierTimer: ReturnType<typeof setInterval> | null = null
   let portScanTimer: ReturnType<typeof setInterval> | null = null
 
   function report(error: unknown): void {
@@ -128,30 +123,6 @@ export function useConnector(options: UseConnectorOptions = {}) {
     return runAction(() => connectorApi.kick(player.machineId))
   }
 
-  async function detectNat(): Promise<void> {
-    if (natBusy.value) return
-    natBusy.value = true
-    try {
-      natType.value = await connectorApi.natType()
-    } catch (error) {
-      report(error)
-    } finally {
-      natBusy.value = false
-    }
-  }
-
-  async function downloadEasyTier(): Promise<void> {
-    if (easyTierBusy.value) return
-    easyTierBusy.value = true
-    try {
-      easyTier.value = await connectorApi.downloadEasyTier()
-    } catch (error) {
-      report(error)
-    } finally {
-      easyTierBusy.value = false
-    }
-  }
-
   async function scanPortOnce(): Promise<void> {
     try {
       if (scanPhase.value === 'detecting') {
@@ -207,21 +178,9 @@ export function useConnector(options: UseConnectorOptions = {}) {
     }
   )
 
-  watch(
-    () => easyTier.value?.status,
-    (phase) => {
-      clearTimer(easyTierTimer)
-      easyTierTimer =
-        phase === 'resolving' || phase === 'downloading' || phase === 'extracting'
-          ? setInterval(() => void refreshEasyTier(), EASYTIER_POLL_MS)
-          : null
-    }
-  )
-
   onMounted(() => void initialize())
   onUnmounted(() => {
     clearTimer(statusTimer)
-    clearTimer(easyTierTimer)
     clearTimer(portScanTimer)
   })
 
@@ -230,10 +189,7 @@ export function useConnector(options: UseConnectorOptions = {}) {
     unavailableReason,
     status,
     easyTier,
-    natType,
     busy,
-    easyTierBusy,
-    natBusy,
     scanning,
     scanPhase,
     detectedPort,
@@ -245,8 +201,6 @@ export function useConnector(options: UseConnectorOptions = {}) {
     join,
     leave,
     kick,
-    detectNat,
-    downloadEasyTier,
     startPortScan,
     stopPortScan,
   }

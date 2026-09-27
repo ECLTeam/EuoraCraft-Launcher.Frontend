@@ -16,8 +16,6 @@ vi.mock('@/features/connect/api/connectorApi', () => ({
     join: vi.fn(),
     leave: vi.fn(),
     kick: vi.fn(),
-    natType: vi.fn(),
-    downloadEasyTier: vi.fn(),
     detectPorts: vi.fn(),
     searchMcPort: vi.fn(),
   },

@@ -23,20 +23,8 @@
     "title": "Mehrspieler",
     "description": "Erstelle einen Mehrspieler-Raum für Minecraft oder tritt einem bei",
     "nav": {
-      "createHint": "Teile deine Welt",
-      "joinHint": "Mit Freundesraum verbinden",
-      "service": "Mehrspieler-Dienst",
-      "checking": "Wird geprüft",
-      "available": "Verfügbar",
-      "unavailable": "Nicht verfügbar",
-      "ready": "Bereit",
-      "notReady": "Nicht bereit"
-    },
-    "entry": {
-      "title": "Verbindungsart wählen",
-      "description": "Erstelle einen eigenen Raum oder tritt mit einem Raumcode einem Freund bei",
-      "createDescription": "Starte eine lokale Instanz und teile deine Minecraft-Welt mit Freunden",
-      "joinDescription": "Gib den von deinem Freund geteilten Raumcode ein und trete demselben virtuellen LAN bei"
+      "room": "Verbindung",
+      "tools": "Werkzeuge"
     },
     "copy": "Kopieren",
     "copied": "In die Zwischenablage kopiert",
@@ -62,16 +50,14 @@
       "udpBlocked": "UDP nicht verfügbar",
       "ipv6Available": "Öffentliches IPv6 verfügbar"
     },
-    "easyTier": {
-      "title": "EasyTier-Mehrspielerkomponente",
-      "idle": "Die Mehrspielerkomponente ist nicht installiert",
-      "resolving": "Download-Quellen werden auf Geschwindigkeit geprüft und ausgewählt...",
-      "downloading": "Die Mehrspielerkomponente wird heruntergeladen...",
-      "extracting": "Die Mehrspielerkomponente wird entpackt...",
-      "installed": "Die Mehrspielerkomponente ist bereit",
-      "failed": "Download der Mehrspielerkomponente fehlgeschlagen",
-      "install": "Komponente installieren",
-      "retry": "Erneut versuchen"
+    "tools": {
+      "natCardTitle": "NAT-Typ ermitteln",
+      "natCardDesc": "Ermittelt den NAT-Typ dieses Netzwerks zur Einschätzung der Direktverbindung",
+      "detecting": "Netzwerktyp wird ermittelt...",
+      "detectFailed": "Ermittlung fehlgeschlagen",
+      "idleTitle": "Netzwerktyp noch nicht ermittelt",
+      "idleDesc": "Klicke oben rechts auf „NAT-Test“, um zu starten. Das Ergebnis dient nur der Einschätzung der Direktverbindung und beeinflusst bestehende Räume nicht.",
+      "publicAddress": "Öffentliche Adresse"
     },
     "create": {
       "tab": "Raum erstellen",

@@ -23,7 +23,15 @@ const routes: RouteRecordRaw[] = [
     name: 'versions-manage',
     component: withErrorBoundary(() => import('@/views/Instances.vue')),
   },
-  { path: '/connect', name: 'connect', component: withErrorBoundary(() => import('@/views/Connect.vue')) },
+  {
+    path: '/connect',
+    component: withErrorBoundary(() => import('@/views/Connect.vue')),
+    redirect: '/connect/room',
+    children: [
+      { path: 'room', name: 'connect-room', component: () => import('@/views/connect/ConnectRoomTab.vue') },
+      { path: 'tools', name: 'connect-tools', component: () => import('@/views/connect/ConnectToolsTab.vue') },
+    ],
+  },
   { path: '/download', name: 'download', component: withErrorBoundary(() => import('@/views/Download.vue')) },
   { path: '/plugins', name: 'plugins', component: withErrorBoundary(() => import('@/views/Plugins.vue')) },
   {

@@ -23,20 +23,8 @@
     "title": "マルチプレイ",
     "description": "Minecraft のマルチプレイルームを作成または参加",
     "nav": {
-      "createHint": "ワールドを共有",
-      "joinHint": "フレンドのルームに接続",
-      "service": "マルチプレイサービス",
-      "checking": "確認中",
-      "available": "利用可能",
-      "unavailable": "利用不可",
-      "ready": "準備完了",
-      "notReady": "未準備"
-    },
-    "entry": {
-      "title": "接続方法を選択",
-      "description": "自分のルームを作成するか、ルームコードでフレンドに参加",
-      "createDescription": "ローカルインスタンスを起動し、あなたの Minecraft ワールドをフレンドと共有",
-      "joinDescription": "フレンドが共有したルームコードを入力して、同じ仮想 LAN に参加"
+      "room": "接続",
+      "tools": "ツール"
     },
     "copy": "コピー",
     "copied": "クリップボードにコピーしました",
@@ -62,16 +50,14 @@
       "udpBlocked": "UDP 利用不可",
       "ipv6Available": "パブリック IPv6 対応"
     },
-    "easyTier": {
-      "title": "EasyTier マルチプレイコンポーネント",
-      "idle": "マルチプレイコンポーネントが未インストールです",
-      "resolving": "速度を測定してダウンロード元を選択中...",
-      "downloading": "マルチプレイコンポーネントをダウンロード中...",
-      "extracting": "マルチプレイコンポーネントを展開中...",
-      "installed": "マルチプレイコンポーネントの準備が完了しました",
-      "failed": "マルチプレイコンポーネントのダウンロードに失敗しました",
-      "install": "コンポーネントをインストール",
-      "retry": "再試行"
+    "tools": {
+      "natCardTitle": "NAT タイプ診断",
+      "natCardDesc": "現在のネットワークの NAT タイプを診断し、直接接続の可否を判断します",
+      "detecting": "ネットワークタイプを診断中...",
+      "detectFailed": "診断に失敗しました",
+      "idleTitle": "ネットワークタイプは未診断です",
+      "idleDesc": "右上の「NAT 診断」をクリックして開始してください。結果は直接接続の可否の判断にのみ使われ、既存のルームには影響しません。",
+      "publicAddress": "グローバルアドレス"
     },
     "create": {
       "tab": "ルームを作成",
