@@ -29,7 +29,6 @@ export default ts.config(
       // ── Vue ──
       'vue/multi-word-component-names': 'off',
       'vue/component-name-in-template-casing': ['error', 'PascalCase', { registeredComponentsOnly: false }],
-      'vue/component-tags-order': ['error', { order: ['template', 'script', 'style'] }],
       'vue/block-order': ['error', { order: ['template', 'script', 'style'] }],
       'vue/attribute-hyphenation': ['error', 'never'],
       'vue/v-on-event-hyphenation': ['error', 'never'],
@@ -46,6 +45,9 @@ export default ts.config(
       '@typescript-eslint/no-import-type-side-effects': 'error',
 
       // ── General ──
+      // ESLint 10 recommended 新增；核心规则感知不到 script-setup 绑定的模板读取，
+      // 对 Vue SFC 响应式状态会全量误报（约 400 处），待有 Vue 感知的替代规则再启用。
+      'no-useless-assignment': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-debugger': 'error',
       'no-alert': 'error',
