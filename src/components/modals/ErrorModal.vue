@@ -117,7 +117,7 @@ const { t, te, tm } = useI18n()
 const launcherMessage = useLauncherMessage()
 
 interface Props {
-  visible: boolean
+  visible?: boolean
   title?: string
   message?: string
   detail?: string
