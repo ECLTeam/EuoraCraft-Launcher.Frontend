@@ -11,10 +11,10 @@ export const URLS = {
   userAgreement: 'https://euoracraft.zient.top/guide/user-agreement/',
 
   /** GitHub 组织 */
-  githubOrg: 'https://github.com/ECLteam',
+  githubOrg: 'https://github.com/ECLTeam',
 
   /** 提交问题（Issue） */
-  issues: 'https://github.com/ECLteam/EuoraCraft-Launcher/issues',
+  issues: 'https://github.com/ECLTeam/EuoraCraft-Launcher/issues',
 
   /** Qomicex-Public GitHub 组织 */
   qomicexPublic: 'https://github.com/Qomicex-Public',
@@ -88,8 +88,8 @@ export const URLS = {
     license: 'https://github.com/EasyTier/EasyTier/blob/main/LICENSE',
   },
   easyTierPyo3: {
-    repo: 'https://github.com/ECLteam/EasyTier-PyO3',
-    license: 'https://github.com/ECLteam/EasyTier-PyO3/blob/main/LICENSE',
+    repo: 'https://github.com/ECLTeam/EasyTier-PyO3',
+    license: 'https://github.com/ECLTeam/EasyTier-PyO3/blob/main/LICENSE',
   },
   scaffoldingMC: {
     repo: 'https://github.com/Scaffolding-MC/Scaffolding-MC',
