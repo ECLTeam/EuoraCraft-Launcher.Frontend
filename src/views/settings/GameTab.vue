@@ -212,22 +212,44 @@
       </SettingRow>
 
       <SettingRow :label="t('settings.preLaunchCommand')" :description="t('settings.preLaunchCommandDesc')">
-        <NInput v-model:value="localSettings.pre_launch_command" @blur="saveConfig" />
+        <NInput
+          v-model:value="localSettings.pre_launch_command"
+          class="advanced-argument-input"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 8 }"
+          :placeholder="t('settings.preLaunchCommandPlaceholder')"
+          @blur="saveConfig"
+        />
       </SettingRow>
 
       <SettingRow :label="t('settings.wrapperCommand')" :description="t('settings.wrapperCommandDesc')">
-        <NInput v-model:value="localSettings.wrapper_command" @blur="saveConfig" />
+        <NInput
+          v-model:value="localSettings.wrapper_command"
+          class="advanced-argument-input"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 8 }"
+          :placeholder="t('settings.wrapperCommandPlaceholder')"
+          @blur="saveConfig"
+        />
       </SettingRow>
 
       <SettingRow :label="t('settings.postExitCommand')" :description="t('settings.postExitCommandDesc')">
-        <NInput v-model:value="localSettings.post_exit_command" @blur="saveConfig" />
+        <NInput
+          v-model:value="localSettings.post_exit_command"
+          class="advanced-argument-input"
+          type="textarea"
+          :autosize="{ minRows: 3, maxRows: 8 }"
+          :placeholder="t('settings.postExitCommandPlaceholder')"
+          @blur="saveConfig"
+        />
       </SettingRow>
 
       <SettingRow :label="t('settings.envVars')" :description="t('settings.envVarsDesc')">
         <NInput
           v-model:value="localSettings.env_vars"
+          class="advanced-argument-input"
           type="textarea"
-          :autosize="{ minRows: 2, maxRows: 6 }"
+          :autosize="{ minRows: 3, maxRows: 8 }"
           :placeholder="t('settings.envVarsPlaceholder')"
           @blur="saveConfig"
         />

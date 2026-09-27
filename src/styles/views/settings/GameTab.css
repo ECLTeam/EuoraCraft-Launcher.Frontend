@@ -339,3 +339,9 @@
 .advanced-argument-input {
   width: min(440px, 42vw);
 }
+
+/* 命令与参数类文本按等宽字体渲染，便于逐字符核对；与实例详情页多行框保持一致。 */
+.advanced-argument-input :deep(textarea) {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}

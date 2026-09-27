@@ -166,16 +166,29 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.advancedOptions') }}</div>
         <SettingRow :label="t('settings.wrapperCommand')" :description="t('versions.detail.inheritGlobalDesc')">
-          <NInput v-model:value="versionSettings.wrapperCommand" />
+          <NInput
+            v-model:value="versionSettings.wrapperCommand"
+            class="argument-input"
+            type="textarea"
+            :autosize="{ minRows: 3, maxRows: 8 }"
+            :placeholder="t('settings.wrapperCommandPlaceholder')"
+          />
         </SettingRow>
         <SettingRow :label="t('settings.postExitCommand')" :description="t('versions.detail.inheritGlobalDesc')">
-          <NInput v-model:value="versionSettings.postExitCommand" />
+          <NInput
+            v-model:value="versionSettings.postExitCommand"
+            class="argument-input"
+            type="textarea"
+            :autosize="{ minRows: 3, maxRows: 8 }"
+            :placeholder="t('settings.postExitCommandPlaceholder')"
+          />
         </SettingRow>
         <SettingRow :label="t('settings.envVars')" :description="t('versions.detail.inheritGlobalDesc')">
           <NInput
             v-model:value="versionSettings.envVars"
+            class="argument-input"
             type="textarea"
-            :autosize="{ minRows: 2, maxRows: 5 }"
+            :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.envVarsPlaceholder')"
           />
         </SettingRow>
