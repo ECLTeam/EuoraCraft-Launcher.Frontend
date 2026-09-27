@@ -1025,7 +1025,7 @@
     "preLaunchCommand": "起動前コマンド",
     "preLaunchCommandDesc": "ゲームの作業フォルダーで実行し、最大 60 秒待機します。失敗時は起動を中止します",
     "wrapperCommand": "ラッパーコマンド",
-    "wrapperCommandDesc": "java 起動コマンド全体を包みます。{} プレースホルダーがあれば置換し、なければ接頭辞として結合します",
+    "wrapperCommandDesc": "java 起動コマンド全体を包みます。{'{'}{'}'} プレースホルダーがあれば置換し、なければ接頭辞として結合します",
     "postExitCommand": "終了後コマンド",
     "postExitCommandDesc": "ゲーム終了後にインスタンスディレクトリで実行します。終了コードに関係なく失敗はログのみ",
     "envVars": "カスタム環境変数",

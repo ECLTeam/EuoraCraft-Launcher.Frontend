@@ -1025,7 +1025,7 @@
     "preLaunchCommand": "Pre-launch Command",
     "preLaunchCommandDesc": "Runs in the game directory and waits up to 60 seconds; failure cancels launch",
     "wrapperCommand": "Wrapper command",
-    "wrapperCommandDesc": "Wraps the full java launch command; replaces {} when present, otherwise used as a prefix",
+    "wrapperCommandDesc": "Wraps the full java launch command; replaces {'{'}{'}'} when present, otherwise used as a prefix",
     "postExitCommand": "Post-exit command",
     "postExitCommandDesc": "Runs in the instance directory after the game exits, regardless of exit code; failures are only logged",
     "envVars": "Custom environment variables",

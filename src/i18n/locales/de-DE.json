@@ -1025,7 +1025,7 @@
     "preLaunchCommand": "Befehl vor dem Start",
     "preLaunchCommandDesc": "Wird im Spielordner ausgeführt und wartet bis zu 60 Sekunden; Fehler bricht den Start ab",
     "wrapperCommand": "Wrapper-Befehl",
-    "wrapperCommandDesc": "Umschließt den vollständigen Java-Startbefehl; ersetzt {}, falls vorhanden, sonst als Präfix",
+    "wrapperCommandDesc": "Umschließt den vollständigen Java-Startbefehl; ersetzt {'{'}{'}'}, falls vorhanden, sonst als Präfix",
     "postExitCommand": "Befehl nach Beenden",
     "postExitCommandDesc": "Wird nach Spielende im Instanzverzeichnis ausgeführt, unabhängig vom Exit-Code; Fehler nur im Protokoll",
     "envVars": "Eigene Umgebungsvariablen",

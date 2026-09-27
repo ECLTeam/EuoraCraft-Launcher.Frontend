@@ -1025,7 +1025,7 @@
     "preLaunchCommand": "啟動前執行命令",
     "preLaunchCommandDesc": "在遊戲工作目錄執行，最多等待 60 秒；失敗或逾時會取消啟動",
     "wrapperCommand": "包裝命令",
-    "wrapperCommandDesc": "包裹完整 java 啟動命令；含 {} 佔位符時替換為完整命令，否則作為前綴拼接",
+    "wrapperCommandDesc": "包裹完整 java 啟動命令；含 {'{'}{'}'} 佔位符時替換為完整命令，否則作為前綴拼接",
     "postExitCommand": "後退出命令",
     "postExitCommandDesc": "遊戲行程退出後在實例目錄執行，無論退出碼；失敗僅記錄日誌",
     "envVars": "自訂環境變數",
