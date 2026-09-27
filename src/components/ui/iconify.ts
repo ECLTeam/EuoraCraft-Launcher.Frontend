@@ -14,6 +14,7 @@ export const ICON_MAP: Record<string, string> = {
   plugin: 'puzzle',
   bug: 'bug',
   activity: 'activity',
+  toolbox: 'briefcase-2',
   wifi: 'wifi',
   network: 'network',
   menu: 'menu-2',

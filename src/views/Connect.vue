@@ -25,6 +25,6 @@ provideConnector(useConnector({ onError: (error) => message.error(error) }))
 const navItems = computed(() => [
   { path: '/more/room', icon: 'wifi', label: t('connect.nav.room') },
   { path: '/more/plugins', icon: 'puzzle', label: t('connect.nav.plugins') },
-  { path: '/more/tools', icon: 'activity', label: t('connect.nav.tools') },
+  { path: '/more/tools', icon: 'toolbox', label: t('connect.nav.tools') },
 ])
 </script>
