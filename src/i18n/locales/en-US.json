@@ -1174,6 +1174,7 @@
       "reasonsLabel": "Possible causes",
       "reasonIndex": "Possible cause {index}",
       "evidence": "Log evidence",
+      "suspectedMods": "Suspected mods",
       "suggestions": "Recommended steps",
       "genericSuggestion": "Export the crash report and inspect the complete logs for more context.",
       "confidence": {
@@ -1242,6 +1243,13 @@
             "Delete the instance native cache and repair game files."
           ]
         },
+        "java_mac_jdk_legacy": {
+          "title": "Legacy JDK window issue on macOS",
+          "suggestions": [
+            "Upgrade to a newer Java 8 build or later.",
+            "Update the launcher and Forge components, then retry."
+          ]
+        },
         "graphics_opengl_unsupported": {
           "title": "OpenGL is not supported",
           "suggestions": [
@@ -1254,6 +1262,20 @@
           "suggestions": [
             "Update or roll back to a stable graphics driver.",
             "Temporarily disable shaders and graphics enhancement mods."
+          ]
+        },
+        "graphics_macos_glfw": {
+          "title": "macOS display service unavailable",
+          "suggestions": [
+            "Make sure a display is connected and awake.",
+            "Update GPU drivers or switch to a compatible Java version."
+          ]
+        },
+        "graphics_rtss_sodium": {
+          "title": "RTSS is incompatible with Sodium",
+          "suggestions": [
+            "Exit RivaTuner Statistics Server or disable its injection.",
+            "Add Sodium to the RTSS exclusion list or uninstall it."
           ]
         },
         "jvm_native_crash": {
@@ -1277,12 +1299,23 @@
             "Delete the damaged JAR named in the log and download it again."
           ]
         },
+        "files_already_exists": {
+          "title": "File already exists",
+          "suggestions": [
+            "Delete the conflicting file named in the log and retry.",
+            "Check whether the instance directory was extracted or overwritten twice."
+          ]
+        },
         "loader_install_incomplete": {
           "title": "Incomplete mod loader installation",
           "suggestions": [
             "Reinstall Forge, Fabric, NeoForge, or Quilt.",
             "Ensure the version JSON and libraries were not modified manually."
           ]
+        },
+        "loader_forge_error_screen": {
+          "title": "Forge reported an error and halted",
+          "suggestions": ["Check the exception listed in the evidence.", "Fix or remove the related mods as suggested."]
         },
         "mod_extracted_jar": {
           "title": "A mod was extracted incorrectly",
@@ -1312,12 +1345,23 @@
             "Follow the solution reported by the mod loader."
           ]
         },
+        "mod_class_resolution_failure": {
+          "title": "Class conflict or missing class",
+          "suggestions": [
+            "Locate the mod by the class name in the evidence and update it.",
+            "Check for mods that do not match the game version."
+          ]
+        },
         "mod_mixin_failure": {
           "title": "Mixin injection failed",
           "suggestions": [
             "Update the associated mod and its dependencies.",
             "Disable recently added core or optimization mods in batches."
           ]
+        },
+        "mod_mixin_bootstrap_missing": {
+          "title": "Mixin bootstrap is missing",
+          "suggestions": ["Repair the loader and library files.", "Check that Mixin or Fabric versions match the game."]
         },
         "mod_config_failure": {
           "title": "Invalid mod configuration",
@@ -1345,6 +1389,24 @@
           "suggestions": [
             "Temporarily remove OptiFine and retry.",
             "Use a graphics optimization option compatible with this loader."
+          ]
+        },
+        "mod_optifine_duplicate": {
+          "title": "OptiFine installed twice",
+          "suggestions": [
+            "Remove the OptiFine file from the mods folder and keep the built-in install.",
+            "Make sure OptiFine is not present as both a mod and a version component."
+          ]
+        },
+        "mod_id_limit_exceeded": {
+          "title": "Mod IDs exceeded the limit",
+          "suggestions": ["Remove some mods to reduce ID usage.", "Upgrade to a game version with a higher ID limit."]
+        },
+        "mod_invalid_module_name": {
+          "title": "Invalid mod file name",
+          "suggestions": [
+            "Rename the file using letters and numbers only.",
+            "Remove non-ASCII or special characters from the path."
           ]
         },
         "resource_render_failure": {

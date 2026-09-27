@@ -1174,6 +1174,7 @@
       "reasonsLabel": "分析到的可能原因",
       "reasonIndex": "可能原因 {index}",
       "evidence": "日誌證據",
+      "suspectedMods": "可疑模組",
       "suggestions": "建議操作",
       "genericSuggestion": "匯出崩潰報告並結合完整日誌進一步排查。",
       "confidence": {
@@ -1224,6 +1225,10 @@
           "title": "Java 或原生庫架構不匹配",
           "suggestions": ["確保 Java、系統和原生庫均為相同架構。", "刪除版本的原生庫快取後重新補全檔案。"]
         },
+        "java_mac_jdk_legacy": {
+          "title": "舊版 JDK 在 macOS 上視窗異常",
+          "suggestions": ["升級到較新版本的 Java 8 或更高版本。", "更新啟動器與 Forge 相關元件後重試。"]
+        },
         "graphics_opengl_unsupported": {
           "title": "OpenGL 不受支援",
           "suggestions": ["更新顯示卡驅動並確認遊戲使用獨立顯示卡。", "避免透過不支援硬體加速的遠端桌面啟動。"]
@@ -1231,6 +1236,17 @@
         "graphics_driver_crash": {
           "title": "顯示卡驅動發生崩潰",
           "suggestions": ["更新或回退到穩定版顯示卡驅動。", "暫時關閉光影、高畫質修復和圖形增強模組。"]
+        },
+        "graphics_macos_glfw": {
+          "title": "macOS 圖形顯示服務不可用",
+          "suggestions": ["確認顯示器已連接且未處於休眠鎖定狀態。", "更新顯示卡驅動或改用相容的 Java 版本。"]
+        },
+        "graphics_rtss_sodium": {
+          "title": "RTSS 與 Sodium 不相容",
+          "suggestions": [
+            "結束 RivaTuner Statistics Server 或關閉其注入功能。",
+            "在 RTSS 中將 Sodium 加入排除清單，或直接解除安裝。"
+          ]
         },
         "jvm_native_crash": {
           "title": "Java 原生層崩潰",
@@ -1244,9 +1260,17 @@
           "title": "遊戲檔案損壞",
           "suggestions": ["重新補全遊戲與載入器檔案。", "刪除日誌中指出的損壞 JAR 後重新下載。"]
         },
+        "files_already_exists": {
+          "title": "檔案已存在衝突",
+          "suggestions": ["刪除日誌中指出的同名檔案後重試。", "檢查實例目錄是否被重複解壓或覆蓋安裝。"]
+        },
         "loader_install_incomplete": {
           "title": "模組載入器安裝不完整",
           "suggestions": ["重新安裝 Forge、Fabric、NeoForge 或 Quilt。", "確認版本 JSON 與依賴庫沒有被手動修改。"]
+        },
+        "loader_forge_error_screen": {
+          "title": "Forge 回報錯誤並終止遊戲",
+          "suggestions": ["檢視證據中列出的異常原因。", "按照異常提示修復或移除相關模組。"]
         },
         "mod_extracted_jar": {
           "title": "模組被錯誤解壓",
@@ -1264,9 +1288,17 @@
           "title": "模組版本不相容",
           "suggestions": ["移除衝突模組或安裝相容版本。", "按載入器給出的解決方案調整模組組合。"]
         },
+        "mod_class_resolution_failure": {
+          "title": "類別衝突或缺失",
+          "suggestions": ["根據證據中的類別名稱定位相關模組並更新。", "檢查是否混入與遊戲版本不符的模組。"]
+        },
         "mod_mixin_failure": {
           "title": "Mixin 注入失敗",
           "suggestions": ["更新證據中關聯的模組及其依賴。", "逐批禁用最近新增的核心或最佳化模組。"]
+        },
+        "mod_mixin_bootstrap_missing": {
+          "title": "Mixin 引導元件缺失",
+          "suggestions": ["重新補全載入器與程式庫檔案。", "檢查 Mixin 或 Fabric 版本是否與遊戲相符。"]
         },
         "mod_config_failure": {
           "title": "模組配置無法解析",
@@ -1283,6 +1315,21 @@
         "mod_optifine_conflict": {
           "title": "OptiFine 或圖形模組衝突",
           "suggestions": ["暫時移除 OptiFine 後重試。", "使用與當前載入器相容的圖形最佳化方案。"]
+        },
+        "mod_optifine_duplicate": {
+          "title": "OptiFine 被重複安裝",
+          "suggestions": [
+            "刪除 mods 資料夾中的 OptiFine 檔案，僅保留版本內建安裝。",
+            "確認 OptiFine 未同時以 Mod 與版本元件存在。"
+          ]
+        },
+        "mod_id_limit_exceeded": {
+          "title": "模組數量超出 ID 上限",
+          "suggestions": ["移除部分模組以降低 ID 佔用。", "升級到支援更高 ID 上限的遊戲版本。"]
+        },
+        "mod_invalid_module_name": {
+          "title": "模組檔案名稱不合法",
+          "suggestions": ["將檔案重新命名為英文與數字組成的名稱。", "移除路徑中的中文或特殊字元後重試。"]
         },
         "resource_render_failure": {
           "title": "資源包或渲染資源異常",

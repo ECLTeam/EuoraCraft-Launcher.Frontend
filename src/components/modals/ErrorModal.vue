@@ -44,6 +44,10 @@
             <span>{{ t('error.crash.evidence') }}</span>
             <code v-for="line in reason.evidence" :key="line">{{ line }}</code>
           </div>
+          <div v-if="reason.mods?.length" class="crash-evidence">
+            <span>{{ t('error.crash.suspectedMods') }}</span>
+            <code v-for="mod in reason.mods" :key="mod">{{ mod }}</code>
+          </div>
           <div class="crash-suggestions">
             <span>{{ t('error.crash.suggestions') }}</span>
             <ol>

@@ -1174,6 +1174,7 @@
       "reasonsLabel": "検出された原因の可能性",
       "reasonIndex": "考えられる原因 {index}",
       "evidence": "ログの証拠",
+      "suspectedMods": "疑わしいMod",
       "suggestions": "推奨される対処",
       "genericSuggestion": "クラッシュレポートをエクスポートし、完全なログと併せてさらに調査してください。",
       "confidence": {
@@ -1245,6 +1246,13 @@
             "バージョンのネイティブライブラリキャッシュを削除してからファイルを再補完してください。"
           ]
         },
+        "java_mac_jdk_legacy": {
+          "title": "旧版 JDK の macOS でのウィンドウ異常",
+          "suggestions": [
+            "新しい Java 8 以降へアップグレードしてください。",
+            "ランチャーと Forge 関連コンポーネントを更新してから再試行してください。"
+          ]
+        },
         "graphics_opengl_unsupported": {
           "title": "OpenGL がサポートされていません",
           "suggestions": [
@@ -1257,6 +1265,20 @@
           "suggestions": [
             "グラフィックドライバーを更新するか、安定版にロールバックしてください。",
             "シェーダー、高解像度修正、グラフィック強化 Mod を一時的に無効にしてください。"
+          ]
+        },
+        "graphics_macos_glfw": {
+          "title": "macOS の表示サービスを利用できません",
+          "suggestions": [
+            "ディスプレイが接続され、スリープ状態でないか確認してください。",
+            "グラフィックドライバーを更新するか、互換性のある Java を使用してください。"
+          ]
+        },
+        "graphics_rtss_sodium": {
+          "title": "RTSS が Sodium と非対応です",
+          "suggestions": [
+            "RivaTuner Statistics Server を終了するか、注入機能を無効にしてください。",
+            "RTSS の除外リストに Sodium を追加するか、アンインストールしてください。"
           ]
         },
         "jvm_native_crash": {
@@ -1280,11 +1302,25 @@
             "ログに記載された破損した JAR を削除して再ダウンロードしてください。"
           ]
         },
+        "files_already_exists": {
+          "title": "ファイルが既に存在します",
+          "suggestions": [
+            "ログに示された同名ファイルを削除してから再試行してください。",
+            "インスタンスフォルダーが二重に展開・上書きされていないか確認してください。"
+          ]
+        },
         "loader_install_incomplete": {
           "title": "Mod ローダーのインストールが不完全です",
           "suggestions": [
             "Forge、Fabric、NeoForge、Quilt のいずれかを再インストールしてください。",
             "バージョン JSON と依存ライブラリが手動で変更されていないことを確認してください。"
+          ]
+        },
+        "loader_forge_error_screen": {
+          "title": "Forge がエラーを報告し終了しました",
+          "suggestions": [
+            "証拠に示された例外の原因を確認してください。",
+            "例外の内容に従って関連モッドを修正または削除してください。"
           ]
         },
         "mod_extracted_jar": {
@@ -1315,11 +1351,25 @@
             "ローダーが提示した解決策に従って Mod の組み合わせを調整してください。"
           ]
         },
+        "mod_class_resolution_failure": {
+          "title": "クラスの競合または欠落",
+          "suggestions": [
+            "証拠のクラス名から該当モッドを特定して更新してください。",
+            "ゲームバージョンと一致しない Mod が混入していないか確認してください。"
+          ]
+        },
         "mod_mixin_failure": {
           "title": "Mixin の注入に失敗しました",
           "suggestions": [
             "証拠に関連する Mod とその依存関係を更新してください。",
             "最近追加したコア Mod や最適化 Mod を少しずつ無効にしてください。"
+          ]
+        },
+        "mod_mixin_bootstrap_missing": {
+          "title": "Mixin ブートストラップが不足しています",
+          "suggestions": [
+            "ローダーとライブラリファイルを再取得してください。",
+            "Mixin や Fabric のバージョンがゲームと一致しているか確認してください。"
           ]
         },
         "mod_config_failure": {
@@ -1348,6 +1398,27 @@
           "suggestions": [
             "OptiFine を一時的に削除して再試行してください。",
             "現在のローダーと互換性のあるグラフィック最適化手段を使用してください。"
+          ]
+        },
+        "mod_optifine_duplicate": {
+          "title": "OptiFine が重複して導入されています",
+          "suggestions": [
+            "mods フォルダー内の OptiFine ファイルを削除し、バージョン内蔵のインストールのみ残してください。",
+            "OptiFine が Mod とバージョンコンポーネントの両方に存在しないか確認してください。"
+          ]
+        },
+        "mod_id_limit_exceeded": {
+          "title": "Mod の ID が上限を超えました",
+          "suggestions": [
+            "Mod 数を減らして ID の使用量を抑えてください。",
+            "ID 上限が大きいゲームバージョンへアップグレードしてください。"
+          ]
+        },
+        "mod_invalid_module_name": {
+          "title": "Mod ファイル名が不正です",
+          "suggestions": [
+            "英数字のみのファイル名に変更してください。",
+            "パスから日本語や特殊文字を取り除いてから再試行してください。"
           ]
         },
         "resource_render_failure": {

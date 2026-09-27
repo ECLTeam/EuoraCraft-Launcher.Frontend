@@ -250,6 +250,10 @@ export interface CrashReason {
   confidence: CrashConfidence
   evidence: string[]
   parameters: Record<string, unknown>
+  /** 归因到的可疑 Mod（显示名或文件名），由 Mod 索引反查得出 */
+  mods?: string[]
+  /** 堆栈候选包名（未映射到 Mod 时） */
+  packages?: string[]
 }
 
 export interface CrashCandidateFile {

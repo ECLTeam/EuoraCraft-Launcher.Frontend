@@ -67,7 +67,8 @@ describe('ErrorModal', () => {
               code: 'mod.missing_dependency',
               confidence: 'certain',
               evidence: ['depends on example-lib which is missing'],
-              parameters: {},
+              parameters: { target_mod: 'example-lib' },
+              mods: ['Example Mod'],
             },
           ],
           sourceFiles: ['latest.log'],
@@ -79,6 +80,8 @@ describe('ErrorModal', () => {
     expect(document.body.textContent).toContain('1.21.8-Fabric')
     expect(document.body.textContent).toContain('模组依赖缺失')
     expect(document.body.textContent).toContain('depends on example-lib which is missing')
+    expect(document.body.textContent).toContain('可疑模组')
+    expect(document.body.textContent).toContain('Example Mod')
     expect(document.body.textContent).toContain('查看输出')
     expect(document.body.textContent).toContain('导出崩溃报告')
     wrapper.unmount()

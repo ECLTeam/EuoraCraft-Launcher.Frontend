@@ -1174,6 +1174,7 @@
       "reasonsLabel": "Mögliche Ursachen",
       "reasonIndex": "Mögliche Ursache {index}",
       "evidence": "Protokollbelege",
+      "suspectedMods": "Verdächtige Mods",
       "suggestions": "Empfohlene Maßnahmen",
       "genericSuggestion": "Exportiere den Absturzbericht und untersuche zusammen mit den vollständigen Protokollen weitere Ursachen.",
       "confidence": {
@@ -1245,6 +1246,13 @@
             "Den nativen Bibliothekscache der Version löschen und die Dateien erneut vervollständigen."
           ]
         },
+        "java_mac_jdk_legacy": {
+          "title": "Fensterproblem einer alten JDK unter macOS",
+          "suggestions": [
+            "Aktualisiere auf ein neueres Java-8-Update oder höher.",
+            "Aktualisiere Launcher und Forge-Komponenten und versuche es erneut."
+          ]
+        },
         "graphics_opengl_unsupported": {
           "title": "OpenGL wird nicht unterstützt",
           "suggestions": [
@@ -1257,6 +1265,20 @@
           "suggestions": [
             "Grafiktreiber aktualisieren oder auf eine stabile Version zurücksetzen.",
             "Shader-, HD-Fix- und Grafik-Mods vorübergehend deaktivieren."
+          ]
+        },
+        "graphics_macos_glfw": {
+          "title": "macOS-Anzeigedienst nicht verfügbar",
+          "suggestions": [
+            "Stelle sicher, dass ein Display angeschlossen und aktiv ist.",
+            "Aktualisiere den Grafiktreiber oder nutze ein kompatibles Java."
+          ]
+        },
+        "graphics_rtss_sodium": {
+          "title": "RTSS ist nicht mit Sodium kompatibel",
+          "suggestions": [
+            "Beende RivaTuner Statistics Server oder deaktiviere dessen Injektion.",
+            "Füge Sodium in RTSS zur Ausnahmeliste hinzu oder deinstalliere es."
           ]
         },
         "jvm_native_crash": {
@@ -1280,11 +1302,25 @@
             "Die im Protokoll genannte beschädigte JAR-Datei löschen und neu herunterladen."
           ]
         },
+        "files_already_exists": {
+          "title": "Datei existiert bereits",
+          "suggestions": [
+            "Lösche die im Protokoll genannte Datei und versuche es erneut.",
+            "Prüfe, ob der Instanzordner doppelt entpackt oder überschrieben wurde."
+          ]
+        },
         "loader_install_incomplete": {
           "title": "Mod-Loader-Installation unvollständig",
           "suggestions": [
             "Forge, Fabric, NeoForge oder Quilt neu installieren.",
             "Sicherstellen, dass die Versions-JSON und Abhängigkeitsbibliotheken nicht manuell verändert wurden."
+          ]
+        },
+        "loader_forge_error_screen": {
+          "title": "Forge hat einen Fehler gemeldet und das Spiel beendet",
+          "suggestions": [
+            "Prüfe die in den Belegen genannte Ausnahme.",
+            "Behebe das Problem oder entferne die betroffenen Mods."
           ]
         },
         "mod_extracted_jar": {
@@ -1315,11 +1351,25 @@
             "Die Mod-Kombination nach der Lösung des Loaders anpassen."
           ]
         },
+        "mod_class_resolution_failure": {
+          "title": "Klassenkonflikt oder fehlende Klasse",
+          "suggestions": [
+            "Finde den Mod über den Klassennamen in den Belegen und aktualisiere ihn.",
+            "Prüfe, ob Mods enthalten sind, die nicht zur Spielversion passen."
+          ]
+        },
         "mod_mixin_failure": {
           "title": "Mixin-Injektion fehlgeschlagen",
           "suggestions": [
             "Die in den Belegen genannten Mods samt Abhängigkeiten aktualisieren.",
             "Zuletzt hinzugefügte Kern- oder Optimierungs-Mods stapelweise deaktivieren."
+          ]
+        },
+        "mod_mixin_bootstrap_missing": {
+          "title": "Mixin-Bootstrap fehlt",
+          "suggestions": [
+            "Lade die Loader- und Bibliotheksdateien neu herunter.",
+            "Prüfe, ob Mixin- und Fabric-Version zum Spiel passen."
           ]
         },
         "mod_config_failure": {
@@ -1348,6 +1398,27 @@
           "suggestions": [
             "OptiFine vorübergehend entfernen und erneut versuchen.",
             "Eine mit dem aktuellen Loader kompatible Grafikoptimierung verwenden."
+          ]
+        },
+        "mod_optifine_duplicate": {
+          "title": "OptiFine doppelt installiert",
+          "suggestions": [
+            "Entferne die OptiFine-Datei aus dem Mods-Ordner und behalte nur die integrierte Installation.",
+            "Stelle sicher, dass OptiFine nicht gleichzeitig als Mod und Versionskomponente vorliegt."
+          ]
+        },
+        "mod_id_limit_exceeded": {
+          "title": "Mod-ID-Limit überschritten",
+          "suggestions": [
+            "Entferne einige Mods, um den ID-Verbrauch zu senken.",
+            "Wechsle auf eine Spielversion mit höherem ID-Limit."
+          ]
+        },
+        "mod_invalid_module_name": {
+          "title": "Ungültiger Mod-Dateiname",
+          "suggestions": [
+            "Benenne die Datei nur mit Buchstaben und Zahlen um.",
+            "Entferne Sonderzeichen aus dem Pfad und versuche es erneut."
           ]
         },
         "resource_render_failure": {
