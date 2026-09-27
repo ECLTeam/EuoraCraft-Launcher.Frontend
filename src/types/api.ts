@@ -127,6 +127,9 @@ export interface BackendEvents {
       background?: Partial<BackgroundConfig>
     }
   }
+  'launcher:visibility': {
+    action: 'none' | 'minimize' | 'quit'
+  }
   'launcher:notify': {
     type: 'info' | 'warning' | 'error'
     title: string
@@ -513,6 +516,11 @@ export interface CommandPayloadMap {
     game_args?: string[]
     version_isolation?: boolean
     quick_target?: { type: 'world'; world_id: string } | { type: 'server'; address: string }
+    wrapper_command?: string
+    post_exit_command?: string
+    env_vars?: string
+    window_title?: string
+    launcher_visibility?: 'none' | 'minimize' | 'quit'
   }
   game_launch_cancel: undefined
   game_instance_stop: { instance_id: string }

@@ -4,6 +4,7 @@ export interface VersionSettingsTarget {
 }
 
 export type InstanceIsolationMode = 'inherit' | 'enabled' | 'disabled'
+export type LauncherVisibilityMode = 'inherit' | 'none' | 'minimize' | 'quit'
 
 export interface VersionLaunchSettings {
   isolationMode: InstanceIsolationMode
@@ -13,6 +14,16 @@ export interface VersionLaunchSettings {
   javaPath: string
   jvmArgs: string
   gameArgs: string
+  /** 包装命令；留空回退全局。 */
+  wrapperCommand: string
+  /** 后退出命令；留空回退全局。 */
+  postExitCommand: string
+  /** 自定义环境变量；留空回退全局。 */
+  envVars: string
+  /** 窗口标题模板；留空回退全局。 */
+  windowTitle: string
+  /** 启动器可见性；inherit 表示回退全局。 */
+  launcherVisibility: LauncherVisibilityMode
 }
 
 export const DEFAULT_VERSION_SETTINGS: Readonly<VersionLaunchSettings> = {
@@ -23,6 +34,11 @@ export const DEFAULT_VERSION_SETTINGS: Readonly<VersionLaunchSettings> = {
   javaPath: '',
   jvmArgs: '',
   gameArgs: '',
+  wrapperCommand: '',
+  postExitCommand: '',
+  envVars: '',
+  windowTitle: '',
+  launcherVisibility: 'inherit',
 }
 
 export function createDefaultVersionSettings(): VersionLaunchSettings {
@@ -55,6 +71,14 @@ export function normalizeVersionSettings(value: unknown): VersionLaunchSettings 
     javaPath: typeof data.javaPath === 'string' ? data.javaPath : '',
     jvmArgs: typeof data.jvmArgs === 'string' ? data.jvmArgs : '',
     gameArgs: typeof data.gameArgs === 'string' ? data.gameArgs : '',
+    wrapperCommand: typeof data.wrapperCommand === 'string' ? data.wrapperCommand : '',
+    postExitCommand: typeof data.postExitCommand === 'string' ? data.postExitCommand : '',
+    envVars: typeof data.envVars === 'string' ? data.envVars : '',
+    windowTitle: typeof data.windowTitle === 'string' ? data.windowTitle : '',
+    launcherVisibility:
+      data.launcherVisibility === 'none' || data.launcherVisibility === 'minimize' || data.launcherVisibility === 'quit'
+        ? data.launcherVisibility
+        : 'inherit',
   }
 }
 

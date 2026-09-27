@@ -30,6 +30,11 @@ describe('instanceSettingsApi', () => {
         javaPath: '',
         jvmArgs: '-XX:+UseG1GC',
         gameArgs: '',
+        wrapperCommand: '',
+        postExitCommand: '',
+        envVars: '',
+        windowTitle: '',
+        launcherVisibility: 'inherit',
       }
     )
 
@@ -55,6 +60,11 @@ describe('instanceSettingsApi', () => {
         javaPath: '',
         jvmArgs: '',
         gameArgs: '',
+        wrapperCommand: '',
+        postExitCommand: '',
+        envVars: '',
+        windowTitle: '',
+        launcherVisibility: 'inherit',
       },
     })
 
@@ -79,6 +89,11 @@ describe('instanceSettingsApi', () => {
           javaPath: '',
           jvmArgs: '',
           gameArgs: '',
+          wrapperCommand: '',
+          postExitCommand: '',
+          envVars: '',
+          windowTitle: '',
+          launcherVisibility: 'inherit',
         },
       },
     })
@@ -111,6 +126,11 @@ describe('instanceSettingsApi', () => {
           javaPath: '',
           jvmArgs: '',
           gameArgs: '',
+          wrapperCommand: '',
+          postExitCommand: '',
+          envVars: '',
+          windowTitle: '',
+          launcherVisibility: 'inherit',
         },
       },
     })
@@ -125,6 +145,11 @@ describe('instanceSettingsApi', () => {
         javaPath: '',
         jvmArgs: '',
         gameArgs: '',
+        wrapperCommand: '',
+        postExitCommand: '',
+        envVars: '',
+        windowTitle: '',
+        launcherVisibility: 'inherit',
       }
     )
 

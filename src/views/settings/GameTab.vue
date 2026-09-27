@@ -215,6 +215,41 @@
         <NInput v-model:value="localSettings.pre_launch_command" @blur="saveConfig" />
       </SettingRow>
 
+      <SettingRow :label="t('settings.wrapperCommand')" :description="t('settings.wrapperCommandDesc')">
+        <NInput v-model:value="localSettings.wrapper_command" @blur="saveConfig" />
+      </SettingRow>
+
+      <SettingRow :label="t('settings.postExitCommand')" :description="t('settings.postExitCommandDesc')">
+        <NInput v-model:value="localSettings.post_exit_command" @blur="saveConfig" />
+      </SettingRow>
+
+      <SettingRow :label="t('settings.envVars')" :description="t('settings.envVarsDesc')">
+        <NInput
+          v-model:value="localSettings.env_vars"
+          type="textarea"
+          :autosize="{ minRows: 2, maxRows: 6 }"
+          :placeholder="t('settings.envVarsPlaceholder')"
+          @blur="saveConfig"
+        />
+      </SettingRow>
+
+      <SettingRow :label="t('settings.windowTitle')" :description="t('settings.windowTitleDesc')">
+        <NInput
+          v-model:value="localSettings.window_title_template"
+          :placeholder="t('settings.windowTitlePlaceholder')"
+          @blur="saveConfig"
+        />
+      </SettingRow>
+
+      <SettingRow :label="t('settings.launcherVisibility')" :description="t('settings.launcherVisibilityDesc')">
+        <NSelect
+          :value="localSettings.launcher_visibility || 'none'"
+          :options="launcherVisibilityOptions"
+          class="process-priority-select"
+          @update:value="handleLauncherVisibilityChange"
+        />
+      </SettingRow>
+
       <SettingRow
         :label="t('settings.preferHighPerformanceGpu')"
         :description="t('settings.preferHighPerformanceGpuDesc')"
@@ -383,6 +418,12 @@ const rendererOptions = RENDERERS.map((value) => ({
   label: t(`settings.rendererOptions.${value}`),
 }))
 
+const launcherVisibilityOptions = [
+  { value: 'none', label: t('settings.visibilityOptions.none') },
+  { value: 'minimize', label: t('settings.visibilityOptions.minimize') },
+  { value: 'quit', label: t('settings.visibilityOptions.quit') },
+]
+
 const formatLaunchArgument = (value: string): string => {
   if (!/[\s"']/.test(value)) return value
   return JSON.stringify(value)
@@ -441,6 +482,11 @@ const saveConfig = async () => {
     instance_isolation_policy: localSettings.value.instance_isolation_policy || 'all',
     game_args_tail: localSettings.value.game_args_tail || '',
     pre_launch_command: localSettings.value.pre_launch_command || '',
+    wrapper_command: localSettings.value.wrapper_command || '',
+    post_exit_command: localSettings.value.post_exit_command || '',
+    env_vars: localSettings.value.env_vars || '',
+    window_title_template: localSettings.value.window_title_template || '',
+    launcher_visibility: localSettings.value.launcher_visibility || 'none',
     prefer_high_performance_gpu: localSettings.value.prefer_high_performance_gpu === true,
     use_java_exe: localSettings.value.use_java_exe === true,
     disable_crash_analysis: localSettings.value.disable_crash_analysis === true,
@@ -496,6 +542,11 @@ const handleIsolationPolicyChange = (value: InstanceIsolationPolicy) => {
 
 const handleRendererChange = (value: GameRenderer) => {
   localSettings.value.renderer = value
+  saveConfig()
+}
+
+const handleLauncherVisibilityChange = (value: 'none' | 'minimize' | 'quit') => {
+  localSettings.value.launcher_visibility = value
   saveConfig()
 }
 

@@ -162,6 +162,30 @@
           />
         </SettingRow>
       </div>
+
+      <div class="settings-subgroup">
+        <div class="settings-subgroup__title">{{ t('versions.detail.advancedOptions') }}</div>
+        <SettingRow :label="t('settings.wrapperCommand')" :description="t('versions.detail.inheritGlobalDesc')">
+          <NInput v-model:value="versionSettings.wrapperCommand" />
+        </SettingRow>
+        <SettingRow :label="t('settings.postExitCommand')" :description="t('versions.detail.inheritGlobalDesc')">
+          <NInput v-model:value="versionSettings.postExitCommand" />
+        </SettingRow>
+        <SettingRow :label="t('settings.envVars')" :description="t('versions.detail.inheritGlobalDesc')">
+          <NInput
+            v-model:value="versionSettings.envVars"
+            type="textarea"
+            :autosize="{ minRows: 2, maxRows: 5 }"
+            :placeholder="t('settings.envVarsPlaceholder')"
+          />
+        </SettingRow>
+        <SettingRow :label="t('settings.windowTitle')" :description="t('versions.detail.inheritGlobalDesc')">
+          <NInput v-model:value="versionSettings.windowTitle" />
+        </SettingRow>
+        <SettingRow :label="t('settings.launcherVisibility')" :description="t('versions.detail.inheritGlobalDesc')">
+          <NSelect v-model:value="versionSettings.launcherVisibility" :options="visibilityOptions" />
+        </SettingRow>
+      </div>
     </SettingSection>
   </template>
 </template>
@@ -173,7 +197,11 @@ import { useI18n } from 'vue-i18n'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
-import { createDefaultVersionSettings, type VersionSettingsTarget } from '@/features/instances/model/instanceSettings'
+import {
+  createDefaultVersionSettings,
+  normalizeVersionSettings,
+  type VersionSettingsTarget,
+} from '@/features/instances/model/instanceSettings'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
@@ -189,6 +217,13 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const message = useLauncherMessage()
+
+const visibilityOptions = [
+  { value: 'inherit', label: t('settings.visibilityOptions.inherit') },
+  { value: 'none', label: t('settings.visibilityOptions.none') },
+  { value: 'minimize', label: t('settings.visibilityOptions.minimize') },
+  { value: 'quit', label: t('settings.visibilityOptions.quit') },
+]
 
 const isolationModeOptions = [
   { value: 'inherit', label: t('versions.detail.isolationModes.inherit') },
@@ -294,8 +329,9 @@ async function loadSettings() {
   try {
     const settings = await instanceSettingsApi.get(target)
     if (requestId !== settingsRequestId) return
-    Object.assign(versionSettings, settings)
-    savedSettingsSnapshot.value = JSON.stringify(settings)
+    // 归一化补齐缺失字段后再存快照，保证脏检查的键集与响应对象一致
+    Object.assign(versionSettings, normalizeVersionSettings(settings))
+    savedSettingsSnapshot.value = JSON.stringify(versionSettings)
   } catch (error) {
     if (requestId === settingsRequestId) {
       message.error(error instanceof Error ? error.message : t('versions.detail.loadSettingsFailed'))

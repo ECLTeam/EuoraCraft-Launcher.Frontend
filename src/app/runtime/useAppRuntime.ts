@@ -1,5 +1,6 @@
 import { computed, readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
+import { desktopWindow } from '@/app/runtime/desktopWindow'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
@@ -202,6 +203,11 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         launcherErrorQueue.enqueue(payload)
       }),
       backend.on('launcher:popup', popupQueue.enqueuePopup),
+      backend.on('launcher:visibility', (payload) => {
+        const action = payload?.action
+        if (action === 'minimize') void desktopWindow.minimize()
+        else if (action === 'quit') void desktopWindow.close()
+      }),
       backend.on('update:check_completed', (result) => {
         updateCheck.setStartupCheckResult(result)
         if (shouldShowStartupUpdate(result)) updateCheck.updateDialogVisible.value = true

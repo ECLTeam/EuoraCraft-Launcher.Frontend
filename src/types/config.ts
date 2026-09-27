@@ -96,6 +96,16 @@ export interface GameConfig {
   game_args_tail?: string
   /** 创建 Minecraft 进程前执行的全局命令。 */
   pre_launch_command?: string
+  /** 包裹 java 命令的全局包装命令；含 {} 占位符时替换为完整命令，否则前缀拼接。 */
+  wrapper_command?: string
+  /** 游戏进程退出后执行的全局命令。 */
+  post_exit_command?: string
+  /** 传给游戏进程的自定义环境变量（多行 KEY=VALUE）。 */
+  env_vars?: string
+  /** 游戏窗口标题模板，支持 {instance}/{version}/{account} 占位符。 */
+  window_title_template?: string
+  /** 游戏启动成功后的启动器行为。 */
+  launcher_visibility?: 'none' | 'minimize' | 'quit'
   /** Windows 下将 Java 可执行文件登记为高性能 GPU 偏好。 */
   prefer_high_performance_gpu?: boolean
   /** Windows 下优先使用 java.exe 而不是 javaw.exe。 */

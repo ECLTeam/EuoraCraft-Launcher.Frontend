@@ -218,6 +218,15 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
           : versionSettings.isolationMode === 'disabled'
             ? false
             : undefined,
+      // 启动高级选项：实例留空回退全局设置
+      wrapper_command: versionSettings.wrapperCommand.trim() || settingsStore.game.wrapper_command || '',
+      post_exit_command: versionSettings.postExitCommand.trim() || settingsStore.game.post_exit_command || '',
+      env_vars: versionSettings.envVars.trim() ? versionSettings.envVars : settingsStore.game.env_vars || '',
+      window_title: versionSettings.windowTitle.trim() || settingsStore.game.window_title_template || '',
+      launcher_visibility:
+        versionSettings.launcherVisibility === 'inherit'
+          ? settingsStore.game.launcher_visibility || 'none'
+          : versionSettings.launcherVisibility,
     })
 
     unlisten()
