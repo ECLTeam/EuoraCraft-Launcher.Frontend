@@ -23,12 +23,12 @@ function createTestRouter(): Router {
     routes: [
       { path: '/', component: { template: '<div />' } },
       {
-        path: '/connect',
+        path: '/more',
         component: Connect,
-        redirect: '/connect/room',
+        redirect: '/more/room',
         children: [
-          { path: 'room', name: 'connect-room', component: RoomStub },
-          { path: 'tools', name: 'connect-tools', component: ToolsStub },
+          { path: 'room', name: 'more-room', component: RoomStub },
+          { path: 'tools', name: 'more-tools', component: ToolsStub },
         ],
       },
     ],
@@ -37,7 +37,7 @@ function createTestRouter(): Router {
 
 async function mountShell() {
   const router = createTestRouter()
-  await router.push('/connect')
+  await router.push('/more')
   await router.isReady()
   const wrapper = mount(Host, { global: { plugins: [i18n, router] } })
   await flushPromises()
@@ -61,7 +61,7 @@ describe('Connect shell', () => {
   it('lands on the room sub-page by default', async () => {
     const { wrapper, router } = await mountShell()
 
-    expect(router.currentRoute.value.path).toBe('/connect/room')
+    expect(router.currentRoute.value.path).toBe('/more/room')
     expect(wrapper.find('.stub-room').exists()).toBe(true)
     expect(wrapper.find('.stub-tools').exists()).toBe(false)
   })
@@ -69,7 +69,7 @@ describe('Connect shell', () => {
   it('swaps the rendered sub-page when the menu target changes', async () => {
     const { wrapper, router } = await mountShell()
 
-    await router.push('/connect/tools')
+    await router.push('/more/tools')
     await flushPromises()
 
     expect(wrapper.find('.stub-tools').exists()).toBe(true)

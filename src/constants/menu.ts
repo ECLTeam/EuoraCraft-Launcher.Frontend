@@ -11,7 +11,7 @@ export interface MenuItem {
 export const MENU_ITEMS: MenuItem[] = [
   { path: '/', labelKey: 'sidebar.game', iconName: 'game' },
   { path: '/versions', labelKey: 'sidebar.versions', iconName: 'cube' },
-  { path: '/connect', labelKey: 'sidebar.connect', iconName: 'wifi' },
+  { path: '/more', labelKey: 'sidebar.more', iconName: 'more' },
   { path: '/download', labelKey: 'download.title', iconName: 'download' },
   { path: '/plugins', labelKey: 'sidebar.plugins', iconName: 'puzzle' },
   { path: '/settings', labelKey: 'sidebar.settings', iconName: 'settings' },

@@ -11,7 +11,7 @@
     "game": "游戏",
     "versions": "实例",
     "instances": "实例管理",
-    "connect": "联机",
+    "more": "更多",
     "plugins": "插件",
     "settings": "设置",
     "debug": "调试",
@@ -20,7 +20,6 @@
     "helpMessage": "帮助文档正在编写中..."
   },
   "connect": {
-    "title": "联机",
     "description": "创建或加入 Minecraft 联机房间",
     "nav": {
       "room": "联机",

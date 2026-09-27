@@ -1,5 +1,5 @@
 <template>
-  <SectionLayout :title="t('connect.title')" icon="wifi" :items="navItems">
+  <SectionLayout :title="t('sidebar.more')" icon="more" :items="navItems">
     <RouterView v-slot="{ Component }">
       <Transition name="page" mode="out-in">
         <component :is="Component" />
@@ -23,7 +23,7 @@ const message = useLauncherMessage()
 provideConnector(useConnector({ onError: (error) => message.error(error) }))
 
 const navItems = computed(() => [
-  { path: '/connect/room', icon: 'wifi', label: t('connect.nav.room') },
-  { path: '/connect/tools', icon: 'activity', label: t('connect.nav.tools') },
+  { path: '/more/room', icon: 'wifi', label: t('connect.nav.room') },
+  { path: '/more/tools', icon: 'activity', label: t('connect.nav.tools') },
 ])
 </script>

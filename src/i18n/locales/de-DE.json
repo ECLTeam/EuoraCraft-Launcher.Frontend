@@ -11,7 +11,7 @@
     "game": "Spiel",
     "versions": "Instanzen",
     "instances": "Instanzverwaltung",
-    "connect": "Mehrspieler",
+    "more": "Mehr",
     "plugins": "Plugins",
     "settings": "Einstellungen",
     "debug": "Debug",
@@ -20,7 +20,6 @@
     "helpMessage": "Die Hilfedokumentation wird derzeit erstellt..."
   },
   "connect": {
-    "title": "Mehrspieler",
     "description": "Erstelle einen Mehrspieler-Raum für Minecraft oder tritt einem bei",
     "nav": {
       "room": "Verbindung",

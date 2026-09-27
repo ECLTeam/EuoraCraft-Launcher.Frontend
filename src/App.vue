@@ -37,7 +37,7 @@
           class="main-content"
           :class="{
             'content-disabled': !isAgreementAccepted && !agreementLoading,
-            'content-managed-scroll': route.path.startsWith('/settings') || route.path.startsWith('/connect'),
+            'content-managed-scroll': route.path.startsWith('/settings') || route.path.startsWith('/more'),
           }"
           tabindex="-1"
         >

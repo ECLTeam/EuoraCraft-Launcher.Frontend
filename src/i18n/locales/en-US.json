@@ -11,7 +11,7 @@
     "game": "Game",
     "versions": "Instances",
     "instances": "Instances",
-    "connect": "Connect",
+    "more": "More",
     "plugins": "Plugins",
     "settings": "Settings",
     "debug": "Debug",
@@ -20,7 +20,6 @@
     "helpMessage": "Help documentation is under construction..."
   },
   "connect": {
-    "title": "Connect",
     "description": "Create or join a Minecraft multiplayer room",
     "nav": {
       "room": "Connect",
