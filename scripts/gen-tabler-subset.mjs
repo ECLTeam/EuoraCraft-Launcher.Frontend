@@ -3,6 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import prettier from 'prettier'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const iconsJson = JSON.parse(fs.readFileSync(path.join(root, 'node_modules/@iconify-json/tabler/icons.json'), 'utf-8'))
@@ -27,7 +28,11 @@ for (const [name, alias] of Object.entries(iconsJson.aliases ?? {})) {
 const out = `// 自动生成：由 scripts/gen-tabler-subset.mjs 从 @iconify-json/tabler 提取仅 ICON_MAP 使用的图标子集（勿手改）。
 export const icons = ${JSON.stringify({ prefix: 'tabler', icons: subsetIcons, aliases: subsetAliases, width: 24, height: 24 })}
 `
-fs.writeFileSync(path.join(root, 'src/components/ui/tabler-subset.ts'), out)
+const outPath = path.join(root, 'src/components/ui/tabler-subset.ts')
+// 按项目 Prettier 配置格式化，保证产物能直接通过 `pnpm format:check`
+const prettierConfig = await prettier.resolveConfig(outPath)
+const formatted = await prettier.format(out, { ...prettierConfig, parser: 'typescript' })
+fs.writeFileSync(outPath, formatted)
 console.log(
-  `names=${names.size} subsetIcons=${Object.keys(subsetIcons).length} aliases=${Object.keys(subsetAliases).length} outputBytes=${Buffer.byteLength(out)}`
+  `names=${names.size} subsetIcons=${Object.keys(subsetIcons).length} aliases=${Object.keys(subsetAliases).length} outputBytes=${Buffer.byteLength(formatted)}`
 )

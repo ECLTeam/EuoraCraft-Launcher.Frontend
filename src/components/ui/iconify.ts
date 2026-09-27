@@ -89,7 +89,7 @@ export const ICON_MAP: Record<string, string> = {
   sparkles: 'sparkles',
   palette: 'palette',
   layers: 'layers-union',
-  more: 'dots-vertical',
+  more: 'apps',
   archive: 'archive',
   calendar: 'calendar',
 
