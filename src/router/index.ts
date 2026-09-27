@@ -34,7 +34,6 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   { path: '/download', name: 'download', component: withErrorBoundary(() => import('@/views/Download.vue')) },
-  { path: '/plugins', redirect: '/more/plugins' },
   {
     path: '/settings',
     component: withErrorBoundary(() => import('@/views/Settings.vue')),

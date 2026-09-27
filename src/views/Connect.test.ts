@@ -33,7 +33,6 @@ function createTestRouter(): Router {
           { path: 'tools', name: 'more-tools', component: ToolsStub },
         ],
       },
-      { path: '/plugins', redirect: '/more/plugins' },
     ],
   })
 }
@@ -78,16 +77,6 @@ describe('Connect shell', () => {
 
     expect(wrapper.find('.stub-plugins').exists()).toBe(true)
     expect(wrapper.find('.stub-room').exists()).toBe(false)
-  })
-
-  it('redirects the legacy /plugins path to the more plugins sub-page', async () => {
-    const { wrapper, router } = await mountShell()
-
-    await router.push('/plugins')
-    await flushPromises()
-
-    expect(router.currentRoute.value.path).toBe('/more/plugins')
-    expect(wrapper.find('.stub-plugins').exists()).toBe(true)
   })
 
   it('swaps the rendered sub-page when the menu target changes', async () => {
