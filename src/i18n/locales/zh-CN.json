@@ -1026,7 +1026,7 @@
     "launcherVisibilityDesc": "游戏启动成功后对启动器窗口的处理；选择退出后本次运行不进行崩溃检测与统计",
     "visibilityOptions": {
       "inherit": "跟随全局",
-      "none": "不动作",
+      "none": "无",
       "minimize": "最小化",
       "quit": "退出启动器"
     },
