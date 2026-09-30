@@ -11,6 +11,8 @@ export interface PluginInfo {
   author: string
   icon: string
   status: string
+  pending_restart?: boolean
+  installed_version?: string
   error: string | null
   dependencies: Record<string, string>
   contributes?: {
@@ -35,7 +37,12 @@ export interface PluginPackagePreflight {
   wheel_count: number
   has_target_lock: boolean
   unverified_source: boolean
-  runtime_ready: boolean
+  dependencies_ready: boolean
+}
+
+export interface PluginPackageInstallResult {
+  status: string
+  message?: string
 }
 
 export interface PluginPackageSelection {

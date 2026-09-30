@@ -61,6 +61,9 @@
                 <NTag size="small" :type="statusType(plugin.status)">
                   {{ t(`plugins.${plugin.status}`) }}
                 </NTag>
+                <NTag v-if="plugin.pending_restart && plugin.status !== 'pending_restart'" size="small" type="warning">
+                  {{ t('plugins.pending_restart') }}
+                </NTag>
               </div>
 
               <NSpace class="plugin-actions" :size="3" :wrap="false">
@@ -73,13 +76,19 @@
                 >
                   <template #icon><UiIcon name="settings" :size="13" /></template>
                 </NButton>
-                <NButton quaternary size="tiny" @click="togglePlugin(plugin)">
+                <NButton
+                  quaternary
+                  size="tiny"
+                  :disabled="plugin.pending_restart && plugin.status !== 'enabled'"
+                  @click="togglePlugin(plugin)"
+                >
                   {{ plugin.status === 'enabled' ? t('plugins.disable') : t('plugins.enable') }}
                 </NButton>
                 <NButton
                   quaternary
                   size="tiny"
                   :loading="reloadingPlugins.includes(plugin.name)"
+                  :disabled="plugin.pending_restart"
                   :title="t('plugins.reload')"
                   @click="reloadPlugin(plugin)"
                 >
@@ -199,7 +208,13 @@ const filteredPlugins = computed(() => {
 function statusType(status: string): 'success' | 'error' | 'warning' | 'info' | 'default' {
   if (status === 'enabled') return 'success'
   if (status === 'disabled' || status === 'permission_denied' || status === 'error') return 'error'
-  if (status === 'loading' || status === 'enabling' || status === 'disabling' || status === 'unloading') {
+  if (
+    status === 'pending_restart' ||
+    status === 'loading' ||
+    status === 'enabling' ||
+    status === 'disabling' ||
+    status === 'unloading'
+  ) {
     return 'warning'
   }
   if (status === 'loaded') return 'info'

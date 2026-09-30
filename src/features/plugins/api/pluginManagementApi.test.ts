@@ -23,7 +23,7 @@ describe('pluginManagementApi 归档安装', () => {
     expect(mocks.command).toHaveBeenCalledWith('select_file', { purpose: 'plugin-package' })
   })
 
-  it('预检后显式确认来源并透传网络与离线包选择', async () => {
+  it('预检后显式确认来源并透传联网意图，无独立运行时参数', async () => {
     const preflight = {
       package: {
         name: 'demo',
@@ -37,16 +37,17 @@ describe('pluginManagementApi 归档安装', () => {
       wheel_count: 0,
       has_target_lock: false,
       unverified_source: true,
-      runtime_ready: false,
+      dependencies_ready: false,
     }
     mocks.command.mockResolvedValueOnce({ success: true, data: preflight })
-    mocks.command.mockResolvedValueOnce({ success: true })
+    mocks.command.mockResolvedValueOnce({ success: true, data: { status: 'installed', message: '待重启' } })
 
     await expect(pluginManagementApi.inspectPackage('C:/demo.eclplugin')).resolves.toEqual(preflight)
-    await pluginManagementApi.installPackage('C:/demo.eclplugin', {
-      allowNetwork: false,
-      offlineRuntimePack: 'C:/runtime.zip',
-    })
+    await expect(
+      pluginManagementApi.installPackage('C:/demo.eclplugin', {
+        allowNetwork: false,
+      })
+    ).resolves.toEqual({ status: 'installed', message: '待重启' })
 
     expect(mocks.command).toHaveBeenNthCalledWith(1, 'plugin_package_inspect', {
       plugin_path: 'C:/demo.eclplugin',
@@ -55,7 +56,6 @@ describe('pluginManagementApi 归档安装', () => {
       plugin_path: 'C:/demo.eclplugin',
       confirm_unverified_source: true,
       allow_network: false,
-      offline_runtime_pack: 'C:/runtime.zip',
     })
   })
 })

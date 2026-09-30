@@ -660,7 +660,8 @@ export function createShowcaseTransport(): BackendTransport {
           description: '由展示模式在内存中创建。',
           author: 'Showcase',
           icon: '',
-          status: 'enabled',
+          status: payload.confirm_unverified_source ? 'pending_restart' : 'enabled',
+          pending_restart: !!payload.confirm_unverified_source,
           error: null,
           dependencies: {},
           services: [],
@@ -682,7 +683,7 @@ export function createShowcaseTransport(): BackendTransport {
           wheel_count: 0,
           has_target_lock: false,
           unverified_source: true,
-          runtime_ready: true,
+          dependencies_ready: true,
         })
       case 'plugin_get_routes':
         return success([])

@@ -14,7 +14,6 @@ vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
     selectPackage: vi.fn(),
     inspectPackage: vi.fn(),
     installPackage: vi.fn(),
-    selectRuntimePack: vi.fn(),
     onStatusChanged: vi.fn(() => vi.fn()),
   },
 }))
@@ -116,7 +115,7 @@ describe('pluginStore', () => {
       wheel_count: 1,
       has_target_lock: true,
       unverified_source: true,
-      runtime_ready: false,
+      dependencies_ready: false,
     }
     const store = usePluginStore()
     vi.mocked(pluginManagementApi.selectPackage).mockResolvedValueOnce(null)
@@ -129,10 +128,13 @@ describe('pluginStore', () => {
     expect(selection).toEqual({ path: 'C:/demo.eclplugin', preflight })
     expect(pluginManagementApi.installPackage).not.toHaveBeenCalled()
 
-    await store.installPackage(selection!, { allowNetwork: false, offlineRuntimePack: 'C:/runtime.zip' })
+    vi.mocked(pluginManagementApi.installPackage).mockResolvedValue({ status: 'installed', message: '待重启' })
+    await expect(store.installPackage(selection!, { allowNetwork: false })).resolves.toEqual({
+      status: 'installed',
+      message: '待重启',
+    })
     expect(pluginManagementApi.installPackage).toHaveBeenCalledWith('C:/demo.eclplugin', {
       allowNetwork: false,
-      offlineRuntimePack: 'C:/runtime.zip',
     })
     expect(pluginManagementApi.list).toHaveBeenCalledOnce()
   })

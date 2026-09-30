@@ -84,8 +84,7 @@
   border-top: 1px solid var(--ecl-border);
 }
 
-.package-option-row,
-.package-runtime-row {
+.package-option-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -93,22 +92,8 @@
   min-width: 0;
 }
 
-.package-option-row span,
-.package-runtime-row span {
+.package-option-row span {
   font-size: 12px;
-}
-
-.package-runtime-row span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--ecl-text-secondary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.package-requirement {
-  color: var(--warning);
-  font-size: 11px;
 }
 
 .package-installing {

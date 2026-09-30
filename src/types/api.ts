@@ -337,8 +337,7 @@ export interface CommandPayloadMap {
   select_background_video: undefined
   select_file:
     | {
-        purpose?:
-          'crash-analysis' | 'modpack' | 'world-import' | 'theme-preset' | 'plugin-package' | 'plugin-runtime-pack'
+        purpose?: 'crash-analysis' | 'modpack' | 'world-import' | 'theme-preset' | 'plugin-package'
       }
     | undefined
   select_files: { purpose?: 'resource-files' }
@@ -555,7 +554,6 @@ export interface CommandPayloadMap {
     plugin_path: string
     confirm_unverified_source?: boolean
     allow_network?: boolean
-    offline_runtime_pack?: string | null
   }
   plugin_package_inspect: { plugin_path: string }
   plugin_get_routes: { plugin_id?: string }
@@ -1117,7 +1115,7 @@ export interface CommandResponseMap {
   plugin_disable: void
   plugin_unload: void
   plugin_reload: void
-  plugin_install: void
+  plugin_install: { status: string; message?: string } | undefined
   plugin_package_inspect: PluginPackagePreflight
   plugin_get_routes: PluginRoute[]
   plugin_get_slots: Record<string, PluginSlotItem[]>
