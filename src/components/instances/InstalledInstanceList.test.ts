@@ -1,9 +1,13 @@
-import { mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { NDropdown, type DropdownOption } from 'naive-ui'
 import { createPinia } from 'pinia'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { instanceProfileApi } from '@/features/instances/api/instanceProfileApi'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
 import InstalledInstanceList from './InstalledInstanceList.vue'
+
+enableAutoUnmount(afterEach)
 
 vi.mock('@/features/instances/api/instanceProfileApi', () => ({
   targetFromVersion: (version: ScannedVersion) => ({ gamePath: version.path, versionId: version.versionId }),
@@ -47,13 +51,13 @@ const versions: ScannedVersion[] = [
   },
 ]
 
-function mountVersionList(searchQuery = '') {
+function mountVersionList(searchQuery = '', items = structuredClone(versions)) {
   return mount(InstalledInstanceList, {
     global: {
       plugins: [i18n, createPinia()],
     },
     props: {
-      versions,
+      versions: items,
       selectedPathIndex: 0,
       pathCount: 1,
       pathName: '主目录',
@@ -67,6 +71,7 @@ function mountVersionList(searchQuery = '') {
 }
 
 describe('InstalledInstanceList', () => {
+  beforeEach(() => vi.clearAllMocks())
   it('按版本名称过滤列表', async () => {
     const wrapper = mountVersionList('fabric')
     // 默认视图为列表；切到卡片视图以断言卡片数量按筛选收敛
@@ -86,18 +91,113 @@ describe('InstalledInstanceList', () => {
     expect(wrapper.emitted('launch')).toEqual([[versions[0]]])
   })
 
-  it('列表模式分离游戏版本与加载器并提供快速操作', async () => {
-    const wrapper = mountVersionList()
+  it('列表合并版本信息并保留完整名称与标签提示', () => {
+    const items = structuredClone(versions)
+    Object.assign(items[0]!, { loaderVersion: '0.16.9', tags: ['生存', '建筑', '朋友'], favorite: true, pinned: true })
+    const wrapper = mountVersionList('', items)
+    const row = wrapper.get('.table-row')
 
-    await wrapper.get('[title="列表视图"]').trigger('click')
-
-    expect(wrapper.get('.table-header').text()).toContain('游戏版本')
-    expect(wrapper.get('.table-header').text()).toContain('加载器')
-    expect(wrapper.get('.table-header').text()).not.toContain('最近启动')
+    expect(wrapper.find('.table-header').exists()).toBe(false)
+    expect(row.get('.instance-name').text()).toBe('生存服')
+    expect(row.get('.instance-name').attributes('title')).toContain('Fabric 1.21.1')
+    expect(row.get('.instance-meta').text()).toBe('Minecraft 1.21.1 · Fabric v0.16.9')
+    expect(row.get('.instance-labels').attributes('title')).toContain('#朋友')
+    expect(row.findAll('.tag-badge').map((tag) => tag.text())).toEqual(['#生存', '#建筑', '+1'])
+    expect(row.find('[aria-label="已收藏"]').exists()).toBe(true)
+    expect(row.find('[aria-label="已置顶"]').exists()).toBe(true)
     expect(wrapper.findAll('.quick-launch-button')).toHaveLength(2)
-    expect(wrapper.findAll('[title="删除版本"]')).toHaveLength(2)
+    expect(row.findAll('button')).toHaveLength(3)
+  })
 
-    await wrapper.findAll('[title="删除版本"]')[0]!.trigger('click')
+  it('列表启动、详情与更多操作不触发行选择', async () => {
+    const wrapper = mountVersionList()
+    const row = wrapper.get('.table-row')
+    await row.get('.quick-launch-button').trigger('click')
+    await row.get('[title="详情与设置"]').trigger('click')
+    await row.get('[title="更多操作"]').trigger('click')
+    expect(wrapper.emitted('launch')).toEqual([[versions[0]]])
+    expect(wrapper.emitted('detail')).toEqual([[versions[0]]])
+    expect(wrapper.emitted('selectVersion')).toBeUndefined()
+    await row.trigger('click')
+    expect(wrapper.emitted('selectVersion')).toEqual([[versions[0]]])
+  })
+
+  it.each(['release', 'Release', 'snapshot', 'Snapshot'])('辅助信息识别后端 %s 类型', (versionType) => {
+    const items = structuredClone(versions)
+    // IPC 运行时存在首字母大写的类型值，测试真实边界形态。
+    Object.assign(items[0]!, { versionType })
+    const wrapper = mountVersionList('', items)
+    const metadata = wrapper.get('.instance-meta').text()
+    expect(metadata).toBe(`Minecraft 1.21.1 · Fabric${versionType.toLowerCase() === 'snapshot' ? ' · 快照版' : ''}`)
+  })
+
+  it.each(['favorite', 'pinned', 'hidden'] as const)('更多菜单更新 %s 并允许取消', async (field) => {
+    const items = structuredClone(versions)
+    const wrapper = mountVersionList('', items)
+    for (const value of [true, false]) {
+      // 隐藏后行会退出筛选，仍通过已打开菜单所绑定的实例取消隐藏。
+      if (!value && field === 'hidden') await wrapper.get('[title="显示隐藏实例"]').trigger('click')
+      await wrapper.get('.table-row [title="更多操作"]').trigger('click')
+      wrapper.getComponent(NDropdown).vm.$emit('select', field)
+      await flushPromises()
+      expect(instanceProfileApi.patch).toHaveBeenLastCalledWith(
+        { gamePath: versions[0]!.path, versionId: versions[0]!.versionId },
+        { [field]: value }
+      )
+      expect(items[0]![field]).toBe(value)
+    }
+  })
+
+  it('更多菜单删除复用原删除事件', async () => {
+    const wrapper = mountVersionList()
+    await wrapper.get('.table-row [title="更多操作"]').trigger('click')
+    wrapper.getComponent(NDropdown).vm.$emit('select', 'delete')
+    await flushPromises()
     expect(wrapper.emitted('remove')).toEqual([[versions[0]]])
+    expect(wrapper.emitted('action')).toBeUndefined()
+  })
+
+  it('更多菜单保留实例工作台、资源管理和文件夹入口', async () => {
+    const wrapper = mountVersionList()
+    await wrapper.get('.table-row [title="更多操作"]').trigger('click')
+    const dropdown = wrapper.getComponent(NDropdown)
+    const options = dropdown.props('options')! as DropdownOption[]
+    const resources = options.find((option) => option.key === 'manage')!
+    expect(resources.children?.map((option) => option.key)).toContain('mods')
+    expect(options.find((option) => option.key === 'folders')?.children).toHaveLength(6)
+    for (const action of ['overview', 'mods', 'folder-instance', 'profile']) {
+      dropdown.vm.$emit('select', action)
+      await flushPromises()
+    }
+    expect(wrapper.emitted('action')).toEqual(
+      ['overview', 'mods', 'folder-instance', 'profile'].map((action) => [action, versions[0]])
+    )
+    await wrapper.findAll('.table-row')[1]!.get('[title="更多操作"]').trigger('click')
+    expect(
+      (dropdown.props('options')! as DropdownOption[])
+        .find((option) => option.key === 'manage')
+        ?.children?.map((option) => option.key)
+    ).not.toContain('mods')
+  })
+
+  it('更多按钮以按钮边缘定位，右键以鼠标位置定位', async () => {
+    const wrapper = mountVersionList()
+    const row = wrapper.get('.table-row')
+    const button = row.get('[title="更多操作"]')
+    vi.spyOn(button.element, 'getBoundingClientRect').mockReturnValue({ left: 320, bottom: 180 } as DOMRect)
+    await button.trigger('click', { clientX: 333, clientY: 170 })
+    expect(wrapper.getComponent(NDropdown).props()).toMatchObject({ x: 320, y: 180, show: true })
+    await row.trigger('contextmenu', { clientX: 200, clientY: 140 })
+    expect(wrapper.getComponent(NDropdown).props()).toMatchObject({ x: 200, y: 140, show: true })
+  })
+
+  it('损坏实例保留详情和菜单但无法快捷启动', () => {
+    const items = structuredClone(versions)
+    items[0]!.isBroken = true
+    const wrapper = mountVersionList('', items)
+    const row = wrapper.get('.table-row')
+    expect(row.find('.quick-launch-button').exists()).toBe(false)
+    expect(row.find('[title="详情与设置"]').exists()).toBe(true)
+    expect(row.find('[title="更多操作"]').exists()).toBe(true)
   })
 })

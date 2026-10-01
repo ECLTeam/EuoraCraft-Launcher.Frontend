@@ -161,13 +161,6 @@
       </div>
 
       <div v-else class="version-table">
-        <div class="table-header">
-          <span class="col-name">实例</span>
-          <span class="col-game-version">游戏版本</span>
-          <span class="col-loader">加载器</span>
-          <span class="col-category">分类/标签</span>
-          <span class="col-actions">操作</span>
-        </div>
         <div class="table-body">
           <div
             v-for="version in filteredVersions"
@@ -178,60 +171,63 @@
             @contextmenu.prevent="showActionMenu($event, version)"
             @click="emit('selectVersion', version)"
           >
-            <div class="col-name name-cell">
-              <InstanceIcon :version="version" :size="34" /><span
-                ><strong>{{ instanceName(version) }}</strong
-                ><small>{{ version.versionId }}</small></span
-              >
+            <InstanceIcon class="list-icon" :version="version" :size="38" />
+            <div class="instance-copy">
+              <div class="instance-heading">
+                <strong class="instance-name" :title="`${instanceName(version)}\n${version.versionId}`">{{
+                  instanceName(version)
+                }}</strong>
+                <span v-if="version.favorite" class="instance-status" title="已收藏" aria-label="已收藏">
+                  <UiIcon name="star" :size="13" />
+                </span>
+                <span v-if="version.pinned" class="instance-status" title="已置顶" aria-label="已置顶">
+                  <UiIcon name="pin" :size="13" />
+                </span>
+              </div>
+              <span class="instance-meta" :title="instanceMetadata(version)">{{ instanceMetadata(version) }}</span>
             </div>
-            <div class="col-game-version">
-              <strong>{{ version.vanillaName || version.versionId }}</strong
-              ><small>{{ versionTypeName(version.versionType) }}</small>
-            </div>
-            <div class="col-loader">
-              <span :class="['badge', 'badge-' + getLoaderClass(version.primaryLoader)]">{{
-                loaderDisplayName(version.primaryLoader)
-              }}</span>
-              <small v-if="loaderVersionText(version)">{{ loaderVersionText(version) }}</small>
-            </div>
-            <div class="col-category">
+            <div
+              class="instance-labels"
+              :title="[categoryName(version.categoryId), ...(version.tags || []).map((tag) => `#${tag}`)].join(' · ')"
+            >
               <span class="category-badge" :style="categoryStyle(version.categoryId)">{{
                 categoryName(version.categoryId)
-              }}</span
-              ><small>{{ version.tags?.map((tag) => `#${tag}`).join(' ') }}</small>
+              }}</span>
+              <span v-for="tag in version.tags?.slice(0, 2)" :key="tag" class="tag-badge">#{{ tag }}</span>
+              <span v-if="(version.tags?.length || 0) > 2" class="tag-badge">+{{ version.tags!.length - 2 }}</span>
             </div>
-            <div class="col-actions">
-              <button
+            <div class="list-actions">
+              <UiButton
                 v-if="!version.isBroken"
-                class="btn-action quick-launch-button"
+                variant="outline"
+                size="sm"
+                class="quick-launch-button"
                 title="快速启动"
                 @click.stop="emit('launch', version)"
               >
                 <UiIcon name="play" :size="14" />
-              </button>
-              <button
-                :class="['btn-action', { active: version.favorite }]"
-                :title="version.favorite ? '取消收藏' : '收藏'"
-                @click.stop="toggleFlag(version, 'favorite')"
+                {{ t('versions.detail.launch') }}
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                shape="square"
+                title="详情与设置"
+                aria-label="详情与设置"
+                @click.stop="emit('detail', version)"
               >
-                <UiIcon name="star" :size="13" />
-              </button>
-              <button
-                :class="['btn-action', { active: version.pinned }]"
-                :title="version.pinned ? '取消置顶' : '置顶'"
-                @click.stop="toggleFlag(version, 'pinned')"
+                <UiIcon name="settings" :size="16" />
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                shape="square"
+                title="更多操作"
+                aria-label="更多操作"
+                @click.stop="showActionMenu($event, version)"
               >
-                <UiIcon name="pin" :size="13" />
-              </button>
-              <button class="btn-action" title="详情与设置" @click.stop="emit('detail', version)">
-                <UiIcon name="settings" :size="13" />
-              </button>
-              <button class="btn-action" title="更多操作" @click.stop="showActionMenu($event, version)">
-                <UiIcon name="more" :size="13" />
-              </button>
-              <button class="btn-action delete-button" title="删除版本" @click.stop="emit('remove', version)">
-                <UiIcon name="trash" :size="13" />
-              </button>
+                <UiIcon name="more" :size="16" />
+              </UiButton>
             </div>
           </div>
         </div>
@@ -258,6 +254,7 @@ import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import InstanceCategoryManager from '@/components/instances/InstanceCategoryManager.vue'
 import InstanceIcon from '@/components/instances/InstanceIcon.vue'
+import UiButton from '@/components/ui/Button.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { getLoaderClass, getLoaderName, getVersionLabelKey } from '@/config/version'
@@ -340,20 +337,32 @@ const actionOptions = computed<DropdownOption[]>(() => [
   { type: 'divider', key: 'd2' },
   { label: '修改图标、别名与描述', key: 'profile', icon: icon('edit') },
   { label: menuVersion.value?.favorite ? '取消收藏' : '收藏', key: 'favorite', icon: icon('star') },
+  { label: menuVersion.value?.pinned ? '取消置顶' : '置顶', key: 'pinned', icon: icon('pin') },
   { label: menuVersion.value?.hidden ? '取消隐藏' : '隐藏', key: 'hidden', icon: icon('eye-off') },
+  { type: 'divider', key: 'd3' },
+  {
+    label: t('versions.detail.delete'),
+    key: 'delete',
+    icon: () => h(UiIcon, { name: 'trash', size: 15, style: { color: 'var(--error)' } }),
+  },
 ])
 
 function showActionMenu(event: MouseEvent, version: ScannedVersion) {
   menuVersion.value = version
-  menuX.value = event.clientX
-  menuY.value = event.clientY
+  const anchor = event.type === 'click' ? (event.currentTarget as HTMLElement).getBoundingClientRect() : null
+  menuX.value = anchor?.left ?? event.clientX
+  menuY.value = anchor?.bottom ?? event.clientY
   menuVisible.value = true
 }
 async function handleActionSelect(key: string) {
   menuVisible.value = false
   if (!menuVersion.value) return
-  if (key === 'favorite' || key === 'hidden') {
+  if (key === 'favorite' || key === 'pinned' || key === 'hidden') {
     await toggleFlag(menuVersion.value, key)
+    return
+  }
+  if (key === 'delete') {
+    emit('remove', menuVersion.value)
     return
   }
   emit('action', key, menuVersion.value)
@@ -412,10 +421,18 @@ function loaderVersionText(version: ScannedVersion): string {
   return version.loaderVersion ? `v${version.loaderVersion}` : ''
 }
 
-function versionTypeName(versionType: ScannedVersion['versionType']): string {
+function versionTypeName(versionType: string): string {
   const key = getVersionLabelKey(versionType)
   // 未知类型（getVersionLabelKey 原样返回）时保持旧行为显示 Minecraft
   return key === versionType ? 'Minecraft' : t(key)
+}
+
+function instanceMetadata(version: ScannedVersion): string {
+  const loader = [loaderDisplayName(version.primaryLoader), loaderVersionText(version)].filter(Boolean).join(' ')
+  const normalizedType = version.versionType.toLowerCase()
+  const typeLabel = versionTypeName(normalizedType)
+  const versionType = normalizedType === 'release' || typeLabel === 'Minecraft' ? '' : typeLabel
+  return [`Minecraft ${version.vanillaName || version.versionId}`, loader, versionType].filter(Boolean).join(' · ')
 }
 
 function formatDuration(seconds?: number): string {
