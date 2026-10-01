@@ -51,12 +51,17 @@
     },
     "tools": {
       "natCardTitle": "NAT Type Detection",
-      "natCardDesc": "Detect this network's NAT type to estimate direct-connection capability",
       "detecting": "Detecting network type...",
       "detectFailed": "Detection failed",
-      "idleTitle": "Network type not detected yet",
-      "idleDesc": "Click “NAT Detection” in the top right to start. The result only estimates direct connectivity and does not affect an existing room.",
-      "publicAddress": "Public address"
+      "idleTitle": "Not detected yet",
+      "publicAddress": "Public address",
+      "notObtained": "Not obtained",
+      "unknownType": "Type undetermined",
+      "ipv6Detected": "Public IPv6 detected",
+      "ipv6NotDetected": "Public IPv6 not detected",
+      "timeout": "Detection timed out. Check your network and retry.",
+      "busy": "Detection is already running. Retry shortly.",
+      "probeFailed": "Network probe failed. Retry shortly."
     },
     "create": {
       "tab": "Create room",

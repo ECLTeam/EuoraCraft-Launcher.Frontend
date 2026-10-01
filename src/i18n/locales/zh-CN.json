@@ -51,12 +51,17 @@
     },
     "tools": {
       "natCardTitle": "NAT 类型检测",
-      "natCardDesc": "检测当前网络的 NAT 类型，判断联机穿透能力",
       "detecting": "正在检测网络类型...",
       "detectFailed": "检测失败",
-      "idleTitle": "尚未检测网络类型",
-      "idleDesc": "点击右上角「NAT 检测」开始。结果仅用于判断能否直连，不影响已建立的房间。",
-      "publicAddress": "公网地址"
+      "idleTitle": "尚未检测",
+      "publicAddress": "公网地址",
+      "notObtained": "未获取",
+      "unknownType": "未能确定类型",
+      "ipv6Detected": "已检测到公网 IPv6",
+      "ipv6NotDetected": "未检测到公网 IPv6",
+      "timeout": "检测超时，请检查网络后重试",
+      "busy": "已有检测正在进行，请稍后重试",
+      "probeFailed": "网络探测失败，请稍后重试"
     },
     "create": {
       "tab": "创建房间",

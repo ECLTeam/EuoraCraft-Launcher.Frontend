@@ -51,12 +51,17 @@
     },
     "tools": {
       "natCardTitle": "NAT-Typ ermitteln",
-      "natCardDesc": "Ermittelt den NAT-Typ dieses Netzwerks zur Einschätzung der Direktverbindung",
       "detecting": "Netzwerktyp wird ermittelt...",
       "detectFailed": "Ermittlung fehlgeschlagen",
-      "idleTitle": "Netzwerktyp noch nicht ermittelt",
-      "idleDesc": "Klicke oben rechts auf „NAT-Test“, um zu starten. Das Ergebnis dient nur der Einschätzung der Direktverbindung und beeinflusst bestehende Räume nicht.",
-      "publicAddress": "Öffentliche Adresse"
+      "idleTitle": "Noch nicht ermittelt",
+      "publicAddress": "Öffentliche Adresse",
+      "notObtained": "Nicht ermittelt",
+      "unknownType": "Typ nicht bestimmbar",
+      "ipv6Detected": "Öffentliches IPv6 erkannt",
+      "ipv6NotDetected": "Kein öffentliches IPv6 erkannt",
+      "timeout": "Zeitüberschreitung. Netzwerk prüfen und erneut versuchen.",
+      "busy": "Eine Prüfung läuft bereits. Bitte später erneut versuchen.",
+      "probeFailed": "Netzwerkprüfung fehlgeschlagen. Bitte erneut versuchen."
     },
     "create": {
       "tab": "Raum erstellen",

@@ -51,12 +51,17 @@
     },
     "tools": {
       "natCardTitle": "NAT 類型偵測",
-      "natCardDesc": "偵測目前網路的 NAT 類型，判斷連線穿透能力",
       "detecting": "正在偵測網路類型...",
       "detectFailed": "偵測失敗",
-      "idleTitle": "尚未偵測網路類型",
-      "idleDesc": "點擊右上角「NAT 偵測」開始。結果僅用於判斷能否直連，不影響已建立的房間。",
-      "publicAddress": "公網位址"
+      "idleTitle": "尚未偵測",
+      "publicAddress": "公網位址",
+      "notObtained": "未取得",
+      "unknownType": "無法確定類型",
+      "ipv6Detected": "已偵測到公網 IPv6",
+      "ipv6NotDetected": "未偵測到公網 IPv6",
+      "timeout": "偵測逾時，請檢查網路後重試",
+      "busy": "已有偵測正在進行，請稍後重試",
+      "probeFailed": "網路探測失敗，請稍後重試"
     },
     "create": {
       "tab": "建立房間",

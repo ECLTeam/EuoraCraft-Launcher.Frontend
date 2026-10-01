@@ -1,63 +1,54 @@
 <template>
   <div class="connect-page connect-tools-page">
     <section class="connect-workspace">
-      <div class="connect-workspace__body">
-        <div class="connect-scroll-area">
-          <div class="connect-tools-layout">
-            <UiCard class="connect-main-card">
-              <template #header>
-                <div class="connect-card-heading">
-                  <UiIcon name="activity" :size="18" />
+      <div class="connect-scroll-area">
+        <div class="connect-tools-layout">
+          <UiCard class="connect-nat-card">
+            <template #header>
+              <div class="connect-nat-heading">
+                <UiIcon name="activity" :size="16" />
+                <strong>{{ t('connect.tools.natCardTitle') }}</strong>
+                <UiButton
+                  variant="outline"
+                  size="sm"
+                  icon="wifi"
+                  :loading="isDetecting"
+                  :disabled="isDetecting"
+                  @click="detect"
+                >
+                  {{ t('connect.nat.detect') }}
+                </UiButton>
+              </div>
+            </template>
+
+            <div class="connect-nat-body" role="status" aria-live="polite" :aria-busy="isDetecting">
+              <div v-if="isDetecting" class="connect-nat-state">
+                <UiLoading mode="inline" size="sm" decorative />
+                <span>{{ t('connect.tools.detecting') }}</span>
+              </div>
+              <div v-else-if="state === 'success' && result" class="connect-nat-result">
+                <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
+                <dl class="connect-nat-fields">
                   <div>
-                    <strong>{{ t('connect.tools.natCardTitle') }}</strong>
-                    <span>{{ t('connect.tools.natCardDesc') }}</span>
+                    <dt>{{ t('connect.tools.publicAddress') }}</dt>
+                    <dd>
+                      <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
+                    </dd>
                   </div>
-                  <UiButton
-                    class="connect-tools-action"
-                    variant="outline"
-                    size="sm"
-                    icon="wifi"
-                    :loading="busy"
-                    :disabled="busy"
-                    @click="detect"
-                  >
-                    {{ t('connect.nat.detect') }}
-                  </UiButton>
-                </div>
-              </template>
-
-              <div v-if="result" class="connect-nat-result">
-                <div class="connect-nat-result__headline">
-                  <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
-                  <span v-if="result.supportsIpv6" class="connect-nat-result__ipv6">
-                    <UiIcon name="info" :size="13" />
-                    {{ t('connect.nat.ipv6Available') }}
-                  </span>
-                </div>
-                <div class="connect-nat-address">
-                  <span>{{ t('connect.tools.publicAddress') }}</span>
-                  <code>{{ publicAddress || '—' }}</code>
-                </div>
+                </dl>
+                <span class="connect-nat-ipv6">
+                  {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
+                </span>
               </div>
-
-              <div v-else-if="busy" class="connect-tools-state">
-                <UiLoading mode="inline" size="lg" decorative class="connect-tools-state__icon" />
-                <strong>{{ t('connect.tools.detecting') }}</strong>
-              </div>
-
-              <div v-else-if="error" class="connect-tools-state connect-tools-state--error">
-                <UiIcon name="alert-circle" :size="32" />
-                <strong>{{ t('connect.tools.detectFailed') }}</strong>
+              <div v-else-if="state === 'error'" class="connect-nat-error">
+                <strong><UiIcon name="alert-circle" :size="15" />{{ t('connect.tools.detectFailed') }}</strong>
                 <p>{{ error }}</p>
               </div>
-
-              <div v-else class="connect-tools-state">
-                <UiIcon name="activity" :size="32" />
-                <strong>{{ t('connect.tools.idleTitle') }}</strong>
-                <p>{{ t('connect.tools.idleDesc') }}</p>
+              <div v-else class="connect-nat-state">
+                <span>{{ t('connect.tools.idleTitle') }}</span>
               </div>
-            </UiCard>
-          </div>
+            </div>
+          </UiCard>
         </div>
       </div>
     </section>
@@ -65,8 +56,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { BackendCommandError } from '@/app/runtime/errorPresentation'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -77,13 +69,20 @@ import type { NatTypeResult } from '@/types/connect'
 import { getErrorMessage } from '@/utils/error'
 
 const { t } = useI18n()
-
+const state = ref<'idle' | 'detecting' | 'success' | 'error'>('idle')
 const result = ref<NatTypeResult | null>(null)
-const busy = ref(false)
 const error = ref('')
+let isActive = true
+const isDetecting = computed(() => state.value === 'detecting')
 
-// detailType 比 type 更精确，优先用它展示具体穿透形态
-const resultLabel = computed(() => t(`connect.nat.${result.value?.detailType ?? result.value?.type ?? 'unknown'}`))
+onBeforeUnmount(() => {
+  isActive = false
+})
+
+const resultLabel = computed(() => {
+  const kind = result.value?.detailType ?? result.value?.type ?? 'unknown'
+  return t(kind === 'unknown' ? 'connect.tools.unknownType' : `connect.nat.${kind}`)
+})
 
 const resultTone = computed<'default' | 'success' | 'warning' | 'error'>(() => {
   switch (result.value?.type) {
@@ -111,16 +110,27 @@ const publicAddress = computed(() => {
 })
 
 async function detect(): Promise<void> {
-  if (busy.value) return
-  busy.value = true
+  if (!isActive || isDetecting.value) return
+  state.value = 'detecting'
+  result.value = null
   error.value = ''
   try {
-    result.value = await connectorApi.natType()
+    const detected = await connectorApi.natType()
+    if (!isActive) return
+    result.value = detected
+    state.value = 'success'
   } catch (cause) {
-    result.value = null
-    error.value = getErrorMessage(cause)
-  } finally {
-    busy.value = false
+    if (!isActive) return
+    if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_TIMEOUT') {
+      error.value = t('connect.tools.timeout')
+    } else if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_BUSY') {
+      error.value = t('connect.tools.busy')
+    } else if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_FAILED') {
+      error.value = t('connect.tools.probeFailed')
+    } else {
+      error.value = getErrorMessage(cause)
+    }
+    state.value = 'error'
   }
 }
 </script>

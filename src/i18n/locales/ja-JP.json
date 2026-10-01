@@ -51,12 +51,17 @@
     },
     "tools": {
       "natCardTitle": "NAT タイプ診断",
-      "natCardDesc": "現在のネットワークの NAT タイプを診断し、直接接続の可否を判断します",
       "detecting": "ネットワークタイプを診断中...",
       "detectFailed": "診断に失敗しました",
-      "idleTitle": "ネットワークタイプは未診断です",
-      "idleDesc": "右上の「NAT 診断」をクリックして開始してください。結果は直接接続の可否の判断にのみ使われ、既存のルームには影響しません。",
-      "publicAddress": "グローバルアドレス"
+      "idleTitle": "未診断",
+      "publicAddress": "グローバルアドレス",
+      "notObtained": "未取得",
+      "unknownType": "タイプを判定できません",
+      "ipv6Detected": "パブリック IPv6 を検出",
+      "ipv6NotDetected": "パブリック IPv6 は未検出",
+      "timeout": "診断がタイムアウトしました。ネットワークを確認して再試行してください。",
+      "busy": "診断中です。しばらくしてから再試行してください。",
+      "probeFailed": "ネットワーク診断に失敗しました。再試行してください。"
     },
     "create": {
       "tab": "ルームを作成",
