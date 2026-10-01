@@ -4,13 +4,17 @@
       <div
         v-show="isVisible"
         class="modal-overlay"
+        :data-modal-id="modalId"
+        :inert="!isInteractive || undefined"
+        :style="{ zIndex: 1000 + Math.max(0, globalModalStack.displayedModalIds.value.indexOf(modalId)) * 10 }"
         role="dialog"
-        :aria-modal="isVisible"
+        :aria-modal="isInteractive"
         :aria-labelledby="titleId"
         @click.self="handleOverlayClick"
       >
         <div
           ref="modalRef"
+          tabindex="-1"
           class="modal-container"
           data-theme-component="dialog"
           :data-theme-node="`dialog.${type}`"
@@ -87,12 +91,13 @@
 
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
-import { ref, computed, watch, nextTick, onUnmounted, useId } from 'vue'
+import { ref, computed, watch, onUnmounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { pinia } from '@/app/stores'
 import { useLayoutStore } from '@/app/stores/layoutStore'
 import UiIcon from '@/components/ui/Icon.vue'
 import { GLOBAL_MODAL_PRIORITY, useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { useModalInteraction, useModalParent } from '@/composables/useModalInteraction'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 
 defineOptions({ name: 'Modal' })
@@ -115,6 +120,7 @@ const props = withDefaults(defineProps<Props>(), {
   transitionName: 'modal',
   icon: '',
   priority: GLOBAL_MODAL_PRIORITY.interactive,
+  parentId: undefined,
 })
 
 const emit = defineEmits<Emits>()
@@ -152,6 +158,8 @@ interface Props {
   icon?: string
   /** 由全局模态框栈仲裁；数值越大越优先。 */
   priority?: number
+  /** 并列渲染但属于同一流程的窗口可显式关联父级。null 表示独立窗口。 */
+  parentId?: string | null
 }
 
 interface Emits {
@@ -181,23 +189,33 @@ const iconType = computed(() => {
 })
 
 const modalRef = ref<HTMLElement | null>(null)
-const titleId = computed(() => `modal-title-${useId()}`)
+const titleId = `modal-title-${useId()}`
 const modalId = `modal-${useId()}`
-const isVisible = computed(() => props.visible && globalModalStack.activeModalId.value === modalId)
+const inheritedParentId = useModalParent(modalId)
+let registeredParentId: string | null = null
+const isVisible = computed(() => props.visible && globalModalStack.displayedModalIds.value.includes(modalId))
+const isInteractive = computed(() => isVisible.value && globalModalStack.interactiveModalId.value === modalId)
 
 const showHeader = computed(() => props.title || props.closable || slots.header)
 
-const keydownHandler = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && isVisible.value && props.closable) {
-    close()
-  }
-}
-
-const close = () => {
-  globalModalStack.unregister(modalId)
+const requestClose = () => {
   emit('update:visible', false)
   emit('close')
 }
+
+const close = () => {
+  if (!isInteractive.value) return
+  globalModalStack.beginClose(modalId)
+  requestClose()
+}
+
+const { restoreFocus } = useModalInteraction({
+  modalId,
+  container: modalRef,
+  interactive: isInteractive,
+  closable: () => props.closable,
+  close,
+})
 
 const open = () => {
   emit('update:visible', true)
@@ -229,6 +247,10 @@ const onAfterEnter = () => {
 }
 
 const onAfterLeave = () => {
+  if (!props.visible) {
+    globalModalStack.unregister(modalId)
+    restoreFocus()
+  }
   emit('closed')
 }
 
@@ -236,29 +258,21 @@ watch(
   [() => props.visible, () => props.priority, () => props.title],
   ([visible, priority, title]) => {
     if (visible) {
-      globalModalStack.register({
+      registeredParentId = globalModalStack.register({
         id: modalId,
         title,
         priority,
         lockScroll: props.lockScroll,
+        parentId: props.parentId === undefined ? inheritedParentId : props.parentId,
+        onRequestClose: requestClose,
       })
     } else {
-      globalModalStack.unregister(modalId)
-    }
-  },
-  { immediate: true }
-)
-
-watch(
-  isVisible,
-  (visible) => {
-    if (visible) {
-      nextTick(() => {
-        modalRef.value?.focus()
-      })
-      document.addEventListener('keydown', keydownHandler)
-    } else {
-      document.removeEventListener('keydown', keydownHandler)
+      if (registeredParentId && globalModalStack.displayedModalIds.value.includes(modalId)) {
+        globalModalStack.beginClose(modalId)
+      } else {
+        globalModalStack.unregister(modalId)
+        restoreFocus()
+      }
     }
   },
   { immediate: true }
@@ -273,11 +287,11 @@ watch(
 )
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', keydownHandler)
   globalModalStack.unregister(modalId)
+  restoreFocus()
 })
 
-defineExpose({ close, open })
+defineExpose({ close, open, modalId })
 </script>
 
 <style scoped src="@/styles/components/modals/Modal.css"></style>

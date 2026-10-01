@@ -89,15 +89,20 @@
   flex-shrink: 0;
 }
 
-.titlebar-back-btn:hover {
+.titlebar-back-btn:hover:not(:disabled) {
   background: var(--glass-item-hover);
   color: var(--text-primary);
   border-color: var(--glass-border);
 }
 
-.titlebar-back-btn:active {
+.titlebar-back-btn:active:not(:disabled) {
   transform: scale(0.94);
   transition-duration: var(--duration-instant);
+}
+
+.titlebar-back-btn:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .titlebar-modal-title {

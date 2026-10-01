@@ -11,15 +11,19 @@ export function useFullscreenModal() {
   const globalModalStack = useGlobalModalStack()
   const isVisible = computed(() => globalModalStack.isFullscreenActive.value)
   const title = computed(() => globalModalStack.activeTitle.value)
-  const currentId = computed(() => (isVisible.value ? globalModalStack.activeModalId.value : null))
+  const currentId = computed(() => globalModalStack.currentFullscreenId.value)
+  const canClose = computed(
+    () => currentId.value !== null && globalModalStack.interactiveModalId.value === currentId.value
+  )
 
-  const open = (id: string, modalTitle: string, onClose?: () => void) => {
+  const open = (id: string, modalTitle: string, onClose?: () => void, lockScroll = true) => {
     globalModalStack.register({
       id,
       title: modalTitle,
       priority: GLOBAL_MODAL_PRIORITY.interactive,
       isFullscreen: true,
       onRequestClose: onClose,
+      lockScroll,
     })
   }
 
@@ -28,7 +32,7 @@ export function useFullscreenModal() {
   }
 
   const close = () => {
-    if (!isVisible.value) return
+    if (!canClose.value) return
     globalModalStack.closeActive()
   }
 
@@ -40,6 +44,7 @@ export function useFullscreenModal() {
     isVisible,
     title,
     currentId,
+    canClose,
     open,
     unregister,
     close,

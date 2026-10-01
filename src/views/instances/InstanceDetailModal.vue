@@ -1,5 +1,6 @@
 <template>
   <FullscreenModal
+    ref="detailModalRef"
     v-model:visible="visible"
     :title="title"
     :showFooter="false"
@@ -109,7 +110,7 @@
       </main>
     </div>
   </FullscreenModal>
-  <Modal v-model:visible="iconPickerVisible" title="选择实例图标" width="520px">
+  <Modal v-model:visible="iconPickerVisible" :parentId="detailModalRef?.modalId" title="选择实例图标" width="520px">
     <div class="icon-picker-grid">
       <button @click="setProfileIcon('auto')"><UiIcon name="refresh" :size="28" /><span>自动</span></button>
       <button
@@ -124,6 +125,7 @@
   </Modal>
   <CrashLogPickerModal
     v-model:visible="showCrashPicker"
+    :parentId="detailModalRef?.modalId"
     :version="version"
     :gamePath="getGamePath() ?? ''"
     @analyze="runCrashAnalysis"
@@ -188,6 +190,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const detailModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 const message = useLauncherMessage()
 const router = useRouter()
 

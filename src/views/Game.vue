@@ -87,6 +87,7 @@
     </FullscreenModal>
 
     <FullscreenModal
+      ref="accountModalRef"
       v-model:visible="account.showAccountModal"
       :title="t('game.accountManagement')"
       :showFooter="false"
@@ -509,6 +510,7 @@
 
     <Modal
       v-model:visible="account.showMicrosoftLoginModal"
+      :parentId="accountModalRef?.modalId"
       :title="t('game.login.title')"
       :closable="false"
       bodyClass="ms-login-body"
@@ -548,6 +550,7 @@
 
     <ConfirmDialog
       v-model:visible="account.showDeleteConfirmModal"
+      :parentId="accountModalRef?.modalId"
       :title="t('common.confirm')"
       :content="account.deleteConfirmMessage"
       :confirmText="t('common.delete')"
@@ -632,6 +635,7 @@ const {
 } = useGameInfoCard()
 
 const showAddAccountModal = ref(false)
+const accountModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 const showWardrobeModal = ref(false)
 const showRunningInstances = ref(false)
 const showAccountDetailsModal = ref(false)

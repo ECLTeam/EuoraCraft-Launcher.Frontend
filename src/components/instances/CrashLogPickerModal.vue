@@ -1,6 +1,7 @@
 <template>
   <Modal
     :visible="visible"
+    :parentId="parentId"
     :title="t('crashPick.title')"
     width="560px"
     wrapperClass="crash-picker-modal"
@@ -59,6 +60,7 @@ import { formatFileSize, formatTimestamp } from '@/utils/format'
 
 const props = defineProps<{
   visible: boolean
+  parentId?: string | null
   version: ScannedVersion | null
   gamePath: string
 }>()

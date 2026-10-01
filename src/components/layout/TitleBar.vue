@@ -9,7 +9,12 @@
     <!-- 左侧 -->
     <div class="titlebar-left">
       <template v-if="isFullscreenModalVisible">
-        <button class="titlebar-back-btn" :title="t('common.back')" @click="handleClose">
+        <button
+          class="titlebar-back-btn"
+          :title="t('common.back')"
+          :disabled="!fullscreenModal.canClose.value"
+          @click="handleClose"
+        >
           <UiIcon name="arrow-left" :size="18" />
         </button>
         <span class="titlebar-modal-title">{{ fullscreenModalTitle }}</span>
