@@ -1076,7 +1076,7 @@ export interface CommandResponseMap {
   game_resource_list: GameResource[]
   game_resource_install: GameOperation
   game_resource_toggle: { id: string; enabled: boolean }
-  game_resource_delete: void
+  game_resource_delete: { deleted: string[]; failed: Array<{ resourceId: string; message: string }> }
   game_resource_manifest_export: { path: string }
   game_schematic_material_manifest_export: { path: string }
   game_resource_search: { source: string; items: unknown[] }

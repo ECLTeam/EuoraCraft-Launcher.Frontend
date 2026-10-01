@@ -37,13 +37,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import OnlineModSearch from '@/components/mods/OnlineModSearch.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import InstancesTab from '@/views/instances/InstancesTab.vue'
-
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -67,10 +66,19 @@ const activeTab = ref<DownloadTab>(
   (validTabs as string[]).includes(fromQuery) ? (fromQuery as DownloadTab) : 'instances'
 )
 
+watch(
+  () => route.query.tab,
+  (value) => {
+    activeTab.value =
+      typeof value === 'string' && validTabs.includes(value as DownloadTab) ? (value as DownloadTab) : 'instances'
+  }
+)
 function switchTab(tab: DownloadTab) {
   activeTab.value = tab
   // 同步 query，方便版本弹窗等外部入口带 tab 直达；不覆盖其他外部参数
-  void router.replace({ query: { ...route.query, tab } })
+  const query: LocationQueryRaw = { ...route.query, tab }
+  if (tab !== 'datapack') delete query.world
+  void router.replace({ query })
 }
 </script>
 

@@ -68,6 +68,7 @@
                 :worldOptions="worldOptions"
                 initialType="resourcepack"
                 :allowedTypes="['resourcepack']"
+                @openOnlineSearch="handleOnlineSearch"
               />
             </div>
             <div v-else-if="activeTab === 'shaderpacks' && version" :key="activeTab" class="vdm-page workspace-page">
@@ -76,6 +77,7 @@
                 :worldOptions="worldOptions"
                 initialType="shaderpack"
                 :allowedTypes="['shaderpack']"
+                @openOnlineSearch="handleOnlineSearch"
               />
             </div>
             <div v-else-if="activeTab === 'datapacks' && version" :key="activeTab" class="vdm-page workspace-page">
@@ -84,6 +86,7 @@
                 :worldOptions="worldOptions"
                 initialType="datapack"
                 :allowedTypes="['datapack']"
+                @openOnlineSearch="handleOnlineSearch"
               />
             </div>
             <div v-else-if="activeTab === 'schematics' && version" :key="activeTab" class="vdm-page workspace-page">
@@ -151,14 +154,14 @@ import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { getLoaderName } from '@/config/version'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instanceProfileApi, targetFromVersion } from '@/features/instances/api/instanceProfileApi'
 import { instanceRuntimeApi } from '@/features/instances/api/instanceRuntimeApi'
 import { hasModLoader } from '@/features/instances/model/instanceCapabilities'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
-import type { ScannedVersion, VersionRunStats, WorldEntry } from '@/types/instances'
-
+import type { GameResourceType, ScannedVersion, VersionRunStats, WorldEntry } from '@/types/instances'
 interface Props {
   visible: boolean
   version: ScannedVersion | null
@@ -355,11 +358,23 @@ function handleAction(action: string) {
   if (props.version) emit('action', action, props.version)
 }
 
-function handleOnlineSearch() {
+function handleOnlineSearch(request?: {
+  type: Exclude<GameResourceType, 'schematic'>
+  worldId: string | null
+  query: string
+}) {
   const version = props.version
   if (!version) return
   visible.value = false
-  void router.push({ name: 'download', query: { tab: 'mod', instance: `${version.path}\u0000${version.versionId}` } })
+  void router.push({
+    name: 'download',
+    query: {
+      tab: request?.type || 'mod',
+      instance: instanceKey(version),
+      ...(request?.worldId ? { world: request.worldId } : {}),
+      ...(request?.query ? { q: request.query } : {}),
+    },
+  })
 }
 
 // 重置 activeTab 当弹窗打开时；关闭时由各 tab 子组件自行 flush 挂起的自动保存

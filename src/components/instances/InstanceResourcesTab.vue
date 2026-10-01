@@ -26,14 +26,21 @@
         <NButton quaternary circle size="small" :loading="loading" title="刷新" @click="load">
           <template #icon><UiIcon name="refresh" :size="16" /></template>
         </NButton>
-        <NButton quaternary circle size="small" title="在线搜索" @click="onlineVisible = true">
+        <NButton
+          v-if="resourceType !== 'schematic'"
+          quaternary
+          circle
+          size="small"
+          title="在线搜索"
+          @click="openOnlineSearch"
+        >
           <template #icon><UiIcon name="search" :size="16" /></template>
         </NButton>
         <NButton quaternary circle size="small" title="导出清单" @click="exportManifest">
           <template #icon><UiIcon name="file-download" :size="16" /></template>
         </NButton>
         <NButton
-          v-if="resourceType !== 'resourcepack'"
+          v-if="managing"
           quaternary
           circle
           size="small"
@@ -44,30 +51,52 @@
         >
           <template #icon><UiIcon name="trash" :size="16" /></template>
         </NButton>
+        <NButton
+          size="small"
+          :disabled="loading"
+          :title="managing ? t('resourceManagement.done') : t('resourceManagement.manage')"
+          @click="toggleManagement"
+          >{{ t(managing ? 'resourceManagement.done' : 'resourceManagement.manage') }}</NButton
+        >
         <NButton size="small" type="primary" class="toolbar-primary-btn" @click="chooseAndInstall">
           <template #icon><UiIcon name="plus" :size="13" /></template>
           安装资源
         </NButton>
       </div>
     </header>
+    <div v-if="managing" class="resource-management-bar">
+      <NCheckbox
+        :checked="allFilteredSelected"
+        :indeterminate="someFilteredSelected && !allFilteredSelected"
+        :disabled="loading || filtered.length === 0"
+        @update:checked="selectFiltered"
+        >{{ t('resourceManagement.selectAll') }}</NCheckbox
+      >
+      <span>{{ t('resourceManagement.selected', { count: selected.size }) }}</span>
+    </div>
     <UiLoading :show="loading" mode="overlay">
       <div v-if="filtered.length" class="resource-table">
         <div
           v-for="item in filtered"
           :key="item.id"
           class="resource-row"
-          :class="{ 'resource-row-pack': resourceType === 'resourcepack' }"
+          :class="{ 'resource-row-managing': managing }"
         >
-          <div v-if="resourceType === 'resourcepack'" class="resource-icon">
+          <NCheckbox
+            v-if="managing"
+            :checked="selected.has(item.id)"
+            :disabled="loading || confirmLoading"
+            @update:checked="toggleSelected(item.id)"
+          />
+          <div class="resource-icon">
             <img
               v-if="item.iconData && !failedIcons.has(item.id)"
               :src="item.iconData"
               alt=""
               @error="failedIcons.add(item.id)"
             />
-            <UiIcon v-else name="package" :size="24" />
+            <UiIcon v-else :name="resourceType === 'schematic' ? 'cube' : 'package'" :size="24" />
           </div>
-          <NCheckbox v-else :checked="selected.has(item.id)" @update:checked="toggleSelected(item.id)" />
           <div class="resource-copy">
             <strong>{{ item.name || item.id }}</strong
             ><small>{{ item.id }} · {{ item.version || '本地资源' }}</small>
@@ -112,19 +141,6 @@
       :resourceId="previewResource?.id"
       :resourceName="previewResource?.name || previewResource?.id"
     />
-    <Modal v-model:visible="onlineVisible" title="在线搜索资源" width="700px">
-      <div class="online-toolbar">
-        <NInput v-model:value="onlineQuery" placeholder="输入项目名称" @keyup.enter="searchOnline" />
-        <NSelect v-model:value="onlineSource" :options="onlineSources" />
-        <NButton type="primary" :loading="onlineLoading" @click="searchOnline">搜索</NButton>
-      </div>
-      <div class="online-results">
-        <div v-for="(item, index) in onlineItems" :key="String((item as any).project_id || (item as any).id || index)">
-          <strong>{{ (item as any).title || (item as any).name || '未命名项目' }}</strong>
-          <span>{{ (item as any).description || (item as any).summary || '' }}</span>
-        </div>
-      </div>
-    </Modal>
   </section>
 </template>
 
@@ -135,7 +151,6 @@ import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
-import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -143,7 +158,6 @@ import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/
 import SchematicPreviewModal from '@/features/instances/components/SchematicPreviewModal.vue'
 import type { GameResource, GameResourceType, ScannedVersion } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
-
 const props = defineProps<{
   version: ScannedVersion
   worldOptions?: Array<{ label: string; value: string }>
@@ -152,6 +166,11 @@ const props = defineProps<{
   /** 限定可切换的资源类型；为空表示全部 */
   allowedTypes?: GameResourceType[]
 }>()
+const emit = defineEmits<{
+  openOnlineSearch: [request: { type: Exclude<GameResourceType, 'schematic'>; worldId: string | null; query: string }]
+}>()
+const managing = ref(false)
+let loadRequestId = 0
 const message = useLauncherMessage()
 const { t } = useI18n()
 const resourceType = ref<GameResourceType>(props.initialType || 'mod')
@@ -161,11 +180,6 @@ const failedIcons = ref(new Set<string>())
 const selected = ref(new Set<string>())
 const query = ref('')
 const loading = ref(false)
-const onlineVisible = ref(false)
-const onlineQuery = ref('')
-const onlineSource = ref<'modrinth' | 'curseforge'>('modrinth')
-const onlineItems = ref<unknown[]>([])
-const onlineLoading = ref(false)
 const previewResource = ref<GameResource | null>(null)
 const previewVisible = ref(false)
 const allTypes: Array<{ value: GameResourceType; label: string }> = [
@@ -178,10 +192,6 @@ const allTypes: Array<{ value: GameResourceType; label: string }> = [
 const types = computed(() =>
   props.allowedTypes?.length ? allTypes.filter((t) => props.allowedTypes!.includes(t.value)) : allTypes
 )
-const onlineSources = [
-  { label: 'Modrinth', value: 'modrinth' },
-  { label: 'CurseForge', value: 'curseforge' },
-]
 const target = computed(() => workspaceTarget(props.version))
 const filtered = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase()
@@ -192,23 +202,33 @@ const filtered = computed(() => {
     : resources.value
 })
 
+const allFilteredSelected = computed(
+  () => filtered.value.length > 0 && filtered.value.every((item) => selected.value.has(item.id))
+)
+const someFilteredSelected = computed(() => filtered.value.some((item) => selected.value.has(item.id)))
 async function load() {
+  const requestId = ++loadRequestId
   if (resourceType.value === 'datapack' && !worldId.value) {
     resources.value = []
+    loading.value = false
+    failedIcons.value = new Set()
     return
   }
   loading.value = true
   try {
-    resources.value = await instanceWorkspaceApi.resources(target.value, resourceType.value, worldId.value || undefined)
+    const result = await instanceWorkspaceApi.resources(target.value, resourceType.value, worldId.value || undefined)
+    if (requestId !== loadRequestId) return
+    resources.value = result
+    selected.value = new Set([...selected.value].filter((id) => result.some((item) => item.id === id)))
     failedIcons.value = new Set()
   } catch (error) {
-    message.error(error instanceof Error ? error.message : '读取资源失败')
+    if (requestId === loadRequestId) message.error(error instanceof Error ? error.message : '读取资源失败')
   } finally {
-    loading.value = false
+    if (requestId === loadRequestId) loading.value = false
   }
 }
 // 安装后的延迟刷新定时器：组件卸载时清理，避免卸载后仍触发请求
-let refreshTimer: ReturnType<typeof setTimeout> | null = null
+let refreshTimer: number | null = null
 
 async function install(paths: string[]) {
   if (!paths.length) return
@@ -258,12 +278,24 @@ function toggleSelected(id: string) {
   selected.value = next
 }
 function confirmDelete(ids: string[]) {
+  const capturedTarget = target.value
+  const capturedType = resourceType.value
+  const capturedWorld = worldId.value || undefined
   openConfirm(
-    '删除',
-    `确定删除 ${ids.length} 个资源？`,
+    t('common.delete'),
+    t('resourceManagement.confirmDelete', { count: ids.length }),
     async () => {
-      await instanceWorkspaceApi.deleteResources(target.value, resourceType.value, ids, worldId.value || undefined)
-      selected.value = new Set()
+      const result = await instanceWorkspaceApi.deleteResources(capturedTarget, capturedType, ids, capturedWorld)
+      if (
+        target.value.game_path !== capturedTarget.game_path ||
+        target.value.version_id !== capturedTarget.version_id ||
+        resourceType.value !== capturedType ||
+        (worldId.value || undefined) !== capturedWorld
+      )
+        return
+      selected.value = new Set(result.failed.map((item) => item.resourceId))
+      if (result.failed.length)
+        message.error(result.failed.map((item) => `${item.resourceId}: ${item.message}`).join('\n'))
       await load()
     },
     true
@@ -279,25 +311,21 @@ function openPreview(item: GameResource) {
   previewResource.value = item
   previewVisible.value = true
 }
-async function searchOnline() {
-  if (!onlineQuery.value.trim()) return
-  onlineLoading.value = true
-  try {
-    const result = unwrapResponse(
-      await backend.command('game_resource_search', {
-        query: onlineQuery.value,
-        game_version: props.version.vanillaName || props.version.versionId,
-        loader: props.version.primaryLoader,
-        source: onlineSource.value,
-      }),
-      '搜索在线资源'
-    )
-    onlineItems.value = result.items
-  } catch (error) {
-    message.error(getErrorMessage(error, '搜索在线资源失败'))
-  } finally {
-    onlineLoading.value = false
+function openOnlineSearch() {
+  if (resourceType.value !== 'schematic')
+    emit('openOnlineSearch', { type: resourceType.value, worldId: worldId.value, query: query.value.trim() })
+}
+function toggleManagement() {
+  managing.value = !managing.value
+  selected.value = new Set()
+}
+function selectFiltered(checked: boolean) {
+  const next = new Set(selected.value)
+  for (const item of filtered.value) {
+    if (checked) next.add(item.id)
+    else next.delete(item.id)
   }
+  selected.value = next
 }
 async function exportManifest() {
   const selected = unwrapResponse(
@@ -315,7 +343,10 @@ async function exportManifest() {
   )
   message.success('资源清单已导出')
 }
-watch([resourceType, worldId], () => {
+watch([resourceType, worldId, () => props.version.path, () => props.version.versionId], () => {
+  managing.value = false
+  confirmVisible.value = false
+  confirmAction = null
   selected.value = new Set()
   void load()
 })
@@ -343,6 +374,8 @@ async function handleConfirm() {
     await confirmAction()
     confirmVisible.value = false
     confirmAction = null
+  } catch (error) {
+    message.error(getErrorMessage(error, '删除资源失败'))
   } finally {
     confirmLoading.value = false
   }
@@ -350,6 +383,7 @@ async function handleConfirm() {
 
 onMounted(load)
 onBeforeUnmount(() => {
+  loadRequestId += 1
   if (refreshTimer) {
     clearTimeout(refreshTimer)
     refreshTimer = null
@@ -369,8 +403,7 @@ onBeforeUnmount(() => {
   box-shadow: var(--ecl-shadow-surface);
 }
 
-.workspace-toolbar,
-.online-toolbar {
+.workspace-toolbar {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -421,7 +454,7 @@ onBeforeUnmount(() => {
 
 .resource-row {
   display: grid;
-  grid-template-columns: 28px minmax(220px, 1fr) 110px 60px auto;
+  grid-template-columns: 40px minmax(0, 1fr) 110px 60px auto;
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
@@ -435,8 +468,16 @@ onBeforeUnmount(() => {
   border-bottom: 0;
 }
 
-.resource-row-pack {
-  grid-template-columns: 40px minmax(0, 1fr) 110px 60px auto;
+.resource-row-managing {
+  grid-template-columns: 24px 40px minmax(0, 1fr) 110px 60px auto;
+}
+.resource-management-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  color: var(--text-secondary);
+  font-size: 12px;
 }
 
 .resource-icon {
@@ -537,39 +578,15 @@ onBeforeUnmount(() => {
   font-size: 11px;
 }
 
-.online-results {
-  display: grid;
-  gap: 8px;
-  max-height: 420px;
-  overflow: auto;
-  margin-top: 12px;
-}
-
-.online-results > div {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card);
-  transition:
-    background var(--duration-fast) var(--ease-emphasized),
-    border-color var(--duration-fast) var(--ease-emphasized);
-}
-
-.online-results > div:hover {
-  background: var(--ecl-surface-muted);
-  border-color: var(--ecl-border-strong);
-}
-
-.online-results strong {
-  color: var(--ecl-text);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.online-results span {
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
+@media (max-width: 640px) {
+  .resource-row {
+    grid-template-columns: 40px minmax(0, 1fr) 60px auto;
+  }
+  .resource-row-managing {
+    grid-template-columns: 24px 40px minmax(0, 1fr) 60px auto;
+  }
+  .resource-source {
+    display: none;
+  }
 }
 </style>

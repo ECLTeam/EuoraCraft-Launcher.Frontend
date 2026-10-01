@@ -1,12 +1,17 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { NSelect } from 'naive-ui'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import InstanceResourcesTab from '@/components/instances/InstanceResourcesTab.vue'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { i18n } from '@/i18n'
 import type { BackendMockState } from '@/test/mockBackend'
 import type { ScannedVersion } from '@/types/instances'
 import InstanceDetailModal from './InstanceDetailModal.vue'
 import type * as NaiveUi from 'naive-ui'
+import type * as VueRouter from 'vue-router'
 
 const mocks = vi.hoisted(() => ({
+  push: vi.fn(),
   getSettings: vi.fn(),
   saveSettings: vi.fn(),
   resetSettings: vi.fn(),
@@ -18,6 +23,13 @@ const mocks = vi.hoisted(() => ({
   listCrashCandidates: vi.fn(),
 }))
 const mock = vi.hoisted<{ state?: BackendMockState }>(() => ({ state: undefined }))
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof VueRouter>()
+  return { ...actual, useRouter: () => ({ push: mocks.push }) }
+})
+vi.mock('@/composables/useLauncherMessage', () => ({
+  useLauncherMessage: () => ({ error: vi.fn(), warning: vi.fn(), success: vi.fn() }),
+}))
 vi.mock('@/api/client', async () => {
   const { createMockBackend } = await import('@/test/mockBackend')
   mock.state = createMockBackend()
@@ -79,8 +91,12 @@ const version: ScannedVersion = {
   jsonPath: 'D:/Games/.minecraft/versions/1.21.5/1.21.5.json',
 }
 
-function mountModal(initialTab: 'overview' | 'mods' | 'settings' = 'settings', targetVersion = version) {
-  return mount(InstanceDetailModal, {
+const wrappers: ReturnType<typeof mount>[] = []
+function mountModal(
+  initialTab: 'overview' | 'mods' | 'settings' | 'resourcepacks' = 'settings',
+  targetVersion = version
+) {
+  const wrapper = mount(InstanceDetailModal, {
     global: {
       plugins: [i18n],
       stubs: { Teleport: true },
@@ -91,9 +107,16 @@ function mountModal(initialTab: 'overview' | 'mods' | 'settings' = 'settings', t
       initialTab,
     },
   })
+  wrappers.push(wrapper)
+  return wrapper
 }
 
 describe('InstanceDetailModal', () => {
+  afterEach(async () => {
+    wrappers.splice(0).forEach((wrapper) => wrapper.unmount())
+    vi.useRealTimers()
+    await flushPromises()
+  })
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getSettings.mockResolvedValue({
@@ -125,13 +148,31 @@ describe('InstanceDetailModal', () => {
     })
   })
 
+  it('navigates resource search to downloads while retaining instance, world and query', async () => {
+    mock.state!.mocks.command.mockResolvedValue({ success: true, data: [] })
+    const wrapper = mountModal('resourcepacks')
+    await flushPromises()
+    wrapper
+      .getComponent(InstanceResourcesTab)
+      .vm.$emit('openOnlineSearch', { type: 'datapack', worldId: 'My World', query: 'custom query' })
+    expect(mocks.push).toHaveBeenCalledWith({
+      name: 'download',
+      query: { tab: 'datapack', instance: instanceKey(version), world: 'My World', q: 'custom query' },
+    })
+    expect(wrapper.emitted('update:visible')).toContainEqual([false])
+  })
+
   it('uses horizontal tabs and opens the requested settings page', async () => {
     const wrapper = mountModal()
     await flushPromises()
 
     expect(wrapper.find('.vdm-tabs').exists()).toBe(true)
     expect(wrapper.find('.version-settings-page').exists()).toBe(true)
-    expect(wrapper.findAll('.n-switch')).toHaveLength(2)
+    expect(
+      wrapper
+        .findAllComponents(NSelect)
+        .filter((select) => select.props('options')?.some((option) => option.value === 'auto'))
+    ).toHaveLength(2)
     expect(mocks.getSettings).toHaveBeenCalledWith({
       versionId: '1.21.5',
       path: 'D:/Games/.minecraft',
@@ -203,12 +244,16 @@ describe('InstanceDetailModal', () => {
     vi.useFakeTimers()
     const wrapper = mountModal()
     await flushPromises()
-    await wrapper.findAll('.n-switch')[0]!.trigger('click')
+    wrapper
+      .findAllComponents(NSelect)
+      .find((select) => select.props('options')?.some((option) => option.value === 'auto'))!
+      .vm.$emit('update:value', 'manual')
+    await wrapper.vm.$nextTick()
     await vi.advanceTimersByTimeAsync(300)
     expect(mocks.saveSettings).toHaveBeenCalledTimes(1)
     expect(mocks.saveSettings).toHaveBeenCalledWith(
       { versionId: '1.21.5', path: 'D:/Games/.minecraft' },
-      expect.objectContaining({ customMemory: true })
+      expect.objectContaining({ memoryMode: 'manual' })
     )
     vi.useRealTimers()
   })
@@ -223,8 +268,13 @@ describe('InstanceDetailModal', () => {
     vi.useFakeTimers()
     const wrapper = mountModal()
     await flushPromises()
-    await wrapper.findAll('.n-switch')[0]!.trigger('click')
+    wrapper
+      .findAllComponents(NSelect)
+      .find((select) => select.props('options')?.some((option) => option.value === 'auto'))!
+      .vm.$emit('update:value', 'manual')
+    await wrapper.vm.$nextTick()
     await wrapper.setProps({ visible: false })
+    await flushPromises()
     expect(mocks.saveSettings).toHaveBeenCalledTimes(1)
     vi.useRealTimers()
   })

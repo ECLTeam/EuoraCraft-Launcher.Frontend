@@ -81,10 +81,6 @@
           class="oms-instance-select"
           @persist="onInstancePersist"
         />
-        <NButton v-if="resourceType === 'world'" secondary size="small" @click="chooseAndImportWorld">
-          <template #icon><UiIcon name="upload" :size="15" /></template>
-          {{ t('download.world.importLocal') }}
-        </NButton>
         <div class="instance-selector-actions">
           <NButton quaternary circle size="small" title="刷新" @click="refreshResults">
             <template #icon><UiIcon name="refresh" :size="15" /></template>
@@ -542,7 +538,6 @@ import type {
 } from '@/types/instances'
 import type { ModInfo, ModSearchItem, ModSourceReference, ModSourceStatus, ModVersion } from '@/types/mods'
 import { getErrorMessage } from '@/utils/error'
-
 const props = withDefaults(
   defineProps<{
     resourceType?: DownloadResourceType
@@ -920,7 +915,7 @@ function normalizeInstancePath(value: string): string {
 // 读取 query.instance 并按当前实例自动选中安装位置，随后清除该参数
 function handleQueryInstance(): void {
   const queryInstance = typeof route.query.instance === 'string' ? route.query.instance : ''
-  if (!queryInstance) return
+  if (!queryInstance || !target.ready.value) return
   const parsed = parseInstanceKey(queryInstance)
   const hit =
     target.installableInstances.value.find((version) => instanceKey(version) === queryInstance) ??
@@ -932,6 +927,9 @@ function handleQueryInstance(): void {
   if (hit) {
     target.setTarget(hit)
     void target.persist()
+  } else {
+    target.clearTarget()
+    message.warning(t('resourceNavigation.missingInstance'))
   }
   // 应用一次后清除 query，避免切页/后退时反复覆盖用户的选择
   const restQuery = { ...route.query }
@@ -943,7 +941,7 @@ function handleQueryInstance(): void {
 watch(
   () => route.query.instance,
   (value) => {
-    if (typeof value === 'string') handleQueryInstance()
+    if (typeof value === 'string' && target.ready.value) handleQueryInstance()
   }
 )
 
@@ -1225,26 +1223,56 @@ async function refreshCompatibleInstances(): Promise<void> {
   }
 }
 
+let worldsRequestId = 0
+const worldsLoadedKey = ref('')
 watch(
   () => [props.resourceType, instance.value?.path, instance.value?.versionId],
-  async ([, path, versionId]) => {
-    if (props.resourceType !== 'datapack' || !path || !versionId) {
-      worldOptions.value = []
-      selectedWorldId.value = null
+  async () => {
+    const requestId = ++worldsRequestId
+    worldsLoadedKey.value = ''
+    selectedWorldId.value = null
+    worldOptions.value = []
+    const selected = instance.value
+    if (props.resourceType !== 'datapack' || !selected) {
+      worldsLoading.value = false
       return
     }
-    const selected = instance.value
-    if (!selected) return
     worldsLoading.value = true
     try {
       const worlds = await instanceWorkspaceApi.worlds(workspaceTarget(selected))
+      if (requestId !== worldsRequestId) return
       worldOptions.value = worlds.map((world) => ({ label: world.name, value: world.id }))
-      selectedWorldId.value = worlds[0]?.id ?? null
-    } catch {
-      worldOptions.value = []
-      selectedWorldId.value = null
+      worldsLoadedKey.value = instanceKey(selected)
+      selectedWorldId.value = typeof route.query.world === 'string' ? null : (worlds[0]?.id ?? null)
+    } catch (error) {
+      if (requestId !== worldsRequestId) return
+      message.error(getErrorMessage(error))
     } finally {
-      worldsLoading.value = false
+      if (requestId === worldsRequestId) worldsLoading.value = false
+    }
+  },
+  { immediate: true }
+)
+watch(
+  () => [route.query.world, route.query.instance, worldsLoading.value, worldsLoadedKey.value],
+  () => {
+    const worldId = route.query.world
+    if (props.resourceType !== 'datapack' || typeof worldId !== 'string' || route.query.instance || worldsLoading.value)
+      return
+    if (!instance.value || worldsLoadedKey.value !== instanceKey(instance.value)) return
+    selectedWorldId.value = worldOptions.value.some((world) => world.value === worldId) ? worldId : null
+    if (!selectedWorldId.value) message.warning(t('resourceNavigation.missingWorld'))
+    const query = { ...route.query }
+    delete query.world
+    void router.replace({ query })
+  }
+)
+watch(
+  () => route.query.q,
+  (value) => {
+    if (typeof value === 'string' && target.ready.value) {
+      query.value = value
+      void handleSearch()
     }
   }
 )
@@ -1697,27 +1725,6 @@ async function handleDrop(event: DragEvent) {
       await instanceWorkspaceApi.installResources(workspaceTarget(inst), props.resourceType, paths, worldId)
     }
     message.success(t('mods.installSuccess', { count: paths.length, resource: resourceTypeLabel.value }))
-    await target.persist()
-    emit('installed')
-  } catch (error) {
-    message.error(getErrorMessage(error))
-  }
-}
-
-async function chooseAndImportWorld(): Promise<void> {
-  const inst = instance.value
-  if (!inst) {
-    message.warning(t('mods.selectInstanceFirst'))
-    return
-  }
-  try {
-    const selected = unwrapResponse(
-      await backend.command('select_file', { purpose: 'world-import' }),
-      t('download.world.importLocal')
-    )
-    if (!selected.path) return
-    await instanceWorkspaceApi.importWorld(workspaceTarget(inst), selected.path)
-    message.success(t('download.world.importSuccess'))
     await target.persist()
     emit('installed')
   } catch (error) {

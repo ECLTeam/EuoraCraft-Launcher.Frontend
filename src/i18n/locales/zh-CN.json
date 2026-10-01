@@ -1781,5 +1781,16 @@
     "import": "导入",
     "success": "整合包导入任务已创建",
     "dropHint": "松开以导入整合包"
+  },
+  "resourceManagement": {
+    "manage": "管理",
+    "done": "完成",
+    "selectAll": "全选当前结果",
+    "selected": "已选择 {count} 项",
+    "confirmDelete": "确定删除 {count} 个资源？"
+  },
+  "resourceNavigation": {
+    "missingInstance": "目标实例不存在，请重新选择安装实例",
+    "missingWorld": "目标存档不存在，请重新选择存档"
   }
 }

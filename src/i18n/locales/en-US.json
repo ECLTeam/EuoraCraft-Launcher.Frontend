@@ -1886,5 +1886,16 @@
     "import": "Import",
     "success": "Modpack import task created",
     "dropHint": "Release to import modpack"
+  },
+  "resourceManagement": {
+    "manage": "Manage",
+    "done": "Done",
+    "selectAll": "Select current results",
+    "selected": "{count} selected",
+    "confirmDelete": "Delete {count} resources?"
+  },
+  "resourceNavigation": {
+    "missingInstance": "Target instance is unavailable. Select an installation target.",
+    "missingWorld": "Target world is unavailable. Select a world."
   }
 }

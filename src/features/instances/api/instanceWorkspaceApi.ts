@@ -19,7 +19,6 @@ import type {
   WorldEntry,
 } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
-
 export function workspaceTarget(version: ScannedVersion, versionIsolation?: boolean): InstanceTargetPayload {
   const target = { game_path: version.path, version_id: version.versionId }
   return versionIsolation === undefined ? target : { ...target, version_isolation: versionIsolation }
@@ -345,7 +344,7 @@ export const instanceWorkspaceApi = {
     resourceIds: string[],
     worldId?: string
   ) =>
-    call<void>(
+    call<{ deleted: string[]; failed: Array<{ resourceId: string; message: string }> }>(
       'game_resource_delete',
       { ...target, resource_type: resourceType, resource_ids: resourceIds, world_id: worldId },
       '删除资源'
