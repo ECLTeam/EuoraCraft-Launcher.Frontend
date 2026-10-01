@@ -69,6 +69,7 @@
       "hint": "Create a room from an already running instance",
       "selectInstance": "Running instance",
       "instancePlaceholder": "Select an already running instance",
+      "noRunningInstancePlaceholder": "No running instances",
       "noRunningInstance": "No running instance detected. Start an instance on the Game page first.",
       "next": "Next",
       "manualPortEntry": "Input port",

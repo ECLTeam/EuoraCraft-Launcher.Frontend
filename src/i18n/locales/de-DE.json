@@ -69,6 +69,7 @@
       "hint": "Aus einer bereits gestarteten Instanz einen Raum erstellen",
       "selectInstance": "Laufende Instanz",
       "instancePlaceholder": "Bitte eine bereits gestartete Instanz wählen",
+      "noRunningInstancePlaceholder": "Keine laufenden Instanzen",
       "noRunningInstance": "Keine laufende Instanz erkannt. Bitte starte zuerst eine Instanz auf der Seite „Spiel“.",
       "next": "Weiter",
       "manualPortEntry": "Port eingeben",

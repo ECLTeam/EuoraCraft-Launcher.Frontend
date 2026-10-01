@@ -1,6 +1,6 @@
-import { flushPromises, mount } from '@vue/test-utils'
+import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import UiSelect from '@/components/ui/Select.vue'
 import { provideConnector, type ConnectorContext } from '@/features/connect/connectorContext'
@@ -9,6 +9,8 @@ import { i18n } from '@/i18n'
 import type { ConnectorStatus, EasyTierStatus } from '@/types/connect'
 import type { GameInstance, ScannedVersion } from '@/types/instances'
 import ConnectRoomTab from './ConnectRoomTab.vue'
+
+enableAutoUnmount(afterEach)
 
 const mocks = vi.hoisted(() => ({
   listRunningInstances: vi.fn(),
@@ -138,6 +140,86 @@ describe('ConnectRoomTab', () => {
     expect(createCard?.attributes('aria-disabled')).toBe('true')
     expect(createCard?.findComponent(UiSelect).props('disabled')).toBe(true)
     expect(createCard?.findAll('button').every((button) => button.attributes('disabled') !== undefined)).toBe(true)
+  })
+
+  it('无运行实例时禁用选择器并显示空状态占位文案', async () => {
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    await flushPromises()
+
+    const select = wrapper.getComponent(UiSelect)
+    expect(select.props('disabled')).toBe(true)
+    expect(select.get('.placeholder').text()).toBe('暂无运行实例')
+    expect(wrapper.text()).toContain('没有检测到已启动的实例，请先在「游戏」页启动实例')
+
+    await select.get('.select-trigger').trigger('click')
+    expect(select.get('.ui-select').classes()).not.toContain('open')
+  })
+
+  it('展开运行实例列表时没有搜索框且可以选择实例', async () => {
+    mocks.listRunningInstances.mockResolvedValue([runningInstance])
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    await flushPromises()
+
+    const select = wrapper.getComponent(UiSelect)
+    expect(select.props('disabled')).toBe(false)
+    expect(select.get('.placeholder').text()).toBe('请选择已启动的实例')
+    await select.get('.select-trigger').trigger('click')
+
+    expect(select.get('.ui-select').classes()).toContain('open')
+    const dropdown = document.body.querySelector('.select-dropdown')
+    expect(dropdown?.querySelector('.select-search')).toBeNull()
+    expect(dropdown?.querySelector('input')).toBeNull()
+    const option = dropdown?.querySelector<HTMLElement>('.select-option')
+    expect(option?.textContent).toContain(runningInstance.name)
+    option?.click()
+    await wrapper.vm.$nextTick()
+
+    expect(select.props('modelValue')).toBe(runningInstance.id)
+    expect(select.get('.selected-text').text()).toBe(runningInstance.name)
+    expect(select.get('.ui-select').classes()).not.toContain('open')
+  })
+
+  it('运行实例启动和退出时同步更新禁用状态与占位文案', async () => {
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    await flushPromises()
+    const select = wrapper.getComponent(UiSelect)
+    const onChanged = mocks.onRunningChanged.mock.calls[0]?.[0] as () => void
+    expect(select.props('disabled')).toBe(true)
+
+    mocks.listRunningInstances.mockResolvedValue([runningInstance])
+    onChanged()
+    await flushPromises()
+    expect(select.props('disabled')).toBe(false)
+    expect(select.get('.placeholder').text()).toBe('请选择已启动的实例')
+    await select.get('.select-trigger').trigger('click')
+    document.body.querySelector<HTMLElement>('.select-option')?.click()
+    await wrapper.vm.$nextTick()
+
+    mocks.listRunningInstances.mockResolvedValue([])
+    onChanged()
+    await flushPromises()
+    expect(select.props('disabled')).toBe(true)
+    expect(select.get('.placeholder').text()).toBe('暂无运行实例')
+    await select.get('.select-trigger').trigger('click')
+    expect(select.get('.ui-select').classes()).not.toContain('open')
+  })
+
+  it.each([
+    ['zh-CN', '暂无运行实例'],
+    ['zh-TW', '暫無執行中的實例'],
+    ['en-US', 'No running instances'],
+    ['ja-JP', '実行中のインスタンスはありません'],
+    ['de-DE', 'Keine laufenden Instanzen'],
+    ['ru-RU', 'Нет запущенных экземпляров'],
+  ] as const)('切换到 %s 时显示对应的空状态占位文案', async (locale, placeholder) => {
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    await flushPromises()
+    const messages = i18n.global.getLocaleMessage(locale)
+    expect(messages.connect.create).toHaveProperty('noRunningInstancePlaceholder', placeholder)
+
+    i18n.global.locale.value = locale
+    await wrapper.vm.$nextTick()
+    expect(wrapper.getComponent(UiSelect).get('.placeholder').text()).toBe(placeholder)
   })
 
   it('加入房间成功后主动刷新一次成员', async () => {

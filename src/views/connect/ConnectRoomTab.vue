@@ -122,9 +122,14 @@
                           id="connect-instance"
                           v-model="selectedInstanceKey"
                           :options="runningInstanceOptions"
-                          :placeholder="t('connect.create.instancePlaceholder')"
-                          searchable
-                          :disabled="createRoomDisabled"
+                          :placeholder="
+                            t(
+                              runningInstances.length
+                                ? 'connect.create.instancePlaceholder'
+                                : 'connect.create.noRunningInstancePlaceholder'
+                            )
+                          "
+                          :disabled="createRoomDisabled || !runningInstances.length"
                         />
                         <UiButton variant="outline" icon="edit" :disabled="createRoomDisabled" @click="goToManualPort">
                           {{ t('connect.create.manualPortEntry') }}

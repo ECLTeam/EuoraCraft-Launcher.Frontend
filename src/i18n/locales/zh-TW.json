@@ -69,6 +69,7 @@
       "hint": "從已啟動的實例建立聯機房間",
       "selectInstance": "執行實例",
       "instancePlaceholder": "請選擇已啟動的實例",
+      "noRunningInstancePlaceholder": "暫無執行中的實例",
       "noRunningInstance": "沒有檢測到已啟動的實例，請先在「遊戲」頁啟動實例",
       "next": "下一步",
       "manualPortEntry": "輸入埠",

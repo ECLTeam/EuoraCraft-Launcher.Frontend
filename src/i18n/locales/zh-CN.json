@@ -69,6 +69,7 @@
       "hint": "从已启动的实例创建联机房间",
       "selectInstance": "运行实例",
       "instancePlaceholder": "请选择已启动的实例",
+      "noRunningInstancePlaceholder": "暂无运行实例",
       "noRunningInstance": "没有检测到已启动的实例，请先在「游戏」页启动实例",
       "next": "下一步",
       "manualPortEntry": "输入端口",

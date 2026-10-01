@@ -69,6 +69,7 @@
       "hint": "起動済みのインスタンスからマルチプレイルームを作成",
       "selectInstance": "実行中のインスタンス",
       "instancePlaceholder": "起動済みのインスタンスを選択してください",
+      "noRunningInstancePlaceholder": "実行中のインスタンスはありません",
       "noRunningInstance": "起動中のインスタンスが検出されません。先に「ゲーム」ページでインスタンスを起動してください",
       "next": "次へ",
       "manualPortEntry": "ポートを入力",
