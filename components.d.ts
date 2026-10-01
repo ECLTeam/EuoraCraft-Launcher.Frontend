@@ -18,6 +18,7 @@ declare module 'vue' {
     Button: typeof import('./src/components/ui/Button.vue')['default']
     Card: typeof import('./src/components/ui/Card.vue')['default']
     ConfirmDialog: typeof import('./src/components/modals/ConfirmDialog.vue')['default']
+    ConnectorNodeSettings: typeof import('./src/components/connect/ConnectorNodeSettings.vue')['default']
     ConnectorPlayerAvatar: typeof import('./src/components/connect/ConnectorPlayerAvatar.vue')['default']
     CrashLogPickerModal: typeof import('./src/components/instances/CrashLogPickerModal.vue')['default']
     EmptyState: typeof import('./src/components/ui/EmptyState.vue')['default']

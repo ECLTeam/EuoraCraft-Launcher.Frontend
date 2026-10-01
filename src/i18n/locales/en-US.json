@@ -1911,6 +1911,15 @@
     "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
     "shortcutDesktop": "Create desktop shortcut",
     "shortcutChoose": "Choose destination",
-    "shortcutCreated": "Instance shortcut created"
+    "shortcutCreated": "Instance shortcut created",
+    "nodesTitle": "Advanced: custom connection nodes",
+    "nodesHint": "Applies on the next room connection. Enter one EasyTier URI per line. Custom only never falls back to public nodes.",
+    "nodesAddresses": "EasyTier node addresses",
+    "nodesReset": "Restore automatic nodes",
+    "nodesMode": {
+      "automatic": "Automatic nodes",
+      "append": "Append custom nodes",
+      "custom": "Custom nodes only"
+    }
   }
 }

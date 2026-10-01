@@ -1806,6 +1806,15 @@
     "shortcutHint": "使用当前实例图标创建快捷方式，双击直接启动此实例。",
     "shortcutDesktop": "创建桌面快捷方式",
     "shortcutChoose": "选择保存位置",
-    "shortcutCreated": "实例快捷方式已创建"
+    "shortcutCreated": "实例快捷方式已创建",
+    "nodesTitle": "高级选项：自定义联机节点",
+    "nodesHint": "修改在下次创建或加入房间时生效。每行填写一个 EasyTier 节点 URI；仅自定义模式不会回退公共节点。",
+    "nodesAddresses": "EasyTier 节点地址",
+    "nodesReset": "恢复自动节点",
+    "nodesMode": {
+      "automatic": "自动获取节点",
+      "append": "追加自定义节点",
+      "custom": "仅使用自定义节点"
+    }
   }
 }

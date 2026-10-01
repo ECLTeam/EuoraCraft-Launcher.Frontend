@@ -225,6 +225,8 @@ export interface CommandPayloadMap {
   system_memory: undefined
 
   // 联机（当前仅声明前端契约，后端实现后直接接入）
+  connector_nodes_get: undefined
+  connector_nodes_set: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
   connector_status: undefined
   launcher_preload_connector: undefined
   connector_host_port: { port: number }
@@ -686,6 +688,8 @@ export const COMMAND_NAMES = {
   window_update_bounds: 'window_update_bounds',
   frontend_log: 'frontend_log',
   system_memory: 'system_memory',
+  connector_nodes_get: 'connector_nodes_get',
+  connector_nodes_set: 'connector_nodes_set',
   connector_status: 'connector_status',
   launcher_preload_connector: 'launcher_preload_connector',
   connector_host_port: 'connector_host_port',
@@ -934,6 +938,8 @@ export interface CommandResponseMap {
 
   system_memory: SystemMemoryInfo
 
+  connector_nodes_get: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
+  connector_nodes_set: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
   connector_status: ConnectorStatus
   launcher_preload_connector: void
   connector_host_port: { roomCode: string }
