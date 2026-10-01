@@ -117,7 +117,7 @@
     },
     "guest": {
       "title": "Room joined",
-      "description": "Choose a matching instance to enter the game",
+      "description": "Copy the server address to join in Minecraft",
       "serverAddress": "Server address",
       "leave": "Leave room"
     },

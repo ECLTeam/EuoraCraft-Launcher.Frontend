@@ -117,7 +117,7 @@
     },
     "guest": {
       "title": "已加入房间",
-      "description": "选择匹配实例即可快速进入游戏",
+      "description": "复制服务器地址，在游戏中加入",
       "serverAddress": "服务器地址",
       "leave": "退出房间"
     },

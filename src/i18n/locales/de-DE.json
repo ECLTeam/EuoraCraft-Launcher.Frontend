@@ -117,7 +117,7 @@
     },
     "guest": {
       "title": "Raum beigetreten",
-      "description": "Wähle eine passende Instanz, um schnell ins Spiel zu gelangen",
+      "description": "Kopiere die Serveradresse und tritt in Minecraft bei",
       "serverAddress": "Serveradresse",
       "leave": "Raum verlassen"
     },

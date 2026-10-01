@@ -2,6 +2,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
+import ConnectorPlayerAvatar from '@/components/connect/ConnectorPlayerAvatar.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiSelect from '@/components/ui/Select.vue'
 import { provideConnector, type ConnectorContext } from '@/features/connect/connectorContext'
@@ -493,5 +494,77 @@ describe('ConnectRoomTab', () => {
     await wrapper.get('.connect-copy-value button').trigger('click')
 
     expect(mocks.writeClipboard).toHaveBeenCalledWith('127.0.0.1:25566')
+  })
+
+  it.each(['host', 'guest'] as const)('紧凑的 %s 房间保留完整姓名提示和可访问的复制入口', async (mode) => {
+    const name = 'HostPlayerWithAVeryLongName'.repeat(3)
+    const roomCode = 'U/' + '1234-5678-9012-3456'.repeat(3)
+    const wrapper = mountRoomTab(
+      connectorState({
+        ...idleStatus(),
+        mode,
+        roomCode,
+        players: [{ name, vendor: 'Fabric', kind: 'host', machineId: 'host', iconBase64: null }],
+      })
+    )
+    expect(wrapper.get('.connect-player-identity strong').attributes('title')).toBe(name)
+    expect(wrapper.get('.connect-room-owner__identity strong').attributes('title')).toBe(name)
+    expect(wrapper.findAllComponents(ConnectorPlayerAvatar).map((avatar) => avatar.props('size'))).toEqual([32, 32])
+    expect(wrapper.findAll('.ui-tag')).toHaveLength(1)
+    const copy = wrapper.get('.connect-room-code-block button')
+    expect(copy.attributes('aria-label')).toBe('复制')
+    await copy.trigger('click')
+    expect(mocks.writeClipboard).toHaveBeenCalledWith(roomCode)
+    expect(wrapper.find('[title="踢出玩家"]').exists()).toBe(false)
+    if (mode === 'guest') {
+      expect(wrapper.get('.connect-members-heading').text()).toContain('复制服务器地址，在游戏中加入')
+      expect(wrapper.get('.connect-copy-value button').attributes('aria-label')).toBe('复制')
+    }
+  })
+
+  it.each(['host', 'guest'] as const)('%s 的刷新及离开仍正确调用，忙碌时禁用操作', async (mode) => {
+    const state = connectorState({ ...idleStatus(), mode, roomCode: 'U/TEST-ROOM' })
+    const wrapper = mountRoomTab(state)
+    await flushPromises()
+    state.refreshStatus.mockClear()
+    const actions = wrapper.get('.connect-room-operation-list').findAll('button')
+    expect(actions.map((button) => button.text())).toEqual(['刷新玩家', mode === 'host' ? '关闭房间' : '退出房间'])
+    await actions[0]!.trigger('click')
+    await actions[1]!.trigger('click')
+    expect(state.refreshStatus).toHaveBeenCalledTimes(1)
+    expect(state.leave).toHaveBeenCalledTimes(1)
+    state.busy.value = true
+    await flushPromises()
+    for (const action of actions) {
+      expect(action.attributes('disabled')).toBeDefined()
+      await action.trigger('click')
+    }
+    expect(state.refreshStatus).toHaveBeenCalledTimes(1)
+    expect(state.leave).toHaveBeenCalledTimes(1)
+    expect(wrapper.get('.connect-empty-text').text()).toBe(i18n.global.t('connect.players.empty'))
+  })
+
+  it('房主忙碌时不能踢人，房客不能踢人且长服务器地址复制完整', async () => {
+    const guest = { name: 'Guest', vendor: 'ECL', iconBase64: null, kind: 'guest' as const, machineId: 'guest' }
+    const state = connectorState({ ...idleStatus(), mode: 'host', players: [guest] })
+    const wrapper = mountRoomTab(state)
+    state.busy.value = true
+    await flushPromises()
+    const kick = wrapper.get('[title="踢出玩家"]')
+    expect(kick.attributes('disabled')).toBeDefined()
+    await kick.trigger('click')
+    expect(state.kick).not.toHaveBeenCalled()
+    state.status.value = {
+      ...idleStatus(),
+      mode: 'guest',
+      players: [guest],
+      mcHost: '2001:db8:1234:5678:abcd:ef01:2345:6789',
+      mcPort: 25566,
+    }
+    state.busy.value = false
+    await flushPromises()
+    expect(wrapper.find('[title="踢出玩家"]').exists()).toBe(false)
+    await wrapper.get('.connect-copy-value button').trigger('click')
+    expect(mocks.writeClipboard).toHaveBeenCalledWith(`${state.status.value.mcHost}:25566`)
   })
 })

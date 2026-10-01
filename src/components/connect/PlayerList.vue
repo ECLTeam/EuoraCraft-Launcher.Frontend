@@ -7,10 +7,10 @@
         class="connect-player-row"
         :class="{ 'is-host': player.kind === 'host' }"
       >
-        <ConnectorPlayerAvatar :skinBase64="player.iconBase64" :name="player.name" :size="40" />
+        <ConnectorPlayerAvatar :skinBase64="player.iconBase64" :name="player.name" :size="32" />
         <div class="connect-player-identity">
           <div>
-            <strong>{{ player.name }}</strong>
+            <strong :title="player.name">{{ player.name }}</strong>
             <UiTag v-if="player.kind === 'host'" size="tiny" tone="info">{{ t('connect.players.host') }}</UiTag>
           </div>
           <span>{{ player.vendor }}</span>
@@ -22,6 +22,7 @@
           shape="square"
           icon="user-x"
           :title="t('connect.players.kick')"
+          :aria-label="t('connect.players.kick')"
           :disabled="busy"
           @click="emit('kick', player)"
         />

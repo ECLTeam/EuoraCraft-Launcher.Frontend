@@ -66,26 +66,28 @@
   gap: 12px;
 }
 
+.connect-room-container {
+  container: connect-room / inline-size;
+}
+
 .connect-room-layout {
   display: grid;
   width: min(100%, 1040px);
-  min-height: calc(100% - 20px);
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 16px;
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) 248px;
+  gap: 12px;
+  align-items: start;
   margin: 10px auto;
 }
 
 .connect-room-main {
   display: flex;
   min-width: 0;
-  min-height: 410px;
   flex-direction: column;
 }
 
 .connect-side-panel {
   display: flex;
-  width: 280px;
+  width: 100%;
   min-width: 0;
   flex-direction: column;
   gap: 10px;
@@ -115,6 +117,7 @@
   flex: 1;
   flex-direction: column;
   gap: 2px;
+  line-height: 1.4;
 }
 
 .connect-room-owner__identity strong {
@@ -127,17 +130,45 @@
 
 .connect-room-owner__identity span {
   color: var(--ecl-text-tertiary);
-  font-size: 9px;
+  font-size: 10px;
 }
 
-.connect-room-summary-card,
-.connect-room-main {
-  box-shadow: 0 6px 22px color-mix(in srgb, var(--ecl-shadow-color, #172036) 9%, transparent);
+.connect-room-layout .connect-room-summary-card :deep(.card-header),
+.connect-room-layout .connect-room-main :deep(.card-header) {
+  min-height: 44px;
+  padding: 10px 12px;
+  background: transparent;
 }
 
-.connect-room-summary-card :deep(.card-header),
-.connect-room-main :deep(.card-header) {
-  background: color-mix(in srgb, var(--primary) 4%, var(--card-bg));
+.connect-room-layout .connect-card-heading {
+  gap: 8px;
+}
+
+.connect-room-layout .connect-card-heading > div {
+  min-width: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.connect-room-layout .connect-card-heading strong {
+  flex-shrink: 0;
+}
+
+.connect-room-layout .connect-card-heading span:not(.connect-members-heading__icon) {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.connect-room-layout .connect-card-heading > .icon,
+.connect-room-layout .connect-members-heading__icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.connect-room-summary-card :deep(.card-body) {
+  padding: 12px;
 }
 
 .connect-room-summary-divider {
@@ -157,15 +188,11 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding: 8px 9px;
-  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--ecl-border));
-  border-radius: var(--ecl-radius-control);
-  background: color-mix(in srgb, var(--primary) 6%, var(--ecl-surface-muted));
 }
 
 .connect-room-code-block > span {
   color: var(--ecl-text-tertiary);
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .connect-room-code-block > div {
@@ -187,26 +214,35 @@
 
 .connect-room-operation-list {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
-.connect-room-operation-title {
-  margin-bottom: 2px;
-  color: var(--ecl-text-secondary);
-  font-size: 10px;
-  font-weight: 650;
+.connect-room-operation-list :deep(.ui-btn) {
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  min-height: 28px;
+  white-space: normal;
 }
 
-.connect-room-operation-list :deep(.ui-btn) {
-  width: 100%;
-  justify-content: flex-start;
+.connect-room-operation-list :deep(.btn-content) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.connect-room-summary-card :deep(.btn-square) {
+  width: 26px;
+  height: 26px;
+  min-height: 26px;
+  flex-shrink: 0;
 }
 
 .connect-members-heading__icon {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   place-items: center;
   border-radius: 9px;
@@ -228,6 +264,7 @@
 }
 
 .connect-side-status-row > span {
+  flex-shrink: 0;
   color: var(--ecl-text-secondary);
 }
 
@@ -239,18 +276,13 @@
   gap: 4px;
 }
 
-.connect-copy-value code {
-  max-width: 150px;
-}
-
 .connect-side-status-row code {
   min-width: 0;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--ecl-text);
   font-size: 10px;
   font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-align: right;
 }
 
 .connect-node-list {
@@ -978,29 +1010,22 @@
   min-width: 0;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-}
-
-:deep(.connect-player-row) {
-  min-height: 60px;
-  border: 1px solid transparent;
+  padding: 8px;
+  min-height: 52px;
   border-radius: var(--ecl-radius-control);
-  transition:
-    border-color var(--duration-fast) var(--ease-emphasized),
-    background-color var(--duration-fast) var(--ease-emphasized);
+  transition: background-color var(--duration-fast) var(--ease-emphasized);
 }
 
 :deep(.connect-player-row:hover) {
-  border-color: color-mix(in srgb, var(--primary) 18%, var(--ecl-border));
-  background: color-mix(in srgb, var(--primary) 4%, var(--ecl-surface-muted));
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
 }
 
 :deep(.connect-player-row.is-host) {
-  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  background: color-mix(in srgb, var(--primary) 3%, transparent);
 }
 
 :deep(.connect-player-row .ui-avatar) {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+  flex-shrink: 0;
 }
 
 :deep(.connect-player-identity) {
@@ -1009,15 +1034,18 @@
   flex: 1;
   flex-direction: column;
   gap: 2px;
+  line-height: 1.4;
 }
 
 :deep(.connect-player-identity) > div {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 6px;
 }
 
 :deep(.connect-player-identity) strong {
+  min-width: 0;
   overflow: hidden;
   color: var(--ecl-text);
   font-size: 12px;
@@ -1027,7 +1055,15 @@
 
 :deep(.connect-player-identity) > span {
   color: var(--ecl-text-tertiary);
-  font-size: 9px;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.connect-player-identity .ui-tag),
+:deep(.connect-player-row .ui-btn) {
+  flex-shrink: 0;
 }
 
 :deep(.connect-player-presence) {
@@ -1036,20 +1072,16 @@
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--success);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 14%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 8%, transparent);
 }
 
-@media (max-width: 780px) {
+@container connect-room (max-width: 620px) {
   .connect-room-layout {
     grid-template-columns: 1fr;
   }
 
   .connect-room-sidebar {
     width: 100%;
-  }
-
-  .connect-room-main {
-    min-height: 360px;
   }
 }
 

@@ -44,7 +44,10 @@
           </UiButton>
         </div>
 
-        <div class="connect-scroll-area">
+        <div
+          class="connect-scroll-area"
+          :class="{ 'connect-room-container': displayStatus.mode === 'host' || displayStatus.mode === 'guest' }"
+        >
           <Transition name="page" mode="out-in">
             <template v-if="displayStatus.mode === 'idle'">
               <div :key="`idle-${displayHostStep}`" class="connect-idle-layout">
@@ -298,16 +301,15 @@
                     <ConnectorPlayerAvatar
                       :skinBase64="hostPlayer?.iconBase64"
                       :name="hostName || t('connect.host.title')"
-                      :size="38"
+                      :size="32"
                     />
                     <div class="connect-room-owner__identity">
-                      <strong>{{ hostName || t('connect.host.title') }}</strong>
+                      <strong :title="hostName || t('connect.host.title')">{{
+                        hostName || t('connect.host.title')
+                      }}</strong>
                       <span>{{ t('connect.roomInfo.creator') }}</span>
                     </div>
-                    <UiTag tone="info" size="tiny">{{ t('connect.players.host') }}</UiTag>
                   </div>
-
-                  <div class="connect-room-summary-divider"></div>
 
                   <div class="connect-room-code-block">
                     <span>{{ t('connect.join.roomCode') }}</span>
@@ -319,6 +321,7 @@
                         shape="square"
                         icon="copy"
                         :title="t('connect.copy')"
+                        :aria-label="t('connect.copy')"
                         @click="copyCurrentRoomCode"
                       />
                     </div>
@@ -338,6 +341,7 @@
                           shape="square"
                           icon="copy"
                           :title="t('connect.copy')"
+                          :aria-label="t('connect.copy')"
                           @click="copyServerAddress"
                         />
                       </div>
@@ -347,11 +351,10 @@
                   <div class="connect-room-summary-divider"></div>
 
                   <div class="connect-room-operation-list">
-                    <strong class="connect-room-operation-title">{{ t('connect.roomActions.title') }}</strong>
-                    <UiButton variant="ghost" icon="refresh" :loading="busy" @click="() => refreshStatus()">
+                    <UiButton size="sm" variant="ghost" icon="refresh" :loading="busy" @click="() => refreshStatus()">
                       {{ t('connect.players.refresh') }}
                     </UiButton>
-                    <UiButton variant="danger" icon="logout" :loading="busy" @click="leave">
+                    <UiButton size="sm" variant="danger" icon="logout" :loading="busy" @click="leave">
                       {{ t(displayStatus.mode === 'host' ? 'connect.host.close' : 'connect.guest.leave') }}
                     </UiButton>
                   </div>
@@ -377,7 +380,6 @@ import UiInput from '@/components/ui/Input.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import UiProgress from '@/components/ui/Progress.vue'
 import UiSelect from '@/components/ui/Select.vue'
-import UiTag from '@/components/ui/Tag.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { useConnectFlowDebug } from '@/features/connect/composables/useConnectFlowDebug'
 import { useConnectorContext } from '@/features/connect/connectorContext'
