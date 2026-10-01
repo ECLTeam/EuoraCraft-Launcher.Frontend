@@ -61,33 +61,40 @@
                     </template>
                     <div class="connect-form">
                       <label for="connect-room-code">{{ t('connect.join.roomCode') }}</label>
-                      <div class="connect-room-input-row">
-                        <UiInput
-                          id="connect-room-code"
-                          v-model="roomCode"
-                          placeholder="U/XXXX-XXXX-XXXX-XXXX"
-                          prefixIcon="link"
-                          :aria-label="t('connect.join.roomCode')"
-                          :disabled="!serviceReady"
-                          @enter="joinRoom"
-                        />
+                      <div class="connect-room-input-row connect-join-row">
+                        <div ref="roomCodeField" class="connect-code-field" :class="{ 'has-clear': roomCode }">
+                          <UiInput
+                            id="connect-room-code"
+                            v-model="roomCode"
+                            placeholder="U/XXXX-XXXX-XXXX-XXXX"
+                            prefixIcon="link"
+                            :aria-label="t('connect.join.roomCode')"
+                            :disabled="!serviceReady"
+                            @enter="joinRoom"
+                          />
+                          <UiButton
+                            v-if="roomCode"
+                            class="connect-code-clear"
+                            variant="ghost"
+                            shape="square"
+                            size="sm"
+                            icon="close"
+                            :title="t('common.clear')"
+                            :aria-label="t('common.clear')"
+                            :disabled="!serviceReady || !roomCode"
+                            @click="clearRoomCode"
+                          />
+                        </div>
                         <UiButton
-                          variant="outline"
-                          icon="close"
-                          :disabled="!serviceReady || !roomCode"
-                          @click="clearRoomCode"
-                        >
-                          {{ t('common.clear') }}
-                        </UiButton>
-                        <UiButton
-                          variant="outline"
+                          class="connect-code-paste"
+                          variant="ghost"
+                          shape="square"
                           icon="clipboard"
                           :title="t('connect.join.paste')"
+                          :aria-label="t('connect.join.paste')"
                           :disabled="!serviceReady"
                           @click="pasteRoomCode"
-                        >
-                          {{ t('connect.join.paste') }}
-                        </UiButton>
+                        />
                         <UiButton
                           icon="login"
                           :loading="busy"
@@ -117,7 +124,7 @@
 
                     <div v-if="displayHostStep === 1" class="connect-form">
                       <label for="connect-instance">{{ t('connect.create.selectInstance') }}</label>
-                      <div class="connect-room-input-row">
+                      <div class="connect-room-input-row connect-instance-row">
                         <UiSelect
                           id="connect-instance"
                           v-model="selectedInstanceKey"
@@ -131,9 +138,6 @@
                           "
                           :disabled="createRoomDisabled || !runningInstances.length"
                         />
-                        <UiButton variant="outline" icon="edit" :disabled="createRoomDisabled" @click="goToManualPort">
-                          {{ t('connect.create.manualPortEntry') }}
-                        </UiButton>
                         <UiButton
                           icon="arrow-right"
                           :disabled="createRoomDisabled || !selectedInstanceKey"
@@ -142,10 +146,22 @@
                           {{ t('connect.create.next') }}
                         </UiButton>
                       </div>
-                      <p v-if="!runningInstances.length && serviceReady" class="connect-help-text">
-                        {{ t('connect.create.noRunningInstance') }}
-                      </p>
-                      <div v-else-if="runningInstances.length" class="connect-running-games">
+                      <div class="connect-create-assist">
+                        <p v-if="!runningInstances.length && serviceReady" class="connect-help-text">
+                          {{ t('connect.create.noRunningInstance') }}
+                        </p>
+                        <UiButton
+                          class="connect-manual-entry"
+                          variant="text"
+                          size="sm"
+                          :disabled="createRoomDisabled"
+                          @click="goToManualPort"
+                        >
+                          {{ t('connect.create.manualPortEntry') }}
+                          <UiIcon name="arrow-right" :size="14" />
+                        </UiButton>
+                      </div>
+                      <div v-if="runningInstances.length" class="connect-running-games">
                         <span class="connect-running-games__hint">{{ t('connect.create.runningGameHint') }}</span>
                         <ul class="connect-running-games__list">
                           <li v-for="instance in runningInstances" :key="instance.id" class="connect-running-game">
@@ -210,10 +226,16 @@
                           {{ t('connect.create.createRoom') }}
                         </UiButton>
                       </div>
-                      <button class="connect-mode-link" type="button" :disabled="busy" @click="goBackToInstanceStep">
-                        <UiIcon name="arrow-left" :size="16" />
-                        <span>{{ t('connect.create.back') }}</span>
-                      </button>
+                      <UiButton
+                        class="connect-mode-link"
+                        variant="text"
+                        size="sm"
+                        icon="arrow-left"
+                        :disabled="busy"
+                        @click="goBackToInstanceStep"
+                      >
+                        {{ t('connect.create.back') }}
+                      </UiButton>
                     </div>
                   </UiCard>
                 </div>
@@ -369,6 +391,7 @@ const hostStep = ref<1 | 2>(1)
 const selectedInstanceKey = ref('')
 const port = ref('25565')
 const roomCode = ref('')
+const roomCodeField = ref<HTMLDivElement>()
 const runningInstances = ref<GameInstance[]>([])
 let unsubscribeRunning: (() => void) | null = null
 
@@ -543,6 +566,7 @@ async function copyServerAddress(): Promise<void> {
 
 function clearRoomCode(): void {
   roomCode.value = ''
+  roomCodeField.value?.querySelector<HTMLInputElement>('input')?.focus()
 }
 
 watch(

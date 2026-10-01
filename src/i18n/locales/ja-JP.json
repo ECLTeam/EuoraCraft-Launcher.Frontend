@@ -72,7 +72,7 @@
       "noRunningInstancePlaceholder": "実行中のインスタンスはありません",
       "noRunningInstance": "起動中のインスタンスが検出されません。先に「ゲーム」ページでインスタンスを起動してください",
       "next": "次へ",
-      "manualPortEntry": "ポートを入力",
+      "manualPortEntry": "ポートを手動入力",
       "back": "戻る",
       "lanHint": "ゲームで「LAN に公開」が有効になっていることを確認してください。ポートは自動的に検出されます。",
       "detecting": "ローカルポートを検出中...",

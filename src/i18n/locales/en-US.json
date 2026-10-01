@@ -72,7 +72,7 @@
       "noRunningInstancePlaceholder": "No running instances",
       "noRunningInstance": "No running instance detected. Start an instance on the Game page first.",
       "next": "Next",
-      "manualPortEntry": "Input port",
+      "manualPortEntry": "Enter port manually",
       "back": "Back",
       "lanHint": "Make sure the game is open to LAN; the port will be detected automatically.",
       "detecting": "Detecting local ports...",

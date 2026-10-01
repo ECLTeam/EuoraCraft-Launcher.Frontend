@@ -2,9 +2,11 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
+import UiIcon from '@/components/ui/Icon.vue'
 import UiSelect from '@/components/ui/Select.vue'
 import { provideConnector, type ConnectorContext } from '@/features/connect/connectorContext'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
 import type { ConnectorStatus, EasyTierStatus } from '@/types/connect'
 import type { GameInstance, ScannedVersion } from '@/types/instances'
@@ -16,6 +18,12 @@ const mocks = vi.hoisted(() => ({
   listRunningInstances: vi.fn(),
   onRunningChanged: vi.fn(),
   writeClipboard: vi.fn(),
+  readClipboard: vi.fn(),
+  showError: vi.fn(),
+}))
+
+vi.mock('@/composables/useLauncherMessage', () => ({
+  useLauncherMessage: () => ({ error: mocks.showError, warning: vi.fn(), success: vi.fn() }),
 }))
 
 vi.mock('@/features/instances/api/instanceRuntimeApi', () => ({
@@ -100,11 +108,13 @@ function mountRoomTab(state: ReturnType<typeof connectorState>) {
   })
   const pinia = createPinia()
   setActivePinia(pinia)
+  vi.spyOn(useSettingsStore(pinia), 'load').mockResolvedValue(undefined)
   useInstanceStore().scannedVersions = [scannedVersion]
   i18n.global.locale.value = 'zh-CN'
 
   return mount(Harness, {
-    global: { plugins: [i18n, pinia] },
+    attachTo: document.body,
+    global: { plugins: [i18n, pinia], components: { UiIcon } },
   })
 }
 
@@ -113,10 +123,74 @@ describe('ConnectRoomTab', () => {
     mocks.listRunningInstances.mockReset().mockResolvedValue([])
     mocks.onRunningChanged.mockReset().mockReturnValue(undefined)
     mocks.writeClipboard.mockReset().mockResolvedValue(undefined)
+    mocks.readClipboard.mockReset().mockResolvedValue('')
+    mocks.showError.mockReset()
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
-      value: { writeText: mocks.writeClipboard },
+      value: { writeText: mocks.writeClipboard, readText: mocks.readClipboard },
     })
+  })
+
+  it('保留双卡，将手动端口放在辅助区域并精简同行操作', async () => {
+    const state = connectorState(idleStatus())
+    const wrapper = mountRoomTab(state)
+    await flushPromises()
+    expect(wrapper.findAll('.connect-idle-primary .connect-main-card')).toHaveLength(2)
+    expect(wrapper.get('.connect-join-row').findAll('button')).toHaveLength(2)
+    expect(wrapper.get('.connect-instance-row').findAll('button')).toHaveLength(1)
+    const manual = wrapper.get('.connect-create-assist button')
+    expect(manual.text()).toBe('手动输入端口')
+    expect(manual.attributes('disabled')).toBeUndefined()
+    await manual.trigger('click')
+    await flushPromises()
+    expect(wrapper.find('#connect-port').exists()).toBe(true)
+    expect(state.startPortScan).toHaveBeenCalledTimes(1)
+  })
+
+  it('输入框内清除仅有内容时展示，清除后恢复输入焦点', async () => {
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    expect(wrapper.find('.connect-code-clear').exists()).toBe(false)
+    await wrapper.get('#connect-room-code').setValue('U/YZ0P-UV89-9QG6-WVVT')
+    const clear = wrapper.get('.connect-code-field .connect-code-clear')
+    expect(clear.attributes('aria-label')).toBe('清除')
+    await clear.trigger('click')
+    await flushPromises()
+    expect((wrapper.get('#connect-room-code').element as HTMLInputElement).value).toBe('')
+    expect(wrapper.find('.connect-code-clear').exists()).toBe(false)
+    expect(document.activeElement).toBe(wrapper.get('#connect-room-code').element)
+  })
+
+  it('粘贴图标读取并修剪房间码，失败保留原值并提示', async () => {
+    const wrapper = mountRoomTab(connectorState(idleStatus()))
+    mocks.readClipboard.mockResolvedValue('  U/YZ0P-UV89-9QG6-WVVT  ')
+    const paste = wrapper.get('.connect-code-paste')
+    expect(paste.text()).toBe('')
+    expect(paste.attributes('aria-label')).toBe('粘贴')
+    await paste.trigger('click')
+    await flushPromises()
+    expect((wrapper.get('#connect-room-code').element as HTMLInputElement).value).toBe('U/YZ0P-UV89-9QG6-WVVT')
+    mocks.readClipboard.mockRejectedValue(new Error('Clipboard denied'))
+    await paste.trigger('click')
+    await flushPromises()
+    expect(mocks.showError).toHaveBeenCalledWith(i18n.global.t('connect.validation.pasteFailed'))
+    expect((wrapper.get('#connect-room-code').element as HTMLInputElement).value).toBe('U/YZ0P-UV89-9QG6-WVVT')
+  })
+
+  it('服务不可用时禁止图标清除和粘贴，输入 Enter 沿用加入流程', async () => {
+    const state = connectorState(idleStatus())
+    const wrapper = mountRoomTab(state)
+    await wrapper.get('#connect-room-code').setValue('U/YZ0P-UV89-9QG6-WVVT')
+    await wrapper.get('#connect-room-code').trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+    expect(state.join).toHaveBeenCalledWith('U/YZ0P-UV89-9QG6-WVVT')
+    state.availability.value = 'unavailable'
+    await flushPromises()
+    expect(wrapper.get('.connect-code-clear').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.connect-code-paste').attributes('disabled')).toBeDefined()
+    await wrapper.get('.connect-code-clear').trigger('click')
+    await wrapper.get('.connect-code-paste').trigger('click')
+    expect((wrapper.get('#connect-room-code').element as HTMLInputElement).value).toBe('U/YZ0P-UV89-9QG6-WVVT')
+    expect(mocks.readClipboard).not.toHaveBeenCalled()
   })
 
   it('keeps the room choices visible when the backend is unavailable', () => {
@@ -306,6 +380,7 @@ describe('ConnectRoomTab', () => {
       const wrapper = mountRoomTab(state)
       await flushPromises()
       const initialStep = wrapper.get('.connect-idle-layout').element
+      await wrapper.get('#connect-room-code').setValue('U/YZ0P-UV89-9QG6-WVVT')
 
       if (entry === '下一步') {
         wrapper.getComponent(UiSelect).vm.$emit('update:modelValue', runningInstance.id)
@@ -314,7 +389,9 @@ describe('ConnectRoomTab', () => {
       const entryButton =
         entry === '快捷创建'
           ? wrapper.get('.connect-running-game button')
-          : wrapper.findAll('button').find((button) => button.text() === entry)
+          : wrapper
+              .findAll('button')
+              .find((button) => button.text() === (entry === '输入端口' ? '手动输入端口' : entry))
       expect(entryButton).toBeDefined()
       await entryButton?.trigger('click')
       await flushPromises()
@@ -329,12 +406,13 @@ describe('ConnectRoomTab', () => {
       await flushPromises()
       expect(wrapper.get('.connect-idle-layout').element).not.toBe(portStep)
       expect(wrapper.find('#connect-port').exists()).toBe(false)
+      expect((wrapper.get('#connect-room-code').element as HTMLInputElement).value).toBe('U/YZ0P-UV89-9QG6-WVVT')
       expect(wrapper.getComponent(UiSelect).props('modelValue')).toBe(entry === '输入端口' ? '' : runningInstance.id)
       expect(state.stopPortScan).toHaveBeenCalledTimes(1)
 
       await wrapper
         .findAll('button')
-        .find((button) => button.text() === '输入端口')
+        .find((button) => button.text() === '手动输入端口')
         ?.trigger('click')
       await flushPromises()
       expect((wrapper.get('#connect-port').element as HTMLInputElement).value).toBe('25566')

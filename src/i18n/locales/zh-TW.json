@@ -72,7 +72,7 @@
       "noRunningInstancePlaceholder": "暫無執行中的實例",
       "noRunningInstance": "沒有檢測到已啟動的實例，請先在「遊戲」頁啟動實例",
       "next": "下一步",
-      "manualPortEntry": "輸入埠",
+      "manualPortEntry": "手動輸入連接埠",
       "back": "上一步",
       "lanHint": "請確保遊戲已開啟「對區域網開放」，系統會自動探測埠。",
       "detecting": "正在探測本地埠...",

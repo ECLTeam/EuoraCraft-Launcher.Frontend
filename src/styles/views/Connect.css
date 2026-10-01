@@ -63,7 +63,7 @@
   max-width: 820px;
   margin: 0 auto;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .connect-room-layout {
@@ -690,6 +690,122 @@
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.connect-idle-primary .connect-main-card :deep(.card-header) {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-bottom: 0;
+}
+
+.connect-idle-primary .connect-main-card :deep(.card-body) {
+  padding: 12px 14px;
+}
+
+.connect-idle-primary .connect-card-heading {
+  gap: 8px;
+}
+
+.connect-idle-primary .connect-card-heading > .icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.connect-idle-primary .connect-card-heading > div {
+  min-width: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.connect-idle-primary .connect-card-heading strong {
+  flex-shrink: 0;
+}
+
+.connect-idle-primary .connect-card-heading span {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.connect-idle-primary .connect-form {
+  gap: 8px;
+}
+
+.connect-idle-primary .connect-form > label {
+  font-size: 11px;
+}
+
+.connect-idle-primary .connect-room-input-row,
+.connect-idle-primary .connect-port-input {
+  flex-wrap: wrap;
+}
+
+.connect-idle-primary .connect-room-input-row > :first-child,
+.connect-idle-primary .connect-port-input :deep(.ui-input-wrapper) {
+  flex: 1 1 180px;
+  min-width: 0;
+  width: auto;
+}
+
+.connect-idle-primary .connect-port-input :deep(.ui-input),
+.connect-idle-primary .connect-port-input > .ui-btn {
+  height: 32px;
+  min-height: 32px;
+}
+
+.connect-code-field {
+  position: relative;
+}
+
+.connect-idle-primary .connect-code-paste {
+  width: 32px;
+  flex-shrink: 0;
+}
+
+.connect-code-field.has-clear :deep(.ui-input) {
+  padding-right: 34px;
+}
+
+.connect-idle-primary .connect-code-field :deep(.connect-code-clear) {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 26px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0;
+}
+
+.connect-create-assist {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.connect-create-assist .connect-help-text {
+  flex: 1 1 260px;
+  color: var(--text-tertiary);
+}
+
+.connect-idle-primary .connect-manual-entry,
+.connect-idle-primary .connect-mode-link {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.connect-idle-primary .connect-manual-entry {
+  margin-left: auto;
+}
+
+.connect-manual-entry :deep(.btn-content) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .connect-debug-bar {

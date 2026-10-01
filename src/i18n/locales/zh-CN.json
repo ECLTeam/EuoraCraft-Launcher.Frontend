@@ -72,7 +72,7 @@
       "noRunningInstancePlaceholder": "暂无运行实例",
       "noRunningInstance": "没有检测到已启动的实例，请先在「游戏」页启动实例",
       "next": "下一步",
-      "manualPortEntry": "输入端口",
+      "manualPortEntry": "手动输入端口",
       "back": "上一步",
       "lanHint": "请确保游戏已开启「对局域网开放」，系统会自动探测端口。",
       "detecting": "正在探测本地端口...",

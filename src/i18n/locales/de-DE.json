@@ -72,7 +72,7 @@
       "noRunningInstancePlaceholder": "Keine laufenden Instanzen",
       "noRunningInstance": "Keine laufende Instanz erkannt. Bitte starte zuerst eine Instanz auf der Seite „Spiel“.",
       "next": "Weiter",
-      "manualPortEntry": "Port eingeben",
+      "manualPortEntry": "Port manuell eingeben",
       "back": "Zurück",
       "lanHint": "Stelle sicher, dass im Spiel „Für LAN öffnen“ aktiviert ist; der Port wird automatisch erkannt.",
       "detecting": "Lokale Ports werden erkannt...",
