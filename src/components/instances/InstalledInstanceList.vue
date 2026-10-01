@@ -171,7 +171,7 @@
             @contextmenu.prevent="showActionMenu($event, version)"
             @click="emit('selectVersion', version)"
           >
-            <InstanceIcon class="list-icon" :version="version" :size="38" />
+            <InstanceIcon class="list-icon" :version="version" :size="32" />
             <div class="instance-copy">
               <div class="instance-heading">
                 <strong class="instance-name" :title="`${instanceName(version)}\n${version.versionId}`">{{
@@ -194,7 +194,9 @@
                 categoryName(version.categoryId)
               }}</span>
               <span v-for="tag in version.tags?.slice(0, 2)" :key="tag" class="tag-badge">#{{ tag }}</span>
-              <span v-if="(version.tags?.length || 0) > 2" class="tag-badge">+{{ version.tags!.length - 2 }}</span>
+              <span v-if="(version.tags?.length || 0) > 2" class="tag-badge tag-count"
+                >+{{ version.tags!.length - 2 }}</span
+              >
             </div>
             <div class="list-actions">
               <UiButton
