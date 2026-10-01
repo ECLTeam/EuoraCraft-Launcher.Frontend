@@ -3,6 +3,7 @@
     <section class="connect-workspace">
       <div class="connect-scroll-area">
         <div class="connect-tools-layout">
+          <CustomDownloadCard />
           <UiCard class="connect-nat-card">
             <template #header>
               <div class="connect-nat-heading">
@@ -59,6 +60,7 @@
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BackendCommandError } from '@/app/runtime/errorPresentation'
+import CustomDownloadCard from '@/components/connect/CustomDownloadCard.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -67,7 +69,6 @@ import UiTag from '@/components/ui/Tag.vue'
 import { connectorApi } from '@/features/connect/api/connectorApi'
 import type { NatTypeResult } from '@/types/connect'
 import { getErrorMessage } from '@/utils/error'
-
 const { t } = useI18n()
 const state = ref<'idle' | 'detecting' | 'success' | 'error'>('idle')
 const result = ref<NatTypeResult | null>(null)

@@ -244,6 +244,37 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         }
         styleElement.textContent = scopePluginCss(pluginName, payload.css || '')
       }),
+      backend.on('game:operation_progress', (payload) => {
+        if (payload.kind !== 'custom_download') return
+        const taskId = payload.operationId
+        if (!globalTaskQueue.tasks.value.some((task) => task.id === taskId))
+          globalTaskQueue.addTask(
+            {
+              type: 'download',
+              name: payload.name || options.t('advanced.downloadTitle'),
+              versionId: '',
+              loaderType: '',
+            },
+            taskId
+          )
+        const status =
+          payload.status === 'completed'
+            ? 'completed'
+            : payload.status === 'failed'
+              ? 'error'
+              : payload.status === 'cancelled'
+                ? 'canceled'
+                : 'running'
+        globalTaskQueue.updateTask(taskId, {
+          status,
+          progress: payload.percent,
+          message: payload.message,
+          done: payload.done,
+          total: payload.total,
+          speed: ['completed', 'error', 'canceled'].includes(status) ? 0 : payload.speed,
+          progressType: payload.progressType,
+        })
+      }),
       backend.on('game:install_progress', handleInstallProgress)
     )
   }

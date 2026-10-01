@@ -1523,7 +1523,8 @@
     "select": "Select",
     "clear": "Clear",
     "more": "More",
-    "reset": "Reset"
+    "reset": "Reset",
+    "retry": "Retry"
   },
   "agreement": {
     "title": "User Agreement",
@@ -1907,11 +1908,6 @@
     "empty": "Not set"
   },
   "advanced": {
-    "shortcutTitle": "Instance shortcuts",
-    "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
-    "shortcutDesktop": "Create desktop shortcut",
-    "shortcutChoose": "Choose destination",
-    "shortcutCreated": "Instance shortcut created",
     "nodesTitle": "Advanced: custom connection nodes",
     "nodesHint": "Applies on the next room connection. Enter one EasyTier URI per line. Custom only never falls back to public nodes.",
     "nodesAddresses": "EasyTier node addresses",
@@ -1920,6 +1916,16 @@
       "automatic": "Automatic nodes",
       "append": "Append custom nodes",
       "custom": "Custom nodes only"
-    }
+    },
+    "downloadTitle": "Custom download",
+    "downloadUrl": "Download URL",
+    "downloadPath": "Destination file",
+    "downloadOverwrite": "Allow overwriting an existing file (preserved on failure)",
+    "downloadStart": "Start download",
+    "shortcutTitle": "Instance shortcuts",
+    "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
+    "shortcutDesktop": "Create desktop shortcut",
+    "shortcutChoose": "Choose destination",
+    "shortcutCreated": "Instance shortcut created"
   }
 }

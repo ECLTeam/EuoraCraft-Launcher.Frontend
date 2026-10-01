@@ -203,6 +203,8 @@ export type BackendEventName = keyof BackendEvents
 export type SchematicLocale = 'zh-CN' | 'zh-TW' | 'en-US' | 'ja-JP' | 'ru-RU' | 'de-DE'
 
 export interface CommandPayloadMap {
+  custom_download_start: { url: string; target_path: string; overwrite?: boolean }
+  custom_download_retry: { operation_id: string }
   system_ping: undefined
   launcher_errors_pending: undefined
   launcher_errors_ack: { error_ids: string[] }
@@ -354,6 +356,7 @@ export interface CommandPayloadMap {
       | 'schematic-material-manifest'
       | 'screenshot'
       | 'mod-file'
+      | 'custom-download'
       | 'instance-shortcut'
       | 'theme-preset'
     default_directory?: string
@@ -676,6 +679,8 @@ export type CommandName = keyof CommandPayloadMap
 // 后端对应权威：ECL/api/registry.py::COMMAND_NAMES。
 
 export const COMMAND_NAMES = {
+  custom_download_start: 'custom_download_start',
+  custom_download_retry: 'custom_download_retry',
   system_ping: 'system_ping',
   launcher_errors_pending: 'launcher_errors_pending',
   launcher_errors_ack: 'launcher_errors_ack',
@@ -1053,6 +1058,8 @@ export interface CommandResponseMap {
   }
   game_instance_files_repair: GameOperation
   game_instance_delete: void
+  custom_download_start: { operationId: string; status: string }
+  custom_download_retry: { operationId: string; status: string }
   game_instance_shortcut_create: { path: string; iconPath: string }
   game_operation_get: GameOperation
   game_operation_cancel: boolean

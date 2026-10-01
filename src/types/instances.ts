@@ -158,6 +158,11 @@ export interface InstanceTargetPayload {
 }
 
 export interface GameOperation {
+  name?: string
+  done?: number
+  total?: number
+  speed?: number
+  progressType?: 'bytes' | 'files'
   operationId: string
   kind?: string
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'

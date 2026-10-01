@@ -21,6 +21,7 @@ declare module 'vue' {
     ConnectorNodeSettings: typeof import('./src/components/connect/ConnectorNodeSettings.vue')['default']
     ConnectorPlayerAvatar: typeof import('./src/components/connect/ConnectorPlayerAvatar.vue')['default']
     CrashLogPickerModal: typeof import('./src/components/instances/CrashLogPickerModal.vue')['default']
+    CustomDownloadCard: typeof import('./src/components/connect/CustomDownloadCard.vue')['default']
     EmptyState: typeof import('./src/components/ui/EmptyState.vue')['default']
     ErrorBoundary: typeof import('./src/components/ErrorBoundary.vue')['default']
     ErrorModal: typeof import('./src/components/modals/ErrorModal.vue')['default']
