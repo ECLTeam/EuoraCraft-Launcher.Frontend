@@ -426,7 +426,31 @@
       "versionList": "Instanzliste",
       "protectedPath": "Der Standardpfad kann nicht gelöscht werden",
       "confirmDeletePath": "Möchtest du den Pfad „{name}“ wirklich löschen?",
-      "defaultPathTip": "Der Speicherort des Standardpfads kann nicht geändert, der Name jedoch schon"
+      "defaultPathTip": "Der Speicherort des Standardpfads kann nicht geändert, der Name jedoch schon",
+      "toolbar": {
+        "filter": "Filter",
+        "sort": "Sortieren",
+        "favoritesOnly": "Nur Favoriten",
+        "pinnedOnly": "Nur angeheftete",
+        "showHidden": "Versteckte Instanzen anzeigen",
+        "category": "Kategorie",
+        "allCategories": "Alle Kategorien",
+        "manageCategories": "Kategorien verwalten",
+        "clearFilters": "Filter löschen",
+        "asc": "Aufsteigend",
+        "desc": "Absteigend",
+        "lastLaunchedAt": "Zuletzt gestartet",
+        "totalRunDurationSeconds": "Gesamte Spielzeit",
+        "launchCount": "Startanzahl",
+        "name": "Name",
+        "gameVersion": "Spielversion",
+        "card": "Kartenansicht",
+        "list": "Listenansicht",
+        "view": "Ansicht",
+        "install": "Installieren",
+        "searchHint": "Aliasse, Beschreibungen, Tags, Versionen oder Loader suchen",
+        "clearSearch": "Suche löschen"
+      }
     },
     "detail": {
       "overview": "Überblick",

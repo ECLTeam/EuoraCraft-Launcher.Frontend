@@ -1,83 +1,26 @@
 <template>
   <section class="version-panel">
-    <div class="panel-header">
-      <div class="header-left">
-        <h3 class="panel-title"><UiIcon name="cube" :size="16" />{{ pathName }}</h3>
-        <span v-if="versions.length" class="version-count-badge"
-          >{{ filteredVersions.length }}/{{ versions.length }}</span
-        >
-      </div>
-      <div class="header-right">
-        <button
-          class="toolbar-button"
-          :class="{ active: favoritesOnly }"
-          title="只看收藏"
-          @click="favoritesOnly = !favoritesOnly"
-        >
-          <UiIcon name="star" :size="14" />
-        </button>
-        <button
-          class="toolbar-button"
-          :class="{ active: pinnedOnly }"
-          title="只看置顶"
-          @click="pinnedOnly = !pinnedOnly"
-        >
-          <UiIcon name="pin" :size="14" />
-        </button>
-        <button
-          class="toolbar-button"
-          :class="{ active: showHidden }"
-          title="显示隐藏实例"
-          @click="showHidden = !showHidden"
-        >
-          <UiIcon :name="showHidden ? 'eye' : 'eye-off'" :size="14" />
-        </button>
-        <button class="toolbar-button" title="管理分类" @click="categoryManagerVisible = true">
-          <UiIcon name="tags" :size="14" />
-        </button>
-        <select v-model="categoryFilter" class="toolbar-select" title="分类筛选">
-          <option value="">全部分类</option>
-          <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-        </select>
-        <select v-model="sortKey" class="toolbar-select sort-select" title="排序方式" @change="persistDisplaySettings">
-          <option value="lastLaunchedAt">最近启动</option>
-          <option value="totalRunDurationSeconds">累计时长</option>
-          <option value="launchCount">启动次数</option>
-          <option value="name">名称</option>
-          <option value="gameVersion">游戏版本</option>
-        </select>
-        <button class="toolbar-button" title="切换排序方向" @click="toggleSortDirection">
-          <UiIcon :name="sortDirection === 'desc' ? 'sort-descending' : 'sort-ascending'" :size="14" />
-        </button>
-        <div class="view-switch">
-          <button :class="{ active: viewMode === 'card' }" title="卡片视图" @click="setViewMode('card')">
-            <UiIcon name="layout-grid" :size="14" />
-          </button>
-          <button :class="{ active: viewMode === 'list' }" title="列表视图" @click="setViewMode('list')">
-            <UiIcon name="list" :size="14" />
-          </button>
-        </div>
-        <button class="toolbar-button" :disabled="refreshLoading" title="刷新" @click="emit('refresh')">
-          <UiIcon name="refresh" :size="14" />
-        </button>
-        <button class="btn-install-version" @click="emit('install')">
-          <UiIcon name="download" :size="14" /><span class="btn-text">{{ t('versions.download.installNew') }}</span>
-        </button>
-        <div class="search-box">
-          <UiIcon name="search" :size="16" class="search-icon" />
-          <input
-            :value="searchQuery"
-            type="text"
-            placeholder="搜索别名、描述、标签、版本或加载器"
-            class="search-input"
-            @input="updateSearchQuery"
-          />
-          <button v-if="searchQuery" class="search-clear" type="button" @click="emit('update:searchQuery', '')">
-            <UiIcon name="close" :size="14" />
-          </button>
-        </div>
-      </div>
-    </div>
+    <InstanceListToolbar
+      v-model:favoritesOnly="favoritesOnly"
+      v-model:pinnedOnly="pinnedOnly"
+      v-model:showHidden="showHidden"
+      v-model:categoryId="categoryFilter"
+      :pathName="pathName"
+      :totalCount="versions.length"
+      :filteredCount="filteredVersions.length"
+      :categories="categories"
+      :refreshLoading="refreshLoading"
+      :searchQuery="searchQuery"
+      :viewMode="viewMode"
+      :sortKey="sortKey"
+      :sortDirection="sortDirection"
+      @update:searchQuery="emit('update:searchQuery', $event)"
+      @update:viewMode="setViewMode"
+      @sort="setSort"
+      @refresh="emit('refresh')"
+      @install="emit('install')"
+      @manageCategories="categoryManagerVisible = true"
+    />
 
     <div class="version-content">
       <div v-if="selectedPathIndex === -1" class="empty-state">
@@ -256,6 +199,7 @@ import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import InstanceCategoryManager from '@/components/instances/InstanceCategoryManager.vue'
 import InstanceIcon from '@/components/instances/InstanceIcon.vue'
+import InstanceListToolbar from '@/components/instances/InstanceListToolbar.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
@@ -448,10 +392,6 @@ function formatDate(value?: string | null): string {
   return formatDateUtil(value, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }, '从未启动')
 }
 
-function updateSearchQuery(event: Event) {
-  emit('update:searchQuery', (event.target as HTMLInputElement).value)
-}
-
 function coverStyle(version: ScannedVersion) {
   const cover = coverUrls.value[instanceKey(version)]
   if (!cover) return undefined
@@ -487,8 +427,9 @@ function setViewMode(mode: 'card' | 'list') {
   void persistDisplaySettings()
 }
 
-function toggleSortDirection() {
-  sortDirection.value = sortDirection.value === 'desc' ? 'asc' : 'desc'
+function setSort(key: InstanceSortKey, direction: 'asc' | 'desc') {
+  sortKey.value = key
+  sortDirection.value = direction
   void persistDisplaySettings()
 }
 

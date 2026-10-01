@@ -2,10 +2,13 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { NDropdown, type DropdownOption } from 'naive-ui'
 import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import UiIcon from '@/components/ui/Icon.vue'
 import { instanceProfileApi } from '@/features/instances/api/instanceProfileApi'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
 import InstalledInstanceList from './InstalledInstanceList.vue'
+import InstanceListToolbar from './InstanceListToolbar.vue'
 
 enableAutoUnmount(afterEach)
 
@@ -51,10 +54,12 @@ const versions: ScannedVersion[] = [
   },
 ]
 
-function mountVersionList(searchQuery = '', items = structuredClone(versions)) {
+function mountVersionList(searchQuery = '', items = structuredClone(versions), pinia = createPinia()) {
+  vi.spyOn(useSettingsStore(pinia), 'patchUi').mockResolvedValue(undefined)
   return mount(InstalledInstanceList, {
     global: {
-      plugins: [i18n, createPinia()],
+      plugins: [i18n, pinia],
+      components: { UiIcon },
     },
     props: {
       versions: items,
@@ -72,6 +77,12 @@ function mountVersionList(searchQuery = '', items = structuredClone(versions)) {
 
 describe('InstalledInstanceList', () => {
   beforeEach(() => vi.clearAllMocks())
+  it('顶部使用筛选和排序入口替代平铺控件', () => {
+    const wrapper = mountVersionList()
+    expect(wrapper.find('.filter-toggle').exists()).toBe(true)
+    expect(wrapper.find('.sort-toggle').exists()).toBe(true)
+    expect(wrapper.find('.toolbar-select').exists()).toBe(false)
+  })
   it('按版本名称过滤列表', async () => {
     const wrapper = mountVersionList('fabric')
     // 默认视图为列表；切到卡片视图以断言卡片数量按筛选收敛
@@ -135,8 +146,8 @@ describe('InstalledInstanceList', () => {
     const items = structuredClone(versions)
     const wrapper = mountVersionList('', items)
     for (const value of [true, false]) {
-      // 隐藏后行会退出筛选，仍通过已打开菜单所绑定的实例取消隐藏。
-      if (!value && field === 'hidden') await wrapper.get('[title="显示隐藏实例"]').trigger('click')
+      if (!value && field === 'hidden') wrapper.getComponent(InstanceListToolbar).vm.$emit('update:showHidden', true)
+      await flushPromises()
       await wrapper.get('.table-row [title="更多操作"]').trigger('click')
       wrapper.getComponent(NDropdown).vm.$emit('select', field)
       await flushPromises()
@@ -199,5 +210,54 @@ describe('InstalledInstanceList', () => {
     expect(row.find('.quick-launch-button').exists()).toBe(false)
     expect(row.find('[title="详情与设置"]').exists()).toBe(true)
     expect(row.find('[title="更多操作"]').exists()).toBe(true)
+  })
+
+  it('工具栏组合筛选保持交集，视图切换保留筛选状态', async () => {
+    const items = structuredClone(versions)
+    items[0]!.favorite = true
+    items[0]!.pinned = true
+    items[0]!.categoryId = 'modded'
+    const wrapper = mountVersionList('', items)
+    const toolbar = wrapper.getComponent(InstanceListToolbar)
+    toolbar.vm.$emit('update:favoritesOnly', true)
+    toolbar.vm.$emit('update:pinnedOnly', true)
+    toolbar.vm.$emit('update:categoryId', 'modded')
+    await flushPromises()
+    expect(wrapper.findAll('.table-row')).toHaveLength(1)
+    expect(toolbar.get('.filter-count').text()).toBe('3')
+    await wrapper.get('[title="卡片视图"]').trigger('click')
+    expect(wrapper.findAll('.instance-card')).toHaveLength(1)
+    expect(toolbar.get('.filter-count').text()).toBe('3')
+  })
+
+  it('排序方向更新顺序并与视图一同持久化', async () => {
+    const pinia = createPinia()
+    const wrapper = mountVersionList('', structuredClone(versions), pinia)
+    const toolbar = wrapper.getComponent(InstanceListToolbar)
+    const store = useSettingsStore(pinia)
+    const save = vi.spyOn(store, 'patchUi').mockResolvedValue(undefined)
+    toolbar.vm.$emit('sort', 'gameVersion', 'asc')
+    await flushPromises()
+    expect(wrapper.findAll('.instance-name').map((name) => name.text())).toEqual(['原版', '生存服'])
+    expect(save).toHaveBeenLastCalledWith({
+      instanceManager: { viewMode: 'list', sortKey: 'gameVersion', sortDirection: 'asc' },
+    })
+    toolbar.vm.$emit('sort', 'gameVersion', 'desc')
+    await flushPromises()
+    expect(wrapper.findAll('.instance-name').map((name) => name.text())).toEqual(['生存服', '原版'])
+  })
+
+  it('搜索、刷新、安装与分类管理继续接回父组件', async () => {
+    const wrapper = mountVersionList()
+    const toolbar = wrapper.getComponent(InstanceListToolbar)
+    toolbar.vm.$emit('update:searchQuery', 'fabric')
+    toolbar.vm.$emit('refresh')
+    toolbar.vm.$emit('install')
+    toolbar.vm.$emit('manageCategories')
+    await flushPromises()
+    expect(wrapper.emitted('update:searchQuery')).toEqual([['fabric']])
+    expect(wrapper.emitted('refresh')).toEqual([[]])
+    expect(wrapper.emitted('install')).toEqual([[]])
+    expect(wrapper.findComponent({ name: 'InstanceCategoryManager' }).props('visible')).toBe(true)
   })
 })

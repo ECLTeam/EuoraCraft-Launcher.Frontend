@@ -36,6 +36,7 @@ declare module 'vue' {
     InstanceDetailSettingsTab: typeof import('./src/components/instances/InstanceDetailSettingsTab.vue')['default']
     InstanceIcon: typeof import('./src/components/instances/InstanceIcon.vue')['default']
     InstanceInstallModal: typeof import('./src/components/instances/InstanceInstallModal.vue')['default']
+    InstanceListToolbar: typeof import('./src/components/instances/InstanceListToolbar.vue')['default']
     InstancePathSidebar: typeof import('./src/components/instances/InstancePathSidebar.vue')['default']
     InstanceResourcesTab: typeof import('./src/components/instances/InstanceResourcesTab.vue')['default']
     InstanceScreenshotsTab: typeof import('./src/components/instances/InstanceScreenshotsTab.vue')['default']

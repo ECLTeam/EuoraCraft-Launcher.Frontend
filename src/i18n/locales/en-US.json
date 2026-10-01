@@ -426,7 +426,31 @@
       "versionList": "Instance List",
       "protectedPath": "Default path cannot be deleted",
       "confirmDeletePath": "Are you sure you want to delete path \"{name}\"?",
-      "defaultPathTip": "Default path cannot change location but can change name"
+      "defaultPathTip": "Default path cannot change location but can change name",
+      "toolbar": {
+        "filter": "Filter",
+        "sort": "Sort",
+        "favoritesOnly": "Favorites only",
+        "pinnedOnly": "Pinned only",
+        "showHidden": "Show hidden instances",
+        "category": "Category",
+        "allCategories": "All categories",
+        "manageCategories": "Manage categories",
+        "clearFilters": "Clear filters",
+        "asc": "Ascending",
+        "desc": "Descending",
+        "lastLaunchedAt": "Last launched",
+        "totalRunDurationSeconds": "Total playtime",
+        "launchCount": "Launch count",
+        "name": "Name",
+        "gameVersion": "Game version",
+        "card": "Card view",
+        "list": "List view",
+        "view": "View",
+        "install": "Install",
+        "searchHint": "Search aliases, descriptions, tags, versions or loaders",
+        "clearSearch": "Clear search"
+      }
     },
     "detail": {
       "overview": "Overview",

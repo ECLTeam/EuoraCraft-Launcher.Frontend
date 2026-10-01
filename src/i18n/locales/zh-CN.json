@@ -426,7 +426,31 @@
       "versionList": "实例列表",
       "protectedPath": "默认路径不可删除",
       "confirmDeletePath": "确定要删除路径 \"{name}\" 吗？",
-      "defaultPathTip": "默认路径不能修改路径位置，但可以修改名称"
+      "defaultPathTip": "默认路径不能修改路径位置，但可以修改名称",
+      "toolbar": {
+        "filter": "筛选",
+        "sort": "排序",
+        "favoritesOnly": "只看收藏",
+        "pinnedOnly": "只看置顶",
+        "showHidden": "显示隐藏实例",
+        "category": "分类",
+        "allCategories": "全部分类",
+        "manageCategories": "管理分类",
+        "clearFilters": "清除筛选",
+        "asc": "升序",
+        "desc": "降序",
+        "lastLaunchedAt": "最近启动",
+        "totalRunDurationSeconds": "累计时长",
+        "launchCount": "启动次数",
+        "name": "名称",
+        "gameVersion": "游戏版本",
+        "card": "卡片视图",
+        "list": "列表视图",
+        "view": "视图",
+        "install": "安装",
+        "searchHint": "搜索别名、描述、标签、版本或加载器",
+        "clearSearch": "清除搜索"
+      }
     },
     "detail": {
       "overview": "总览",

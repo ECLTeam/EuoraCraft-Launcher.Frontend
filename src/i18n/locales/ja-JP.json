@@ -426,7 +426,31 @@
       "versionList": "インスタンス一覧",
       "protectedPath": "デフォルトパスは削除できません",
       "confirmDeletePath": "パス「{name}」を削除してもよろしいですか？",
-      "defaultPathTip": "デフォルトパスの場所は変更できませんが、名前は変更できます"
+      "defaultPathTip": "デフォルトパスの場所は変更できませんが、名前は変更できます",
+      "toolbar": {
+        "filter": "絞り込み",
+        "sort": "並び替え",
+        "favoritesOnly": "お気に入りのみ",
+        "pinnedOnly": "固定したもののみ",
+        "showHidden": "非表示のインスタンスを表示",
+        "category": "カテゴリ",
+        "allCategories": "すべてのカテゴリ",
+        "manageCategories": "カテゴリを管理",
+        "clearFilters": "絞り込みを解除",
+        "asc": "昇順",
+        "desc": "降順",
+        "lastLaunchedAt": "最終起動",
+        "totalRunDurationSeconds": "合計プレイ時間",
+        "launchCount": "起動回数",
+        "name": "名前",
+        "gameVersion": "ゲームバージョン",
+        "card": "カード表示",
+        "list": "リスト表示",
+        "view": "表示",
+        "install": "インストール",
+        "searchHint": "別名、説明、タグ、バージョン、ローダーを検索",
+        "clearSearch": "検索をクリア"
+      }
     },
     "detail": {
       "overview": "概要",

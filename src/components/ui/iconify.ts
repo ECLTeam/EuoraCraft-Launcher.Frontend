@@ -60,6 +60,7 @@ export const ICON_MAP: Record<string, string> = {
   'pin-filled': 'pin-filled',
   tags: 'tags',
   'eye-off': 'eye-off',
+  filter: 'filter',
   'filter-off': 'filter-off',
   'sort-ascending': 'sort-ascending',
   'sort-descending': 'sort-descending',

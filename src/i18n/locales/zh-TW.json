@@ -426,7 +426,31 @@
       "versionList": "實例列表",
       "protectedPath": "預設路徑不可刪除",
       "confirmDeletePath": "確定要刪除路徑 \"{name}\" 嗎？",
-      "defaultPathTip": "預設路徑不能修改路徑位置，但可以修改名稱"
+      "defaultPathTip": "預設路徑不能修改路徑位置，但可以修改名稱",
+      "toolbar": {
+        "filter": "篩選",
+        "sort": "排序",
+        "favoritesOnly": "只看收藏",
+        "pinnedOnly": "只看置頂",
+        "showHidden": "顯示隱藏實例",
+        "category": "分類",
+        "allCategories": "全部分類",
+        "manageCategories": "管理分類",
+        "clearFilters": "清除篩選",
+        "asc": "升冪",
+        "desc": "降冪",
+        "lastLaunchedAt": "最近啟動",
+        "totalRunDurationSeconds": "累計時長",
+        "launchCount": "啟動次數",
+        "name": "名稱",
+        "gameVersion": "遊戲版本",
+        "card": "卡片檢視",
+        "list": "清單檢視",
+        "view": "檢視",
+        "install": "安裝",
+        "searchHint": "搜尋別名、描述、標籤、版本或載入器",
+        "clearSearch": "清除搜尋"
+      }
     },
     "detail": {
       "overview": "總覽",

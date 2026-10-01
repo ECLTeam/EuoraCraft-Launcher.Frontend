@@ -23,6 +23,7 @@ describe('图标映射', () => {
       'pin',
       'tags',
       'eye-off',
+      'filter',
       'filter-off',
       'sort-ascending',
       'sort-descending',
