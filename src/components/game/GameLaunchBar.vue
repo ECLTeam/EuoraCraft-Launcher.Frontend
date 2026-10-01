@@ -12,7 +12,7 @@
           <span class="split-main-icon"><UiIcon name="play" :size="16" /></span>
           <span class="launch-main-content">
             <span class="launch-main-label">{{ launching ? t('game.launching') : t('game.launch') }}</span>
-            <span class="launch-version">{{ selectedVersion }}</span>
+            <span class="launch-version" :title="selectedInstanceName">{{ selectedInstanceName }}</span>
           </span>
         </button>
         <span class="split-divider"></span>
@@ -154,6 +154,11 @@ const instanceStore = useInstanceStore()
 const settingsStore = useSettingsStore()
 const isRecentInstancesOpen = ref(false)
 
+const selectedInstanceName = computed(() => {
+  const matched = matchedInstance(props.selectedVersion, props.currentGamePath)
+  return matched ? instanceDisplayName(matched) : props.selectedVersion
+})
+
 const pinCapReached = computed(() => props.recentInstances.filter((item) => item.pinned).length >= MAX_PINNED_ITEMS)
 
 const getPathDisplayName = (gamePath: string): string => {
@@ -161,14 +166,14 @@ const getPathDisplayName = (gamePath: string): string => {
   return parts[parts.length - 1] || gamePath
 }
 
-function matchedInstance(item: RecentInstance) {
+function matchedInstance(versionId: string, gamePath: string) {
   return instanceStore.scannedVersions.find(
-    (v) => v.versionId === item.versionId && normalizeGamePath(v.path) === normalizeGamePath(item.gamePath)
+    (v) => v.versionId === versionId && normalizeGamePath(v.path) === normalizeGamePath(gamePath)
   )
 }
 
 function instanceNameOf(item: RecentInstance): string {
-  const matched = matchedInstance(item)
+  const matched = matchedInstance(item.versionId, item.gamePath)
   return matched ? instanceDisplayName(matched) : item.versionName
 }
 

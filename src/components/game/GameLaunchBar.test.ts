@@ -4,13 +4,20 @@ import { createPinia } from 'pinia'
 import { describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
 import { MAX_PINNED_ITEMS, type RecentInstance } from '@/composables/useRecentInstances'
+import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { i18n } from '@/i18n'
+import type { ScannedVersion } from '@/types/instances'
 import GameLaunchBar from './GameLaunchBar.vue'
 
-function mountLaunchBar(overrides: Partial<InstanceType<typeof GameLaunchBar>['$props']> = {}) {
+function mountLaunchBar(
+  overrides: Partial<InstanceType<typeof GameLaunchBar>['$props']> = {},
+  scannedVersions: ScannedVersion[] = []
+) {
+  const pinia = createPinia()
+  useInstanceStore(pinia).scannedVersions = scannedVersions
   return mount(GameLaunchBar, {
     global: {
-      plugins: [i18n, createPinia()],
+      plugins: [i18n, pinia],
     },
     props: {
       versionsCount: 1,
@@ -22,6 +29,25 @@ function mountLaunchBar(overrides: Partial<InstanceType<typeof GameLaunchBar>['$
       ...overrides,
     },
   })
+}
+
+function makeVersion(patch: Partial<ScannedVersion> = {}): ScannedVersion {
+  return {
+    id: '1.21.1',
+    versionId: '1.21.1',
+    versionType: 'release',
+    path: 'C:/Games/.minecraft',
+    displayName: '默认实例名称',
+    primaryLoader: 'Vanilla',
+    vanillaName: '1.21.1',
+    hasForge: false,
+    hasNeoForge: false,
+    hasFabric: false,
+    hasQuilt: false,
+    isBroken: false,
+    jsonPath: 'C:/Games/.minecraft/versions/1.21.1/1.21.1.json',
+    ...patch,
+  }
 }
 
 function makeRecent(count: number, pinnedCount = 0): RecentInstance[] {
@@ -41,6 +67,72 @@ async function openRecentPopover(wrapper: ReturnType<typeof mountLaunchBar>) {
 }
 
 describe('GameLaunchBar', () => {
+  it.each([
+    { alias: '朋友生存服', displayName: '默认实例名称', expected: '朋友生存服' },
+    { alias: '', displayName: '默认实例名称', expected: '默认实例名称' },
+    { alias: '', displayName: '', expected: '1.21.1' },
+  ])('启动按钮按统一优先级显示名称：$expected', ({ alias, displayName, expected }) => {
+    const wrapper = mountLaunchBar({ currentGamePath: 'C:/Games/.minecraft' }, [makeVersion({ alias, displayName })])
+
+    expect(wrapper.get('.launch-version').text()).toBe(expected)
+  })
+
+  it('相同版本标识按当前游戏目录匹配，不显示其他目录的别名', () => {
+    const wrapper = mountLaunchBar({ currentGamePath: 'D:/Games/.minecraft' }, [
+      makeVersion({ alias: '另一个目录的实例' }),
+      makeVersion({ path: 'D:/Games/.minecraft', alias: '当前目录的实例' }),
+    ])
+
+    expect(wrapper.get('.launch-version').text()).toBe('当前目录的实例')
+  })
+
+  it.each(['c:/games/.minecraft', 'C:\\Games\\.minecraft', 'C:/Games/.minecraft/'])(
+    '游戏目录规范化后仍能找到当前实例：%s',
+    (currentGamePath) => {
+      const wrapper = mountLaunchBar({ currentGamePath }, [makeVersion({ alias: '朋友生存服' })])
+
+      expect(wrapper.get('.launch-version').text()).toBe('朋友生存服')
+    }
+  )
+
+  it('扫描未就绪或仅有其他目录的同标识实例时回退到版本标识', () => {
+    const wrapper = mountLaunchBar({ currentGamePath: 'D:/Games/.minecraft' }, [makeVersion({ alias: '其他实例' })])
+
+    expect(wrapper.get('.launch-version').text()).toBe('1.21.1')
+  })
+
+  it('扫描完成、别名更新和目录切换后名称响应式更新', async () => {
+    const wrapper = mountLaunchBar({ currentGamePath: 'C:/Games/.minecraft' })
+    const store = useInstanceStore()
+    expect(wrapper.get('.launch-version').text()).toBe('1.21.1')
+
+    store.scannedVersions = [
+      makeVersion({ alias: '旧名称' }),
+      makeVersion({ path: 'D:/Games/.minecraft', alias: '另一实例' }),
+    ]
+    await nextTick()
+    expect(wrapper.get('.launch-version').text()).toBe('旧名称')
+
+    store.scannedVersions[0]!.alias = '新名称'
+    await nextTick()
+    expect(wrapper.get('.launch-version').text()).toBe('新名称')
+
+    await wrapper.setProps({ currentGamePath: 'D:/Games/.minecraft' })
+    expect(wrapper.get('.launch-version').text()).toBe('另一实例')
+    await wrapper.setProps({ selectedVersion: '1.20.1' })
+    expect(wrapper.get('.launch-version').text()).toBe('1.20.1')
+  })
+
+  it('长别名保留完整提示，展示名称不改变启动使用的版本标识', async () => {
+    const alias = '朋友生存服：机械动力与建筑探索长期整合实例'
+    const wrapper = mountLaunchBar({ currentGamePath: 'C:/Games/.minecraft' }, [makeVersion({ alias })])
+
+    expect(wrapper.get('.launch-version').attributes('title')).toBe(alias)
+    expect(wrapper.props('selectedVersion')).toBe('1.21.1')
+    await wrapper.get('.split-main').trigger('click')
+    expect(wrapper.emitted('launch')).toEqual([[]])
+  })
+
   it('渲染真实插件插槽宿主而不是未解析组件标签', () => {
     const wrapper = mountLaunchBar()
 
