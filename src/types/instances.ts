@@ -230,6 +230,7 @@ export interface GameResource {
   type: GameResourceType
   path: string
   name: string
+  iconData?: string | null
   version?: string
   loader?: string
   enabled: boolean

@@ -33,6 +33,7 @@
           <template #icon><UiIcon name="file-download" :size="16" /></template>
         </NButton>
         <NButton
+          v-if="resourceType !== 'resourcepack'"
           quaternary
           circle
           size="small"
@@ -51,8 +52,22 @@
     </header>
     <UiLoading :show="loading" mode="overlay">
       <div v-if="filtered.length" class="resource-table">
-        <div v-for="item in filtered" :key="item.id" class="resource-row">
-          <NCheckbox :checked="selected.has(item.id)" @update:checked="toggleSelected(item.id)" />
+        <div
+          v-for="item in filtered"
+          :key="item.id"
+          class="resource-row"
+          :class="{ 'resource-row-pack': resourceType === 'resourcepack' }"
+        >
+          <div v-if="resourceType === 'resourcepack'" class="resource-icon">
+            <img
+              v-if="item.iconData && !failedIcons.has(item.id)"
+              :src="item.iconData"
+              alt=""
+              @error="failedIcons.add(item.id)"
+            />
+            <UiIcon v-else name="package" :size="24" />
+          </div>
+          <NCheckbox v-else :checked="selected.has(item.id)" @update:checked="toggleSelected(item.id)" />
           <div class="resource-copy">
             <strong>{{ item.name || item.id }}</strong
             ><small>{{ item.id }} · {{ item.version || '本地资源' }}</small>
@@ -142,6 +157,7 @@ const { t } = useI18n()
 const resourceType = ref<GameResourceType>(props.initialType || 'mod')
 const worldId = ref<string | null>(null)
 const resources = ref<GameResource[]>([])
+const failedIcons = ref(new Set<string>())
 const selected = ref(new Set<string>())
 const query = ref('')
 const loading = ref(false)
@@ -184,6 +200,7 @@ async function load() {
   loading.value = true
   try {
     resources.value = await instanceWorkspaceApi.resources(target.value, resourceType.value, worldId.value || undefined)
+    failedIcons.value = new Set()
   } catch (error) {
     message.error(error instanceof Error ? error.message : '读取资源失败')
   } finally {
@@ -298,7 +315,10 @@ async function exportManifest() {
   )
   message.success('资源清单已导出')
 }
-watch([resourceType, worldId], load)
+watch([resourceType, worldId], () => {
+  selected.value = new Set()
+  void load()
+})
 
 const confirmVisible = ref(false)
 const confirmTitle = ref('')
@@ -413,6 +433,40 @@ onBeforeUnmount(() => {
 
 .resource-row:last-child {
   border-bottom: 0;
+}
+
+.resource-row-pack {
+  grid-template-columns: 40px minmax(0, 1fr) 110px 60px auto;
+}
+
+.resource-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: var(--ecl-radius-control);
+  background: var(--ecl-hover);
+  color: var(--ecl-text-secondary);
+}
+
+.resource-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .resource-row-pack {
+    grid-template-columns: 40px minmax(0, 1fr) 40px auto;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .resource-row-pack .resource-source {
+    display: none;
+  }
 }
 
 .resource-row:hover {
