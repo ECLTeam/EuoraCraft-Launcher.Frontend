@@ -84,34 +84,6 @@
   white-space: nowrap;
 }
 
-.piv-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 24px 12px;
-  text-align: center;
-}
-
-.piv-empty-icon {
-  opacity: 0.5;
-}
-
-.piv-empty-title {
-  margin: 0;
-  color: var(--ecl-text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.piv-empty-desc {
-  margin: 0;
-  color: var(--ecl-text-tertiary);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
 /* ── 右列：输出 + 输入 ─────────────────────────── */
 .piv-main {
   display: flex;

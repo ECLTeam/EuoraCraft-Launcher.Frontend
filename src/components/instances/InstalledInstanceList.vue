@@ -23,23 +23,18 @@
     />
 
     <div class="version-content">
-      <div v-if="selectedPathIndex === -1" class="empty-state">
-        <UiIcon name="folder" :size="48" class="empty-icon" />
-        <p class="empty-text">{{ t('versions.manage.selectPathHint') }}</p>
+      <UiEmptyState v-if="selectedPathIndex === -1" icon="folder" :title="t('versions.manage.selectPathHint')">
         <button v-if="pathCount === 0" class="btn-primary" @click="emit('addPath')">
           <UiIcon name="add" :size="16" />{{ t('common.add') }}
         </button>
-      </div>
+      </UiEmptyState>
       <UiLoading v-else-if="loading" :label="t('versions.manage.scanning')" />
-      <div v-else-if="versions.length === 0" class="empty-state">
-        <UiIcon name="cube" :size="48" class="empty-icon" />
-        <p class="empty-text">{{ t('versions.manage.noVersionsFound') }}</p>
-        <p class="empty-hint">{{ pathLocation }}</p>
-      </div>
-      <div v-else-if="filteredVersions.length === 0" class="empty-state">
-        <UiIcon name="filter-off" :size="42" class="empty-icon" />
-        <p class="empty-text">没有符合当前筛选条件的实例</p>
-      </div>
+      <UiEmptyState
+        v-else-if="versions.length === 0"
+        :title="t('versions.manage.noVersionsFound')"
+        :description="pathLocation"
+      />
+      <UiEmptyState v-else-if="filteredVersions.length === 0" icon="filter-off" title="没有符合当前筛选条件的实例" />
 
       <div v-else-if="viewMode === 'card'" class="instance-grid">
         <article
@@ -201,6 +196,7 @@ import InstanceCategoryManager from '@/components/instances/InstanceCategoryMana
 import InstanceIcon from '@/components/instances/InstanceIcon.vue'
 import InstanceListToolbar from '@/components/instances/InstanceListToolbar.vue'
 import UiButton from '@/components/ui/Button.vue'
+import UiEmptyState from '@/components/ui/EmptyState.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { getLoaderClass, getLoaderName, getVersionLabelKey } from '@/config/version'
@@ -210,7 +206,6 @@ import { filterAndSortInstances, instanceDisplayName } from '@/features/instance
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { InstanceCategory, InstanceSortKey, ScannedVersion } from '@/types/instances'
 import { formatDate as formatDateUtil } from '@/utils/format'
-
 const props = defineProps<{
   versions: ScannedVersion[]
   selectedPathIndex: number
