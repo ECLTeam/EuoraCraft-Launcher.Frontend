@@ -57,7 +57,6 @@
   gap: var(--s-sm);
   border-radius: inherit;
   background: var(--ui-loading-overlay);
-  backdrop-filter: blur(1px);
   pointer-events: none;
 }
 

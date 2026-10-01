@@ -8,7 +8,6 @@
   background: var(--glass-bg-sidebar);
   backdrop-filter: blur(18px);
   border-right: 1px solid var(--glass-border);
-  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.35);
   transition:
     width var(--duration-fast) var(--ease-emphasized),
     min-width var(--duration-fast) var(--ease-emphasized);
