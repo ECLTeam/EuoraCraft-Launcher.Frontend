@@ -58,8 +58,8 @@ body:has(#app[data-window-chrome='custom']) {
   inset: 0;
   z-index: 0;
   background: var(--bg-overlay-tint);
-  backdrop-filter: blur(var(--bg-blur, 0px));
-  -webkit-backdrop-filter: blur(var(--bg-blur, 0px));
+  -webkit-backdrop-filter: var(--glass-backdrop, none);
+  backdrop-filter: var(--glass-backdrop, none);
   pointer-events: none;
 }
 

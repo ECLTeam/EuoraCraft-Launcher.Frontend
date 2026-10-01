@@ -112,22 +112,20 @@
   display: none;
 }
 
-/* 背景模糊层可开关：关闭时取消背景与内容区的毛玻璃模糊 */
-[data-aurora-blur='0'] .app-background,
+/* 额外毛玻璃层开关不覆盖背景媒体自身的模糊滤镜。 */
 [data-aurora-blur='0'] .app-background-overlay {
-  filter: none;
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 [data-aurora-blur='0'][data-ui-skin='folia'] .main-content {
-  backdrop-filter: none;
   -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 [data-ui-skin='folia'] .main-content {
-  backdrop-filter: blur(var(--folia-glass-blur));
   -webkit-backdrop-filter: blur(var(--folia-glass-blur));
+  backdrop-filter: blur(var(--folia-glass-blur));
 }
 
 [data-ui-skin='folia'] .sidebar,

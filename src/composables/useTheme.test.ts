@@ -4,6 +4,28 @@ import { useTheme } from '@/composables/useTheme'
 import { LIGHT_THEME_COLORS } from '@/config/theme'
 
 describe('useTheme 语义色', () => {
+  it('关闭额外毛玻璃层后背景模糊仍可调整，切换主题不覆盖数值', () => {
+    setActivePinia(createPinia())
+    const theme = useTheme()
+    const root = document.documentElement
+
+    theme.setThemeId('folia', false)
+    theme.setBlurLayerEnabled(false)
+    theme.setBlurAmount(12, false)
+    expect(root.dataset.auroraBlur).toBe('0')
+    expect(root.style.getPropertyValue('--bg-blur')).toBe('12px')
+
+    theme.setThemeId('classic', false)
+    expect(theme.blurAmount.value).toBe(12)
+    expect(root.dataset.auroraBlur).toBe('0')
+    expect(root.style.getPropertyValue('--bg-blur')).toBe('12px')
+
+    theme.setBlurLayerEnabled(true)
+    expect(root.style.getPropertyValue('--bg-blur')).toBe('12px')
+    theme.setBlurAmount(0, false)
+    expect(root.style.getPropertyValue('--bg-blur')).toBe('0px')
+  })
+
   it('字体覆盖只作用于对应区域，清空后立即移除旧变量', () => {
     setActivePinia(createPinia())
     const theme = useTheme()
