@@ -1,43 +1,50 @@
 <template>
   <section class="screens-panel">
     <header class="screens-toolbar">
-      <NInput v-model:value="query" clearable placeholder="搜索截图文件名" /><NSelect
-        v-model:value="direction"
-        :options="sortOptions"
-        class="sort-select"
-      /><NButton :loading="loading" @click="load">刷新</NButton><NButton @click="openFolder">打开截图目录</NButton>
+      <NInput v-model:value="query" clearable size="small" placeholder="搜索截图文件名" />
+      <NSelect v-model:value="direction" :options="sortOptions" size="small" class="sort-select" />
+      <div class="toolbar-actions">
+        <NButton quaternary circle size="small" :loading="loading" title="刷新" aria-label="刷新" @click="load">
+          <template #icon><UiIcon name="refresh" :size="16" /></template>
+        </NButton>
+        <NButton quaternary circle size="small" title="打开截图目录" aria-label="打开截图目录" @click="openFolder">
+          <template #icon><UiIcon name="folder-open" :size="16" /></template>
+        </NButton>
+      </div>
     </header>
     <UiLoading :show="loading" mode="overlay">
-      <section v-for="group in groups" :key="group.date" class="shot-group">
-        <h3>{{ group.date }}</h3>
-        <div class="shot-grid">
-          <article v-for="shot in group.items" :key="shot.id" class="shot-card">
-            <img :src="shot.thumbnailUrl" :alt="shot.name" loading="lazy" />
-            <div>
-              <strong>{{ shot.name }}</strong
-              ><small>{{ shot.width }}×{{ shot.height }} · {{ formatSize(shot.size) }}</small>
-            </div>
-            <div class="shot-actions">
-              <NButton quaternary circle size="tiny" title="复制" @click="copy(shot)">
-                <template #icon><UiIcon name="copy" :size="14" /></template>
-              </NButton>
-              <NButton quaternary circle size="tiny" title="另存为" @click="saveAs(shot)">
-                <template #icon><UiIcon name="file-download" :size="14" /></template>
-              </NButton>
-              <NButton quaternary circle size="tiny" title="设为封面" @click="cover(shot)">
-                <template #icon><UiIcon name="photo" :size="14" /></template>
-              </NButton>
-              <NButton quaternary circle size="tiny" title="设为背景" @click="background(shot)">
-                <template #icon><UiIcon name="layout-grid" :size="14" /></template>
-              </NButton>
-              <NButton quaternary circle size="tiny" type="error" title="删除" @click="remove(shot)">
-                <template #icon><UiIcon name="trash" :size="14" /></template>
-              </NButton>
-            </div>
-          </article>
-        </div>
-      </section>
-      <NEmpty v-if="!groups.length" description="还没有截图" />
+      <div class="screens-content">
+        <section v-for="group in groups" :key="group.date" class="shot-group">
+          <h3>{{ group.date }}</h3>
+          <div class="shot-grid">
+            <article v-for="shot in group.items" :key="shot.id" class="shot-card">
+              <img :src="shot.thumbnailUrl" :alt="shot.name" loading="lazy" />
+              <div>
+                <strong>{{ shot.name }}</strong
+                ><small>{{ shot.width }}×{{ shot.height }} · {{ formatSize(shot.size) }}</small>
+              </div>
+              <div class="shot-actions">
+                <NButton quaternary circle size="tiny" title="复制" @click="copy(shot)">
+                  <template #icon><UiIcon name="copy" :size="14" /></template>
+                </NButton>
+                <NButton quaternary circle size="tiny" title="另存为" @click="saveAs(shot)">
+                  <template #icon><UiIcon name="file-download" :size="14" /></template>
+                </NButton>
+                <NButton quaternary circle size="tiny" title="设为封面" @click="cover(shot)">
+                  <template #icon><UiIcon name="photo" :size="14" /></template>
+                </NButton>
+                <NButton quaternary circle size="tiny" title="设为背景" @click="background(shot)">
+                  <template #icon><UiIcon name="layout-grid" :size="14" /></template>
+                </NButton>
+                <NButton quaternary circle size="tiny" type="error" title="删除" @click="remove(shot)">
+                  <template #icon><UiIcon name="trash" :size="14" /></template>
+                </NButton>
+              </div>
+            </article>
+          </div>
+        </section>
+        <NEmpty v-if="!groups.length" description="还没有截图" />
+      </div>
     </UiLoading>
     <ConfirmDialog
       v-model:visible="confirmVisible"
@@ -168,10 +175,8 @@ onMounted(load)
 .screens-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   min-height: 420px;
   overflow: hidden;
-  padding: 12px;
   background: var(--ecl-surface);
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-card);
@@ -179,10 +184,29 @@ onMounted(load)
 }
 .screens-toolbar {
   display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ecl-border);
 }
 .screens-toolbar > .n-input {
   flex: 1;
+  min-width: 180px;
+}
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+.screens-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
 }
 .sort-select {
   width: 130px;

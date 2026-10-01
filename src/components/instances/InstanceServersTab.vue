@@ -1,62 +1,72 @@
 <template>
   <section class="servers-panel">
     <header class="servers-toolbar">
-      <NInput v-model:value="query" clearable placeholder="搜索服务器名称、地址或 MOTD" />
+      <NInput v-model:value="query" clearable size="small" placeholder="搜索服务器名称、地址或 MOTD" />
       <div class="toolbar-actions">
-        <NButton quaternary circle :loading="loading" title="刷新列表" @click="load">
+        <NButton quaternary circle size="small" :loading="loading" title="刷新列表" aria-label="刷新列表" @click="load">
           <template #icon><UiIcon name="refresh" :size="16" /></template>
         </NButton>
-        <NButton quaternary circle :loading="statusLoading" title="刷新状态" @click="refreshStatus">
+        <NButton
+          quaternary
+          circle
+          size="small"
+          :loading="statusLoading"
+          title="刷新状态"
+          aria-label="刷新状态"
+          @click="refreshStatus"
+        >
           <template #icon><UiIcon name="wifi" :size="16" /></template>
         </NButton>
-        <NButton type="primary" class="toolbar-primary-btn" @click="edit()">
+        <NButton size="small" type="primary" class="toolbar-primary-btn" aria-label="添加服务器" @click="edit()">
           <template #icon><UiIcon name="plus" :size="13" /></template>
           添加服务器
         </NButton>
       </div>
     </header>
     <UiLoading :show="loading" mode="overlay">
-      <div v-if="filtered.length" class="server-list">
-        <article v-for="server in filtered" :key="server.id" class="server-row">
-          <div class="server-row-main">
-            <div :class="['status-dot', statusClass(server)]" :title="statusLabel(server)" />
-            <div class="server-info">
-              <div class="server-name-row">
-                <span class="server-name">{{ server.name }}</span>
-                <span v-if="server.favorite" class="server-fav">★</span>
-                <span class="server-address">{{ server.address }}</span>
-              </div>
-              <p class="server-motd">{{ motdText(server) }}</p>
-              <div v-if="statuses[server.address]?.online" class="server-badges">
-                <span class="server-badge players">
-                  <UiIcon name="users" :size="12" />
-                  {{ statuses[server.address]?.playersOnline }}/{{ statuses[server.address]?.playersMax }}
-                </span>
-                <span :class="['server-badge', 'latency', latencyClass(server)]">
-                  <UiIcon name="bolt" :size="12" />
-                  {{ statuses[server.address]?.latency }} ms
-                </span>
-                <span v-if="statuses[server.address]?.version" class="server-badge version">
-                  {{ statuses[server.address]?.version }}
-                </span>
+      <div class="servers-content">
+        <div v-if="filtered.length" class="server-list">
+          <article v-for="server in filtered" :key="server.id" class="server-row">
+            <div class="server-row-main">
+              <div :class="['status-dot', statusClass(server)]" :title="statusLabel(server)" />
+              <div class="server-info">
+                <div class="server-name-row">
+                  <span class="server-name">{{ server.name }}</span>
+                  <span v-if="server.favorite" class="server-fav">★</span>
+                  <span class="server-address">{{ server.address }}</span>
+                </div>
+                <p class="server-motd">{{ motdText(server) }}</p>
+                <div v-if="statuses[server.address]?.online" class="server-badges">
+                  <span class="server-badge players">
+                    <UiIcon name="users" :size="12" />
+                    {{ statuses[server.address]?.playersOnline }}/{{ statuses[server.address]?.playersMax }}
+                  </span>
+                  <span :class="['server-badge', 'latency', latencyClass(server)]">
+                    <UiIcon name="bolt" :size="12" />
+                    {{ statuses[server.address]?.latency }} ms
+                  </span>
+                  <span v-if="statuses[server.address]?.version" class="server-badge version">
+                    {{ statuses[server.address]?.version }}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="server-actions">
-            <NButton size="small" type="primary" @click="connect(server)">启动并连接</NButton>
-            <NButton quaternary circle size="small" title="复制地址" @click="copyAddress(server)">
-              <template #icon><UiIcon name="copy" :size="15" /></template>
-            </NButton>
-            <NButton quaternary circle size="small" title="编辑" @click="edit(server)">
-              <template #icon><UiIcon name="settings" :size="15" /></template>
-            </NButton>
-            <NButton quaternary circle size="small" type="error" title="删除" @click="remove(server)">
-              <template #icon><UiIcon name="trash" :size="15" /></template>
-            </NButton>
-          </div>
-        </article>
+            <div class="server-actions">
+              <NButton size="small" type="primary" @click="connect(server)">启动并连接</NButton>
+              <NButton quaternary circle size="small" title="复制地址" @click="copyAddress(server)">
+                <template #icon><UiIcon name="copy" :size="15" /></template>
+              </NButton>
+              <NButton quaternary circle size="small" title="编辑" @click="edit(server)">
+                <template #icon><UiIcon name="settings" :size="15" /></template>
+              </NButton>
+              <NButton quaternary circle size="small" type="error" title="删除" @click="remove(server)">
+                <template #icon><UiIcon name="trash" :size="15" /></template>
+              </NButton>
+            </div>
+          </article>
+        </div>
+        <NEmpty v-else description="服务器列表为空" />
       </div>
-      <NEmpty v-else description="服务器列表为空" />
     </UiLoading>
     <ConfirmDialog
       v-model:visible="confirmVisible"
@@ -230,10 +240,8 @@ async function handleConfirm() {
 .servers-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   min-height: 420px;
   overflow: hidden;
-  padding: 12px;
   background: var(--ecl-surface);
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-card);
@@ -241,11 +249,16 @@ async function handleConfirm() {
 }
 .servers-toolbar {
   display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ecl-border);
 }
 .servers-toolbar > .n-input {
   flex: 1;
+  min-width: 180px;
 }
 .toolbar-actions {
   display: flex;
@@ -255,7 +268,10 @@ async function handleConfirm() {
   margin-left: auto;
 }
 .toolbar-primary-btn {
-  margin-left: 4px;
+  margin-left: 12px;
+}
+.servers-content {
+  padding: 12px;
 }
 .server-list {
   display: grid;
