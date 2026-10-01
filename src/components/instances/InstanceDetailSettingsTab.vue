@@ -32,12 +32,12 @@
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.memoryAllocation') }}</div>
-        <SettingRow :label="t('versions.detail.customMemory')" :description="t('versions.detail.customMemoryDesc')">
-          <NSwitch v-model:value="versionSettings.customMemory" />
+        <SettingRow :label="t('versions.detail.memoryAllocation')" :description="inheritedDescription('memory_auto')">
+          <NSelect v-model:value="versionSettings.memoryMode" :options="runtimeModeOptions" />
         </SettingRow>
 
         <div
-          v-if="versionSettings.customMemory"
+          v-if="versionSettings.memoryMode === 'manual'"
           class="memory-manual-section"
           :style="{ '--memory-slider-progress': sliderValuePosition + '%' }"
         >
@@ -116,30 +116,20 @@
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.javaRuntime') }}</div>
-        <SettingRow :label="t('versions.detail.customJava')" :description="t('versions.detail.customJavaDesc')">
-          <NSwitch v-model:value="versionSettings.customJava" />
+        <SettingRow :label="t('versions.detail.javaRuntime')" :description="inheritedDescription('java_auto')">
+          <NSelect v-model:value="versionSettings.javaMode" :options="runtimeModeOptions" />
         </SettingRow>
-        <SettingRow v-if="versionSettings.customJava" :label="t('versions.detail.javaPath')">
-          <div class="java-selector">
-            <NSelect
-              class="java-path-select"
-              :value="versionSettings.javaPath || null"
-              :options="javaOptions"
-              :placeholder="t('versions.detail.javaPathPlaceholder')"
-              filterable
-              :loading="javaScanning"
-              @update:value="handleJavaPathChange"
-            />
-            <NButton size="small" :loading="javaSelecting" @click="selectJava">
-              {{ t('common.browse') }}
-            </NButton>
-          </div>
+        <SettingRow v-if="versionSettings.javaMode === 'manual'" :label="t('settings.javaPath')">
+          <JavaRuntimeSelector v-model:value="versionSettings.javaPath" />
         </SettingRow>
       </div>
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.jvmArgs') }}</div>
-        <SettingRow :label="t('versions.detail.customJvmArgs')" :description="t('versions.detail.customJvmArgsDesc')">
+        <SettingRow
+          :label="t('versions.detail.customJvmArgs')"
+          :description="inheritedDescription('jvm_args') + ' · ' + t('versions.detail.customJvmArgsDesc')"
+        >
           <NInput
             v-model:value="versionSettings.jvmArgs"
             class="argument-input"
@@ -152,7 +142,10 @@
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.gameArgs') }}</div>
-        <SettingRow :label="t('versions.detail.customGameArgs')" :description="t('versions.detail.customGameArgsDesc')">
+        <SettingRow
+          :label="t('versions.detail.customGameArgs')"
+          :description="inheritedDescription('game_args_tail') + ' · ' + t('versions.detail.customGameArgsDesc')"
+        >
           <NInput
             v-model:value="versionSettings.gameArgs"
             class="argument-input"
@@ -164,49 +157,156 @@
       </div>
 
       <div class="settings-subgroup">
+        <SettingRow
+          v-for="field in booleanFields"
+          :key="field.key"
+          :label="t(field.label)"
+          :description="inheritedDescription(field.global)"
+        >
+          <NSelect
+            :value="
+              versionSettings[field.key] === null ? 'inherit' : versionSettings[field.key] ? 'enabled' : 'disabled'
+            "
+            :options="isolationModeOptions"
+            @update:value="versionSettings[field.key] = $event === 'inherit' ? null : $event === 'enabled'"
+          />
+        </SettingRow>
+        <SettingRow :label="t('settings.processPriority')" :description="inheritedDescription('process_priority')">
+          <NSelect
+            :value="versionSettings.processPriority || 'inherit'"
+            :options="priorityOptions"
+            @update:value="versionSettings.processPriority = $event === 'inherit' ? null : $event"
+          />
+        </SettingRow>
+        <SettingRow
+          :label="t('settings.windowSize')"
+          :description="inheritedDescription('game_width') + ' × ' + (settingsStore.game.game_height || 480)"
+        >
+          <div class="instance-window-controls">
+            <NInputNumber
+              v-model:value="versionSettings.width"
+              :min="320"
+              :max="16384"
+              :placeholder="t('instanceSettings.inherit')"
+            />
+            <span>×</span>
+            <NInputNumber
+              v-model:value="versionSettings.height"
+              :min="240"
+              :max="16384"
+              :placeholder="t('instanceSettings.inherit')"
+            />
+          </div>
+        </SettingRow>
+        <SettingRow v-if="isWindows" :label="t('settings.renderer')" :description="inheritedDescription('renderer')">
+          <NSelect
+            :value="versionSettings.renderer || 'inherit'"
+            :options="rendererOptions"
+            @update:value="versionSettings.renderer = $event === 'inherit' ? null : $event"
+          />
+        </SettingRow>
+      </div>
+      <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.advancedOptions') }}</div>
-        <SettingRow :label="t('settings.wrapperCommand')" :description="t('versions.detail.inheritGlobalDesc')">
+        <SettingRow :label="t('settings.preLaunchCommand')" :description="inheritedDescription('pre_launch_command')">
+          <div class="instance-command-controls">
+            <NSelect
+              :value="versionSettings.preLaunchCommand === null ? 'inherit' : 'custom'"
+              :options="commandModeOptions"
+              @update:value="versionSettings.preLaunchCommand = $event === 'inherit' ? null : ''"
+            />
+            <NInput
+              v-if="versionSettings.preLaunchCommand !== null"
+              v-model:value="versionSettings.preLaunchCommand"
+              type="textarea"
+            />
+          </div>
+        </SettingRow>
+        <SettingRow :label="t('settings.wrapperCommand')" :description="inheritedDescription('wrapper_command')">
+          <NSelect
+            :value="versionSettings.commandOverrides.includes('wrapperCommand') ? 'custom' : 'inherit'"
+            :options="commandModeOptions"
+            @update:value="setCommandOverride('wrapperCommand', $event === 'custom')"
+          />
           <NInput
             v-model:value="versionSettings.wrapperCommand"
+            :disabled="!versionSettings.commandOverrides.includes('wrapperCommand')"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.wrapperCommandPlaceholder')"
           />
         </SettingRow>
-        <SettingRow :label="t('settings.postExitCommand')" :description="t('versions.detail.inheritGlobalDesc')">
+        <SettingRow :label="t('settings.postExitCommand')" :description="inheritedDescription('post_exit_command')">
+          <NSelect
+            :value="versionSettings.commandOverrides.includes('postExitCommand') ? 'custom' : 'inherit'"
+            :options="commandModeOptions"
+            @update:value="setCommandOverride('postExitCommand', $event === 'custom')"
+          />
           <NInput
             v-model:value="versionSettings.postExitCommand"
+            :disabled="!versionSettings.commandOverrides.includes('postExitCommand')"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.postExitCommandPlaceholder')"
           />
         </SettingRow>
-        <SettingRow :label="t('settings.envVars')" :description="t('versions.detail.inheritGlobalDesc')">
+        <SettingRow :label="t('settings.envVars')" :description="inheritedDescription('env_vars')">
+          <NSelect
+            :value="versionSettings.commandOverrides.includes('envVars') ? 'custom' : 'inherit'"
+            :options="commandModeOptions"
+            @update:value="setCommandOverride('envVars', $event === 'custom')"
+          />
           <NInput
             v-model:value="versionSettings.envVars"
+            :disabled="!versionSettings.commandOverrides.includes('envVars')"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.envVarsPlaceholder')"
           />
         </SettingRow>
-        <SettingRow :label="t('settings.windowTitle')" :description="t('versions.detail.inheritGlobalDesc')">
-          <NInput v-model:value="versionSettings.windowTitle" />
+        <SettingRow :label="t('settings.windowTitle')" :description="inheritedDescription('window_title_template')">
+          <NSelect
+            :value="versionSettings.commandOverrides.includes('windowTitle') ? 'custom' : 'inherit'"
+            :options="commandModeOptions"
+            @update:value="setCommandOverride('windowTitle', $event === 'custom')"
+          />
+          <NInput
+            v-model:value="versionSettings.windowTitle"
+            :disabled="!versionSettings.commandOverrides.includes('windowTitle')"
+          />
         </SettingRow>
-        <SettingRow :label="t('settings.launcherVisibility')" :description="t('versions.detail.inheritGlobalDesc')">
+        <SettingRow
+          :label="t('settings.launcherVisibility')"
+          :description="inheritedDescription('launcher_visibility')"
+        >
           <NSelect v-model:value="versionSettings.launcherVisibility" :options="visibilityOptions" />
         </SettingRow>
       </div>
+    </SettingSection>
+    <SettingSection v-if="isWindows" :title="t('advanced.shortcutTitle')">
+      <SettingRow :label="t('advanced.shortcutTitle')" :description="t('advanced.shortcutHint')">
+        <div class="instance-window-controls">
+          <NButton :loading="shortcutCreating" :disabled="shortcutCreating" @click="createShortcut(false)">{{
+            t('advanced.shortcutDesktop')
+          }}</NButton>
+          <NButton :disabled="shortcutCreating" @click="createShortcut(true)">{{
+            t('advanced.shortcutChoose')
+          }}</NButton>
+        </div>
+      </SettingRow>
     </SettingSection>
   </template>
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NSelect, NSwitch } from 'naive-ui'
+import { NButton, NInput, NInputNumber, NSelect } from 'naive-ui'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import backend from '@/api/client'
+import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
@@ -214,13 +314,15 @@ import {
   createDefaultVersionSettings,
   normalizeVersionSettings,
   type VersionSettingsTarget,
+  type VersionLaunchSettings,
 } from '@/features/instances/model/instanceSettings'
 import { settingsApi } from '@/features/settings/api/settingsApi'
+import JavaRuntimeSelector from '@/features/settings/components/JavaRuntimeSelector.vue'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { SystemMemoryInfo } from '@/types/config'
-import type { JavaInstallation, ScannedVersion } from '@/types/instances'
-
+import type { ScannedVersion } from '@/types/instances'
 defineOptions({ name: 'InstanceDetailSettingsTab' })
 
 const props = defineProps<{
@@ -230,6 +332,36 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const message = useLauncherMessage()
+
+const shortcutCreating = ref(false)
+async function createShortcut(chooseLocation: boolean) {
+  if (!props.version) return
+  const target = { game_path: props.version.path, version_id: props.version.versionId }
+  shortcutCreating.value = true
+  try {
+    let outputPath: string | undefined
+    if (chooseLocation) {
+      const selected = unwrapResponse(
+        await backend.command('select_save_file', {
+          purpose: 'instance-shortcut',
+          default_name: `${props.version.alias || props.version.versionId}.lnk`.replace(/[<>:"/\\|?*]/g, '_'),
+        }),
+        t('advanced.shortcutTitle')
+      )
+      if (!selected.path) return
+      outputPath = selected.path
+    }
+    unwrapResponse(
+      await backend.command('game_instance_shortcut_create', { ...target, output_path: outputPath }),
+      t('advanced.shortcutTitle')
+    )
+    message.success(t('advanced.shortcutCreated'))
+  } catch (cause) {
+    message.error(cause instanceof Error ? cause.message : String(cause))
+  } finally {
+    shortcutCreating.value = false
+  }
+}
 
 const visibilityOptions = [
   { value: 'inherit', label: t('settings.visibilityOptions.inherit') },
@@ -244,17 +376,75 @@ const isolationModeOptions = [
   { value: 'disabled', label: t('versions.detail.isolationModes.disabled') },
 ]
 
+const settingsStore = useSettingsStore()
+const isWindows = window.navigator.userAgent.toLowerCase().includes('windows')
+const runtimeModeOptions = computed(() =>
+  ['inherit', 'auto', 'manual'].map((value) => ({ value, label: t(`instanceSettings.${value}`) }))
+)
+const commandModeOptions = computed(() =>
+  ['inherit', 'custom'].map((value) => ({ value, label: t(`instanceSettings.${value}`) }))
+)
+const priorityOptions = computed(() => [
+  { value: 'inherit', label: t('instanceSettings.inherit') },
+  ...['idle', 'below_normal', 'normal', 'above_normal', 'high'].map((value) => ({
+    value,
+    label: t(`settings.processPriorityOptions.${value}`),
+  })),
+])
+const rendererOptions = computed(() => [
+  { value: 'inherit', label: t('instanceSettings.inherit') },
+  ...['default', 'software', 'directx12', 'vulkan'].map((value) => ({
+    value,
+    label: t(`settings.rendererOptions.${value}`),
+  })),
+])
+const booleanFields = computed(() => [
+  { key: 'lockMemory' as const, global: 'lock_memory' as const, label: 'settings.lockMemory' },
+  { key: 'fullscreen' as const, global: 'fullscreen' as const, label: 'settings.fullscreen' },
+  {
+    key: 'disableCrashAnalysis' as const,
+    global: 'disable_crash_analysis' as const,
+    label: 'settings.disableCrashAnalysis',
+  },
+  ...(isWindows
+    ? [
+        {
+          key: 'preferHighPerformanceGpu' as const,
+          global: 'prefer_high_performance_gpu' as const,
+          label: 'settings.preferHighPerformanceGpu',
+        },
+        { key: 'useJavaExe' as const, global: 'use_java_exe' as const, label: 'settings.useJavaExe' },
+      ]
+    : []),
+])
+function inheritedDescription(key: keyof typeof settingsStore.game) {
+  let value: string
+  if (key === 'java_auto')
+    value = settingsStore.game.java_auto ? t('instanceSettings.auto') : settingsStore.game.java_path || '-'
+  else if (key === 'memory_auto')
+    value = settingsStore.game.memory_auto
+      ? t('instanceSettings.auto')
+      : formatMemory(settingsStore.game.memory_size ?? 4096)
+  else if (typeof settingsStore.game[key] === 'boolean')
+    value = t(
+      settingsStore.game[key] ? 'versions.detail.isolationModes.enabled' : 'versions.detail.isolationModes.disabled'
+    )
+  else value = String(settingsStore.game[key] || t('instanceSettings.empty'))
+  return t('instanceSettings.effectiveGlobal', { value })
+}
+function setCommandOverride(key: VersionLaunchSettings['commandOverrides'][number], enabled: boolean) {
+  versionSettings.commandOverrides = enabled
+    ? [...new Set([...versionSettings.commandOverrides, key])]
+    : versionSettings.commandOverrides.filter((item) => item !== key)
+}
 const versionSettings = reactive(createDefaultVersionSettings())
 const settingsLoading = ref(false)
 const settingsSaving = ref(false)
-const javaSelecting = ref(false)
-const javaScanning = ref(false)
-const javaList = ref<JavaInstallation[]>([])
 const systemMemory = ref<SystemMemoryInfo>({ totalMb: 16384, usedMb: 4096, freeMb: 12288, percentUsed: 25 })
 const systemMemoryError = ref(false)
 
 const MEMORY_MIN = 1024
-const maxMemory = computed(() => Math.max(systemMemory.value.totalMb, 2048))
+const maxMemory = computed(() => Math.min(65536, Math.max(systemMemory.value.totalMb, 2048)))
 const recommendedMaxMemory = computed(() => Math.max(Math.floor(systemMemory.value.totalMb * 0.8), 2048))
 const clampVersionMemory = (value: number) => Math.min(Math.max(value, MEMORY_MIN), maxMemory.value)
 const safeMemorySize = computed({
@@ -292,17 +482,6 @@ const memoryBarSegments = computed(() => {
     remainingPct: 0,
   }
 })
-const javaOptions = computed(() => {
-  const options = javaList.value.map((java) => ({
-    value: java.path,
-    label: `Java ${java.major_version} (${java.java_type}) · ${java.version} · ${java.arch}`,
-  }))
-  const selectedPath = versionSettings.javaPath
-  if (selectedPath && !options.some((option) => option.value === selectedPath)) {
-    options.unshift({ value: selectedPath, label: selectedPath })
-  }
-  return options
-})
 const formatMemory = (mb: number): string => {
   if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB'
   return mb + ' MB'
@@ -317,7 +496,8 @@ let skipSettingsWatch = false
 /** 300ms 防抖定时器（参考 GameTab.vue 的 debouncedSaveConfig） */
 let settingsSaveTimer: ReturnType<typeof setTimeout> | null = null
 /** 保存串行化：保存中再有新变更则排队重存，避免 API 读-改-写竞态 */
-let resaveQueued = false
+let saveChain: Promise<unknown> = Promise.resolve()
+let loadedSettingsTarget: VersionSettingsTarget | null = null
 
 function getSettingsTarget(): VersionSettingsTarget | null {
   if (!props.version) return null
@@ -336,6 +516,8 @@ async function loadSettings() {
   const requestId = ++settingsRequestId
   skipSettingsWatch = true
   const defaults = createDefaultVersionSettings()
+  loadedSettingsTarget = null
+  for (const key of Object.keys(versionSettings)) delete (versionSettings as unknown as Record<string, unknown>)[key]
   Object.assign(versionSettings, defaults)
   savedSettingsSnapshot.value = JSON.stringify(defaults)
   settingsLoading.value = true
@@ -344,6 +526,7 @@ async function loadSettings() {
     if (requestId !== settingsRequestId) return
     // 归一化补齐缺失字段后再存快照，保证脏检查的键集与响应对象一致
     Object.assign(versionSettings, normalizeVersionSettings(settings))
+    loadedSettingsTarget = target
     savedSettingsSnapshot.value = JSON.stringify(versionSettings)
   } catch (error) {
     if (requestId === settingsRequestId) {
@@ -359,39 +542,37 @@ async function loadSettings() {
 }
 
 function validateSettings(): string | null {
-  if (versionSettings.customMemory && (versionSettings.memory < 512 || versionSettings.memory > 65536)) {
+  if (versionSettings.memoryMode === 'manual' && (versionSettings.memory < 512 || versionSettings.memory > 65536)) {
     return t('versions.detail.invalidMemory')
   }
-  if (versionSettings.customJava && !versionSettings.javaPath.trim()) {
+  if (versionSettings.javaMode === 'manual' && !versionSettings.javaPath.trim()) {
     return t('versions.detail.javaPathRequired')
   }
   return null
 }
 
 async function persistSettings() {
-  if (settingsSaving.value) {
-    resaveQueued = true
-    return
-  }
-  const target = getSettingsTarget()
+  const target = loadedSettingsTarget
   if (!target) return
   const invalid = validateSettings()
   if (invalid) {
     message.warning(invalid)
     return
   }
+  const snapshot = JSON.stringify(versionSettings)
   settingsSaving.value = true
+  const queued = saveChain
+    .catch(() => undefined)
+    .then(() => instanceSettingsApi.save(target, JSON.parse(snapshot) as VersionLaunchSettings))
+  saveChain = queued
   try {
-    await instanceSettingsApi.save(target, { ...versionSettings })
-    savedSettingsSnapshot.value = JSON.stringify(versionSettings)
+    await queued
+    if (loadedSettingsTarget?.versionId === target.versionId && loadedSettingsTarget?.path === target.path)
+      savedSettingsSnapshot.value = snapshot
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.detail.saveSettingsFailed'))
   } finally {
-    settingsSaving.value = false
-    if (resaveQueued) {
-      resaveQueued = false
-      void persistSettings()
-    }
+    if (saveChain === queued) settingsSaving.value = false
   }
 }
 
@@ -415,12 +596,13 @@ function flushSettingsSave() {
 
 // 打开时加载；关闭时 flush 挂起中的自动保存（复刻原父组件行为）
 watch(
-  () => props.visible,
-  (val) => {
-    if (val) {
+  () => [props.visible, props.version?.path, props.version?.versionId] as const,
+  ([visible]) => {
+    flushSettingsSave()
+    if (visible) {
       void loadSettings()
       void loadRuntimeInfo()
-    } else flushSettingsSave()
+    } else settingsRequestId += 1
   },
   { immediate: true }
 )
@@ -436,15 +618,21 @@ watch(
 )
 
 async function resetSettings() {
-  const target = getSettingsTarget()
+  const target = loadedSettingsTarget
   if (!target) return
+  if (settingsSaveTimer) {
+    clearTimeout(settingsSaveTimer)
+    settingsSaveTimer = null
+  }
   settingsSaving.value = true
   try {
+    await saveChain.catch(() => undefined)
     await instanceSettingsApi.reset(target)
+    if (loadedSettingsTarget?.versionId !== target.versionId || loadedSettingsTarget?.path !== target.path) return
     skipSettingsWatch = true
     const defaults = createDefaultVersionSettings()
     Object.assign(versionSettings, defaults)
-    savedSettingsSnapshot.value = JSON.stringify(defaults)
+    savedSettingsSnapshot.value = JSON.stringify(versionSettings)
     message.success(t('versions.detail.settingsReset'))
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.detail.saveSettingsFailed'))
@@ -455,29 +643,8 @@ async function resetSettings() {
   }
 }
 
-async function selectJava() {
-  javaSelecting.value = true
-  try {
-    const path = await instanceSettingsApi.selectJava()
-    if (path) versionSettings.javaPath = path
-  } catch (error) {
-    message.error(error instanceof Error ? error.message : t('versions.detail.javaSelectFailed'))
-  } finally {
-    javaSelecting.value = false
-  }
-}
-
-function handleJavaPathChange(value: string | number | null) {
-  versionSettings.javaPath = typeof value === 'string' ? value : ''
-}
-
 async function loadRuntimeInfo() {
-  try {
-    const java = await settingsApi.listJava()
-    if (Array.isArray(java) && java.length) javaList.value = java
-  } catch {
-    // 扫描失败时仍可通过浏览按钮手动选择
-  }
+  await settingsStore.load().catch((error) => message.error(error instanceof Error ? error.message : String(error)))
   try {
     const mem = await settingsApi.getSystemMemory()
     if (mem && typeof mem.totalMb === 'number') systemMemory.value = mem
@@ -488,9 +655,31 @@ async function loadRuntimeInfo() {
 
 // 切换到其他 tab / 组件卸载时，同样 flush 挂起中的自动保存
 onBeforeUnmount(() => {
+  settingsRequestId += 1
   if (settingsSaveTimer) clearTimeout(settingsSaveTimer)
   if (settingsDirty.value) void persistSettings()
 })
 </script>
 
 <style scoped src="@/styles/views/instances/InstanceDetailModal.css"></style>
+
+<style scoped>
+.instance-window-controls {
+  display: flex;
+  gap: 8px;
+}
+:deep(.argument-input) {
+  min-width: 260px;
+}
+:deep(.setting-control:has(.argument-input)) {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: min(600px, 60%);
+}
+.instance-command-controls {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+</style>

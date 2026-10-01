@@ -127,6 +127,7 @@ export interface BackendEvents {
       background?: Partial<BackgroundConfig>
     }
   }
+  'launcher:open_page': { page: 'games' | 'instances' | 'download' | 'settings' | 'more' }
   'launcher:visibility': {
     action: 'none' | 'minimize' | 'quit'
   }
@@ -351,6 +352,7 @@ export interface CommandPayloadMap {
       | 'schematic-material-manifest'
       | 'screenshot'
       | 'mod-file'
+      | 'instance-shortcut'
       | 'theme-preset'
     default_directory?: string
     default_name?: string
@@ -362,6 +364,7 @@ export interface CommandPayloadMap {
   game_instances: undefined
   game_version_stats: { game_path: string; version_id: string }
   game_version_settings_get: { game_path: string; version_id: string }
+  game_version_settings_effective: { game_path: string; version_id: string }
   game_version_settings_set: { game_path: string; version_id: string; data: unknown }
   game_instance_profile_get: { game_path: string; version_id: string }
   game_instance_profile_patch: {
@@ -381,6 +384,7 @@ export interface CommandPayloadMap {
   game_instance_categories_get: undefined
   game_instance_categories_upsert: { category_id?: string; name: string; color: string; order?: number }
   game_instance_categories_delete: { category_id: string }
+  game_instance_shortcut_create: InstanceTargetPayload & { output_path?: string }
   game_instance_folder_open: InstanceTargetPayload & {
     folder: 'instance' | 'mods' | 'saves' | 'screenshots' | 'logs' | 'crash-reports'
   }
@@ -760,6 +764,7 @@ export const COMMAND_NAMES = {
   game_instances: 'game_instances',
   game_version_stats: 'game_version_stats',
   game_version_settings_get: 'game_version_settings_get',
+  game_version_settings_effective: 'game_version_settings_effective',
   game_version_settings_set: 'game_version_settings_set',
   game_instance_profile_get: 'game_instance_profile_get',
   game_instance_profile_patch: 'game_instance_profile_patch',
@@ -769,6 +774,7 @@ export const COMMAND_NAMES = {
   game_instance_categories_get: 'game_instance_categories_get',
   game_instance_categories_upsert: 'game_instance_categories_upsert',
   game_instance_categories_delete: 'game_instance_categories_delete',
+  game_instance_shortcut_create: 'game_instance_shortcut_create',
   game_instance_folder_open: 'game_instance_folder_open',
   game_instance_mods_list: 'game_instance_mods_list',
   game_instance_mod_toggle: 'game_instance_mod_toggle',
@@ -1014,6 +1020,7 @@ export interface CommandResponseMap {
   game_instances: GameInstance[]
   game_version_stats: VersionRunStats
   game_version_settings_get: Record<string, unknown>
+  game_version_settings_effective: Record<string, unknown>
   game_version_settings_set: Record<string, unknown>
   game_instance_profile_get: InstanceProfile
   game_instance_profile_patch: InstanceProfile
@@ -1040,6 +1047,7 @@ export interface CommandResponseMap {
   }
   game_instance_files_repair: GameOperation
   game_instance_delete: void
+  game_instance_shortcut_create: { path: string; iconPath: string }
   game_operation_get: GameOperation
   game_operation_cancel: boolean
   game_world_list: WorldEntry[]

@@ -16,7 +16,6 @@ import { launcherErrorQueue } from './errorPresentation'
 import { installDesktopInteractionPolicy } from './interactionPolicy'
 import { launcherPopupQueue, notifyLauncherPopup } from './useLauncherPopupQueue'
 import type { Router } from 'vue-router'
-
 /** 版本检测共享状态，启动自动检测与设置页手动检测共用。 */
 const updateCheck = useUpdateCheck()
 
@@ -203,6 +202,16 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         launcherErrorQueue.enqueue(payload)
       }),
       backend.on('launcher:popup', popupQueue.enqueuePopup),
+      backend.on('launcher:open_page', ({ page }) => {
+        const routes = {
+          games: '/',
+          instances: '/versions',
+          download: '/download',
+          settings: '/settings',
+          more: '/more',
+        }
+        if (page in routes) void options.router.push(routes[page])
+      }),
       backend.on('launcher:visibility', (payload) => {
         const action = payload?.action
         if (action === 'minimize') void desktopWindow.minimize()

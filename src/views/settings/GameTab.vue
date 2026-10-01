@@ -10,22 +10,7 @@
         :label="t('settings.javaPath')"
         :description="t('settings.javaPathDesc')"
       >
-        <div class="java-selector">
-          <NSelect
-            class="java-path-select"
-            :value="localSettings.java_path"
-            :options="javaOptions"
-            :placeholder="t('settings.javaPathPlaceholder')"
-            filterable
-            @update:value="handleJavaPathChange"
-          />
-          <NButton size="small" @click="browseJava">
-            {{ t('common.browse') }}
-          </NButton>
-          <NButton size="small" :loading="isJavaLoading" @click="refreshJavaList">
-            {{ t('common.refresh') }}
-          </NButton>
-        </div>
+        <JavaRuntimeSelector :value="localSettings.java_path" @update:value="handleJavaPathChange" />
       </SettingRow>
     </SettingSection>
 
@@ -297,25 +282,23 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
+import { NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAsyncAction } from '@/composables/useAsyncAction'
-import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { parseLaunchArguments } from '@/features/instances/model/instanceSettings'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { settingsApi } from '@/features/settings/api/settingsApi'
+import JavaRuntimeSelector from '@/features/settings/components/JavaRuntimeSelector.vue'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { GameRenderer, InstanceIsolationPolicy, SystemMemoryInfo } from '@/types/config'
-
 const { t } = useI18n()
-const message = useLauncherMessage()
 const { run } = useAsyncAction({ showSuccess: false, showError: true, errorMessage: t('common.error') })
 const settingsStore = useSettingsStore()
-const { game: localSettings, javaInstallations: javaList, isJavaLoading } = storeToRefs(settingsStore)
+const { game: localSettings } = storeToRefs(settingsStore)
 const isWindows = window.navigator.userAgent.toLowerCase().includes('windows')
 
 const systemMemory = ref<SystemMemoryInfo>({
@@ -338,7 +321,7 @@ const memoryAutoDesc = computed(() => {
 })
 
 const maxMemory = computed(() => {
-  return Math.max(systemMemory.value.totalMb, 2048)
+  return Math.min(65536, Math.max(systemMemory.value.totalMb, 2048))
 })
 
 const recommendedMaxMemory = computed(() => {
@@ -403,18 +386,6 @@ const memoryBarSegments = computed(() => {
   }
 })
 
-const javaOptions = computed(() => {
-  const options = javaList.value.map((java) => ({
-    value: java.path,
-    label: `Java ${java.major_version} (${java.java_type}) · ${java.version} · ${java.arch}`,
-  }))
-  const selectedPath = localSettings.value.java_path
-  if (selectedPath && !options.some((option) => option.value === selectedPath)) {
-    options.unshift({ value: selectedPath, label: selectedPath })
-  }
-  return options
-})
-
 const formatMemory = (mb: number): string => {
   if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB'
   return mb + ' MB'
@@ -457,14 +428,6 @@ const globalJvmArgsText = computed({
     localSettings.value.jvm_args = parseLaunchArguments(value)
   },
 })
-
-const loadJavaList = async (force = false) => {
-  await run(async () => settingsStore.loadJavaInstallations(force))
-}
-
-const refreshJavaList = async () => {
-  await loadJavaList(true)
-}
 
 const loadGameConfig = async () => {
   await run(async () => settingsStore.load())
@@ -611,16 +574,7 @@ const handleJavaPathChange = (path: string) => {
   saveConfig()
 }
 
-const browseJava = async () => {
-  const path = await run(async () => settingsApi.selectJava())
-  if (!path) return
-  localSettings.value.java_path = path
-  await saveConfig()
-  message.success(t('common.success'))
-}
-
 onMounted(() => {
-  void loadJavaList()
   loadGameConfig().then(() => loadSystemMemory())
 })
 

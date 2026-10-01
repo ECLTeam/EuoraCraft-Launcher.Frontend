@@ -10,16 +10,12 @@ import {
   LAUNCH_ERROR_HIDE_DELAY,
   STATUS_MESSAGE_AUTO_HIDE,
 } from '@/config/game'
-import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
-import { createDefaultVersionSettings, parseLaunchArguments } from '@/features/instances/model/instanceSettings'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
-import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { LaunchProgress } from '@/types/system'
 import { normalizeGamePath } from '@/utils/path'
 import { useLauncherMessage } from './useLauncherMessage'
 import { globalLaunchProgress } from './useLaunchProgress'
-
 export interface VersionItem {
   id: string
   type: string
@@ -48,7 +44,6 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
   const message = useLauncherMessage()
   const router = useRouter()
   const instanceStore = useInstanceStore()
-  const settingsStore = useSettingsStore()
   const { versions, selectedVersion, currentGamePath } = storeToRefs(instanceStore)
   const { show: showLaunchProgress, hide: hideLaunchProgress, setProgress: setLaunchProgress } = globalLaunchProgress
 
@@ -190,43 +185,9 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
 
     setLaunchProgress(0, 'prepare', `正在准备启动 ${selectedVersion.value}...`)
 
-    let versionSettings = createDefaultVersionSettings()
-    try {
-      versionSettings = await instanceSettingsApi.get({
-        versionId: selectedVersion.value,
-        path: currentGamePath.value,
-      })
-    } catch (error) {
-      console.warn('[VersionSettings] 读取版本独立设置失败，将使用全局设置:', error)
-    }
-
     const launchResult = await backend.command('game_launch', {
       version_id: selectedVersion.value,
       game_path: currentGamePath.value,
-      java_path: versionSettings.customJava ? versionSettings.javaPath || undefined : undefined,
-      memory: versionSettings.customMemory ? versionSettings.memory : undefined,
-      lock_memory: settingsStore.game.lock_memory,
-      process_priority: settingsStore.game.process_priority || 'normal',
-      width: settingsStore.game.game_width,
-      height: settingsStore.game.game_height,
-      fullscreen: settingsStore.game.fullscreen,
-      jvm_args: versionSettings.jvmArgs ? parseLaunchArguments(versionSettings.jvmArgs) : undefined,
-      game_args: versionSettings.gameArgs ? parseLaunchArguments(versionSettings.gameArgs) : undefined,
-      version_isolation:
-        versionSettings.isolationMode === 'enabled'
-          ? true
-          : versionSettings.isolationMode === 'disabled'
-            ? false
-            : undefined,
-      // 启动高级选项：实例留空回退全局设置
-      wrapper_command: versionSettings.wrapperCommand.trim() || settingsStore.game.wrapper_command || '',
-      post_exit_command: versionSettings.postExitCommand.trim() || settingsStore.game.post_exit_command || '',
-      env_vars: versionSettings.envVars.trim() ? versionSettings.envVars : settingsStore.game.env_vars || '',
-      window_title: versionSettings.windowTitle.trim() || settingsStore.game.window_title_template || '',
-      launcher_visibility:
-        versionSettings.launcherVisibility === 'inherit'
-          ? settingsStore.game.launcher_visibility || 'none'
-          : versionSettings.launcherVisibility,
     })
 
     unlisten()

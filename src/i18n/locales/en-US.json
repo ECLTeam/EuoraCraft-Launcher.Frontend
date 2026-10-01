@@ -1897,5 +1897,20 @@
   "resourceNavigation": {
     "missingInstance": "Target instance is unavailable. Select an installation target.",
     "missingWorld": "Target world is unavailable. Select a world."
+  },
+  "instanceSettings": {
+    "inherit": "Inherit global",
+    "auto": "Automatic",
+    "manual": "Manual",
+    "custom": "Override for this instance (can be empty)",
+    "effectiveGlobal": "Current global value: {value}",
+    "empty": "Not set"
+  },
+  "advanced": {
+    "shortcutTitle": "Instance shortcuts",
+    "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
+    "shortcutDesktop": "Create desktop shortcut",
+    "shortcutChoose": "Choose destination",
+    "shortcutCreated": "Instance shortcut created"
   }
 }

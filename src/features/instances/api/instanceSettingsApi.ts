@@ -6,7 +6,6 @@ import {
   type VersionLaunchSettings,
   type VersionSettingsTarget,
 } from '@/features/instances/model/instanceSettings'
-
 /**
  * 版本独立启动设置保存在每个版本自己的目录中
  * （.minecraft/versions/<versionId>/.ecl/settings.json），
@@ -41,7 +40,7 @@ export const instanceSettingsApi = {
     return normalizeVersionSettings(legacy[createVersionSettingsKey(target)])
   },
 
-  async save(target: VersionSettingsTarget, value: VersionLaunchSettings): Promise<void> {
+  async save(target: VersionSettingsTarget, value: Partial<VersionLaunchSettings>): Promise<void> {
     const result = await backend.command('game_version_settings_set', {
       game_path: target.path,
       version_id: target.versionId,
@@ -61,8 +60,13 @@ export const instanceSettingsApi = {
     await removeLegacyEntry(target)
   },
 
-  async selectJava(): Promise<string | null> {
-    const result = await backend.command('select_java')
-    return assertSuccess(result, '选择 Java')?.path ?? null
+  async effective(target: VersionSettingsTarget): Promise<Record<string, unknown>> {
+    return assertSuccess(
+      await backend.command('game_version_settings_effective', {
+        game_path: target.path,
+        version_id: target.versionId,
+      }),
+      '读取有效启动设置'
+    )
   },
 }

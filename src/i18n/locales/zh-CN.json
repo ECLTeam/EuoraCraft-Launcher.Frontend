@@ -1792,5 +1792,20 @@
   "resourceNavigation": {
     "missingInstance": "目标实例不存在，请重新选择安装实例",
     "missingWorld": "目标存档不存在，请重新选择存档"
+  },
+  "instanceSettings": {
+    "inherit": "继承全局",
+    "auto": "自动选择／分配",
+    "manual": "手动指定",
+    "custom": "此实例独立设置（允许留空）",
+    "effectiveGlobal": "全局当前值：{value}",
+    "empty": "未设置"
+  },
+  "advanced": {
+    "shortcutTitle": "实例快捷方式",
+    "shortcutHint": "使用当前实例图标创建快捷方式，双击直接启动此实例。",
+    "shortcutDesktop": "创建桌面快捷方式",
+    "shortcutChoose": "选择保存位置",
+    "shortcutCreated": "实例快捷方式已创建"
   }
 }
