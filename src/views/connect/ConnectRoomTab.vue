@@ -47,7 +47,7 @@
         <div class="connect-scroll-area">
           <Transition name="page" mode="out-in">
             <template v-if="displayStatus.mode === 'idle'">
-              <div key="idle" class="connect-idle-layout">
+              <div :key="`idle-${displayHostStep}`" class="connect-idle-layout">
                 <div class="connect-idle-primary">
                   <UiCard v-if="displayHostStep !== 2" class="connect-main-card">
                     <template #header>

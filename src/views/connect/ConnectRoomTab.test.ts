@@ -298,6 +298,50 @@ describe('ConnectRoomTab', () => {
     expect(state.startPortScan).toHaveBeenCalled()
   })
 
+  it.each(['输入端口', '下一步', '快捷创建'] as const)(
+    '通过%s切换步骤时替换过渡根节点并保留表单状态',
+    async (entry) => {
+      const state = connectorState(idleStatus())
+      mocks.listRunningInstances.mockResolvedValue(entry === '输入端口' ? [] : [runningInstance])
+      const wrapper = mountRoomTab(state)
+      await flushPromises()
+      const initialStep = wrapper.get('.connect-idle-layout').element
+
+      if (entry === '下一步') {
+        wrapper.getComponent(UiSelect).vm.$emit('update:modelValue', runningInstance.id)
+        await wrapper.vm.$nextTick()
+      }
+      const entryButton =
+        entry === '快捷创建'
+          ? wrapper.get('.connect-running-game button')
+          : wrapper.findAll('button').find((button) => button.text() === entry)
+      expect(entryButton).toBeDefined()
+      await entryButton?.trigger('click')
+      await flushPromises()
+
+      const portStep = wrapper.get('.connect-idle-layout').element
+      expect(portStep).not.toBe(initialStep)
+      expect(wrapper.find('#connect-instance').exists()).toBe(false)
+      expect(state.startPortScan).toHaveBeenCalledTimes(1)
+      await wrapper.get('#connect-port').setValue('25566')
+
+      await wrapper.get('.connect-mode-link').trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.connect-idle-layout').element).not.toBe(portStep)
+      expect(wrapper.find('#connect-port').exists()).toBe(false)
+      expect(wrapper.getComponent(UiSelect).props('modelValue')).toBe(entry === '输入端口' ? '' : runningInstance.id)
+      expect(state.stopPortScan).toHaveBeenCalledTimes(1)
+
+      await wrapper
+        .findAll('button')
+        .find((button) => button.text() === '输入端口')
+        ?.trigger('click')
+      await flushPromises()
+      expect((wrapper.get('#connect-port').element as HTMLInputElement).value).toBe('25566')
+      expect(state.startPortScan).toHaveBeenCalledTimes(2)
+    }
+  )
+
   it('creates a room with a manually entered port', async () => {
     const state = connectorState(idleStatus())
     mocks.listRunningInstances.mockResolvedValue([runningInstance])
