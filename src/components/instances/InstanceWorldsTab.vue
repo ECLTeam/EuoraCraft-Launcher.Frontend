@@ -1,12 +1,23 @@
 <template>
   <section class="worlds-panel">
     <header class="worlds-toolbar">
-      <NInput v-model:value="query" clearable placeholder="搜索世界名称、目录、种子或版本" />
-      <NSelect v-model:value="sortKey" :options="sortOptions" class="sort-select" />
-      <NButton :loading="loading" @click="load">刷新</NButton>
-      <NButton @click="importWorld">导入</NButton>
-      <NButton @click="editOptions">游戏设置</NButton>
-      <NButton @click="openFolder">打开存档目录</NButton>
+      <NInput v-model:value="query" clearable size="small" placeholder="搜索世界名称、目录、种子或版本" />
+      <NSelect v-model:value="sortKey" :options="sortOptions" size="small" class="sort-select" />
+      <div class="worlds-toolbar-actions">
+        <NButton quaternary circle size="small" :loading="loading" title="刷新" aria-label="刷新" @click="load">
+          <template #icon><UiIcon name="refresh" :size="16" /></template>
+        </NButton>
+        <NButton quaternary circle size="small" title="游戏设置" aria-label="游戏设置" @click="editOptions">
+          <template #icon><UiIcon name="settings" :size="16" /></template>
+        </NButton>
+        <NButton quaternary circle size="small" title="打开存档目录" aria-label="打开存档目录" @click="openFolder">
+          <template #icon><UiIcon name="folder-open" :size="16" /></template>
+        </NButton>
+        <NButton size="small" type="primary" class="worlds-toolbar-primary" aria-label="导入存档" @click="importWorld">
+          <template #icon><UiIcon name="upload" :size="13" /></template>
+          导入
+        </NButton>
+      </div>
     </header>
     <UiLoading :show="loading" mode="overlay">
       <div v-if="filtered.length" class="world-grid">
@@ -436,6 +447,18 @@ onMounted(load)
 .worlds-toolbar > .n-input {
   flex: 1;
   min-width: 180px;
+}
+
+.worlds-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
+
+.worlds-toolbar-primary {
+  margin-left: 12px;
 }
 
 .sort-select {
