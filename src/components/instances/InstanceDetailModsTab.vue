@@ -58,12 +58,6 @@
       <UiLoading v-else :show="modsLoading" mode="overlay" class="mods-spin">
         <template v-if="filteredMods.length">
           <div class="mods-list">
-            <div class="mods-list-header" aria-hidden="true">
-              <span>{{ t('versions.mods.modName') }}</span>
-              <span>{{ t('versions.mods.modVersion') }}</span>
-              <span>{{ t('versions.mods.loader') }}</span>
-              <span>{{ t('versions.mods.status') }}</span>
-            </div>
             <article
               v-for="mod in filteredMods"
               :key="mod.filename"
@@ -77,13 +71,9 @@
                 <div class="mod-list-title">
                   <strong>{{ modDisplayName(mod) }}</strong>
                   <span v-if="hasTranslatedName(mod)" class="mod-original-name">{{ mod.name }}</span>
-                  <span class="mod-list-filename">{{ mod.filename }}</span>
+                  <span class="mod-list-filename" :title="mod.filename">{{ mod.filename }}</span>
+                  <span class="mod-list-metadata">{{ [mod.version, mod.author].filter(Boolean).join(' · ') }}</span>
                 </div>
-              </div>
-
-              <div class="mod-list-version">
-                <strong>{{ mod.version || t('versions.mods.unknownVersion') }}</strong>
-                <span>{{ mod.author || t('versions.mods.unknownAuthor') }}</span>
               </div>
 
               <div class="mod-list-loader">
@@ -151,7 +141,6 @@ import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/
 import { modApi } from '@/features/mods/api/modApi'
 import type { ScannedVersion } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
-
 defineOptions({ name: 'InstanceDetailModsTab' })
 
 const props = defineProps<{

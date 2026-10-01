@@ -625,35 +625,24 @@
   overflow-y: auto;
 }
 
-.mods-list-header,
 .mod-list-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(90px, 1fr) minmax(80px, 0.6fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  column-gap: 14px;
-}
-
-.mods-list-header {
-  position: sticky;
-  z-index: 1;
-  top: 0;
-  min-height: 32px;
-  padding: 0 12px;
-  color: var(--ecl-text-tertiary);
-  background: var(--ecl-surface);
-  border-bottom: 1px solid var(--ecl-border);
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.mod-list-row {
-  min-height: 66px;
+  gap: 12px;
+  min-height: 58px;
   padding: 8px 12px;
-  background: color-mix(in srgb, var(--ecl-surface) 78%, transparent);
   border-bottom: 1px solid var(--ecl-border);
+  border-radius: var(--ecl-radius-control);
   transition: background var(--duration-fast) var(--ease-emphasized);
 }
-
+.mod-list-metadata {
+  font-size: 10px;
+  color: var(--ecl-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .mod-list-row:hover {
   background: var(--ecl-hover);
 }
@@ -671,11 +660,11 @@
 
 .mod-list-icon {
   display: flex;
-  flex: 0 0 34px;
+  flex: 0 0 32px;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--ecl-radius-control);
   color: var(--ecl-primary);
   overflow: hidden;
@@ -1286,31 +1275,18 @@
     width: 140px;
   }
 
-  .mods-list-header {
-    display: none;
-  }
-
   .mod-list-row {
-    grid-template-columns: minmax(0, 1fr) 88px auto;
-    row-gap: 5px;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
-
-  .mod-list-version {
+  .mod-list-loader {
     grid-column: 1;
     grid-row: 2;
-    padding-left: 44px;
+    padding-left: 42px;
   }
-
-  .mod-list-loader {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
   .mod-list-actions {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1 / span 2;
   }
-
   .java-path-control {
     width: min(400px, 45vw);
   }
