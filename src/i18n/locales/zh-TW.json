@@ -1783,5 +1783,27 @@
     "import": "匯入",
     "success": "整合包匯入任務已建立",
     "dropHint": "鬆開以匯入整合包"
+  },
+  "advanced": {
+    "nodesTitle": "連線",
+    "nodesEntry": "連線設定",
+    "nodesPolicy": "節點策略",
+    "nodesAddresses": "自訂節點位址",
+    "nodesReset": "恢復預設",
+    "nodesMode": {
+      "automatic": "自動",
+      "append": "公共與自訂",
+      "custom": "僅自訂"
+    },
+    "nodesModeHint": {
+      "automatic": "自動取得並使用公共節點。",
+      "append": "使用公共節點及下方填寫的自訂節點。",
+      "custom": "僅使用下方填寫的節點，至少需要一個有效位址，不退回公共節點。"
+    },
+    "nodesAddressHint": "每行填寫一個包含協定和連接埠的 EasyTier 節點位址。",
+    "nodesHint": "儲存後於下次建立或加入房間時生效，目前房間不會切換節點。",
+    "nodesResetHint": "恢復預設會立即儲存自動模式並清空自訂節點。",
+    "nodesRetry": "重新載入",
+    "nodesSaved": "已儲存，下次連線時生效。"
   }
 }

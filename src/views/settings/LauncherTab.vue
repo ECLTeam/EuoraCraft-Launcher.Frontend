@@ -1,5 +1,5 @@
 <template>
-  <div class="tab-pane launcher-settings">
+  <div ref="settingsPage" class="tab-pane launcher-settings">
     <SettingSection :title="t('settings.languageRegion')">
       <SettingRow :label="t('settings.language')" :description="t('settings.languageDesc')">
         <NSelect
@@ -91,6 +91,19 @@
       </SettingRow>
     </SettingSection>
 
+    <div
+      ref="connectorSection"
+      class="connector-settings-target"
+      data-settings-section="connector"
+      role="region"
+      tabindex="-1"
+      :aria-label="t('advanced.nodesTitle')"
+    >
+      <SettingSection :title="t('advanced.nodesTitle')">
+        <ConnectorNodeSettings />
+      </SettingSection>
+    </div>
+
     <SettingSection :title="t('settings.developer')">
       <SettingRow :label="t('settings.debugMode')" :description="t('settings.debugModeDesc')">
         <NSwitch :value="debugMode" @update:value="handleDebugModeChange" />
@@ -114,8 +127,10 @@
 <script setup lang="ts">
 import { NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import ConnectorNodeSettings from '@/components/connect/ConnectorNodeSettings.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useDebugMode } from '@/composables/useDebugMode'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
@@ -128,6 +143,57 @@ import type { LauncherConfig } from '@/types/config'
 type ProxyMode = NonNullable<LauncherConfig['proxy_mode']>
 
 const { t, locale } = useI18n()
+const route = useRoute()
+const settingsPage = ref<HTMLElement>()
+const connectorSection = ref<HTMLElement>()
+let locationGeneration = 0
+let locationFrame: number | null = null
+let locationTimer: ReturnType<typeof setTimeout> | null = null
+
+function cancelLocation() {
+  locationGeneration++
+  if (locationFrame !== null) cancelAnimationFrame(locationFrame)
+  if (locationTimer !== null) clearTimeout(locationTimer)
+  locationFrame = null
+  locationTimer = null
+}
+
+// RouterView 的进入过渡完成前定位会偏移；仅等待本页动画，离页即取消。
+async function locateConnectorSection() {
+  cancelLocation()
+  if (route.query.section !== 'connector') return
+  const generation = locationGeneration
+  await nextTick()
+  if (generation !== locationGeneration) return
+  locationFrame = requestAnimationFrame(() => {
+    locationFrame = requestAnimationFrame(() => {
+      locationFrame = null
+      const focusSection = () => {
+        if (generation !== locationGeneration || !connectorSection.value?.isConnected) return
+        if (locationTimer !== null) clearTimeout(locationTimer)
+        locationTimer = null
+        connectorSection.value.scrollIntoView({ block: 'start', behavior: 'instant' })
+        connectorSection.value.focus({ preventScroll: true })
+      }
+      const animations = settingsPage.value?.getAnimations?.() ?? []
+      if (!animations.length) {
+        focusSection()
+        return
+      }
+      let finished = false
+      const finish = () => {
+        if (finished) return
+        finished = true
+        focusSection()
+      }
+      locationTimer = setTimeout(finish, 1000)
+      void Promise.allSettled(animations.map((animation) => animation.finished)).then(finish)
+    })
+  })
+}
+
+watch(() => route.query.section, locateConnectorSection, { immediate: true, flush: 'post' })
+onBeforeUnmount(cancelLocation)
 const { run } = useAsyncAction({ showSuccess: false, showError: true, errorMessage: t('common.error') })
 const settingsStore = useSettingsStore()
 const { download: downloadSettings } = storeToRefs(settingsStore)
