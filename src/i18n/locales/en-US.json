@@ -366,7 +366,6 @@
       "stopConfirm": "Stop instance “{name}”? The launcher will first request a normal save and exit, then force it to end if it does not respond within 3 seconds.",
       "stopped": "Instance “{name}” stopped",
       "empty": "No instances are currently running",
-      "emptyHint": "Launch a game from Home or Instance Details and it will appear here until it exits.",
       "unknownPath": "Unknown game path",
       "loadFailed": "Failed to load running instances",
       "stopFailed": "Failed to stop instance"

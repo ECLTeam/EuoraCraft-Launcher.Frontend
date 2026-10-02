@@ -88,7 +88,6 @@
 
         <template #empty-actions>
           <div class="running-empty-actions">
-            <span>{{ t('versions.running.emptyHint') }}</span>
             <NButton secondary size="small" @click="loadInstances">
               <template #icon><UiIcon name="refresh" :size="14" /></template>
               {{ t('versions.running.refresh') }}

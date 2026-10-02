@@ -76,7 +76,7 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.get('.running-instances-count').classes()).toContain('inactive')
   })
 
-  it('uses the standard empty box and retains the hint and refresh action', async () => {
+  it('uses the standard empty box and retains the refresh action', async () => {
     mocks.list.mockResolvedValue([])
     const wrapper = mountTab()
     await flushPromises()
@@ -84,7 +84,6 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.getComponent(NEmpty).props('description')).toBe(i18n.global.t('versions.running.empty'))
     expect(wrapper.find('.n-empty__icon svg').exists()).toBe(true)
     expect(wrapper.find('.running-empty-icon').exists()).toBe(false)
-    expect(wrapper.get('.n-empty__extra').text()).toContain(i18n.global.t('versions.running.emptyHint'))
     await wrapper.get('.n-empty__extra button').trigger('click')
     await flushPromises()
     expect(mocks.list).toHaveBeenCalledTimes(2)

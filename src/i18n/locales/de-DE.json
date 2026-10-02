@@ -366,7 +366,6 @@
       "stopConfirm": "Die Instanz „{name}“ wird beendet. Der Launcher fordert das Spiel zunächst zu normalem Speichern und Beenden auf; reagiert es nicht innerhalb von 3 Sekunden, wird es erzwungen beendet. Fortfahren?",
       "stopped": "Instanz „{name}“ wurde beendet",
       "empty": "Derzeit laufen keine Instanzen",
-      "emptyHint": "Starte ein Spiel über die Startseite oder die Instanzdetails – es erscheint hier und wird nach dem Beenden automatisch entfernt.",
       "unknownPath": "Unbekannter Instanzpfad",
       "loadFailed": "Laufende Instanzen konnten nicht geladen werden",
       "stopFailed": "Instanz konnte nicht beendet werden"
