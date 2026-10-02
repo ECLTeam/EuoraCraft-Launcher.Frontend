@@ -315,7 +315,7 @@
   },
   "download": {
     "title": "Загрузки",
-    "instanceDownload": "Загрузка экземпляров",
+    "instanceDownload": "Экземпляры",
     "modDownload": "Загрузка модов",
     "mod": "Мод",
     "resourcepack": "Наборы ресурсов",

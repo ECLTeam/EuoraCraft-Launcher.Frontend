@@ -28,6 +28,26 @@ async function mountDownload(query: Record<string, string>) {
 }
 
 describe('Download navigation', () => {
+  it('将实例入口显示为实例，并保留实例页导航', async () => {
+    const { wrapper, router } = await mountDownload({ tab: 'mod' })
+    const instanceButton = wrapper.findAll('.download-nav-item')[0]!
+    expect(instanceButton.text()).toBe('实例')
+    await instanceButton.trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.query.tab).toBe('instances')
+    expect(wrapper.find('.test-instances').exists()).toBe(true)
+    wrapper.unmount()
+  })
+  it.each([
+    ['zh-CN', '实例'],
+    ['zh-TW', '實例'],
+    ['en-US', 'Instances'],
+    ['de-DE', 'Instanzen'],
+    ['ja-JP', 'インスタンス'],
+    ['ru-RU', 'Экземпляры'],
+  ] as const)('使用 %s 的实例导航名称', (locale, label) => {
+    expect(i18n.global.t('download.instanceDownload', {}, { locale })).toBe(label)
+  })
   it('responds to query changes and removes world only when leaving datapacks', async () => {
     const { wrapper, router } = await mountDownload({
       tab: 'datapack',

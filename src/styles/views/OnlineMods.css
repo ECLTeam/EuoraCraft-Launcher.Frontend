@@ -218,6 +218,10 @@
   min-height: 240px;
 }
 
+.mods-results-spin.ui-loading {
+  --ui-loading-overlay: transparent;
+}
+
 .mods-results-scroll {
   height: 100%;
 }
