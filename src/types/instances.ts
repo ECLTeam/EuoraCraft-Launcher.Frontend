@@ -159,6 +159,7 @@ export interface InstanceTargetPayload {
 
 export interface GameOperation {
   name?: string
+  path?: string
   done?: number
   total?: number
   speed?: number

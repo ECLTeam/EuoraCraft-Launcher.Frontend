@@ -5,49 +5,49 @@
         <div class="connect-tools-layout">
           <CustomDownloadCard />
           <UiCard class="connect-nat-card">
-            <template #header>
+            <div class="connect-nat-bar">
               <div class="connect-nat-heading">
                 <UiIcon name="activity" :size="16" />
                 <strong>{{ t('connect.tools.natCardTitle') }}</strong>
-                <UiButton
-                  variant="outline"
-                  size="sm"
-                  icon="wifi"
-                  :loading="isDetecting"
-                  :disabled="isDetecting"
-                  @click="detect"
-                >
-                  {{ t('connect.nat.detect') }}
-                </UiButton>
               </div>
-            </template>
 
-            <div class="connect-nat-body" role="status" aria-live="polite" :aria-busy="isDetecting">
-              <div v-if="isDetecting" class="connect-nat-state">
-                <UiLoading mode="inline" size="sm" decorative />
-                <span>{{ t('connect.tools.detecting') }}</span>
+              <div class="connect-nat-body" role="status" aria-live="polite" :aria-busy="isDetecting">
+                <div v-if="isDetecting" class="connect-nat-state">
+                  <UiLoading mode="inline" size="sm" decorative />
+                  <span>{{ t('connect.tools.detecting') }}</span>
+                </div>
+                <div v-else-if="state === 'success' && result" class="connect-nat-result">
+                  <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
+                  <dl class="connect-nat-fields">
+                    <div>
+                      <dt>{{ t('connect.tools.publicAddress') }}</dt>
+                      <dd>
+                        <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
+                      </dd>
+                    </div>
+                  </dl>
+                  <span class="connect-nat-ipv6">
+                    {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
+                  </span>
+                </div>
+                <div v-else-if="state === 'error'" class="connect-nat-error">
+                  <strong><UiIcon name="alert-circle" :size="15" />{{ t('connect.tools.detectFailed') }}</strong>
+                  <p>{{ error }}</p>
+                </div>
+                <div v-else class="connect-nat-state">
+                  <span>{{ t('connect.tools.idleTitle') }}</span>
+                </div>
               </div>
-              <div v-else-if="state === 'success' && result" class="connect-nat-result">
-                <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
-                <dl class="connect-nat-fields">
-                  <div>
-                    <dt>{{ t('connect.tools.publicAddress') }}</dt>
-                    <dd>
-                      <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
-                    </dd>
-                  </div>
-                </dl>
-                <span class="connect-nat-ipv6">
-                  {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
-                </span>
-              </div>
-              <div v-else-if="state === 'error'" class="connect-nat-error">
-                <strong><UiIcon name="alert-circle" :size="15" />{{ t('connect.tools.detectFailed') }}</strong>
-                <p>{{ error }}</p>
-              </div>
-              <div v-else class="connect-nat-state">
-                <span>{{ t('connect.tools.idleTitle') }}</span>
-              </div>
+              <UiButton
+                class="connect-nat-action"
+                variant="outline"
+                size="sm"
+                icon="wifi"
+                :loading="isDetecting"
+                :disabled="isDetecting"
+                @click="detect"
+                >{{ t('connect.nat.detect') }}</UiButton
+              >
             </div>
           </UiCard>
         </div>

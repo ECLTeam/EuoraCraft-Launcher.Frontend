@@ -1906,5 +1906,28 @@
     "import": "Importieren",
     "success": "Importaufgabe für das Modpaket wurde erstellt",
     "dropHint": "Loslassen, um das Modpaket zu importieren"
+  },
+  "advanced": {
+    "downloadTitle": "Benutzerdefinierter Download",
+    "downloadUrl": "Download-URL",
+    "downloadFolder": "Downloadordner",
+    "downloadNaming": "Dateiname beim Speichern",
+    "downloadOriginalName": "Originaldateiname",
+    "downloadCustomName": "Eigener Name",
+    "downloadFileName": "Dateiname",
+    "downloadFileNameHint": "Wird genau wie eingegeben gespeichert; gewünschte Dateiendung angeben",
+    "downloadOriginalHint": "Erwarteter Dateiname: {name}; der Server kann einen anderen Namen angeben",
+    "downloadAdvanced": "Erweiterte Einstellungen",
+    "downloadUserAgent": "User-Agent (leer für Standardwert)",
+    "downloadHeaders": "Weitere HTTP-Header",
+    "downloadAddHeader": "Header hinzufügen",
+    "downloadHeaderName": "Headername",
+    "downloadHeaderValue": "Headerwert",
+    "downloadHeadersHint": "Header bleiben nur in dieser Sitzung und werden nicht im Aufgabenprotokoll gespeichert.",
+    "downloadInvalidName": "Einen gültigen einzelnen Dateinamen mit gewünschter Endung eingeben",
+    "downloadInvalidHeaders": "Ungültige, doppelte oder zu große HTTP-Header",
+    "downloadUaHeader": "User-Agent im UA-Feld einstellen",
+    "downloadOverwrite": "Vorhandene Dateien überschreiben (Original bei Fehler behalten)",
+    "downloadStart": "Download starten"
   }
 }

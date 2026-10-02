@@ -1789,5 +1789,28 @@
     "import": "匯入",
     "success": "整合包匯入任務已建立",
     "dropHint": "鬆開以匯入整合包"
+  },
+  "advanced": {
+    "downloadTitle": "自訂下載",
+    "downloadUrl": "下載網址",
+    "downloadFolder": "下載資料夾",
+    "downloadNaming": "儲存名稱",
+    "downloadOriginalName": "原始檔名",
+    "downloadCustomName": "自訂名稱",
+    "downloadFileName": "檔案名稱",
+    "downloadFileNameHint": "依輸入名稱儲存，請包含所需副檔名",
+    "downloadOriginalHint": "預估檔名：{name}，實際名稱依伺服器回應為準",
+    "downloadAdvanced": "進階設定",
+    "downloadUserAgent": "User-Agent（留空使用預設值）",
+    "downloadHeaders": "其他 HTTP 請求標頭",
+    "downloadAddHeader": "新增標頭",
+    "downloadHeaderName": "標頭名稱",
+    "downloadHeaderValue": "標頭值",
+    "downloadHeadersHint": "標頭僅在本次工作階段中保留，不寫入下載工作記錄。",
+    "downloadInvalidName": "請輸入有效的單一檔名，包含所需副檔名",
+    "downloadInvalidHeaders": "標頭格式無效、名稱重複或超過大小限制",
+    "downloadUaHeader": "請在 UA 欄位中設定 User-Agent",
+    "downloadOverwrite": "允許覆寫現有檔案（失敗時保留原檔）",
+    "downloadStart": "開始下載"
   }
 }

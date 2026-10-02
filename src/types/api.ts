@@ -203,7 +203,17 @@ export type BackendEventName = keyof BackendEvents
 export type SchematicLocale = 'zh-CN' | 'zh-TW' | 'en-US' | 'ja-JP' | 'ru-RU' | 'de-DE'
 
 export interface CommandPayloadMap {
-  custom_download_start: { url: string; target_path: string; overwrite?: boolean }
+  custom_download_defaults: undefined
+  custom_download_start: {
+    url: string
+    target_path?: string
+    download_directory?: string
+    naming_mode?: 'original' | 'custom'
+    custom_name?: string
+    user_agent?: string
+    headers?: Record<string, string>
+    overwrite?: boolean
+  }
   custom_download_retry: { operation_id: string }
   system_ping: undefined
   launcher_errors_pending: undefined
@@ -336,7 +346,7 @@ export interface CommandPayloadMap {
   background_video_open: undefined
 
   // 文件选择
-  select_directory: undefined
+  select_directory: { purpose?: 'custom-download'; default_directory?: string } | undefined
   select_java: undefined
   select_image: { purpose?: 'background' | 'skin' | 'cape' | 'instance_icon' } | undefined
   select_background_video: undefined
@@ -684,6 +694,7 @@ export type CommandName = keyof CommandPayloadMap
 
 export const COMMAND_NAMES = {
   custom_download_start: 'custom_download_start',
+  custom_download_defaults: 'custom_download_defaults',
   custom_download_retry: 'custom_download_retry',
   system_ping: 'system_ping',
   launcher_errors_pending: 'launcher_errors_pending',
@@ -1063,6 +1074,7 @@ export interface CommandResponseMap {
   game_instance_files_repair: GameOperation
   game_instance_delete: void
   custom_download_start: { operationId: string; status: string }
+  custom_download_defaults: { downloadDirectory: string; userAgent: string }
   custom_download_retry: { operationId: string; status: string }
   game_instance_shortcut_create: { path: string; iconPath: string }
   game_operation_get: GameOperation

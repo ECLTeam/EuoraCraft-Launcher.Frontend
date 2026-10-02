@@ -1147,7 +1147,7 @@
 .connect-tools-layout {
   display: grid;
   container-type: inline-size;
-  grid-template-columns: minmax(0, 340px);
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   width: 100%;
   padding: 2px 0;
@@ -1158,17 +1158,29 @@
   border-radius: 8px;
 }
 
-.connect-nat-card :deep(.card-header) {
-  padding: 10px 12px;
+.connect-tools-page .connect-workspace {
+  height: 100%;
 }
 
 .connect-nat-card :deep(.card-body) {
   padding: 12px;
 }
 
+.connect-nat-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.connect-nat-action {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .connect-nat-heading {
   display: grid;
-  width: 100%;
+  flex-shrink: 0;
   min-width: 0;
   grid-template-columns: 16px minmax(0, 1fr);
   align-items: center;
@@ -1187,31 +1199,17 @@
   line-height: 1.5;
 }
 
-.connect-nat-heading > .ui-btn {
-  min-width: 0;
-  max-width: 100%;
-  grid-column: 2;
-  justify-self: start;
-  white-space: normal;
-}
-
-.connect-nat-heading :deep(.btn-content) {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  line-height: 1.4;
-}
-
 .connect-nat-body {
-  min-height: 54px;
+  flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .connect-nat-result {
   display: flex;
-  align-items: flex-start;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
 }
 
 .connect-nat-result :deep(.ui-tag) {
@@ -1221,14 +1219,13 @@
 }
 
 .connect-nat-fields {
-  width: 100%;
   margin: 0;
 }
 
 .connect-nat-fields > div {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
 }
 
 .connect-nat-fields dt,
@@ -1251,7 +1248,6 @@
 
 .connect-nat-state {
   display: flex;
-  min-height: 54px;
   align-items: center;
   gap: 8px;
   color: var(--ecl-text-secondary);
@@ -1274,12 +1270,9 @@
   line-height: 1.6;
 }
 
-@container (min-width: 310px) {
-  .connect-nat-heading {
-    grid-template-columns: 16px minmax(0, 1fr) auto;
-  }
-
-  .connect-nat-heading > .ui-btn {
-    grid-column: 3;
+@container (max-width: 450px) {
+  .connect-nat-body {
+    order: 3;
+    flex-basis: 100%;
   }
 }

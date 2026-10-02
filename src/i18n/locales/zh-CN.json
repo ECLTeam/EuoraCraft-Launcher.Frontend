@@ -1826,6 +1826,23 @@
     "shortcutHint": "使用当前实例图标创建快捷方式，双击直接启动此实例。",
     "shortcutDesktop": "创建桌面快捷方式",
     "shortcutChoose": "选择保存位置",
-    "shortcutCreated": "实例快捷方式已创建"
+    "shortcutCreated": "实例快捷方式已创建",
+    "downloadFolder": "下载文件夹",
+    "downloadNaming": "保存名称",
+    "downloadOriginalName": "原文件名",
+    "downloadCustomName": "自定义名称",
+    "downloadFileName": "文件名",
+    "downloadFileNameHint": "按输入名称保存，请包含所需扩展名",
+    "downloadOriginalHint": "预估文件名：{name}，实际名称以服务器响应为准",
+    "downloadAdvanced": "高级设置",
+    "downloadUserAgent": "User-Agent（留空使用默认值）",
+    "downloadHeaders": "其他 HTTP 请求头",
+    "downloadAddHeader": "添加请求头",
+    "downloadHeaderName": "请求头名称",
+    "downloadHeaderValue": "请求头值",
+    "downloadHeadersHint": "请求头仅在本次会话中保留，不写入下载任务记录。",
+    "downloadInvalidName": "请输入有效的单个文件名，请包含所需扩展名",
+    "downloadInvalidHeaders": "请求头格式无效、名称重复或超过大小限制",
+    "downloadUaHeader": "请在 UA 字段中设置 User-Agent"
   }
 }

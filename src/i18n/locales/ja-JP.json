@@ -1906,5 +1906,28 @@
     "import": "インポート",
     "success": "Modパックのインポートタスクを作成しました",
     "dropHint": "離してModパックをインポート"
+  },
+  "advanced": {
+    "downloadTitle": "カスタムダウンロード",
+    "downloadUrl": "ダウンロード URL",
+    "downloadFolder": "保存フォルダー",
+    "downloadNaming": "保存名",
+    "downloadOriginalName": "元のファイル名",
+    "downloadCustomName": "カスタム名",
+    "downloadFileName": "ファイル名",
+    "downloadFileNameHint": "入力した名前で保存します。必要な拡張子を含めてください",
+    "downloadOriginalHint": "推定ファイル名：{name}。実際の名前はサーバーの応答に従います",
+    "downloadAdvanced": "詳細設定",
+    "downloadUserAgent": "User-Agent（空欄で既定値）",
+    "downloadHeaders": "その他の HTTP ヘッダー",
+    "downloadAddHeader": "ヘッダーを追加",
+    "downloadHeaderName": "ヘッダー名",
+    "downloadHeaderValue": "ヘッダー値",
+    "downloadHeadersHint": "ヘッダーはこのセッションでのみ保持され、タスク記録には保存されません。",
+    "downloadInvalidName": "拡張子を含む有効なファイル名を入力してください",
+    "downloadInvalidHeaders": "ヘッダーが無効、重複、または上限を超えています",
+    "downloadUaHeader": "User-Agent は UA 欄で設定してください",
+    "downloadOverwrite": "既存のファイルを上書きする（失敗時は元のファイルを保持）",
+    "downloadStart": "ダウンロード開始"
   }
 }

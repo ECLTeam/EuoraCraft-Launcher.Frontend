@@ -1903,5 +1903,28 @@
     "import": "Импортировать",
     "success": "Задача импорта сборки создана",
     "dropHint": "Отпустите, чтобы импортировать сборку"
+  },
+  "advanced": {
+    "downloadTitle": "Произвольная загрузка",
+    "downloadUrl": "URL загрузки",
+    "downloadFolder": "Папка загрузки",
+    "downloadNaming": "Имя при сохранении",
+    "downloadOriginalName": "Исходное имя файла",
+    "downloadCustomName": "Свое имя",
+    "downloadFileName": "Имя файла",
+    "downloadFileNameHint": "Файл сохраняется с указанным именем; добавьте нужное расширение",
+    "downloadOriginalHint": "Ожидаемое имя: {name}; сервер может указать другое имя",
+    "downloadAdvanced": "Дополнительные настройки",
+    "downloadUserAgent": "User-Agent (пусто — по умолчанию)",
+    "downloadHeaders": "Другие HTTP-заголовки",
+    "downloadAddHeader": "Добавить заголовок",
+    "downloadHeaderName": "Имя заголовка",
+    "downloadHeaderValue": "Значение заголовка",
+    "downloadHeadersHint": "Заголовки хранятся только в текущем сеансе, без записи в журнал задач.",
+    "downloadInvalidName": "Укажите допустимое имя файла с нужным расширением",
+    "downloadInvalidHeaders": "Неверные, повторяющиеся или слишком большие заголовки",
+    "downloadUaHeader": "Задайте User-Agent в поле UA",
+    "downloadOverwrite": "Перезаписывать существующие файлы (сохранить исходный при ошибке)",
+    "downloadStart": "Начать загрузку"
   }
 }

@@ -788,6 +788,11 @@ export function createShowcaseTransport(): BackendTransport {
         return success({ path: String(payload.path ?? '') })
       case 'select_directory':
         return success({ path: 'Showcase/SelectedDirectory' })
+      case 'custom_download_defaults':
+        return success({ downloadDirectory: 'Showcase/Data/downloads', userAgent: 'EuoraCraft-Launcher' })
+      case 'custom_download_start':
+      case 'custom_download_retry':
+        return failure('展示模式无法下载文件', 'SHOWCASE_DOWNLOAD_UNAVAILABLE')
       case 'select_java':
         return success({ path: 'Showcase/Java/bin/javaw.exe' })
       case 'select_file':
