@@ -10,6 +10,16 @@
   width: 220px;
 }
 
+.connector-settings-target {
+  margin-bottom: 16px;
+  border-radius: var(--ecl-radius-card);
+}
+
+.connector-settings-target:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .path-selector {
   display: flex;
   width: min(440px, 48vw);

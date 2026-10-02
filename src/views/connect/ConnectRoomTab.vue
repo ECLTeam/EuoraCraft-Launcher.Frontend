@@ -2,6 +2,18 @@
   <div class="connect-page">
     <section class="connect-workspace">
       <div class="connect-workspace__body">
+        <div class="connect-settings-entry">
+          <UiButton
+            size="sm"
+            variant="ghost"
+            icon="settings"
+            data-action="connector-settings"
+            :disabled="busy || status.mode === 'starting'"
+            @click="openConnectorSettings"
+          >
+            {{ t('advanced.nodesEntry') }}
+          </UiButton>
+        </div>
         <div v-if="flowDebug" class="connect-debug-bar">
           <span class="connect-debug-bar__label">
             <UiIcon name="bug" :size="13" />
@@ -48,7 +60,6 @@
           class="connect-scroll-area"
           :class="{ 'connect-room-container': displayStatus.mode === 'host' || displayStatus.mode === 'guest' }"
         >
-          <ConnectorNodeSettings />
           <Transition name="page" mode="out-in">
             <template v-if="displayStatus.mode === 'idle'">
               <div :key="`idle-${displayHostStep}`" class="connect-idle-layout">
@@ -372,7 +383,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ConnectorNodeSettings from '@/components/connect/ConnectorNodeSettings.vue'
+import { useRouter } from 'vue-router'
 import ConnectorPlayerAvatar from '@/components/connect/ConnectorPlayerAvatar.vue'
 import PlayerList from '@/components/connect/PlayerList.vue'
 import UiButton from '@/components/ui/Button.vue'
@@ -389,6 +400,7 @@ import { validateRoomCode } from '@/features/connect/roomCode'
 import { instanceRuntimeApi } from '@/features/instances/api/instanceRuntimeApi'
 import type { GameInstance } from '@/types/instances'
 const { t } = useI18n()
+const router = useRouter()
 const message = useLauncherMessage()
 const hostStep = ref<1 | 2>(1)
 const selectedInstanceKey = ref('')
@@ -414,6 +426,11 @@ const {
   stopPortScan,
   refreshStatus,
 } = useConnectorContext()
+
+function openConnectorSettings() {
+  if (busy.value || status.value.mode === 'starting') return
+  void router.push({ path: '/settings/launcher', query: { section: 'connector' } })
+}
 
 const {
   flowDebug,
