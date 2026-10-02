@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { NEmpty } from 'naive-ui'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { i18n } from '@/i18n'
@@ -73,6 +74,73 @@ describe('RunningInstancesTab', () => {
     await flushPromises()
 
     expect(wrapper.get('.running-instances-count').classes()).toContain('inactive')
+  })
+
+  it('uses the standard empty box and retains the hint and refresh action', async () => {
+    mocks.list.mockResolvedValue([])
+    const wrapper = mountTab()
+    await flushPromises()
+
+    expect(wrapper.getComponent(NEmpty).props('description')).toBe(i18n.global.t('versions.running.empty'))
+    expect(wrapper.find('.n-empty__icon svg').exists()).toBe(true)
+    expect(wrapper.find('.running-empty-icon').exists()).toBe(false)
+    expect(wrapper.get('.n-empty__extra').text()).toContain(i18n.global.t('versions.running.emptyHint'))
+    await wrapper.get('.n-empty__extra button').trigger('click')
+    await flushPromises()
+    expect(mocks.list).toHaveBeenCalledTimes(2)
+  })
+
+  it('shows only the block loader while the initial request is pending', async () => {
+    let resolve!: (instances: (typeof runningInstance)[]) => void
+    mocks.list.mockReturnValueOnce(new Promise((done) => (resolve = done)))
+    const wrapper = mountTab()
+    await flushPromises()
+
+    expect(wrapper.find('.ui-loading--block').exists()).toBe(true)
+    expect(wrapper.find('.ui-loading--overlay, .running-empty, .running-instance-row').exists()).toBe(false)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(false)
+
+    resolve([])
+    await flushPromises()
+    expect(wrapper.find('.ui-loading--block').exists()).toBe(false)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(true)
+  })
+
+  it('hides existing content and the empty box during refresh, then restores the list', async () => {
+    const wrapper = mountTab()
+    await flushPromises()
+    let resolve!: (instances: (typeof runningInstance)[]) => void
+    mocks.list.mockReturnValueOnce(new Promise((done) => (resolve = done)))
+
+    await wrapper.get('.running-refresh').trigger('click')
+    expect(wrapper.find('.ui-loading--block').exists()).toBe(true)
+    expect(wrapper.find('.running-instance-row').exists()).toBe(false)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(false)
+    expect(wrapper.get('.running-refresh').attributes('disabled')).toBeDefined()
+
+    resolve([runningInstance])
+    await flushPromises()
+    expect(wrapper.find('.ui-loading--block').exists()).toBe(false)
+    expect(wrapper.find('.running-instance-row').exists()).toBe(true)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(false)
+  })
+
+  it('switches to the standard empty box after the last exit and returns when an instance starts', async () => {
+    const wrapper = mountTab()
+    await flushPromises()
+    const handler = mocks.onChanged.mock.calls[0]?.[0]
+
+    mocks.list.mockResolvedValueOnce([])
+    handler({ action: 'exited', instanceId: runningInstance.id })
+    await flushPromises()
+    expect(wrapper.find('.running-instance-row').exists()).toBe(false)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(true)
+
+    mocks.list.mockResolvedValueOnce([runningInstance])
+    handler({ action: 'started', instanceId: runningInstance.id })
+    await flushPromises()
+    expect(wrapper.find('.running-instance-row').exists()).toBe(true)
+    expect(wrapper.findComponent(NEmpty).exists()).toBe(false)
   })
 
   it('confirms and stops a selected instance', async () => {

@@ -28,8 +28,13 @@
         </div>
       </header>
 
-      <UiLoading :show="loading" mode="overlay" class="running-instances-content">
-        <div v-if="instances.length" class="running-instance-table">
+      <InstanceContentState
+        :loading="loading"
+        :empty="instances.length === 0"
+        :emptyDescription="t('versions.running.empty')"
+        class="running-instances-content"
+      >
+        <div class="running-instance-table">
           <div class="running-table-header">
             <span class="col-icon"></span>
             <span class="col-name">{{ t('versions.running.nameColumn') }}</span>
@@ -81,18 +86,16 @@
           </TransitionGroup>
         </div>
 
-        <div v-else-if="!loading" class="running-empty">
-          <div class="running-empty-icon">
-            <UiIcon name="game" :size="38" />
+        <template #empty-actions>
+          <div class="running-empty-actions">
+            <span>{{ t('versions.running.emptyHint') }}</span>
+            <NButton secondary size="small" @click="loadInstances">
+              <template #icon><UiIcon name="refresh" :size="14" /></template>
+              {{ t('versions.running.refresh') }}
+            </NButton>
           </div>
-          <strong>{{ t('versions.running.empty') }}</strong>
-          <span>{{ t('versions.running.emptyHint') }}</span>
-          <NButton secondary size="small" @click="loadInstances">
-            <template #icon><UiIcon name="refresh" :size="14" /></template>
-            {{ t('versions.running.refresh') }}
-          </NButton>
-        </div>
-      </UiLoading>
+        </template>
+      </InstanceContentState>
     </section>
     <ConfirmDialog
       v-model:visible="confirmVisible"
@@ -110,6 +113,7 @@
 import { NButton } from 'naive-ui'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import InstanceContentState from '@/components/instances/InstanceContentState.vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
@@ -349,14 +353,14 @@ async function handleConfirm() {
 
 .running-instances-content {
   flex: 1;
-  height: 100%;
   min-height: 0;
   overflow: hidden;
 }
 
 .running-instance-table {
   display: flex;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   min-width: 0;
   flex-direction: column;
 }
@@ -534,32 +538,15 @@ async function handleConfirm() {
   opacity: 0.5;
 }
 
-.running-empty {
+.running-empty-actions {
   display: flex;
-  height: 100%;
-  min-height: 300px;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
   gap: var(--s-sm);
-  padding: var(--s-xl);
   text-align: center;
 }
 
-.running-empty-icon {
-  display: grid;
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--s-xs);
-  place-items: center;
-}
-
-.running-empty strong {
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.running-empty > span {
+.running-empty-actions > span {
   max-width: 360px;
   color: var(--text-secondary);
   font-size: 11px;
