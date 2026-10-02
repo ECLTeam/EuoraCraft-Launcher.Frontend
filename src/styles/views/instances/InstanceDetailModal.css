@@ -606,6 +606,7 @@
 
 .mod-list-row {
   display: grid;
+  flex-shrink: 0;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
