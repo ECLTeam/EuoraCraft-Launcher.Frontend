@@ -1913,14 +1913,14 @@
     "empty": "Not set"
   },
   "advanced": {
-    "nodesTitle": "Advanced: custom connection nodes",
-    "nodesHint": "Applies on the next room connection. Enter one EasyTier URI per line. Custom only never falls back to public nodes.",
-    "nodesAddresses": "EasyTier node addresses",
-    "nodesReset": "Restore automatic nodes",
+    "nodesTitle": "Multiplayer",
+    "nodesHint": "Saved changes apply the next time you create or join a room. The current room keeps its nodes.",
+    "nodesAddresses": "Custom node addresses",
+    "nodesReset": "Restore defaults",
     "nodesMode": {
-      "automatic": "Automatic nodes",
-      "append": "Append custom nodes",
-      "custom": "Custom nodes only"
+      "automatic": "Automatic",
+      "append": "Public and custom",
+      "custom": "Custom only"
     },
     "downloadTitle": "Custom download",
     "downloadUrl": "Download URL",
@@ -1931,6 +1931,17 @@
     "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
     "shortcutDesktop": "Create desktop shortcut",
     "shortcutChoose": "Choose destination",
-    "shortcutCreated": "Instance shortcut created"
+    "shortcutCreated": "Instance shortcut created",
+    "nodesEntry": "Multiplayer settings",
+    "nodesPolicy": "Node policy",
+    "nodesModeHint": {
+      "automatic": "Automatically fetch and use public nodes.",
+      "append": "Use public nodes together with the custom nodes below.",
+      "custom": "Use only the nodes below. At least one valid address is required; public nodes are never used as a fallback."
+    },
+    "nodesAddressHint": "Enter one EasyTier node address per line, including its protocol and port.",
+    "nodesResetHint": "Restoring defaults immediately saves automatic mode and clears custom nodes.",
+    "nodesRetry": "Reload",
+    "nodesSaved": "Saved. Applies to the next connection."
   }
 }

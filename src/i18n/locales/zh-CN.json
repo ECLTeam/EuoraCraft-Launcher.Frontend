@@ -1808,14 +1808,14 @@
     "empty": "未设置"
   },
   "advanced": {
-    "nodesTitle": "高级选项：自定义联机节点",
-    "nodesHint": "修改在下次创建或加入房间时生效。每行填写一个 EasyTier 节点 URI；仅自定义模式不会回退公共节点。",
-    "nodesAddresses": "EasyTier 节点地址",
-    "nodesReset": "恢复自动节点",
+    "nodesTitle": "联机",
+    "nodesHint": "保存后在下次创建或加入房间时生效，当前房间不会切换节点。",
+    "nodesAddresses": "自定义节点地址",
+    "nodesReset": "恢复默认",
     "nodesMode": {
-      "automatic": "自动获取节点",
-      "append": "追加自定义节点",
-      "custom": "仅使用自定义节点"
+      "automatic": "自动",
+      "append": "公共与自定义",
+      "custom": "仅自定义"
     },
     "downloadTitle": "自定义下载",
     "downloadUrl": "下载地址",
@@ -1826,6 +1826,17 @@
     "shortcutHint": "使用当前实例图标创建快捷方式，双击直接启动此实例。",
     "shortcutDesktop": "创建桌面快捷方式",
     "shortcutChoose": "选择保存位置",
-    "shortcutCreated": "实例快捷方式已创建"
+    "shortcutCreated": "实例快捷方式已创建",
+    "nodesEntry": "联机设置",
+    "nodesPolicy": "节点策略",
+    "nodesModeHint": {
+      "automatic": "自动获取并使用公共节点。",
+      "append": "使用公共节点及下方填写的自定义节点。",
+      "custom": "仅使用下方填写的节点，至少需要一个有效地址，不回退公共节点。"
+    },
+    "nodesAddressHint": "每行填写一个带协议和端口的 EasyTier 节点地址。",
+    "nodesResetHint": "恢复默认会立即保存自动模式并清空自定义节点。",
+    "nodesRetry": "重新加载",
+    "nodesSaved": "已保存，下次连接时生效。"
   }
 }

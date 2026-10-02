@@ -1906,5 +1906,27 @@
     "import": "Importieren",
     "success": "Importaufgabe für das Modpaket wurde erstellt",
     "dropHint": "Loslassen, um das Modpaket zu importieren"
+  },
+  "advanced": {
+    "nodesTitle": "Mehrspieler",
+    "nodesEntry": "Mehrspieler-Einstellungen",
+    "nodesPolicy": "Knotenauswahl",
+    "nodesAddresses": "Eigene Knotenadressen",
+    "nodesReset": "Standard wiederherstellen",
+    "nodesMode": {
+      "automatic": "Automatisch",
+      "append": "Öffentliche und eigene",
+      "custom": "Nur eigene"
+    },
+    "nodesModeHint": {
+      "automatic": "Öffentliche Knoten automatisch abrufen und verwenden.",
+      "append": "Öffentliche Knoten und die unten eingetragenen eigenen Knoten verwenden.",
+      "custom": "Nur die unten eingetragenen Knoten verwenden. Mindestens eine gültige Adresse ist erforderlich; öffentliche Knoten dienen nicht als Ersatz."
+    },
+    "nodesAddressHint": "Eine EasyTier-Knotenadresse pro Zeile eingeben, einschließlich Protokoll und Port.",
+    "nodesHint": "Gespeicherte Änderungen gelten beim nächsten Erstellen oder Betreten eines Raums. Der aktuelle Raum behält seine Knoten.",
+    "nodesResetHint": "Das Wiederherstellen speichert sofort den automatischen Modus und löscht eigene Knoten.",
+    "nodesRetry": "Neu laden",
+    "nodesSaved": "Gespeichert. Gilt ab der nächsten Verbindung."
   }
 }

@@ -5,6 +5,13 @@
   min-height: 0;
 }
 
+.connect-settings-entry {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-right: 4px;
+}
+
 .connect-workspace {
   display: flex;
   width: 100%;

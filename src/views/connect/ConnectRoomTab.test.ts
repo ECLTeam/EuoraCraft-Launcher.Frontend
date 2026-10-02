@@ -16,12 +16,15 @@ import ConnectRoomTab from './ConnectRoomTab.vue'
 enableAutoUnmount(afterEach)
 
 const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
   listRunningInstances: vi.fn(),
   onRunningChanged: vi.fn(),
   writeClipboard: vi.fn(),
   readClipboard: vi.fn(),
   showError: vi.fn(),
 }))
+
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: mocks.navigate }) }))
 
 vi.mock('@/composables/useLauncherMessage', () => ({
   useLauncherMessage: () => ({ error: mocks.showError, warning: vi.fn(), success: vi.fn() }),
@@ -121,6 +124,7 @@ function mountRoomTab(state: ReturnType<typeof connectorState>) {
 
 describe('ConnectRoomTab', () => {
   beforeEach(() => {
+    mocks.navigate.mockReset().mockResolvedValue(undefined)
     mocks.listRunningInstances.mockReset().mockResolvedValue([])
     mocks.onRunningChanged.mockReset().mockReturnValue(undefined)
     mocks.writeClipboard.mockReset().mockResolvedValue(undefined)
@@ -130,6 +134,23 @@ describe('ConnectRoomTab', () => {
       configurable: true,
       value: { writeText: mocks.writeClipboard, readText: mocks.readClipboard },
     })
+  })
+
+  it('用快捷入口替代高级折叠区，忙碌时禁止跳转', async () => {
+    const state = connectorState(idleStatus())
+    const wrapper = mountRoomTab(state)
+    await flushPromises()
+    expect(wrapper.find('details.node-settings').exists()).toBe(false)
+    const entry = wrapper.get('[data-action="connector-settings"]')
+    await entry.trigger('click')
+    expect(mocks.navigate).toHaveBeenCalledWith({ path: '/settings/launcher', query: { section: 'connector' } })
+    mocks.navigate.mockClear()
+    state.busy.value = true
+    await flushPromises()
+    expect(entry.attributes('disabled')).toBeDefined()
+    await entry.trigger('click')
+    expect(mocks.navigate).not.toHaveBeenCalled()
+    expect(state.leave).not.toHaveBeenCalled()
   })
 
   it('保留双卡，将手动端口放在辅助区域并精简同行操作', async () => {
