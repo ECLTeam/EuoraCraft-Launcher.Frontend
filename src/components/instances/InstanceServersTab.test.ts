@@ -127,6 +127,7 @@ describe('InstanceServersTab unified rows', () => {
     expect(wrapper.find('.server-row').exists()).toBe(true)
   })
 
+  // jsdom 渲染 273 行本身即接近默认 5s 上限，全量并发跑套件时必然超时；本用例只校验分批与去重，放宽超时不降低断言强度。
   it('大量服务器按接口上限分批查询，重复地址只查询一次', async () => {
     rows = Array.from({ length: 272 }, (_, index) => ({
       ...rows[0]!,
@@ -138,7 +139,7 @@ describe('InstanceServersTab unified rows', () => {
     const batches = vi.mocked(instanceWorkspaceApi.serverStatuses).mock.calls.map(([addresses]) => addresses)
     expect(batches.map((batch) => batch.length)).toEqual([64, 64, 64, 64, 16])
     expect(new Set(batches.flat()).size).toBe(272)
-  })
+  }, 20000)
 
   it('刷新列表重新读取后端，外部新增记录不会被旧缓存遮住', async () => {
     vi.mocked(instanceWorkspaceApi.servers).mockRestore()
