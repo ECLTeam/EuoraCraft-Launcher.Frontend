@@ -1727,7 +1727,13 @@
     "installVersionPrompt": "{mod} {version} をインスタンス「{instance}」にインストールしますか？",
     "requiredDependencies": "必要な前提 Mod",
     "dependencyOpenHint": "前提 Mod をクリックするとその {version} のバージョン選択ページに移動します",
-    "saveAsSuccess": "{path} に保存しました"
+    "saveAsSuccess": "{path} に保存しました",
+    "searchRetry": "再試行",
+    "pageNumber": "{page} ページ",
+    "continueSearch": "検索を続ける",
+    "searchTruncated": "検索件数の上限に達しました。条件を絞り込んでください。",
+    "sourceUnavailable": "このプラットフォームは一時的に利用できません。他のプラットフォームを使用するか、再試行してください。",
+    "sourceNotConfigured": "このプラットフォームは未設定です。利用可能なプラットフォームを使用します。"
   },
   "auth": {
     "authlib": "Authlib インジェクション",

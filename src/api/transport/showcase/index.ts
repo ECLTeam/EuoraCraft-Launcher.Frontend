@@ -715,6 +715,16 @@ export function createShowcaseTransport(): BackendTransport {
           },
           total: items.length,
           query,
+          ...(payload.source === 'all'
+            ? {
+                sessionId: 'showcase-search',
+                page: 1,
+                pageCount: 1,
+                hasMore: false,
+                totalExact: true,
+                truncated: false,
+              }
+            : {}),
         })
       }
       case 'mod_source_config':

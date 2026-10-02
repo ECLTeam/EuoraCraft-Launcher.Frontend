@@ -31,6 +31,12 @@ export interface ModSearchResult {
   sources: Record<string, ModSourceStatus>
   total: number
   query: string
+  sessionId?: string
+  page?: number
+  pageCount?: number
+  hasMore?: boolean
+  totalExact?: boolean
+  truncated?: boolean
 }
 
 export interface ModInfo {
@@ -112,6 +118,7 @@ export interface McmodInfo {
 }
 
 export interface ModSearchItem {
+  groupId?: string
   id: string
   projectId: string
   slug: string
@@ -123,6 +130,7 @@ export interface ModSearchItem {
   downloads: number
   follows: number
   dateModified?: string
+  dateCreated?: string
   source: 'modrinth' | 'curseforge' | 'ftb'
   projectUrl: string
   categories: string[]
@@ -137,6 +145,8 @@ export interface ModSourceStatus {
   available: boolean
   error: string
   total: number
+  errorCode?: string
+  exhausted?: boolean
 }
 
 export interface ModDependency {

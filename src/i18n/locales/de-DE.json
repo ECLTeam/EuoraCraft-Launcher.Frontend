@@ -1727,7 +1727,13 @@
     "installVersionPrompt": "Möchtest du {mod} {version} in der Instanz „{instance}“ installieren?",
     "requiredDependencies": "Benötigte Voraussetzungen",
     "dependencyOpenHint": "Klicke auf eine Voraussetzung, um zu ihrer {version}-Versionsauswahl zu gelangen",
-    "saveAsSuccess": "Gespeichert unter {path}"
+    "saveAsSuccess": "Gespeichert unter {path}",
+    "searchRetry": "Erneut versuchen",
+    "pageNumber": "Seite {page}",
+    "continueSearch": "Suche fortsetzen",
+    "searchTruncated": "Suchlimit erreicht. Grenze die Filter ein.",
+    "sourceUnavailable": "Diese Plattform ist vorübergehend nicht verfügbar. Nutze die andere Plattform oder versuche es erneut.",
+    "sourceNotConfigured": "Diese Plattform ist nicht konfiguriert. Die verfügbare Plattform wird verwendet."
   },
   "auth": {
     "authlib": "Authlib-Injektion",

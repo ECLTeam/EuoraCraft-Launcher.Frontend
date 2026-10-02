@@ -25,7 +25,7 @@ export function createPopularRequest(
 ): CommandPayloadMap['search_mods'] {
   return {
     query: '',
-    source: resourceType === 'world' ? 'curseforge' : 'modrinth',
+    source: resourceType === 'world' ? 'curseforge' : 'all',
     game_version: instance?.vanillaName ?? '',
     loader_type: resourceType === 'mod' ? (instance?.primaryLoader ?? '') : '',
     resource_type: resourceType,
@@ -56,7 +56,7 @@ export async function getPopularPage(
   } else {
     await pendingPopular.get(key)?.catch(() => undefined)
   }
-  const pending = modApi.search(request).then((result) => {
+  const pending = modApi.search({ ...request, refresh: force }).then((result) => {
     globalCache.set(key, result, { ttl: popularTtl, group: CACHE_GROUPS.API })
     return result
   })
@@ -98,7 +98,7 @@ export async function prefetchVersionCatalog(): Promise<MinecraftVersionCatalog>
   return catalog
 }
 
-/** 按分类顺序且最多两个并发预热默认热门列表，单一来源失败不阻断其他分类。 */
+/** 逐类预热双平台列表，最多占用两个平台请求，保留前台搜索容量。 */
 export async function prefetchPopularPages(
   contexts: Array<{ type: DownloadResourceType; instance: ScannedVersion | null; targetKey: string }>
 ): Promise<void> {
@@ -114,7 +114,7 @@ export async function prefetchPopularPages(
       }
     }
   }
-  await Promise.all([worker(), worker()])
+  await worker()
 }
 
 /** 主窗口就绪后执行的低优先级后台预热，不向页面展示预取失败。 */

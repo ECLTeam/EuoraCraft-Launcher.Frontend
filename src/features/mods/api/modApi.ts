@@ -2,8 +2,12 @@ import backend from '@/api/client'
 import type { CommandPayloadMap } from '@/types/api'
 import type { ModInfo, ModInstallResult, ModSearchResult, ModSourceConfig, ModVersion } from '@/types/mods'
 
-function requireData<T>(response: { success: boolean; data?: T; message?: string }, operation: string): T {
-  if (!response.success || response.data === undefined) throw new Error(response.message || `${operation}失败`)
+function requireData<T>(
+  response: { success: boolean; data?: T; message?: string; errorCode?: string },
+  operation: string
+): T {
+  if (!response.success || response.data === undefined)
+    throw Object.assign(new Error(response.message || `${operation}失败`), { code: response.errorCode })
   return response.data
 }
 

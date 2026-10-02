@@ -100,13 +100,25 @@
         <strong>{{ warning.name }}</strong> · {{ warning.error }}
       </NAlert>
     </div>
+    <NAlert v-if="searchError" type="error" :showIcon="false" class="source-warnings">
+      {{ searchError }}
+      <NButton size="small" :disabled="loading" @click="refreshResults">{{ t('mods.searchRetry') }}</NButton>
+    </NAlert>
+    <NAlert v-if="truncated" type="info" :showIcon="false" class="source-warnings">
+      {{ t('mods.searchTruncated') }}
+    </NAlert>
 
     <div class="mods-results-panel">
       <div class="mods-results-content">
         <UiLoading :show="loading" mode="overlay" :label="t('mods.searching')" class="mods-results-spin">
           <NScrollbar v-if="results.length" class="mods-results-scroll">
             <div class="mod-list">
-              <div v-for="mod in results" :key="mod.id" class="mod-row" @click="openDetails(mod)">
+              <div
+                v-for="mod in results"
+                :key="mod.groupId || `${mod.source}:${mod.projectId}`"
+                class="mod-row"
+                @click="openDetails(mod)"
+              >
                 <!-- 标识图标：小方块，只做识别不抢版面 -->
                 <div class="mod-row-icon">
                   <img v-if="mod.iconUrl" :src="mod.iconUrl" :alt="mod.displayTitle" loading="lazy" />
@@ -157,16 +169,20 @@
                       formatRelativeTime(mod.dateModified)
                     }}</span>
                     <span class="mod-meta-item">{{ mod.author }}</span>
-                    <span class="mod-meta-item mod-meta-source">{{ sourceLabel(mod.source) }}</span>
+                    <span class="mod-meta-item mod-meta-source">{{
+                      mod.alternatives.length > 1
+                        ? mod.alternatives.map((entry) => sourceLabel(entry.source)).join(' · ')
+                        : sourceLabel(mod.source)
+                    }}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div v-if="totalPages > 1" class="mods-pagination">
+            <div v-if="totalPages > 1 || (isAggregated && hasMore)" class="mods-pagination">
               <NButton size="small" quaternary circle :disabled="page <= 1" @click="goToPage(1)">
                 <template #icon><UiIcon name="chevrons-left" :size="14" /></template>
               </NButton>
-              <NButton size="small" quaternary :disabled="page <= 1" @click="goToPage(page - 10)">
+              <NButton v-if="!isAggregated" size="small" quaternary :disabled="page <= 1" @click="goToPage(page - 10)">
                 <template #icon><UiIcon name="chevron-left" :size="14" /></template>
                 {{ t('mods.prev10Pages') }}
               </NButton>
@@ -174,16 +190,31 @@
                 <template #icon><UiIcon name="chevron-left" :size="14" /></template>
                 {{ t('mods.prevPage') }}
               </NButton>
-              <span class="mods-pagination-info">{{ page }} / {{ totalPages }}</span>
-              <NButton size="small" quaternary :disabled="page >= totalPages" @click="goToPage(page + 1)">
+              <span class="mods-pagination-info">{{
+                isAggregated && !totalExact ? t('mods.pageNumber', { page }) : `${page} / ${totalPages}`
+              }}</span>
+              <NButton size="small" quaternary :disabled="!canNextPage || loading" @click="goToPage(page + 1)">
                 {{ t('mods.nextPage') }}
                 <template #icon><UiIcon name="chevron-right" :size="14" /></template>
               </NButton>
-              <NButton size="small" quaternary :disabled="page >= totalPages" @click="goToPage(page + 10)">
+              <NButton
+                v-if="!isAggregated"
+                size="small"
+                quaternary
+                :disabled="page >= totalPages"
+                @click="goToPage(page + 10)"
+              >
                 {{ t('mods.next10Pages') }}
                 <template #icon><UiIcon name="chevron-right" :size="14" /></template>
               </NButton>
-              <NButton size="small" quaternary circle :disabled="page >= totalPages" @click="goToPage(totalPages)">
+              <NButton
+                v-if="!isAggregated"
+                size="small"
+                quaternary
+                circle
+                :disabled="page >= totalPages"
+                @click="goToPage(totalPages)"
+              >
                 <template #icon><UiIcon name="chevrons-right" :size="14" /></template>
               </NButton>
             </div>
@@ -192,13 +223,18 @@
             v-else-if="!loading"
             class="mods-results-empty"
             :description="
-              searched
-                ? t('mods.noResults', { resource: resourceTypeLabel })
-                : t('mods.searchHint', { resource: resourceTypeLabel })
+              isAggregated && hasMore
+                ? t('mods.continueSearch')
+                : searched
+                  ? t('mods.noResults', { resource: resourceTypeLabel })
+                  : t('mods.searchHint', { resource: resourceTypeLabel })
             "
           >
             <template #icon><UiIcon name="cloud-download" :size="42" /></template>
           </NEmpty>
+          <NButton v-if="isAggregated && !results.length && hasMore && !loading" @click="fetchPage(1)">
+            {{ t('mods.continueSearch') }}
+          </NButton>
         </UiLoading>
       </div>
     </div>
@@ -505,7 +541,6 @@ import RequiredModDependencies from '@/components/mods/RequiredModDependencies.v
 import ResourceInstanceSelect from '@/components/resources/ResourceInstanceSelect.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
-import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceKey, parseInstanceKey, useResourceInstallTarget } from '@/composables/useResourceInstallTarget'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
@@ -536,7 +571,14 @@ import type {
   MinecraftVersionType,
   ScannedVersion,
 } from '@/types/instances'
-import type { ModInfo, ModSearchItem, ModSourceReference, ModSourceStatus, ModVersion } from '@/types/mods'
+import type {
+  ModInfo,
+  ModSearchItem,
+  ModSearchResult,
+  ModSourceReference,
+  ModSourceStatus,
+  ModVersion,
+} from '@/types/mods'
 import { getErrorMessage } from '@/utils/error'
 const props = withDefaults(
   defineProps<{
@@ -562,7 +604,8 @@ const usesDirectVersionAction = computed(() =>
 const message = useLauncherMessage()
 const route = useRoute()
 const router = useRouter()
-const { loading, run } = useAsyncAction({ showSuccess: false, showError: false })
+const loading = ref(false)
+const searchError = ref('')
 
 const target = useResourceInstallTarget(props.resourceType, true)
 const instance = target.selectedInstance
@@ -574,7 +617,17 @@ const sourceStatuses = ref<Record<string, ModSourceStatus>>({})
 const PAGE_SIZE = 20
 const page = ref(1)
 const total = ref(0)
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
+const sessionId = ref('')
+const sessionKey = ref('')
+const hasMore = ref(false)
+const totalExact = ref(true)
+const truncated = ref(false)
+const knownPageCount = ref(0)
+const isAggregated = computed(() => !props.fixedSource && !sourceFilter.value)
+const totalPages = computed(() =>
+  Math.max(1, isAggregated.value ? knownPageCount.value : Math.ceil(total.value / PAGE_SIZE))
+)
+const canNextPage = computed(() => (isAggregated.value ? hasMore.value : page.value < totalPages.value))
 const detailsVisible = ref(false)
 const detailLoading = ref(false)
 const refreshingInstances = ref(false)
@@ -746,12 +799,18 @@ interface ModSearchCacheState {
   results: ModSearchItem[]
   total: number
   sources: Record<string, ModSourceStatus>
+  sessionId?: string
+  sessionKey?: string
+  hasMore?: boolean
+  totalExact?: boolean
+  truncated?: boolean
+  pageCount?: number
 }
 
 const STATE_CACHE_TTL = 24 * 60 * 60 * 1000
 
 function stateCacheKey(): string {
-  return `mod-search-state:${props.resourceType}`
+  return `mod-search-state:v2:${props.resourceType}`
 }
 
 const pageCache = new Map<
@@ -794,8 +853,14 @@ function saveState(): void {
       results: results.value,
       total: total.value,
       sources: sourceStatuses.value,
+      sessionId: sessionId.value,
+      sessionKey: sessionKey.value,
+      hasMore: hasMore.value,
+      totalExact: totalExact.value,
+      truncated: truncated.value,
+      pageCount: knownPageCount.value,
     },
-    { ttl: STATE_CACHE_TTL, persistent: false }
+    { ttl: isAggregated.value ? 10 * 60 * 1000 : STATE_CACHE_TTL, persistent: false }
   )
 }
 
@@ -803,7 +868,7 @@ function restoreState(): boolean {
   const cached = globalCache.get<ModSearchCacheState>(stateCacheKey())
   if (!cached || cached.instanceKey !== target.selectedKey.value) return false
   // 默认热门列表使用共享缓存的 10 分钟时效；搜索和翻页继续恢复原有视图。
-  const defaultSource = props.resourceType === 'world' ? 'curseforge' : 'modrinth'
+  const defaultSource = props.resourceType === 'world' ? 'curseforge' : 'all'
   if (
     cached.page === 1 &&
     !cached.query &&
@@ -822,7 +887,15 @@ function restoreState(): boolean {
   results.value = cached.results
   total.value = cached.total
   sourceStatuses.value = cached.sources
+  sessionId.value = cached.sessionId ?? ''
+  sessionKey.value = cached.sessionKey ?? ''
+  hasMore.value = cached.hasMore ?? false
+  totalExact.value = cached.totalExact ?? true
+  truncated.value = cached.truncated ?? false
+  knownPageCount.value = cached.pageCount ?? 0
   searched.value = true
+  // 聚合页面重新读取服务持有的合并元数据，恢复时也校验会话有效性。
+  if (isAggregated.value) void fetchPage(cached.page)
   return true
 }
 
@@ -961,8 +1034,16 @@ watch(
 
 const sourceWarnings = computed(() =>
   Object.entries(sourceStatuses.value)
-    .filter(([, status]) => !status.available && status.error)
-    .map(([name, status]) => ({ name: name === 'mcmod' ? 'MCMOD百科' : sourceLabel(name), error: status.error }))
+    .filter(([, status]) => status.error)
+    .map(([name, status]) => ({
+      name: name === 'mcmod' ? 'MCMOD百科' : sourceLabel(name),
+      error:
+        status.errorCode === 'CURSEFORGE_KEY_REQUIRED'
+          ? t('mods.sourceNotConfigured')
+          : status.errorCode
+            ? t('mods.sourceUnavailable')
+            : status.error,
+    }))
 )
 
 function sourceKey(value: ModSourceReference): string {
@@ -1280,16 +1361,20 @@ watch(
 async function fetchPage(targetPage: number, force = false) {
   const inst = instance.value
   const loader = props.resourceType === 'mod' ? loaderFilter.value || inst?.primaryLoader || '' : ''
-  const source = props.fixedSource || sourceFilter.value || 'modrinth'
+  const source = props.fixedSource || sourceFilter.value || 'all'
+  const aggregated = source === 'all'
+  const criteriaKey = pageCacheKey(0)
+  const activeSession = !force && sessionKey.value === criteriaKey ? sessionId.value : ''
   const isDefaultPopular =
     targetPage === 1 &&
     !query.value.trim() &&
     !versionFilter.value &&
     !loaderFilter.value &&
     !sortFilter.value &&
-    source === (props.resourceType === 'world' ? 'curseforge' : 'modrinth')
+    source === (props.resourceType === 'world' ? 'curseforge' : 'all') &&
+    !activeSession
   const key = pageCacheKey(targetPage)
-  if (!force && !isDefaultPopular) {
+  if (!force && !isDefaultPopular && !aggregated) {
     const cached = pageCache.get(key)
     if (cached) {
       // 命中缓存同样要作废在途请求，避免慢响应稍后覆盖缓存结果
@@ -1298,41 +1383,65 @@ async function fetchPage(targetPage: number, force = false) {
       total.value = cached.total
       sourceStatuses.value = cached.sources
       page.value = targetPage
+      loading.value = false
+      searchError.value = ''
       return
     }
   }
   const requestId = ++searchRequestId
-  const response = await run(() =>
-    isDefaultPopular
-      ? getPopularPage(props.resourceType, inst, target.selectedKey.value, force)
-      : modApi.search({
-          query: query.value.trim(),
-          source,
-          game_version: versionFilter.value || inst?.vanillaName || '',
-          loader_type: loader,
-          resource_type: props.resourceType,
-          limit: PAGE_SIZE,
-          offset: (targetPage - 1) * PAGE_SIZE,
-          sort: sortFilter.value,
-        })
-  ).catch((error) => {
-    message.error(getErrorMessage(error))
-    return undefined
-  })
-  if (!response || requestId !== searchRequestId) return
-  const items = response.items ?? []
-  const totalCount = response.total ?? items.length
-  const sources = response.sources ?? {}
-  results.value = items
-  total.value = totalCount
-  sourceStatuses.value = sources
-  page.value = targetPage
-  if (pageCache.size >= PAGE_CACHE_MAX_ENTRIES) {
-    const oldestKey = pageCache.keys().next().value
-    if (oldestKey !== undefined) pageCache.delete(oldestKey)
+  loading.value = true
+  searchError.value = ''
+  try {
+    const request = {
+      query: query.value.trim(),
+      source,
+      game_version: versionFilter.value || inst?.vanillaName || '',
+      loader_type: loader,
+      resource_type: props.resourceType,
+      limit: PAGE_SIZE,
+      offset: aggregated ? 0 : (targetPage - 1) * PAGE_SIZE,
+      sort: sortFilter.value,
+      session_id: activeSession,
+      page: aggregated && !activeSession ? 1 : targetPage,
+      refresh: force,
+    }
+    let response: ModSearchResult
+    try {
+      response = isDefaultPopular
+        ? await getPopularPage(props.resourceType, inst, target.selectedKey.value, force)
+        : await modApi.search(request)
+    } catch (error) {
+      if (aggregated && error instanceof Error && 'code' in error && error.code === 'SEARCH_SESSION_EXPIRED') {
+        if (requestId !== searchRequestId) return
+        pageCache.clear()
+        response = await modApi.search({ ...request, session_id: '', page: 1, refresh: true })
+      } else throw error
+    }
+    if (requestId !== searchRequestId) return
+    const items = response.items ?? []
+    const totalCount = response.total ?? items.length
+    const sources = response.sources ?? {}
+    results.value = items
+    total.value = totalCount
+    sourceStatuses.value = sources
+    page.value = response.page ?? targetPage
+    sessionId.value = response.sessionId ?? ''
+    sessionKey.value = criteriaKey
+    hasMore.value = response.hasMore ?? false
+    totalExact.value = response.totalExact ?? true
+    truncated.value = response.truncated ?? false
+    knownPageCount.value = response.pageCount ?? 0
+    if (!aggregated && pageCache.size >= PAGE_CACHE_MAX_ENTRIES) {
+      const oldestKey = pageCache.keys().next().value
+      if (oldestKey !== undefined) pageCache.delete(oldestKey)
+    }
+    if (!aggregated) pageCache.set(key, { results: items, total: totalCount, sources })
+    saveState()
+  } catch (error) {
+    if (requestId === searchRequestId) searchError.value = getErrorMessage(error)
+  } finally {
+    if (requestId === searchRequestId) loading.value = false
   }
-  pageCache.set(key, { results: items, total: totalCount, sources })
-  saveState()
 }
 
 async function handleSearch(force = false) {
@@ -1354,7 +1463,8 @@ async function loadPopular(force = false) {
 }
 
 async function goToPage(targetPage: number) {
-  if (targetPage < 1 || targetPage > totalPages.value || targetPage === page.value) return
+  if (loading.value || targetPage < 1 || targetPage === page.value) return
+  if (isAggregated.value ? targetPage > page.value && !hasMore.value : targetPage > totalPages.value) return
   await fetchPage(targetPage)
 }
 

@@ -1724,7 +1724,13 @@
     "installVersionPrompt": "Установить {mod} {version} в экземпляр «{instance}»?",
     "requiredDependencies": "Требуемые предварительные моды",
     "dependencyOpenHint": "Нажмите на предварительный мод, чтобы перейти к выбору его версии {version}",
-    "saveAsSuccess": "Сохранено в {path}"
+    "saveAsSuccess": "Сохранено в {path}",
+    "searchRetry": "Повторить",
+    "pageNumber": "Страница {page}",
+    "continueSearch": "Продолжить поиск",
+    "searchTruncated": "Достигнут лимит поиска. Уточните фильтры.",
+    "sourceUnavailable": "Эта платформа временно недоступна. Используйте другую платформу или повторите попытку.",
+    "sourceNotConfigured": "Эта платформа не настроена. Используется доступная платформа."
   },
   "auth": {
     "authlib": "Инъекция authlib",

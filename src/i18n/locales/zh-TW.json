@@ -1610,7 +1610,13 @@
     "installVersionPrompt": "請問是否將 {mod} {version} 安裝到實例“{instance}”？",
     "requiredDependencies": "所需前置模組",
     "dependencyOpenHint": "點選前置模組可進入其 {version} 版本選擇頁",
-    "saveAsSuccess": "已儲存到 {path}"
+    "saveAsSuccess": "已儲存到 {path}",
+    "searchRetry": "重試",
+    "pageNumber": "第 {page} 頁",
+    "continueSearch": "繼續讀取",
+    "searchTruncated": "已達到本次搜尋數量上限，請縮小篩選範圍。",
+    "sourceUnavailable": "此平台暫時無法使用，可使用另一平台或重試。",
+    "sourceNotConfigured": "此平台尚未設定，目前使用可用平台。"
   },
   "auth": {
     "authlib": "Authlib 注入",

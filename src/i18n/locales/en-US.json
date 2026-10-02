@@ -1713,7 +1713,13 @@
     "installVersionPrompt": "Install {mod} {version} to “{instance}”?",
     "requiredDependencies": "Required dependencies",
     "dependencyOpenHint": "Select a dependency to open its {version} version page",
-    "saveAsSuccess": "Saved to {path}"
+    "saveAsSuccess": "Saved to {path}",
+    "searchRetry": "Retry",
+    "pageNumber": "Page {page}",
+    "continueSearch": "Continue searching",
+    "searchTruncated": "Search limit reached. Narrow your filters to find more projects.",
+    "sourceUnavailable": "This platform is temporarily unavailable. Use the other platform or retry.",
+    "sourceNotConfigured": "This platform is not configured. Results use the available platform."
   },
   "auth": {
     "authlib": "Authlib Injector",

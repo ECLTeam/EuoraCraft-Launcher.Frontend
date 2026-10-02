@@ -103,14 +103,14 @@ describe('下载页后台预取', () => {
     globalCache.set('mod-search-state:mod', { query: 'fabric' })
     const instance = { vanillaName: '1.21.1', primaryLoader: 'fabric' } as ScannedVersion
     expect(createPopularRequest('world', null)).toMatchObject({ source: 'curseforge', resource_type: 'world' })
-    expect(createPopularRequest('mod', null)).toMatchObject({ source: 'modrinth', query: '', limit: 20, offset: 0 })
+    expect(createPopularRequest('mod', null)).toMatchObject({ source: 'all', query: '', limit: 20, offset: 0 })
     expect(createPopularRequest('mod', instance)).toMatchObject({ game_version: '1.21.1', loader_type: 'fabric' })
     expect(createPopularRequest('resourcepack', instance)).toMatchObject({ game_version: '1.21.1', loader_type: '' })
     await getPopularPage('mod', null, '')
     expect(globalCache.get('mod-search-state:mod')).toEqual({ query: 'fabric' })
   })
 
-  it('五类资源最多并行两项，单项失败仍继续处理其他分类', async () => {
+  it('五类资源逐项预热，单项失败仍继续处理其他分类', async () => {
     let active = 0
     let maximum = 0
     let callCount = 0
@@ -127,7 +127,7 @@ describe('下载页后台预取', () => {
     try {
       const types: DownloadResourceType[] = ['mod', 'resourcepack', 'shaderpack', 'datapack', 'world']
       await prefetchPopularPages(types.map((type) => ({ type, instance: null, targetKey: '' })))
-      expect(maximum).toBe(2)
+      expect(maximum).toBe(1)
       expect(mocks.search).toHaveBeenCalledTimes(5)
       expect(warning).toHaveBeenCalledTimes(1)
     } finally {

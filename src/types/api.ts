@@ -617,6 +617,9 @@ export interface CommandPayloadMap {
     limit?: number
     offset?: number
     sort?: string
+    session_id?: string
+    page?: number
+    refresh?: boolean
   }
   mod_source_config: undefined
   get_mod_info: { mod_id: string; source: string; resource_type?: string }
