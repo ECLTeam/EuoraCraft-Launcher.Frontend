@@ -186,12 +186,25 @@ export interface WorldEntry {
   allowCommands?: boolean
   version?: string
   seed?: string
+  seedEditable?: boolean
+  seedError?: string | null
   spawn?: { x: number; y: number; z: number }
   weather?: { raining: boolean; thundering: boolean }
   lastPlayedAt?: string | null
   modifiedAt?: string
   createdAt?: string
   error?: string
+}
+
+export interface WorldPatch {
+  difficulty?: number
+  gameMode?: number
+  allowCommands?: boolean
+  difficultyLocked?: boolean
+  raining?: boolean
+  thundering?: boolean
+  seed?: string
+  spawn?: { x: number; y: number; z: number }
 }
 
 export interface ScreenshotEntry {

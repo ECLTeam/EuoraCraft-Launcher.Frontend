@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { i18n } from '@/i18n'
 import type { BackendMockState } from '@/test/mockBackend'
-import type { ScannedVersion } from '@/types/instances'
+import type { ScannedVersion, WorldEntry } from '@/types/instances'
 import InstanceWorldsTab from './InstanceWorldsTab.vue'
 
 const mock = vi.hoisted<{ state?: BackendMockState }>(() => ({ state: undefined }))
@@ -35,6 +35,102 @@ const version: ScannedVersion = {
   jsonPath: 'D:/Games/.minecraft/versions/1.21.1/1.21.1.json',
 }
 const target = workspaceTarget(version)
+
+describe('InstanceWorldsTab exact seeds', () => {
+  let world: WorldEntry
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.command.mockReset()
+    instanceWorkspaceApi.invalidateCache(target)
+    world = { id: 'world', name: '测试世界', path: 'saves/world', seed: '-4172144997902289642', version: '1.20.1' }
+    mocks.command.mockImplementation((command, payload) => {
+      if (command === 'game_world_list') return Promise.resolve({ success: true, data: [world] })
+      if (command === 'game_world_patch') {
+        world = { ...world, ...(payload.patch.seed !== undefined ? { seed: payload.patch.seed } : {}) }
+        return Promise.resolve({ success: true, data: world })
+      }
+      if (command === 'open_url') return Promise.resolve({ success: true, data: {} })
+      throw new Error(`Unexpected command: ${command}`)
+    })
+  })
+
+  async function openEditor() {
+    const wrapper = await mountWorlds()
+    await wrapper.get('button[title="难度与作弊"]').trigger('click')
+    await flushPromises()
+    const label = wrapper.findAll('.world-editor label').find((label) => label.text().includes('世界种子'))!
+    return { wrapper, input: label.get('input') }
+  }
+
+  it('长种子编辑文本保留全部数位，保存其他字段不会提交种子', async () => {
+    const { wrapper, input } = await openEditor()
+    expect(input.element.value).toBe(world.seed)
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '保存（自动备份）')!
+      .trigger('click')
+    await flushPromises()
+    const patch = mocks.command.mock.calls.find(([command]) => command === 'game_world_patch')![1].patch
+    expect(patch).not.toHaveProperty('seed')
+    wrapper.unmount()
+  })
+
+  it.each(['-9223372036854775808', '9223372036854775807', '0'])('修改种子通过字符串精确传输：%s', async (seed) => {
+    const { wrapper, input } = await openEditor()
+    await input.setValue(seed)
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '保存（自动备份）')!
+      .trigger('click')
+    await flushPromises()
+    expect(mocks.command).toHaveBeenCalledWith(
+      'game_world_patch',
+      expect.objectContaining({ patch: expect.objectContaining({ seed }) })
+    )
+    expect(wrapper.get('.world-card').text()).toContain(`种子 ${seed}`)
+    wrapper.unmount()
+  })
+
+  it.each(['1e3', '1.5', '9223372036854775808', '-9223372036854775809', ''])(
+    '非法种子不发送保存请求：%s',
+    async (seed) => {
+      const { wrapper, input } = await openEditor()
+      await input.setValue(seed)
+      await wrapper
+        .findAll('button')
+        .find((button) => button.text() === '保存（自动备份）')!
+        .trigger('click')
+      await flushPromises()
+      expect(mocks.command.mock.calls.some(([command]) => command === 'game_world_patch')).toBe(false)
+      expect(wrapper.find('.world-editor').exists()).toBe(true)
+      wrapper.unmount()
+    }
+  )
+
+  it.each(['', 'None'])('未知种子统一占位且不能编辑或打开 Chunkbase：%s', async (seed) => {
+    world.seed = seed
+    const { wrapper, input } = await openEditor()
+    expect(wrapper.get('.world-card').text()).toContain('种子 未知')
+    expect(input.attributes('disabled')).toBeDefined()
+    expect(input.element.value).toBe('')
+    expect(wrapper.get('button[title="Chunkbase"]').attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
+
+  it('保存失败保留种子编辑文本和弹窗', async () => {
+    const { wrapper, input } = await openEditor()
+    await input.setValue('9223372036854775807')
+    mocks.command.mockResolvedValueOnce({ success: false, message: '存档正在被占用' })
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '保存（自动备份）')!
+      .trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.world-editor').exists()).toBe(true)
+    expect(input.element.value).toBe('9223372036854775807')
+    wrapper.unmount()
+  })
+})
 
 async function mountWorlds() {
   const wrapper = mount(InstanceWorldsTab, {

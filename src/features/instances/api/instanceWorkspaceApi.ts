@@ -17,6 +17,7 @@ import type {
   ServerEntry,
   ServerStatus,
   WorldEntry,
+  WorldPatch,
 } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
 export function workspaceTarget(version: ScannedVersion, versionIsolation?: boolean): InstanceTargetPayload {
@@ -144,7 +145,7 @@ function cachedWorlds(target: InstanceTargetPayload): Promise<WorldEntry[]> {
   )
 }
 
-async function patchWorld(target: InstanceTargetPayload, worldId: string, patch: object): Promise<WorldEntry> {
+async function patchWorld(target: InstanceTargetPayload, worldId: string, patch: WorldPatch): Promise<WorldEntry> {
   const world = await call<WorldEntry>('game_world_patch', { ...target, world_id: worldId, patch }, '修改存档')
   invalidateWorkspaceCache(target, 'worlds')
   return world

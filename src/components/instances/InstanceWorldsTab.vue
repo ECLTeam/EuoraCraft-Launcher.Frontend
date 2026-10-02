@@ -34,7 +34,9 @@
               ><span>{{ world.difficulty || '未知难度' }}</span
               ><span>{{ world.version || '未知版本' }}</span>
             </div>
-            <p>种子 {{ world.seed || '-' }} · 上次游玩 {{ formatDate(world.lastPlayedAt) }}</p>
+            <p :title="world.seedError || undefined">
+              种子 {{ normalizeWorldSeed(world.seed) ?? '未知' }} · 上次游玩 {{ formatDate(world.lastPlayedAt) }}
+            </p>
             <p v-if="world.error" class="world-error">{{ world.error }}</p>
           </div>
           <div class="world-actions">
@@ -59,7 +61,14 @@
             <NButton quaternary circle size="tiny" title="导出" @click="exportWorld(world)">
               <template #icon><UiIcon name="file-download" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="Chunkbase" @click="chunkbase(world)">
+            <NButton
+              quaternary
+              circle
+              size="tiny"
+              title="Chunkbase"
+              :disabled="normalizeWorldSeed(world.seed) === undefined"
+              @click="chunkbase(world)"
+            >
               <template #icon><UiIcon name="external-link" :size="14" /></template>
             </NButton>
             <NButton quaternary circle size="tiny" type="error" title="删除" @click="remove(world)">
@@ -85,7 +94,10 @@
         <label>出生点 X<NInputNumber v-model:value="editor.spawnX" :min="-30000000" :max="30000000" /></label>
         <label>出生点 Y<NInputNumber v-model:value="editor.spawnY" :min="-30000000" :max="30000000" /></label>
         <label>出生点 Z<NInputNumber v-model:value="editor.spawnZ" :min="-30000000" :max="30000000" /></label>
-        <label>世界种子<NInputNumber v-model:value="editor.seed" placeholder="整数种子" /></label>
+        <label
+          >世界种子<NInput v-model:value="editor.seed" :disabled="!seedCanEdit" placeholder="完整整数种子" />
+          <small v-if="!seedCanEdit">{{ editing?.seedError || '无法读取世界种子，保留原存档数据' }}</small>
+        </label>
         <div class="world-editor-row">
           <label><NSwitch v-model:value="editor.allowCommands" /> 允许作弊</label>
           <label><NSwitch v-model:value="editor.difficultyLocked" /> 锁定难度</label>
@@ -95,7 +107,7 @@
       </div>
       <template #footer
         ><NButton @click="editorVisible = false">取消</NButton
-        ><NButton type="primary" @click="saveWorld">保存（自动备份）</NButton></template
+        ><NButton type="primary" :loading="savingWorld" @click="saveWorld">保存（自动备份）</NButton></template
       >
     </Modal>
     <Modal v-model:visible="backupsVisible" title="存档备份" width="660px">
@@ -166,7 +178,9 @@ import {
   workspaceTarget,
   type GameOptionEntry,
 } from '@/features/instances/api/instanceWorkspaceApi'
-import type { ScannedVersion, WorldEntry } from '@/types/instances'
+import { normalizeWorldSeed } from '@/features/instances/worldSeeds'
+import type { ScannedVersion, WorldEntry, WorldPatch } from '@/types/instances'
+import { getErrorMessage } from '@/utils/error'
 import InstanceContentState from './InstanceContentState.vue'
 
 const props = defineProps<{ version: ScannedVersion }>()
@@ -179,6 +193,10 @@ const sortKey = ref<'name' | 'modifiedAt' | 'lastPlayedAt' | 'createdAt'>('modif
 const iconUrls = reactive<Record<string, string>>({})
 const editorVisible = ref(false)
 const editing = ref<WorldEntry | null>(null)
+const savingWorld = ref(false)
+const seedCanEdit = computed(
+  () => editing.value?.seedEditable !== false && normalizeWorldSeed(editing.value?.seed) !== undefined
+)
 const editor = reactive({
   difficulty: 2,
   gameMode: 0,
@@ -186,7 +204,7 @@ const editor = reactive({
   difficultyLocked: false,
   raining: false,
   thundering: false,
-  seed: 0,
+  seed: '',
   spawnX: 0,
   spawnY: 64,
   spawnZ: 0,
@@ -260,27 +278,38 @@ function editWorld(world: WorldEntry) {
   editor.difficultyLocked = Boolean(world.difficultyLocked)
   editor.raining = Boolean(world.weather?.raining)
   editor.thundering = Boolean(world.weather?.thundering)
-  const numericSeed = Number.parseInt(String(world.seed ?? ''), 10)
-  editor.seed = Number.isNaN(numericSeed) ? 0 : numericSeed
+  editor.seed = normalizeWorldSeed(world.seed) ?? ''
   editor.spawnX = world.spawn?.x ?? 0
   editor.spawnY = world.spawn?.y ?? 64
   editor.spawnZ = world.spawn?.z ?? 0
   editorVisible.value = true
 }
 async function saveWorld() {
-  if (!editing.value) return
-  await instanceWorkspaceApi.patchWorld(target.value, editing.value.id, {
+  if (!editing.value || savingWorld.value) return
+  const patch: WorldPatch = {
     difficulty: editor.difficulty,
     gameMode: editor.gameMode,
     allowCommands: editor.allowCommands,
     difficultyLocked: editor.difficultyLocked,
     raining: editor.raining,
     thundering: editor.thundering,
-    seed: editor.seed,
     spawn: { x: editor.spawnX, y: editor.spawnY, z: editor.spawnZ },
-  })
-  editorVisible.value = false
-  await load()
+  }
+  if (seedCanEdit.value && editor.seed !== normalizeWorldSeed(editing.value.seed)) {
+    const seed = normalizeWorldSeed(editor.seed)
+    if (seed === undefined) return message.error('种子必须是有符号 64 位范围内的完整整数')
+    patch.seed = seed
+  }
+  savingWorld.value = true
+  try {
+    await instanceWorkspaceApi.patchWorld(target.value, editing.value.id, patch)
+    editorVisible.value = false
+    await load()
+  } catch (error) {
+    message.error(getErrorMessage(error, '保存存档失败'))
+  } finally {
+    savingWorld.value = false
+  }
 }
 async function backup(world: WorldEntry) {
   await instanceWorkspaceApi.backupWorld(target.value, world.id)
@@ -395,7 +424,9 @@ function remove(world: WorldEntry) {
   )
 }
 async function chunkbase(world: WorldEntry) {
-  const url = `https://www.chunkbase.com/apps/seed-map#seed=${encodeURIComponent(world.seed || '')}&platform=java_${encodeURIComponent(world.version || '')}`
+  const seed = normalizeWorldSeed(world.seed)
+  if (seed === undefined) return message.error('无法读取世界种子')
+  const url = `https://www.chunkbase.com/apps/seed-map#seed=${encodeURIComponent(seed)}&platform=java_${encodeURIComponent(world.version || '')}`
   await backend.command('open_url', { url })
 }
 
