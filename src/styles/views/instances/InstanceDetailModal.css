@@ -176,21 +176,6 @@
   flex-direction: column;
   overflow: hidden auto;
 }
-/* 空态时让图标与文字在卡内水平垂直居中 */
-.vdm-page.workspace-page :deep(.ui-loading--overlay) {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-}
-.vdm-page.workspace-page :deep(.ui-loading--overlay:has(.n-empty)) {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
 
 /* =============================================
    Overview 页面 — 信息卡片 + 快捷操作
@@ -609,12 +594,6 @@
   overflow: hidden;
 }
 
-.mods-spin {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
 /* 模组列表 */
 .mods-list {
   display: flex;
@@ -794,32 +773,6 @@
 .mods-list .btn-delete:hover {
   background: var(--error-alpha);
   color: var(--error);
-}
-
-/* 模组空状态 */
-.mods-empty {
-  flex: 1;
-  min-height: 200px;
-}
-
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-}
-
-.empty-icon {
-  color: var(--ecl-text-tertiary);
-  opacity: 0.6;
-}
-
-.empty-text {
-  margin: 0;
-  color: var(--ecl-text-secondary);
-  font-size: 13px;
 }
 
 /* =============================================

@@ -33,6 +33,7 @@ declare module 'vue' {
     Input: typeof import('./src/components/ui/Input.vue')['default']
     InstalledInstanceList: typeof import('./src/components/instances/InstalledInstanceList.vue')['default']
     InstanceCategoryManager: typeof import('./src/components/instances/InstanceCategoryManager.vue')['default']
+    InstanceContentState: typeof import('./src/components/instances/InstanceContentState.vue')['default']
     InstanceDetailModsTab: typeof import('./src/components/instances/InstanceDetailModsTab.vue')['default']
     InstanceDetailOverviewTab: typeof import('./src/components/instances/InstanceDetailOverviewTab.vue')['default']
     InstanceDetailProfileTab: typeof import('./src/components/instances/InstanceDetailProfileTab.vue')['default']

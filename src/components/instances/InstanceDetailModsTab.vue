@@ -51,69 +51,63 @@
     </div>
 
     <div class="mods-panel-content">
-      <div v-if="!modSupported" class="mods-empty empty-state">
-        <UiIcon name="puzzle" :size="36" class="empty-icon" />
-        <p class="empty-text">{{ t('versions.mods.loaderNotSupported') }}</p>
-      </div>
-      <UiLoading v-else :show="modsLoading" mode="overlay" class="mods-spin">
-        <template v-if="filteredMods.length">
-          <div class="mods-list">
-            <article
-              v-for="mod in filteredMods"
-              :key="mod.filename"
-              :class="['mod-list-row', { 'is-disabled': !mod.enabled }]"
-            >
-              <div class="mod-list-identity">
-                <span class="mod-list-icon">
-                  <img v-if="mod.icon_data" :src="mod.icon_data" alt="" class="mod-list-icon-img" loading="lazy" />
-                  <UiIcon v-else name="cube" :size="17" />
-                </span>
-                <div class="mod-list-title">
-                  <strong>{{ modDisplayName(mod) }}</strong>
-                  <span v-if="hasTranslatedName(mod)" class="mod-original-name">{{ mod.name }}</span>
-                  <span class="mod-list-filename" :title="mod.filename">{{ mod.filename }}</span>
-                  <span class="mod-list-metadata">{{ [mod.version, mod.author].filter(Boolean).join(' · ') }}</span>
-                </div>
+      <InstanceContentState
+        :loading="modSupported && modsLoading"
+        :empty="!modSupported || filteredMods.length === 0"
+        :emptyDescription="t(modSupported ? 'versions.mods.noMods' : 'versions.mods.loaderNotSupported')"
+      >
+        <div class="mods-list">
+          <article
+            v-for="mod in filteredMods"
+            :key="mod.filename"
+            :class="['mod-list-row', { 'is-disabled': !mod.enabled }]"
+          >
+            <div class="mod-list-identity">
+              <span class="mod-list-icon">
+                <img v-if="mod.icon_data" :src="mod.icon_data" alt="" class="mod-list-icon-img" loading="lazy" />
+                <UiIcon v-else name="cube" :size="17" />
+              </span>
+              <div class="mod-list-title">
+                <strong>{{ modDisplayName(mod) }}</strong>
+                <span v-if="hasTranslatedName(mod)" class="mod-original-name">{{ mod.name }}</span>
+                <span class="mod-list-filename" :title="mod.filename">{{ mod.filename }}</span>
+                <span class="mod-list-metadata">{{ [mod.version, mod.author].filter(Boolean).join(' · ') }}</span>
               </div>
+            </div>
 
-              <div class="mod-list-loader">
-                <span v-if="mod.loader_type" class="badge" :class="'badge-' + mod.loader_type.toLowerCase()">
-                  {{ getLoaderName(mod.loader_type) }}
-                </span>
-                <span v-else class="badge badge-vanilla">{{ t('versions.manage.vanilla') }}</span>
-              </div>
+            <div class="mod-list-loader">
+              <span v-if="mod.loader_type" class="badge" :class="'badge-' + mod.loader_type.toLowerCase()">
+                {{ getLoaderName(mod.loader_type) }}
+              </span>
+              <span v-else class="badge badge-vanilla">{{ t('versions.manage.vanilla') }}</span>
+            </div>
 
-              <div class="mod-list-actions">
-                <span :class="['mod-status', { enabled: mod.enabled }]">
-                  {{ t(mod.enabled ? 'versions.mods.enabled' : 'versions.mods.disabled') }}
-                </span>
-                <button
-                  v-if="mod.project_id || mod.mcmod_url"
-                  class="btn-action"
-                  :title="t('versions.mods.checkOnline')"
-                  @click="handleOpenOnline(mod)"
-                >
-                  <UiIcon name="external-link" :size="13" />
-                </button>
-                <button class="btn-action btn-delete" :title="t('common.delete')" @click="handleDeleteMod(mod)">
-                  <UiIcon name="trash" :size="13" />
-                </button>
-                <NSwitch :value="mod.enabled" size="small" @update:value="handleToggleMod(mod)" />
-              </div>
-            </article>
-          </div>
-        </template>
-        <div v-else-if="!modsLoading" class="mods-empty empty-state">
-          <UiIcon name="puzzle" :size="36" class="empty-icon" />
-          <p class="empty-text">{{ t('versions.mods.noMods') }}</p>
-          <div class="empty-actions" style="display: flex; gap: 8px; margin-top: 4px">
-            <NButton size="small" type="primary" @click="emit('openOnlineSearch')">
-              <template #icon><UiIcon name="search" :size="14" /></template>
-              {{ t('versions.mods.addMod') }}
-            </NButton>
-          </div>
+            <div class="mod-list-actions">
+              <span :class="['mod-status', { enabled: mod.enabled }]">
+                {{ t(mod.enabled ? 'versions.mods.enabled' : 'versions.mods.disabled') }}
+              </span>
+              <button
+                v-if="mod.project_id || mod.mcmod_url"
+                class="btn-action"
+                :title="t('versions.mods.checkOnline')"
+                @click="handleOpenOnline(mod)"
+              >
+                <UiIcon name="external-link" :size="13" />
+              </button>
+              <button class="btn-action btn-delete" :title="t('common.delete')" @click="handleDeleteMod(mod)">
+                <UiIcon name="trash" :size="13" />
+              </button>
+              <NSwitch :value="mod.enabled" size="small" @update:value="handleToggleMod(mod)" />
+            </div>
+          </article>
         </div>
-      </UiLoading>
+        <template v-if="modSupported" #empty-actions>
+          <NButton size="small" type="primary" @click="emit('openOnlineSearch')">
+            <template #icon><UiIcon name="search" :size="14" /></template>
+            {{ t('versions.mods.addMod') }}
+          </NButton>
+        </template>
+      </InstanceContentState>
     </div>
   </div>
 
@@ -134,13 +128,13 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { getLoaderName } from '@/config/version'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { modApi } from '@/features/mods/api/modApi'
 import type { ScannedVersion } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
+import InstanceContentState from './InstanceContentState.vue'
 defineOptions({ name: 'InstanceDetailModsTab' })
 
 const props = defineProps<{

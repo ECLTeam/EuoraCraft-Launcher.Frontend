@@ -12,7 +12,7 @@
         </NButton>
       </div>
     </header>
-    <UiLoading :show="loading" mode="overlay">
+    <InstanceContentState :loading="loading" :empty="groups.length === 0" emptyDescription="还没有截图">
       <div class="screens-content">
         <section v-for="group in groups" :key="group.date" class="shot-group">
           <h3>{{ group.date }}</h3>
@@ -43,9 +43,8 @@
             </article>
           </div>
         </section>
-        <NEmpty v-if="!groups.length" description="还没有截图" />
       </div>
-    </UiLoading>
+    </InstanceContentState>
     <ConfirmDialog
       v-model:visible="confirmVisible"
       :title="confirmTitle"
@@ -59,16 +58,16 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NEmpty, NInput, NSelect } from 'naive-ui'
+import { NButton, NInput, NSelect } from 'naive-ui'
 import { computed, onMounted, ref } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import type { ScannedVersion, ScreenshotEntry } from '@/types/instances'
+import InstanceContentState from './InstanceContentState.vue'
 const props = defineProps<{ version: ScannedVersion }>()
 const emit = defineEmits<{ updated: [] }>()
 const message = useLauncherMessage()

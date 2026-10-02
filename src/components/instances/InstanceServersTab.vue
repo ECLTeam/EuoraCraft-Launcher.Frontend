@@ -23,9 +23,9 @@
         </NButton>
       </div>
     </header>
-    <UiLoading :show="loading" mode="overlay">
+    <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="服务器列表为空">
       <div class="servers-content">
-        <div v-if="filtered.length" class="server-list">
+        <div class="server-list">
           <article v-for="server in filtered" :key="server.id" class="server-row">
             <div class="server-row-main">
               <div :class="['status-dot', statusClass(server)]" :title="statusLabel(server)" />
@@ -65,9 +65,8 @@
             </div>
           </article>
         </div>
-        <NEmpty v-else description="服务器列表为空" />
       </div>
-    </UiLoading>
+    </InstanceContentState>
     <ConfirmDialog
       v-model:visible="confirmVisible"
       :title="confirmTitle"
@@ -92,16 +91,16 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NEmpty, NInput, NSwitch } from 'naive-ui'
+import { NButton, NInput, NSwitch } from 'naive-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import type { ScannedVersion, ServerEntry, ServerStatus } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
+import InstanceContentState from './InstanceContentState.vue'
 const props = defineProps<{ version: ScannedVersion }>()
 const message = useLauncherMessage()
 const servers = ref<ServerEntry[]>([])

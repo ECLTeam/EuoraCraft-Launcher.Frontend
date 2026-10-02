@@ -19,8 +19,8 @@
         </NButton>
       </div>
     </header>
-    <UiLoading :show="loading" mode="overlay">
-      <div v-if="filtered.length" class="world-grid">
+    <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="没有找到存档">
+      <div class="world-grid">
         <article v-for="world in filtered" :key="world.id" class="world-card">
           <img v-if="world.iconPath" :src="iconUrls[world.id]" :alt="world.name" class="world-cover" />
           <div v-else class="world-cover fallback">🌍</div>
@@ -66,8 +66,7 @@
           </div>
         </article>
       </div>
-      <NEmpty v-else description="没有找到存档" />
-    </UiLoading>
+    </InstanceContentState>
     <ConfirmDialog
       v-model:visible="confirmVisible"
       :title="confirmTitle"
@@ -112,8 +111,12 @@
       </div>
     </Modal>
     <Modal v-model:visible="optionsVisible" title="游戏设置" width="560px">
-      <UiLoading :show="optionsLoading" mode="overlay">
-        <div v-if="optionsEntries.length" class="options-editor">
+      <InstanceContentState
+        :loading="optionsLoading"
+        :empty="optionsEntries.length === 0"
+        emptyDescription="没有检测到可编辑的游戏设置"
+      >
+        <div class="options-editor">
           <div v-for="entry in optionsEntries" :key="entry.key" class="options-row">
             <span class="options-label">{{ optionLabel(entry.key) }}</span>
             <NSwitch
@@ -136,8 +139,7 @@
             />
           </div>
         </div>
-        <NEmpty v-else description="没有检测到可编辑的游戏设置" />
-      </UiLoading>
+      </InstanceContentState>
       <template #footer
         ><NButton @click="optionsVisible = false">取消</NButton
         ><NButton type="primary" :loading="savingOptions" :disabled="!optionsEntries.length" @click="saveOptions"
@@ -149,14 +151,13 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NEmpty, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
+import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import {
   instanceWorkspaceApi,
@@ -164,6 +165,7 @@ import {
   type GameOptionEntry,
 } from '@/features/instances/api/instanceWorkspaceApi'
 import type { ScannedVersion, WorldEntry } from '@/types/instances'
+import InstanceContentState from './InstanceContentState.vue'
 
 const props = defineProps<{ version: ScannedVersion }>()
 const emit = defineEmits<{ changed: [worlds: WorldEntry[]] }>()

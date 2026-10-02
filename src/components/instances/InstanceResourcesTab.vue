@@ -74,8 +74,8 @@
       >
       <span>{{ t('resourceManagement.selected', { count: selected.size }) }}</span>
     </div>
-    <UiLoading :show="loading" mode="overlay">
-      <div v-if="filtered.length" class="resource-table">
+    <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="这里还没有资源">
+      <div class="resource-table">
         <div
           v-for="item in filtered"
           :key="item.id"
@@ -123,8 +123,7 @@
           </div>
         </div>
       </div>
-      <NEmpty v-else description="这里还没有资源" />
-    </UiLoading>
+    </InstanceContentState>
 
     <ConfirmDialog
       v-model:visible="confirmVisible"
@@ -145,19 +144,19 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NCheckbox, NEmpty, NInput, NSelect, NSwitch } from 'naive-ui'
+import { NButton, NCheckbox, NInput, NSelect, NSwitch } from 'naive-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import SchematicPreviewModal from '@/features/instances/components/SchematicPreviewModal.vue'
 import type { GameResource, GameResourceType, ScannedVersion } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
+import InstanceContentState from './InstanceContentState.vue'
 const props = defineProps<{
   version: ScannedVersion
   worldOptions?: Array<{ label: string; value: string }>
