@@ -94,10 +94,20 @@
               >
                 <UiIcon name="external-link" :size="13" />
               </button>
-              <button class="btn-action btn-delete" :title="t('common.delete')" @click="handleDeleteMod(mod)">
+              <button
+                class="btn-action btn-delete"
+                :title="t('common.delete')"
+                :disabled="modTogglePending.has(mod)"
+                @click="handleDeleteMod(mod)"
+              >
                 <UiIcon name="trash" :size="13" />
               </button>
-              <NSwitch :value="mod.enabled" size="small" @update:value="handleToggleMod(mod)" />
+              <NSwitch
+                :value="mod.enabled"
+                :disabled="modTogglePending.has(mod)"
+                size="small"
+                @update:value="handleToggleMod(mod)"
+              />
             </div>
           </article>
         </div>
@@ -150,6 +160,7 @@ const message = useLauncherMessage()
 
 const mods = ref<ModItem[]>([])
 const modsLoading = ref(false)
+const modTogglePending = ref(new Set<ModItem>())
 const modSearchQuery = ref('')
 const modFilter = ref<'all' | 'enabled' | 'disabled'>('all')
 
@@ -199,18 +210,24 @@ async function loadMods() {
 
 async function handleToggleMod(mod: ModItem) {
   const target = getTarget()
-  if (!target) return
+  if (!target || modTogglePending.value.has(mod)) return
+  const sourceFilename = mod.filename
+  modTogglePending.value.add(mod)
   try {
-    const result = await instanceWorkspaceApi.toggleMod(target, mod.filename)
+    const result = await instanceWorkspaceApi.toggleMod(target, sourceFilename)
+    mod.filename = result.enabled ? sourceFilename.replace(/\.disabled$/, '') : `${sourceFilename}.disabled`
     mod.enabled = result.enabled
     const actionText = result.enabled ? t('versions.mods.toggleEnabled') : t('versions.mods.toggleDisabled')
     message.success(t('versions.mods.modToggled', { name: modDisplayName(mod), action: actionText }))
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.mods.modToggleFailed'))
+  } finally {
+    modTogglePending.value.delete(mod)
   }
 }
 
 function handleDeleteMod(mod: ModItem) {
+  if (modTogglePending.value.has(mod)) return
   openConfirm(t('common.delete'), t('versions.mods.deleteConfirm', { name: modDisplayName(mod) }), async () => {
     const target = getTarget()
     if (!target) return
