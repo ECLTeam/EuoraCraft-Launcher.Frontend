@@ -13,10 +13,12 @@
         <NButton quaternary circle size="small" title="打开存档目录" aria-label="打开存档目录" @click="openFolder">
           <template #icon><UiIcon name="folder-open" :size="16" /></template>
         </NButton>
-        <NButton size="small" type="primary" class="worlds-toolbar-primary" aria-label="导入存档" @click="importWorld">
-          <template #icon><UiIcon name="upload" :size="13" /></template>
-          导入
-        </NButton>
+        <NDropdown trigger="click" :options="importOptions" @select="importWorld">
+          <NButton size="small" type="primary" class="worlds-toolbar-primary" aria-label="导入存档">
+            <template #icon><UiIcon name="upload" :size="13" /></template>
+            导入
+          </NButton>
+        </NDropdown>
       </div>
     </header>
     <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="没有找到存档">
@@ -151,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
+import { NButton, NDropdown, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
@@ -360,8 +362,12 @@ function copyWorld(world: WorldEntry) {
     message.success('复制任务已创建')
   })
 }
-async function importWorld() {
-  const selected = unwrapResponse(await backend.command('select_file', { purpose: 'world-import' }), '选择存档')
+const importOptions = [
+  { label: 'ZIP 文件', key: 'world-import' },
+  { label: '存档文件夹', key: 'world-import-folder' },
+]
+async function importWorld(purpose: 'world-import' | 'world-import-folder') {
+  const selected = unwrapResponse(await backend.command('select_file', { purpose }), '选择存档')
   if (selected.path) {
     await instanceWorkspaceApi.importWorld(target.value, selected.path)
     message.success('导入任务已创建')

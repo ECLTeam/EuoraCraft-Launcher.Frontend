@@ -342,10 +342,11 @@ export interface CommandPayloadMap {
   select_background_video: undefined
   select_file:
     | {
-        purpose?: 'crash-analysis' | 'modpack' | 'world-import' | 'theme-preset' | 'plugin-package'
+        purpose?:
+          'crash-analysis' | 'modpack' | 'world-import' | 'world-import-folder' | 'theme-preset' | 'plugin-package'
       }
     | undefined
-  select_files: { purpose?: 'resource-files' }
+  select_files: { purpose?: 'resource-files'; resource_type?: GameResourceType }
   select_save_file: {
     purpose:
       | 'crash-report'

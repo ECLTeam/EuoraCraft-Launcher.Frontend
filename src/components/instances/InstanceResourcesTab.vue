@@ -243,7 +243,7 @@ async function install(paths: string[]) {
 }
 async function chooseAndInstall() {
   try {
-    await install(await instanceWorkspaceApi.chooseResourceFiles())
+    await install(await instanceWorkspaceApi.chooseResourceFiles(resourceType.value))
   } catch (error) {
     message.error(getErrorMessage(error, '选择资源文件失败'))
   }

@@ -84,6 +84,22 @@ async function mountResources(initialType: GameResourceType = 'resourcepack', al
 }
 
 describe('InstanceResourcesTab resourcepack icons and deletion', () => {
+  it.each(['resourcepack', 'shaderpack', 'datapack', 'schematic'] as const)(
+    '安装选择器使用当前资源类型：%s',
+    async (resourceType) => {
+      const wrapper = await mountResources(resourceType)
+      mocks.command.mockResolvedValueOnce({ success: true, data: { paths: [] } })
+      const installButton = wrapper.findAll('button').find((button) => button.text() === '安装资源')
+      expect(installButton).toBeDefined()
+      await installButton!.trigger('click')
+      await flushPromises()
+      expect(mocks.command).toHaveBeenCalledWith('select_files', {
+        purpose: 'resource-files',
+        resource_type: resourceType,
+      })
+      expect(mocks.command).not.toHaveBeenCalledWith('game_resource_install', expect.anything())
+    }
+  )
   beforeEach(() => {
     vi.clearAllMocks()
     items = [resource('actual.zip', imageUrl), resource('fallback.zip', null)]

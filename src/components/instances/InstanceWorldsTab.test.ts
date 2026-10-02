@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { NDropdown } from 'naive-ui'
 import { createPinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
@@ -99,17 +100,33 @@ describe('InstanceWorldsTab toolbar', () => {
     expect(mocks.command).toHaveBeenCalledWith('game_instance_folder_open', { ...target, folder: 'saves' })
   })
 
-  it.each(['D:/Exports/world.zip', ''])('导入按钮保留文件选择与取消行为：%s', async (path) => {
+  it.each([
+    ['world-import', 'D:/Exports/world.zip'],
+    ['world-import-folder', 'D:/Exports/world'],
+    ['world-import', ''],
+    ['world-import-folder', ''],
+  ])('两种存档导入入口与取消行为：%s %s', async (purpose, path) => {
     const wrapper = await mountWorlds()
     mocks.command.mockResolvedValueOnce({ success: true, data: { path } })
-    await wrapper.get('.worlds-toolbar button[aria-label="导入存档"]').trigger('click')
+    wrapper.getComponent(NDropdown).vm.$emit('select', purpose)
     await flushPromises()
 
-    expect(mocks.command).toHaveBeenCalledWith('select_file', { purpose: 'world-import' })
+    expect(mocks.command).toHaveBeenCalledWith('select_file', { purpose })
     if (path) {
       expect(mocks.command).toHaveBeenCalledWith('game_world_import', { ...target, source_path: path })
     } else {
       expect(mocks.command).not.toHaveBeenCalledWith('game_world_import', expect.anything())
     }
+  })
+
+  it('导入菜单提供 ZIP 和文件夹选项，打开菜单不立即选择文件', async () => {
+    const wrapper = await mountWorlds()
+    expect(wrapper.getComponent(NDropdown).props('options')).toEqual([
+      { label: 'ZIP 文件', key: 'world-import' },
+      { label: '存档文件夹', key: 'world-import-folder' },
+    ])
+    await wrapper.get('.worlds-toolbar button[aria-label="导入存档"]').trigger('click')
+    await flushPromises()
+    expect(mocks.command).not.toHaveBeenCalledWith('select_file', expect.anything())
   })
 })

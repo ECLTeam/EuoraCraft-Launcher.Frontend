@@ -367,8 +367,11 @@ export const instanceWorkspaceApi = {
       },
       '导出资源清单'
     ),
-  chooseResourceFiles: async () =>
-    unwrapResponse(await backend.command('select_files', { purpose: 'resource-files' }), '选择资源文件').paths,
+  chooseResourceFiles: async (resourceType: GameResourceType) =>
+    unwrapResponse(
+      await backend.command('select_files', { purpose: 'resource-files', resource_type: resourceType }),
+      '选择资源文件'
+    ).paths,
   checkFiles: (target: InstanceTargetPayload) => call('game_instance_files_check', target, '校验实例文件'),
   repairFiles: (target: InstanceTargetPayload) =>
     call<GameOperation>('game_instance_files_repair', target, '补全实例文件'),
