@@ -1933,7 +1933,6 @@
     "nodesEntry": "Mehrspieler-Einstellungen",
     "nodesPolicy": "Knotenauswahl",
     "nodesAddresses": "Eigene Knotenadressen",
-    "nodesReset": "Standard wiederherstellen",
     "nodesMode": {
       "automatic": "Automatisch",
       "append": "Öffentliche und eigene",
@@ -1945,9 +1944,11 @@
       "custom": "Nur die unten eingetragenen Knoten verwenden. Mindestens eine gültige Adresse ist erforderlich; öffentliche Knoten dienen nicht als Ersatz."
     },
     "nodesAddressHint": "Eine EasyTier-Knotenadresse pro Zeile eingeben, einschließlich Protokoll und Port.",
-    "nodesHint": "Gespeicherte Änderungen gelten beim nächsten Erstellen oder Betreten eines Raums. Der aktuelle Raum behält seine Knoten.",
-    "nodesResetHint": "Das Wiederherstellen speichert sofort den automatischen Modus und löscht eigene Knoten.",
+    "nodesHint": "Änderungen der Knotenstrategie werden automatisch gespeichert. Adressen werden beim Verlassen des Eingabefelds gespeichert. Änderungen gelten beim nächsten Erstellen oder Beitreten; der aktuelle Raum behält seine Knoten.",
     "nodesRetry": "Neu laden",
-    "nodesSaved": "Gespeichert. Gilt ab der nächsten Verbindung."
+    "nodesSaved": "Automatisch gespeichert. Gilt für die nächste Verbindung.",
+    "nodesSaving": "Wird gespeichert…",
+    "nodesNotSaved": "Änderungen wurden noch nicht gespeichert.",
+    "nodesRetrySave": "Speichern erneut versuchen"
   }
 }
