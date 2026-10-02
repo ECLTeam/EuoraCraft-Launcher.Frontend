@@ -4,101 +4,127 @@
       ><strong>{{ t('advanced.downloadTitle') }}</strong></template
     >
     <div class="custom-download-form">
-      <label
-        >{{ t('advanced.downloadUrl')
-        }}<NInput v-model:value="url" placeholder="https://example.com/file.zip" :disabled="busy"
-      /></label>
-      <label
-        >{{ t('advanced.downloadFolder') }}
+      <div class="custom-download-row">
+        <label for="custom-download-url">{{ t('advanced.downloadUrl') }}</label>
+        <UiInput id="custom-download-url" v-model="url" placeholder="https://example.com/file.zip" :disabled="busy" />
+      </div>
+      <div class="custom-download-row">
+        <label for="custom-download-folder">{{ t('advanced.downloadFolder') }}</label>
         <div class="custom-download-path">
-          <NInput v-model:value="downloadDirectory" :disabled="busy" /><UiButton
-            size="sm"
-            variant="outline"
+          <UiInput id="custom-download-folder" v-model="downloadDirectory" :disabled="busy" />
+          <UiButton variant="secondary" icon="folder-open" :disabled="busy" @click="browse">{{
+            t('common.browse')
+          }}</UiButton>
+        </div>
+      </div>
+      <div class="custom-download-row">
+        <span id="custom-download-naming-label" class="custom-download-label">{{ t('advanced.downloadNaming') }}</span>
+        <div class="custom-download-naming">
+          <NRadioGroup
+            v-model:value="namingMode"
+            role="radiogroup"
+            aria-labelledby="custom-download-naming-label"
+            name="download-naming"
             :disabled="busy"
-            @click="browse"
-            >{{ t('common.browse') }}</UiButton
+            :themeOverrides="namingTheme"
           >
-        </div></label
-      >
-      <div class="custom-download-naming">
-        <span class="custom-download-label">{{ t('advanced.downloadNaming') }}</span>
-        <NRadioGroup v-model:value="namingMode" :disabled="busy" :name="'download-naming'">
-          <NRadio value="original">{{ t('advanced.downloadOriginalName') }}</NRadio>
-          <NRadio value="custom">{{ t('advanced.downloadCustomName') }}</NRadio>
-        </NRadioGroup>
-        <label v-if="namingMode === 'custom'">
-          {{ t('advanced.downloadFileName') }}
-          <NInput v-model:value="customName" :disabled="busy" placeholder="archive.zip" />
-          <span class="custom-download-hint">{{ t('advanced.downloadFileNameHint') }}</span>
-        </label>
-        <p v-else class="custom-download-hint">{{ t('advanced.downloadOriginalHint', { name: estimatedName }) }}</p>
+            <NRadioButton value="original">{{ t('advanced.downloadOriginalName') }}</NRadioButton>
+            <NRadioButton value="custom">{{ t('advanced.downloadCustomName') }}</NRadioButton>
+          </NRadioGroup>
+          <div v-if="namingMode === 'custom'" class="custom-download-name">
+            <label for="custom-download-name">{{ t('advanced.downloadFileName') }}</label>
+            <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
+            <p class="custom-download-hint">{{ t('advanced.downloadFileNameHint') }}</p>
+          </div>
+          <p v-else class="custom-download-hint">
+            {{
+              url.trim()
+                ? t('advanced.downloadOriginalHint', { name: estimatedName })
+                : t('advanced.downloadOriginalRule')
+            }}
+          </p>
+        </div>
       </div>
       <details class="custom-download-advanced">
-        <summary>{{ t('advanced.downloadAdvanced') }}</summary>
+        <summary><UiIcon name="chevron-right" :size="16" />{{ t('advanced.downloadAdvanced') }}</summary>
         <div class="custom-download-advanced-body">
-          <label>
-            {{ t('advanced.downloadUserAgent') }}
-            <NInput v-model:value="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
-          </label>
-          <div class="custom-download-header-title">
+          <div class="custom-download-row">
+            <label for="custom-download-ua">{{ t('advanced.downloadUserAgent') }}</label>
+            <UiInput id="custom-download-ua" v-model="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
+          </div>
+          <div class="custom-download-row">
             <span class="custom-download-label">{{ t('advanced.downloadHeaders') }}</span>
-            <UiButton size="sm" variant="outline" :disabled="busy || headers.length >= 64" @click="addHeader">
-              {{ t('advanced.downloadAddHeader') }}
-            </UiButton>
+            <div class="custom-download-headers">
+              <div v-for="header in headers" :key="header.id" class="custom-download-header-row">
+                <UiInput
+                  v-model="header.name"
+                  :placeholder="t('advanced.downloadHeaderName')"
+                  :aria-label="t('advanced.downloadHeaderName')"
+                  :disabled="busy"
+                />
+                <UiInput
+                  v-model="header.value"
+                  :placeholder="t('advanced.downloadHeaderValue')"
+                  :aria-label="t('advanced.downloadHeaderValue')"
+                  :disabled="busy"
+                />
+                <UiButton variant="text" :disabled="busy" @click="removeHeader(header.id)">{{
+                  t('common.remove')
+                }}</UiButton>
+              </div>
+              <div class="custom-download-header-actions">
+                <UiButton variant="secondary" icon="plus" :disabled="busy || headers.length >= 64" @click="addHeader">{{
+                  t('advanced.downloadAddHeader')
+                }}</UiButton>
+              </div>
+              <p class="custom-download-hint">{{ t('advanced.downloadHeadersHint') }}</p>
+            </div>
           </div>
-          <div v-for="header in headers" :key="header.id" class="custom-download-header-row">
-            <NInput
-              v-model:value="header.name"
-              :placeholder="t('advanced.downloadHeaderName')"
-              :inputProps="{ 'aria-label': t('advanced.downloadHeaderName') }"
-              :disabled="busy"
-            />
-            <NInput
-              v-model:value="header.value"
-              :placeholder="t('advanced.downloadHeaderValue')"
-              :inputProps="{ 'aria-label': t('advanced.downloadHeaderValue') }"
-              :disabled="busy"
-            />
-            <UiButton size="sm" variant="outline" :disabled="busy" @click="removeHeader(header.id)">{{
-              t('common.remove')
-            }}</UiButton>
-          </div>
-          <p class="custom-download-hint">{{ t('advanced.downloadHeadersHint') }}</p>
+          <p v-if="validationError" class="custom-download-error" role="alert">{{ validationError }}</p>
         </div>
       </details>
-      <label class="custom-download-overwrite"
-        ><NCheckbox v-model:checked="overwrite" :disabled="busy" />{{ t('advanced.downloadOverwrite') }}</label
-      >
       <p v-if="error || validationError" class="custom-download-error" role="alert">{{ error || validationError }}</p>
-      <div v-if="operation" role="status">
+      <div v-if="operation" class="custom-download-status" role="status">
         <UiProgress :percentage="operation.percent" />
         <p>{{ operation.message }}</p>
         <p v-if="operation.path" class="custom-download-target">{{ operation.path }}</p>
       </div>
-      <div class="custom-download-actions">
-        <UiButton
-          :disabled="busy || !url.trim() || !downloadDirectory.trim() || !!validationError"
-          :loading="starting"
-          @click="start"
-          >{{ t('advanced.downloadStart') }}</UiButton
+      <div class="custom-download-footer">
+        <NCheckbox
+          v-model:checked="overwrite"
+          class="custom-download-overwrite"
+          :themeOverrides="overwriteTheme"
+          :disabled="busy"
+          >{{ t('advanced.downloadOverwrite') }}</NCheckbox
         >
-        <UiButton v-if="busy && operation" variant="outline" :disabled="cancelling" @click="cancel">{{
-          t('common.cancel')
-        }}</UiButton>
-        <UiButton
-          v-if="operation && ['failed', 'cancelled'].includes(operation.status)"
-          variant="outline"
-          :disabled="starting"
-          @click="retry"
-          >{{ t('common.retry') }}</UiButton
-        >
+        <div class="custom-download-actions">
+          <UiButton v-if="busy && operation" variant="secondary" size="lg" :disabled="cancelling" @click="cancel">{{
+            t('common.cancel')
+          }}</UiButton>
+          <UiButton
+            v-if="operation && ['failed', 'cancelled'].includes(operation.status)"
+            variant="secondary"
+            size="lg"
+            :disabled="starting"
+            @click="retry"
+            >{{ t('common.retry') }}</UiButton
+          >
+          <UiButton
+            size="lg"
+            icon="download"
+            :disabled="busy || !url.trim() || !downloadDirectory.trim() || !!validationError"
+            :loading="starting"
+            @click="start"
+            >{{ t('advanced.downloadStart') }}</UiButton
+          >
+        </div>
       </div>
     </div>
   </UiCard>
 </template>
 
 <script setup lang="ts">
-import { NCheckbox, NInput, NRadio, NRadioGroup } from 'naive-ui'
+import { NCheckbox, NRadioButton, NRadioGroup } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -106,10 +132,36 @@ import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
+import UiIcon from '@/components/ui/Icon.vue'
+import UiInput from '@/components/ui/Input.vue'
 import UiProgress from '@/components/ui/Progress.vue'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { getErrorMessage } from '@/utils/error'
 const { t } = useI18n()
+const namingTheme = {
+  buttonHeightMedium: '29px',
+  fontSizeMedium: '12px',
+  buttonBorderRadius: 'var(--r-sm)',
+  buttonColor: 'var(--control-bg)',
+  buttonColorActive: 'var(--primary-alpha)',
+  buttonBorderColor: 'var(--control-border)',
+  buttonBorderColorActive: 'var(--primary)',
+  buttonBorderColorHover: 'var(--control-border-hover)',
+  buttonTextColor: 'var(--text-primary)',
+  buttonTextColorActive: 'var(--primary)',
+  buttonTextColorHover: 'var(--text-primary)',
+  buttonBoxShadowFocus: 'var(--control-ring)',
+}
+const overwriteTheme = {
+  fontSizeMedium: '12px',
+  textColor: 'var(--text-secondary)',
+  color: 'var(--control-bg)',
+  colorChecked: 'var(--primary)',
+  border: '1px solid var(--control-border)',
+  borderChecked: '1px solid var(--primary)',
+  checkMarkColor: 'var(--text-on-primary)',
+  boxShadowFocus: 'var(--control-ring)',
+}
 const {
   url,
   downloadDirectory,
@@ -302,95 +354,155 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.custom-download-form {
-  display: grid;
-  gap: 12px;
-}
 .custom-download-card,
-.custom-download-form > *,
-.custom-download-path > .n-input {
+.custom-download-row > *,
+.custom-download-path > *,
+.custom-download-header-row > * {
   min-width: 0;
 }
-.custom-download-path > .n-input {
+.custom-download-form,
+.custom-download-advanced-body {
+  display: grid;
+  gap: 16px;
+}
+.custom-download-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+.custom-download-row > label,
+.custom-download-label {
+  padding-top: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 17px;
+  overflow-wrap: anywhere;
+}
+.custom-download-path,
+.custom-download-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.custom-download-path > .ui-input-wrapper {
   flex: 1;
 }
 .custom-download-path > .ui-btn {
   flex-shrink: 0;
 }
-.custom-download-form > label,
-.custom-download-naming > label,
-.custom-download-advanced-body > label {
+.custom-download-naming,
+.custom-download-name,
+.custom-download-headers,
+.custom-download-status {
   display: grid;
-  gap: 6px;
+  gap: 8px;
+}
+.custom-download-name > label {
+  margin-top: 4px;
+  color: var(--text-primary);
   font-size: 12px;
 }
-.custom-download-path,
-.custom-download-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.custom-download-naming :deep(.n-radio-group) {
+  justify-self: start;
+  max-width: 100%;
 }
-.custom-download-form > .custom-download-overwrite {
-  display: flex;
-  align-items: center;
+.custom-download-naming :deep(.n-radio-button .n-radio__label) {
+  white-space: normal;
+  line-height: 17px;
 }
 p {
   margin: 0;
+  color: var(--text-secondary);
   font-size: 12px;
-  color: var(--ecl-text-secondary);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.custom-download-hint {
+  color: var(--text-tertiary);
+  font-size: 11px;
 }
 .custom-download-error {
   color: var(--error);
 }
-.custom-download-naming,
-.custom-download-advanced-body {
-  display: grid;
-  gap: 10px;
-}
-.custom-download-label {
-  font-size: 12px;
-}
-.custom-download-naming :deep(.n-radio-group) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-}
-.custom-download-hint {
-  color: var(--ecl-text-secondary);
-  font-size: 11px;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
-}
 .custom-download-advanced {
-  border-top: 1px solid var(--ecl-border);
+  border-top: 1px solid var(--divider);
   padding-top: 12px;
 }
 .custom-download-advanced summary {
-  cursor: pointer;
-  font-size: 12px;
-}
-.custom-download-advanced-body {
-  padding-top: 12px;
-}
-.custom-download-header-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  width: fit-content;
+  padding: 4px 6px;
+  margin-left: -6px;
+  border-radius: var(--r-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  line-height: 20px;
+}
+.custom-download-advanced summary::-webkit-details-marker {
+  display: none;
+}
+.custom-download-advanced summary:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+.custom-download-advanced summary:focus-visible {
+  outline: none;
+  box-shadow: var(--control-ring);
+}
+.custom-download-advanced summary > .icon {
+  transition: transform var(--duration-fast) var(--ease-emphasized);
+}
+.custom-download-advanced[open] summary > .icon {
+  transform: rotate(90deg);
+}
+.custom-download-advanced-body {
+  padding-top: 16px;
 }
 .custom-download-header-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
   gap: 8px;
+}
+.custom-download-header-actions {
+  display: flex;
+}
+.custom-download-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  border-top: 1px solid var(--divider);
+  padding-top: 16px;
+}
+.custom-download-overwrite {
+  flex: 1;
+  min-width: 160px;
+}
+.custom-download-overwrite :deep(.n-checkbox__label) {
+  white-space: normal;
+  line-height: 1.6;
 }
 .custom-download-actions {
   flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
-.custom-download-target {
-  margin-top: 6px;
-  overflow-wrap: anywhere;
-}
-@container (max-width: 400px) {
+@container (max-width: 519px) {
+  .custom-download-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .custom-download-row > label,
+  .custom-download-label {
+    padding-top: 0;
+  }
   .custom-download-header-row {
     grid-template-columns: minmax(0, 1fr) auto;
   }

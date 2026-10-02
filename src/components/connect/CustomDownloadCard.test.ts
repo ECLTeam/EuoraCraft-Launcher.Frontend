@@ -52,6 +52,48 @@ describe('CustomDownloadCard', () => {
     expect(wrapper.get('[role="progressbar"]').attributes('aria-valuenow')).toBe('100')
     wrapper.unmount()
   })
+  it('associates field labels and exposes the naming choices as a labelled group', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: { downloadDirectory: 'D:/Default', userAgent: 'Default' } })
+    const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
+    await flushPromises()
+    for (const id of ['custom-download-url', 'custom-download-folder']) {
+      expect(wrapper.get(`label[for="${id}"]`).text()).not.toBe('')
+      expect(wrapper.get(`input#${id}`).attributes('disabled')).toBeUndefined()
+    }
+    expect(wrapper.get('[role="radiogroup"]').attributes('aria-labelledby')).toBe('custom-download-naming-label')
+    await wrapper.get('input[type="radio"][value="custom"]').setValue(true)
+    expect(useCustomDownloadStore().namingMode).toBe('custom')
+    await wrapper.get('#custom-download-name').setValue('保留名称.zip')
+    await wrapper.get('input[type="radio"][value="original"]').setValue(true)
+    expect(wrapper.find('#custom-download-name').exists()).toBe(false)
+    await wrapper.get('input[type="radio"][value="custom"]').setValue(true)
+    expect((wrapper.get('#custom-download-name').element as HTMLInputElement).value).toBe('保留名称.zip')
+    wrapper.unmount()
+  })
+
+  it('keeps request settings while folded and disables every editable field during a download', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: { downloadDirectory: 'D:/Default', userAgent: 'Default' } })
+    Object.assign(useCustomDownloadStore(), {
+      userAgent: 'Test-UA',
+      headers: [{ id: 0, name: 'X-Test', value: 'preserved' }],
+    })
+    const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
+    await flushPromises()
+    expect((wrapper.get('#custom-download-ua').element as HTMLInputElement).value).toBe('Test-UA')
+    expect(wrapper.get('details').attributes('open')).toBeUndefined()
+    expect((wrapper.get('[aria-label="请求头值"]').element as HTMLInputElement).value).toBe('preserved')
+    useCustomDownloadStore().operation = { operationId: 'active', status: 'running', percent: 20, message: '下载中' }
+    await wrapper.vm.$nextTick()
+    for (const field of wrapper.findAll('input')) expect(field.attributes('disabled')).toBeDefined()
+    expect(wrapper.get('input[type="radio"]').attributes('disabled')).toBeDefined()
+    expect(
+      wrapper
+        .findAll('button')
+        .find((button) => button.text() === '开始下载')!
+        .attributes('disabled')
+    ).toBeDefined()
+    wrapper.unmount()
+  })
   it('uses a folder dialog and retains the selected folder when cancelled', async () => {
     mocks.command.mockImplementation(async (name: string) => ({
       success: true,

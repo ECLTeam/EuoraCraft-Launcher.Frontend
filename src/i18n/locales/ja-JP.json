@@ -1917,6 +1917,7 @@
     "downloadFileName": "ファイル名",
     "downloadFileNameHint": "入力した名前で保存します。必要な拡張子を含めてください",
     "downloadOriginalHint": "推定ファイル名：{name}。実際の名前はサーバーの応答に従います",
+    "downloadOriginalRule": "サーバーのファイル名を優先し、なければダウンロード URL の名前を使用します",
     "downloadAdvanced": "詳細設定",
     "downloadUserAgent": "User-Agent（空欄で既定値）",
     "downloadHeaders": "その他の HTTP ヘッダー",

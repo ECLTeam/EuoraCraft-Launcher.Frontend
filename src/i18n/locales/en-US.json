@@ -1939,6 +1939,7 @@
     "downloadFileName": "Filename",
     "downloadFileNameHint": "Saved exactly as entered; include the extension you need",
     "downloadOriginalHint": "Estimated filename: {name}; the server may provide a different name",
+    "downloadOriginalRule": "Use the filename provided by the server, or fall back to the download URL",
     "downloadAdvanced": "Advanced settings",
     "downloadUserAgent": "User-Agent (leave blank for default)",
     "downloadHeaders": "Other HTTP headers",

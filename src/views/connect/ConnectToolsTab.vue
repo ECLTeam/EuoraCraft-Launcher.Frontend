@@ -40,8 +40,8 @@
               </div>
               <UiButton
                 class="connect-nat-action"
-                variant="outline"
-                size="sm"
+                variant="secondary"
+                size="md"
                 icon="wifi"
                 :loading="isDetecting"
                 :disabled="isDetecting"

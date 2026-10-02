@@ -1914,6 +1914,7 @@
     "downloadFileName": "Имя файла",
     "downloadFileNameHint": "Файл сохраняется с указанным именем; добавьте нужное расширение",
     "downloadOriginalHint": "Ожидаемое имя: {name}; сервер может указать другое имя",
+    "downloadOriginalRule": "Используется имя от сервера или, если его нет, имя из URL загрузки",
     "downloadAdvanced": "Дополнительные настройки",
     "downloadUserAgent": "User-Agent (пусто — по умолчанию)",
     "downloadHeaders": "Другие HTTP-заголовки",

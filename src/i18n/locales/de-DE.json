@@ -1917,6 +1917,7 @@
     "downloadFileName": "Dateiname",
     "downloadFileNameHint": "Wird genau wie eingegeben gespeichert; gewünschte Dateiendung angeben",
     "downloadOriginalHint": "Erwarteter Dateiname: {name}; der Server kann einen anderen Namen angeben",
+    "downloadOriginalRule": "Dateiname vom Server verwenden, sonst den Namen aus der Download-URL",
     "downloadAdvanced": "Erweiterte Einstellungen",
     "downloadUserAgent": "User-Agent (leer für Standardwert)",
     "downloadHeaders": "Weitere HTTP-Header",

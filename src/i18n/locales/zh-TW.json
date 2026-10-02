@@ -1800,6 +1800,7 @@
     "downloadFileName": "檔案名稱",
     "downloadFileNameHint": "依輸入名稱儲存，請包含所需副檔名",
     "downloadOriginalHint": "預估檔名：{name}，實際名稱依伺服器回應為準",
+    "downloadOriginalRule": "優先使用伺服器提供的檔名，否則使用下載網址中的名稱",
     "downloadAdvanced": "進階設定",
     "downloadUserAgent": "User-Agent（留空使用預設值）",
     "downloadHeaders": "其他 HTTP 請求標頭",

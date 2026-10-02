@@ -1834,6 +1834,7 @@
     "downloadFileName": "文件名",
     "downloadFileNameHint": "按输入名称保存，请包含所需扩展名",
     "downloadOriginalHint": "预估文件名：{name}，实际名称以服务器响应为准",
+    "downloadOriginalRule": "优先使用服务器提供的文件名，否则使用下载地址中的名称",
     "downloadAdvanced": "高级设置",
     "downloadUserAgent": "User-Agent（留空使用默认值）",
     "downloadHeaders": "其他 HTTP 请求头",
