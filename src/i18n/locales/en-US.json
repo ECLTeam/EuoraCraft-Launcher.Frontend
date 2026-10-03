@@ -1914,9 +1914,8 @@
   },
   "advanced": {
     "nodesTitle": "Multiplayer",
-    "nodesHint": "Saved changes apply the next time you create or join a room. The current room keeps its nodes.",
+    "nodesHint": "Policy changes save automatically. Addresses save when you leave the input. Changes apply the next time you create or join a room; the current room keeps its nodes.",
     "nodesAddresses": "Custom node addresses",
-    "nodesReset": "Restore defaults",
     "nodesMode": {
       "automatic": "Automatic",
       "append": "Public and custom",
@@ -1958,8 +1957,10 @@
       "custom": "Use only the nodes below. At least one valid address is required; public nodes are never used as a fallback."
     },
     "nodesAddressHint": "Enter one EasyTier node address per line, including its protocol and port.",
-    "nodesResetHint": "Restoring defaults immediately saves automatic mode and clears custom nodes.",
     "nodesRetry": "Reload",
-    "nodesSaved": "Saved. Applies to the next connection."
+    "nodesSaved": "Automatically saved. Applies to the next connection.",
+    "nodesSaving": "Saving…",
+    "nodesNotSaved": "Changes have not been saved.",
+    "nodesRetrySave": "Retry saving"
   }
 }

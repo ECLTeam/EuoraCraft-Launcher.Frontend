@@ -136,11 +136,13 @@ describe('ConnectRoomTab', () => {
     })
   })
 
-  it('用快捷入口替代高级折叠区，忙碌时禁止跳转', async () => {
+  it('快捷入口位于加入卡片标题内，忙碌时禁止跳转', async () => {
     const state = connectorState(idleStatus())
     const wrapper = mountRoomTab(state)
     await flushPromises()
     expect(wrapper.find('details.node-settings').exists()).toBe(false)
+    expect(wrapper.find('.connect-settings-entry').exists()).toBe(false)
+    expect(wrapper.get('.connect-idle-primary .connect-main-card .card-header').text()).toContain('联机设置')
     const entry = wrapper.get('[data-action="connector-settings"]')
     await entry.trigger('click')
     expect(mocks.navigate).toHaveBeenCalledWith({ path: '/settings/launcher', query: { section: 'connector' } })
@@ -151,6 +153,11 @@ describe('ConnectRoomTab', () => {
     await entry.trigger('click')
     expect(mocks.navigate).not.toHaveBeenCalled()
     expect(state.leave).not.toHaveBeenCalled()
+  })
+
+  it.each(['starting', 'host', 'guest'] as const)('%s 状态下不保留独立设置入口', (mode) => {
+    const wrapper = mountRoomTab(connectorState({ ...idleStatus(), mode }))
+    expect(wrapper.find('[data-action="connector-settings"]').exists()).toBe(false)
   })
 
   it('保留双卡，将手动端口放在辅助区域并精简同行操作', async () => {

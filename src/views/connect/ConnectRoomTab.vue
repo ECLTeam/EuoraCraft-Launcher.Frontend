@@ -2,18 +2,6 @@
   <div class="connect-page">
     <section class="connect-workspace">
       <div class="connect-workspace__body">
-        <div class="connect-settings-entry">
-          <UiButton
-            size="sm"
-            variant="ghost"
-            icon="settings"
-            data-action="connector-settings"
-            :disabled="busy || status.mode === 'starting'"
-            @click="openConnectorSettings"
-          >
-            {{ t('advanced.nodesEntry') }}
-          </UiButton>
-        </div>
         <div v-if="flowDebug" class="connect-debug-bar">
           <span class="connect-debug-bar__label">
             <UiIcon name="bug" :size="13" />
@@ -66,12 +54,24 @@
                 <div class="connect-idle-primary">
                   <UiCard v-if="displayHostStep !== 2" class="connect-main-card">
                     <template #header>
-                      <div class="connect-card-heading">
-                        <UiIcon name="login" :size="18" />
-                        <div>
-                          <strong>{{ t('connect.join.title') }}</strong>
-                          <span>{{ t('connect.join.hint') }}</span>
+                      <div class="connect-join-heading">
+                        <div class="connect-card-heading">
+                          <UiIcon name="login" :size="18" />
+                          <div>
+                            <strong>{{ t('connect.join.title') }}</strong>
+                            <span>{{ t('connect.join.hint') }}</span>
+                          </div>
                         </div>
+                        <UiButton
+                          size="sm"
+                          variant="ghost"
+                          icon="settings"
+                          data-action="connector-settings"
+                          :disabled="busy || status.mode === 'starting'"
+                          @click="openConnectorSettings"
+                        >
+                          {{ t('advanced.nodesEntry') }}
+                        </UiButton>
                       </div>
                     </template>
                     <div class="connect-form">
