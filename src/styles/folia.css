@@ -190,8 +190,8 @@
   right: 8px;
   left: 8px;
   border-radius: var(--r-sm);
+  /* 激活胶囊只由激活项驱动：不加描边，避免出现"框随鼠标移动"的观感。 */
   background: rgba(var(--primary-rgb, 91, 111, 245), 0.16);
-  box-shadow: inset 0 0 0 1px rgba(var(--primary-rgb, 91, 111, 245), 0.28);
   transition:
     top var(--duration-normal, 0.25s) var(--ease-emphasized),
     height var(--duration-normal, 0.25s) var(--ease-emphasized);

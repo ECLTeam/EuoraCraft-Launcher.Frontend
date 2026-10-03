@@ -19,13 +19,13 @@
     </button>
 
     <!-- 导航区域 -->
-    <nav class="sidebar-nav" @mouseleave="handleMouseLeave">
+    <nav class="sidebar-nav">
       <!-- 插件：侧边栏顶部插槽 -->
       <PluginSlotHost slotId="plugin-slot-sidebar-top" class="plugin-slot-container sidebar-plugin-slot" />
       <div v-if="!isCollapsed" ref="activeBgRef" class="sidebar-active-bg"></div>
       <div v-if="!isCollapsed" ref="indicatorRef" class="sidebar-active-indicator"></div>
 
-      <template v-for="(item, index) in menuItems" :key="item.path">
+      <template v-for="item in menuItems" :key="item.path">
         <button
           class="sidebar-item"
           :data-path="item.path"
@@ -33,7 +33,6 @@
             active: route.path === item.path || (item.path !== '/' && route.path.startsWith(item.path)),
           }"
           :title="isCollapsed ? item.label : undefined"
-          @mouseenter="!isCollapsed && handleMouseEnter(index)"
           @click.prevent="handleItemClick(item)"
         >
           <span class="sidebar-item-icon">
@@ -321,22 +320,6 @@ const getActivePath = (): string => {
     if (prefix) return prefix.path
   }
   return ''
-}
-
-const handleMouseEnter = (index: number) => {
-  if (index < menuItems.value.length) {
-    const item = menuItems.value[index]
-    if (item) updateIndicator(item.path)
-  }
-}
-
-const handleMouseLeave = () => {
-  const activePath = getActivePath()
-  if (activePath) {
-    updateIndicator(activePath)
-  } else {
-    if (indicatorRef.value) indicatorRef.value.style.opacity = '0'
-  }
 }
 
 watch(
