@@ -9,6 +9,7 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
     saveUi: vi.fn(),
     saveGame: vi.fn(),
     saveDownload: vi.fn(),
+    saveConnector: vi.fn(),
     listJava: vi.fn(),
     selectImage: vi.fn(),
     selectBackgroundVideo: vi.fn(),
@@ -31,7 +32,16 @@ describe('settingsStore', () => {
       },
       download: { mirror_source: 'bmclapi' },
       launcher: {},
+      connector: { mode: 'automatic', nodes: [] },
     })
+  })
+
+  it('联机配置沿用共用队列，策略和原始地址更新不会相互覆盖', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    await Promise.all([store.patchConnector({ mode: 'custom' }), store.patchConnector({ nodes: ['draft', ''] })])
+    expect(store.connector).toEqual({ mode: 'custom', nodes: ['draft', ''] })
+    expect(settingsApi.saveConnector).toHaveBeenLastCalledWith(store.connector)
   })
 
   it('加载时补齐默认值但保留后端配置', async () => {
@@ -176,6 +186,7 @@ describe('settingsStore', () => {
       game: { minecraft_paths: [] },
       download: { mirror_source: 'official' },
       launcher: {},
+      connector: { mode: 'automatic', nodes: [] },
     })
     const store = useSettingsStore()
     await store.load()

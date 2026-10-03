@@ -1821,18 +1821,6 @@
       "automatic": "自動",
       "append": "公共與自訂",
       "custom": "僅自訂"
-    },
-    "nodesModeHint": {
-      "automatic": "自動取得並使用公共節點。",
-      "append": "使用公共節點及下方填寫的自訂節點。",
-      "custom": "僅使用下方填寫的節點，至少需要一個有效位址，不退回公共節點。"
-    },
-    "nodesAddressHint": "每行填寫一個包含協定和連接埠的 EasyTier 節點位址。",
-    "nodesHint": "節點策略修改後自動儲存，地址編輯完成後離開輸入框即可儲存；下次建立或加入房間時生效，目前房間不會切換節點。",
-    "nodesRetry": "重新載入",
-    "nodesSaved": "已自動儲存，下次連線時生效。",
-    "nodesSaving": "正在儲存……",
-    "nodesNotSaved": "變更尚未儲存。",
-    "nodesRetrySave": "重試儲存"
+    }
   }
 }

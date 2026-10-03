@@ -1,7 +1,14 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import type { ImageSaveUrlResult } from '@/types/accounts'
-import type { DownloadConfig, GameConfig, LauncherConfig, SystemMemoryInfo, UiConfig } from '@/types/config'
+import type {
+  ConnectorConfig,
+  DownloadConfig,
+  GameConfig,
+  LauncherConfig,
+  SystemMemoryInfo,
+  UiConfig,
+} from '@/types/config'
 import type { JavaInstallation } from '@/types/instances'
 import type { ImageSaveAsPayload } from '@/types/system'
 
@@ -80,13 +87,14 @@ export const settingsApi = {
   isShowcase: backend.runtime.isShowcase,
 
   async load() {
-    const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher'])
+    const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher', 'connector'])
     const data = assertSuccess(result, '读取设置')
     return {
       ui: (data.ui ?? {}) as UiConfig,
       game: (data.game ?? {}) as GameConfig,
       download: (data.download ?? {}) as DownloadConfig,
       launcher: (data.launcher ?? {}) as LauncherConfig,
+      connector: (data.connector ?? { mode: 'automatic', nodes: [] }) as ConnectorConfig,
     }
   },
 
@@ -112,6 +120,10 @@ export const settingsApi = {
 
   async saveDownload(config: DownloadConfig): Promise<void> {
     assertSuccess(await backend.config.set('download', config), '保存下载设置')
+  },
+
+  async saveConnector(config: ConnectorConfig): Promise<void> {
+    assertSuccess(await backend.config.set('connector', config), '保存联机设置')
   },
 
   async getSystemMemory(): Promise<SystemMemoryInfo> {

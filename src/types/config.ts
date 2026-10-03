@@ -1,4 +1,9 @@
 import type { InstanceSortKey } from '@/types/instances'
+
+export interface ConnectorConfig {
+  mode: 'automatic' | 'append' | 'custom'
+  nodes: string[]
+}
 /**
  * 领域类型定义。
  * 由 types/api.ts 拆分而来，与后端 ECL/api/models.py 的 Pydantic 模型对齐。

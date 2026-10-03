@@ -1938,18 +1938,6 @@
       "automatic": "Automatisch",
       "append": "Öffentliche und eigene",
       "custom": "Nur eigene"
-    },
-    "nodesModeHint": {
-      "automatic": "Öffentliche Knoten automatisch abrufen und verwenden.",
-      "append": "Öffentliche Knoten und die unten eingetragenen eigenen Knoten verwenden.",
-      "custom": "Nur die unten eingetragenen Knoten verwenden. Mindestens eine gültige Adresse ist erforderlich; öffentliche Knoten dienen nicht als Ersatz."
-    },
-    "nodesAddressHint": "Eine EasyTier-Knotenadresse pro Zeile eingeben, einschließlich Protokoll und Port.",
-    "nodesHint": "Änderungen der Knotenstrategie werden automatisch gespeichert. Adressen werden beim Verlassen des Eingabefelds gespeichert. Änderungen gelten beim nächsten Erstellen oder Beitreten; der aktuelle Raum behält seine Knoten.",
-    "nodesRetry": "Neu laden",
-    "nodesSaved": "Automatisch gespeichert. Gilt für die nächste Verbindung.",
-    "nodesSaving": "Wird gespeichert…",
-    "nodesNotSaved": "Änderungen wurden noch nicht gespeichert.",
-    "nodesRetrySave": "Speichern erneut versuchen"
+    }
   }
 }
