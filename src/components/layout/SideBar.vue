@@ -22,8 +22,10 @@
     <nav class="sidebar-nav">
       <!-- 插件：侧边栏顶部插槽 -->
       <PluginSlotHost slotId="plugin-slot-sidebar-top" class="plugin-slot-container sidebar-plugin-slot" />
-      <div v-if="!isCollapsed" ref="activeBgRef" class="sidebar-active-bg"></div>
-      <div v-if="!isCollapsed" ref="indicatorRef" class="sidebar-active-indicator"></div>
+      <!-- 折叠时也保留在 DOM 中（不切换 display，否则会掐断过渡）：
+           折叠态与展开态共用这一个胶囊，宽度由 .sidebar.collapsed 侧栏收窄带动。 -->
+      <div ref="activeBgRef" class="sidebar-active-bg"></div>
+      <div ref="indicatorRef" class="sidebar-active-indicator"></div>
 
       <template v-for="item in menuItems" :key="item.path">
         <button
@@ -274,7 +276,7 @@ const handleHelpClick = () => {
 
 /** 通过实际 DOM 测量获取目标菜单项位置并更新指示器 */
 const updateActivePosition = (targetPath: string) => {
-  if (isCollapsed.value) return
+  // 折叠态同样定位这个胶囊：两态共用同一个元素，位置始终由激活项决定。
   nextTick(() => {
     const navEl = indicatorRef.value?.parentElement
     const targetEl = navEl?.querySelector(`.sidebar-item[data-path="${targetPath}"]`) as HTMLElement | null
@@ -353,6 +355,27 @@ watch(
   },
   { deep: true }
 )
+
+/**
+ * 折叠与展开切换后重新定位胶囊。
+ *
+ * 折叠态与展开态共用同一个浮动胶囊；切换时菜单项的文字、插件项与子菜单会增减，
+ * 激活项自身的 offsetTop/offsetHeight 随之变化。展开态还要等文字宽度过渡结束再测量，
+ * 否则会按过渡中的中间值定位。
+ */
+watch(isCollapsed, (collapsed) => {
+  const activePath = getActivePath()
+  if (!activePath) return
+  updateIndicator(activePath)
+  updateActiveBg(activePath)
+  if (!collapsed) {
+    // 文字与插件项在宽度过渡结束后才回到最终布局，过渡完成后补一次精确定位。
+    window.setTimeout(() => {
+      updateIndicator(activePath)
+      updateActiveBg(activePath)
+    }, 200)
+  }
+})
 
 onMounted(() => {
   const activePath = getActivePath()

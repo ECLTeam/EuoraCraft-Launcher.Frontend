@@ -194,7 +194,16 @@
   background: rgba(var(--primary-rgb, 91, 111, 245), 0.16);
   transition:
     top var(--duration-normal, 0.25s) var(--ease-emphasized),
-    height var(--duration-normal, 0.25s) var(--ease-emphasized);
+    height var(--duration-normal, 0.25s) var(--ease-emphasized),
+    opacity var(--duration-fast, 0.15s) var(--ease-emphasized);
+}
+
+/* 折叠态沿用同一个浮动胶囊：清掉行内高亮，避免出现第二套独立胶囊导致两态不同步。
+   选择器带上 .sidebar-nav 以提高特异性，稳定压过 scoped 的 .sidebar.collapsed .sidebar-item.active；
+   footer 项不在 nav 内，继续由它自身的 !important 规则提供高亮。 */
+[data-ui-skin='folia'] .sidebar.collapsed .sidebar-nav .sidebar-item.active {
+  background: transparent;
+  box-shadow: none;
 }
 
 [data-ui-skin='folia'] .sidebar-item.active::before {
