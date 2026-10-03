@@ -206,12 +206,22 @@
   box-shadow: none;
 }
 
+/* 输入类控件的玻璃底与主色描边。
+   .n-input-wrapper 在 naive 中不承载圆角：圆角只画在 .n-input 及其
+   .n-input__border/__state-border 上，因此这条 1px 描边必须显式继承控件圆角，
+   否则会呈矩形，与跟随圆角的 hover/focus 高亮错位。
+   .n-base-selection 自带 var(--n-border-radius)，不参与该继承。 */
 [data-ui-skin='folia'] .n-base-selection,
 [data-ui-skin='folia'] .n-input-wrapper {
   background: var(--control-bg) !important;
   border: 1px solid var(--control-border) !important;
   backdrop-filter: blur(var(--folia-glass-blur)) saturate(1.35);
   -webkit-backdrop-filter: blur(var(--folia-glass-blur)) saturate(1.35);
+}
+
+/* 玻璃底与描边跟随 .n-input 的控件圆角，复合输入框的单侧圆角也一并继承。 */
+[data-ui-skin='folia'] .n-input-wrapper {
+  border-radius: inherit;
 }
 
 /* 下拉选项弹层：加高 + 宽度随内容自适应（teleport 到 body，需全局选择器覆盖 naive 默认裁剪）。
