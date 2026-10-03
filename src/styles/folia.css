@@ -207,19 +207,21 @@
 }
 
 /* 输入类控件的玻璃底与主色描边。
-   .n-input-wrapper 在 naive 中不承载圆角：圆角只画在 .n-input 及其
-   .n-input__border/__state-border 上，因此这条 1px 描边必须显式继承控件圆角，
-   否则会呈矩形，与跟随圆角的 hover/focus 高亮错位。
-   .n-base-selection 自带 var(--n-border-radius)，不参与该继承。 */
+   描边用 inset box-shadow 而非 border：.n-input-wrapper 与 .n-base-selection 的高度由内容
+   撑开，border 会在内容盒之外额外撑高 2px，使输入框比并排的 NInputGroup 按钮高出 1px、
+   并与 classic 皮肤的高度不一致。inset 阴影不参与布局，因此高度与内边距始终与 naive 原生一致。
+   内圆角由 wrapper 继承（.n-input-wrapper 在 naive 中不承载圆角，圆角只画在 .n-input 及其
+   .n-input__border/__state-border 上），否则描边会呈矩形；.n-base-selection 自带圆角，不参与继承。 */
 [data-ui-skin='folia'] .n-base-selection,
 [data-ui-skin='folia'] .n-input-wrapper {
   background: var(--control-bg) !important;
-  border: 1px solid var(--control-border) !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px var(--control-border);
   backdrop-filter: blur(var(--folia-glass-blur)) saturate(1.35);
   -webkit-backdrop-filter: blur(var(--folia-glass-blur)) saturate(1.35);
 }
 
-/* 玻璃底与描边跟随 .n-input 的控件圆角，复合输入框的单侧圆角也一并继承。 */
+/* 玻璃底与描边跟随控件圆角，复合输入框的单侧圆角也一并继承。 */
 [data-ui-skin='folia'] .n-input-wrapper {
   border-radius: inherit;
 }
