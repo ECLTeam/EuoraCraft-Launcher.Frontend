@@ -50,7 +50,6 @@ export const showcaseConfig: Record<string, unknown> = {
       mode: 'system',
       primary_color: '#5B6FF5',
       blur_amount: 0,
-      sidebar_collapsed: true,
       navigation_mode: 'sidebar',
       titlebar_hidden: true,
       background_opacity: 1,

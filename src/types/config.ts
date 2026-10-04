@@ -179,7 +179,6 @@ export interface ThemeConfig {
   theme_id?: 'classic' | 'folia'
   primary_color: string
   blur_amount: number
-  sidebar_collapsed: boolean
   navigation_mode?: NavigationMode
   /** 主窗口装饰模式，保存后下次启动生效。 */
   window_chrome?: 'custom' | 'system_shadow' | 'native'
