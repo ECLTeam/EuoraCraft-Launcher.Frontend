@@ -316,6 +316,7 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { clearAvatarCache, fetchTextureDataUrl } from '@/composables/useAvatarRenderer'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useRequestScope } from '@/composables/useRequestScope'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import SkinViewer3D from '@/features/accounts/components/SkinViewer3D.vue'
@@ -369,7 +370,9 @@ const refreshingCapes = ref(false)
 const showEditModal = ref(false)
 const showUploadModal = ref(false)
 const showOptionsModal = ref(false)
-let targetTextureRequest = 0
+const accountTextureRequests = useRequestScope(() => `${props.visible}\0${targetAccountId.value}`)
+const localTextureRequests = useRequestScope(() => `${props.visible}\0${targetAccountId.value}`)
+const wardrobeRequests = useRequestScope(() => String(props.visible))
 
 const accountOptions = computed(() => props.accounts.map((account) => ({ label: account.alias, value: account.id })))
 const targetAccount = computed(() => props.accounts.find((account) => account.id === targetAccountId.value) ?? null)
@@ -400,14 +403,20 @@ function handleVisibleChange(value: boolean): void {
 }
 
 async function loadItems(): Promise<void> {
+  const isCurrent = wardrobeRequests.begin()
   loading.value = true
   try {
-    items.value = await accountsApi.listWardrobe()
-    await Promise.all(items.value.map(loadLocalTexture))
+    const loadedItems = await accountsApi.listWardrobe()
+    const entries = await Promise.all(
+      loadedItems.map(async (item) => [item.id, await accountsApi.wardrobeTexture(item.id)] as const)
+    )
+    if (!isCurrent()) return
+    items.value = loadedItems
+    textureUrls.value = Object.fromEntries(entries)
   } catch (reason) {
-    message.error(reason instanceof Error ? reason.message : t('wardrobe.loadFailed'))
+    if (isCurrent()) message.error(reason instanceof Error ? reason.message : t('wardrobe.loadFailed'))
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 
@@ -417,8 +426,10 @@ async function loadLocalTexture(item: WardrobeItem): Promise<string> {
 }
 
 async function loadTargetTextures(): Promise<void> {
+  if (!props.visible) return
   const accountId = targetAccountId.value
-  const request = ++targetTextureRequest
+  const isCurrent = accountTextureRequests.begin()
+  localTextureRequests.invalidate()
   accountSkinUrl.value = ''
   accountCapeUrl.value = ''
   selectedSkinUrl.value = ''
@@ -429,35 +440,54 @@ async function loadTargetTextures(): Promise<void> {
   if (!accountId) return
   try {
     const textures = await accountsApi.textureUrls(accountId)
-    if (request !== targetTextureRequest) return
-    accountModel.value = textures.skinModel ?? 'classic'
-    accountCapeUrl.value = (await fetchTextureDataUrl(textures.capeUrl || '')) || ''
-    await Promise.all(
-      officialCapes.value.map(async (cape) => {
-        officialCapeUrls.value[cape.id] = (await fetchTextureDataUrl(cape.url)) || ''
-      })
+    if (!isCurrent()) return
+    const capeUrl = (await fetchTextureDataUrl(textures.capeUrl || '')) || ''
+    if (!isCurrent()) return
+    const capeEntries = await Promise.all(
+      officialCapes.value.map(async (cape) => [cape.id, (await fetchTextureDataUrl(cape.url)) || ''] as const)
     )
-    accountSkinUrl.value = (await fetchTextureDataUrl(textures.skinUrl || '')) || ''
+    if (!isCurrent()) return
+    const skinUrl = (await fetchTextureDataUrl(textures.skinUrl || '')) || ''
+    if (!isCurrent()) return
+    accountModel.value = textures.skinModel ?? 'classic'
+    accountCapeUrl.value = capeUrl
+    officialCapeUrls.value = Object.fromEntries(capeEntries)
+    accountSkinUrl.value = skinUrl
   } catch (reason) {
-    if (request !== targetTextureRequest) return
+    if (!isCurrent()) return
     message.warning(reason instanceof Error ? reason.message : t('wardrobe.textureFailed'))
   }
 }
 
 async function selectLocal(item: WardrobeItem): Promise<void> {
+  const isCurrent = localTextureRequests.begin()
   selectedLocal.value = item
   selectedOfficialCape.value = null
   editName.value = item.name
   editModel.value = item.model ?? 'classic'
-  const texture = await loadLocalTexture(item)
-  if (item.kind === 'skin') selectedSkinUrl.value = texture
-  else selectedCapeUrl.value = texture
+  if (item.kind === 'skin') selectedSkinUrl.value = ''
+  else selectedCapeUrl.value = ''
+  try {
+    const texture = await loadLocalTexture(item)
+    if (!isCurrent()) return
+    if (item.kind === 'skin') selectedSkinUrl.value = texture
+    else selectedCapeUrl.value = texture
+  } catch (reason) {
+    if (isCurrent()) message.warning(reason instanceof Error ? reason.message : t('wardrobe.textureFailed'))
+  }
 }
 
 async function selectOfficialCape(cape: MicrosoftCape): Promise<void> {
+  const isCurrent = localTextureRequests.begin()
   selectedOfficialCape.value = cape
   selectedLocal.value = null
-  selectedCapeUrl.value = officialCapeUrls.value[cape.id] || ((await fetchTextureDataUrl(cape.url)) ?? '')
+  selectedCapeUrl.value = ''
+  try {
+    const texture = officialCapeUrls.value[cape.id] || ((await fetchTextureDataUrl(cape.url)) ?? '')
+    if (isCurrent()) selectedCapeUrl.value = texture
+  } catch (reason) {
+    if (isCurrent()) message.warning(reason instanceof Error ? reason.message : t('wardrobe.textureFailed'))
+  }
 }
 
 async function importItem(): Promise<void> {
@@ -655,13 +685,20 @@ function formatBytes(bytes: number): string {
 watch(
   () => props.visible,
   async (visible) => {
-    if (!visible) return
+    if (!visible) {
+      loading.value = false
+      showEditModal.value = false
+      showUploadModal.value = false
+      showOptionsModal.value = false
+      return
+    }
     activeTab.value = 'skin'
     const previousAccountId = targetAccountId.value
     const defaultAccountId = props.currentAccount?.id || props.accounts[0]?.id || null
     targetAccountId.value = defaultAccountId
     await loadItems()
-    if (previousAccountId === defaultAccountId) await loadTargetTextures()
+    if (props.visible && targetAccountId.value === defaultAccountId && previousAccountId === defaultAccountId)
+      await loadTargetTextures()
   }
 )
 
