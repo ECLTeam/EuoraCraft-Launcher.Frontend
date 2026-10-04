@@ -4,8 +4,8 @@
       <div class="connect-scroll-area">
         <div class="connect-tools-layout">
           <PageHeader :title="t('connect.nav.tools')" icon="toolbox" />
-          <CustomDownloadCard />
           <div class="connect-tools-grid">
+            <CustomDownloadCard />
             <NatToolCard />
           </div>
         </div>
