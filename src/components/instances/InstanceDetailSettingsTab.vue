@@ -310,6 +310,7 @@ import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
+import { settingsSaveSession } from '@/features/instances/model/instanceSaveSession'
 import {
   createDefaultVersionSettings,
   normalizeVersionSettings,
@@ -323,6 +324,7 @@ import SettingSection from '@/features/settings/components/SettingSection.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { SystemMemoryInfo } from '@/types/config'
 import type { ScannedVersion } from '@/types/instances'
+import { gamePathIdentity } from '@/utils/path'
 defineOptions({ name: 'InstanceDetailSettingsTab' })
 
 const props = defineProps<{
@@ -496,7 +498,7 @@ let skipSettingsWatch = false
 /** 300ms 防抖定时器（参考 GameTab.vue 的 debouncedSaveConfig） */
 let settingsSaveTimer: ReturnType<typeof setTimeout> | null = null
 /** 保存串行化：保存中再有新变更则排队重存，避免 API 读-改-写竞态 */
-let saveChain: Promise<unknown> = Promise.resolve()
+let saveChain: Promise<void> = Promise.resolve()
 let loadedSettingsTarget: VersionSettingsTarget | null = null
 
 function getSettingsTarget(): VersionSettingsTarget | null {
@@ -528,6 +530,8 @@ async function loadSettings() {
     Object.assign(versionSettings, normalizeVersionSettings(settings))
     loadedSettingsTarget = target
     savedSettingsSnapshot.value = JSON.stringify(versionSettings)
+    const pendingDraft = settingsSaveSession.draft(`${gamePathIdentity(target.path)}\0${target.versionId}`)
+    if (pendingDraft) Object.assign(versionSettings, pendingDraft)
   } catch (error) {
     if (requestId === settingsRequestId) {
       message.error(error instanceof Error ? error.message : t('versions.detail.loadSettingsFailed'))
@@ -561,9 +565,11 @@ async function persistSettings() {
   }
   const snapshot = JSON.stringify(versionSettings)
   settingsSaving.value = true
-  const queued = saveChain
-    .catch(() => undefined)
-    .then(() => instanceSettingsApi.save(target, JSON.parse(snapshot) as VersionLaunchSettings))
+  const queued = settingsSaveSession.enqueue(
+    `${gamePathIdentity(target.path)}\0${target.versionId}`,
+    JSON.parse(snapshot) as VersionLaunchSettings,
+    (submitted) => instanceSettingsApi.save(target, submitted)
+  )
   saveChain = queued
   try {
     await queued
@@ -625,19 +631,23 @@ async function resetSettings() {
     settingsSaveTimer = null
   }
   settingsSaving.value = true
+  const defaults = createDefaultVersionSettings()
+  const beforeReset = JSON.stringify(versionSettings)
+  const queued = settingsSaveSession.enqueue(`${gamePathIdentity(target.path)}\0${target.versionId}`, defaults, () =>
+    instanceSettingsApi.reset(target)
+  )
+  saveChain = queued
   try {
-    await saveChain.catch(() => undefined)
-    await instanceSettingsApi.reset(target)
+    await queued
     if (loadedSettingsTarget?.versionId !== target.versionId || loadedSettingsTarget?.path !== target.path) return
     skipSettingsWatch = true
-    const defaults = createDefaultVersionSettings()
-    Object.assign(versionSettings, defaults)
-    savedSettingsSnapshot.value = JSON.stringify(versionSettings)
+    if (JSON.stringify(versionSettings) === beforeReset) Object.assign(versionSettings, defaults)
+    savedSettingsSnapshot.value = JSON.stringify(defaults)
     message.success(t('versions.detail.settingsReset'))
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.detail.saveSettingsFailed'))
   } finally {
-    settingsSaving.value = false
+    if (saveChain === queued) settingsSaving.value = false
     await nextTick()
     skipSettingsWatch = false
   }

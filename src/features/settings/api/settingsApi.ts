@@ -118,8 +118,8 @@ export const settingsApi = {
     assertSuccess(await backend.config.set('game', config), '保存设置')
   },
 
-  async saveDownload(config: DownloadConfig): Promise<void> {
-    assertSuccess(await backend.config.set('download', config), '保存下载设置')
+  async patchDownload(patch: Partial<DownloadConfig>): Promise<DownloadConfig> {
+    return assertSuccess(await backend.command('settings_download_patch', patch), '保存下载设置')
   },
 
   async saveConnector(config: ConnectorConfig): Promise<void> {

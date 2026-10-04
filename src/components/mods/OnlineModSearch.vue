@@ -563,6 +563,7 @@ import {
   type VersionGroupType,
 } from '@/features/mods/model/modVersionGroups'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { DownloadConfig } from '@/types/config'
 import type {
   GameResourceType,
@@ -1752,11 +1753,8 @@ async function readDownloadConfig(): Promise<DownloadConfig> {
 async function persistSaveDirectory(path: string): Promise<void> {
   const directory = parentDirectory(path)
   if (!directory) return
-  const current = await readDownloadConfig()
-  await backend.config.set('download', {
-    ...current,
+  await useSettingsStore().patchDownload({
     resourceSaveDirectories: {
-      ...(current.resourceSaveDirectories ?? {}),
       [props.resourceType]: directory,
     },
   })

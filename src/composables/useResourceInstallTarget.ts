@@ -2,6 +2,7 @@ import { computed, onMounted, ref } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { ScannedVersion } from '@/types/instances'
 import { gamePathIdentity } from '@/utils/path'
 
@@ -116,13 +117,8 @@ export function useResourceInstallTarget(resourceType: InstallTargetKey, autoSel
   }
 
   async function persist(instance: ScannedVersion | null = selectedInstance.value): Promise<void> {
-    const current = (unwrapResponse(await backend.config.get('download'), '读取下载设置') ?? {}) as {
-      resourceInstallCache?: Record<string, { gamePath: string; versionId: string }>
-    }
-    await backend.config.set('download', {
-      ...current,
+    await useSettingsStore().patchDownload({
       resourceInstallCache: {
-        ...(current.resourceInstallCache ?? {}),
         // 选"无"时写空记录，代表显式选择"不绑定实例"，便于切页后恢复
         [resourceType]: instance
           ? { gamePath: instance.path, versionId: instance.versionId }

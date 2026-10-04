@@ -381,6 +381,16 @@ export function createShowcaseTransport(): BackendTransport {
         config[String(payload.section)] = cloneConfigData(payload.data)
         persistShowcaseConfig(config)
         return success()
+      case 'settings_download_patch': {
+        const previous = config.download as Record<string, unknown>
+        const next = { ...previous, ...cloneConfigData(payload) } as Record<string, unknown>
+        for (const field of ['resourceInstallCache', 'resourceSaveDirectories']) {
+          if (payload[field]) next[field] = { ...((previous[field] as object) ?? {}), ...(payload[field] as object) }
+        }
+        config.download = next
+        persistShowcaseConfig(config)
+        return success(structuredClone(next))
+      }
       case 'game_java_scan':
         return success([
           {

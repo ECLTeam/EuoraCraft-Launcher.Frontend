@@ -218,6 +218,7 @@ export interface CommandPayloadMap {
   // 配置
   settings_get: { section?: ConfigSection; sections?: ConfigSection[] } | undefined
   settings_set: { section: ConfigSection; data: unknown }
+  settings_download_patch: Partial<DownloadConfig>
 
   // 受控窗口
   window_list: undefined
@@ -698,6 +699,7 @@ export const COMMAND_NAMES = {
   launcher_errors_ack: 'launcher_errors_ack',
   settings_get: 'settings_get',
   settings_set: 'settings_set',
+  settings_download_patch: 'settings_download_patch',
   window_list: 'window_list',
   window_open: 'window_open',
   window_focus: 'window_focus',
@@ -945,6 +947,7 @@ export interface CommandResponseMap {
 
   settings_get: unknown
   settings_set: void
+  settings_download_patch: DownloadConfig
 
   window_list: WindowMetadata[]
   window_open: WindowMetadata

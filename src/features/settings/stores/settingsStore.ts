@@ -265,11 +265,10 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchDownload(patch: Partial<DownloadConfig>): Promise<void> {
+    const submittedPatch = structuredClone(patch)
     await enqueueWrite('download', async () => {
       await ensureReady()
-      const next = { ...download.value, ...patch }
-      await settingsApi.saveDownload(next)
-      download.value = next
+      download.value = await settingsApi.patchDownload(submittedPatch)
       configRevision += 1
     })
   }

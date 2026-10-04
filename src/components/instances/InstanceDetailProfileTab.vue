@@ -57,7 +57,9 @@ import { NButton, NInput, NSelect, NSwitch } from 'naive-ui'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { instanceProfileApi, targetFromVersion } from '@/features/instances/api/instanceProfileApi'
+import { profileSaveSession, type InstanceProfileForm } from '@/features/instances/model/instanceSaveSession'
 import type { InstanceCategory, InstanceExternalSource, ScannedVersion } from '@/types/instances'
 
 defineOptions({ name: 'InstanceDetailProfileTab' })
@@ -76,7 +78,7 @@ const message = useLauncherMessage()
 
 const categories = ref<InstanceCategory[]>([])
 const profileSaving = ref(false)
-const profileForm = reactive({
+const profileForm = reactive<InstanceProfileForm>({
   alias: '',
   description: '',
   favorite: false,
@@ -120,7 +122,10 @@ function loadProfileForm() {
     tagsText: (version.tags || []).join(', '),
     preferredExternalSource: version.preferredExternalSource || 'auto',
   })
+  loadedProfileVersion = version
   savedProfileSnapshot.value = JSON.stringify(profileForm)
+  const pendingDraft = profileSaveSession.draft(instanceKey(version))
+  if (pendingDraft) Object.assign(profileForm, pendingDraft)
   void nextTick(() => {
     skipProfileWatch = false
   })
@@ -129,54 +134,47 @@ function loadProfileForm() {
 /** 个性化表单自动保存：防抖 + 串行化（参考设置 tab） */
 let skipProfileWatch = false
 let profileSaveTimer: ReturnType<typeof setTimeout> | null = null
-let profileResaveQueued = false
+let loadedProfileVersion: ScannedVersion | null = null
+let latestProfileSave: Promise<void> | null = null
 const savedProfileSnapshot = ref('')
 
-function profilePayload() {
+function profilePayload(form: InstanceProfileForm) {
   return {
-    alias: profileForm.alias,
-    description: profileForm.description,
-    favorite: profileForm.favorite,
-    pinned: profileForm.pinned,
-    hidden: profileForm.hidden,
-    categoryId: profileForm.categoryId,
-    tags: profileForm.tagsText
+    alias: form.alias,
+    description: form.description,
+    favorite: form.favorite,
+    pinned: form.pinned,
+    hidden: form.hidden,
+    categoryId: form.categoryId,
+    tags: form.tagsText
       .split(/[,，]/)
       .map((tag) => tag.trim())
       .filter(Boolean),
-    preferredExternalSource: profileForm.preferredExternalSource,
+    preferredExternalSource: form.preferredExternalSource,
   }
 }
 
 async function persistProfile() {
-  const version = props.version
+  const version = loadedProfileVersion
   if (!version) return
-  if (profileSaving.value) {
-    profileResaveQueued = true
-    return
-  }
+  const form = { ...profileForm }
+  const snapshot = JSON.stringify(form)
+  const key = instanceKey(version)
+  const target = targetFromVersion(version)
   profileSaving.value = true
+  const queued = profileSaveSession.enqueue(key, form, async (submitted) => {
+    const payload = profilePayload(submitted)
+    await instanceProfileApi.patch(target, payload)
+    Object.assign(version, payload, { displayName: submitted.alias })
+  })
+  latestProfileSave = queued
   try {
-    await instanceProfileApi.patch(targetFromVersion(version), profilePayload())
-    // 直接更新本地版本对象，避免触发全量扫描
-    const v = version as unknown as Record<string, unknown>
-    v.displayName = profileForm.alias
-    v.description = profileForm.description
-    v.favorite = profileForm.favorite
-    v.pinned = profileForm.pinned
-    v.hidden = profileForm.hidden
-    v.categoryId = profileForm.categoryId
-    v.tags = profilePayload().tags
-    v.preferredExternalSource = profileForm.preferredExternalSource
-    savedProfileSnapshot.value = JSON.stringify(profileForm)
+    await queued
+    if (loadedProfileVersion === version) savedProfileSnapshot.value = snapshot
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.detail.profileSaveFailed'))
   } finally {
-    profileSaving.value = false
-    if (profileResaveQueued) {
-      profileResaveQueued = false
-      void persistProfile()
-    }
+    if (latestProfileSave === queued) profileSaving.value = false
   }
 }
 
@@ -220,13 +218,12 @@ function profileFieldLabel(field: string): string {
 
 // 打开时加载表单与分类；关闭时 flush 挂起中的自动保存（复刻原父组件行为）
 watch(
-  () => props.visible,
-  (val) => {
-    if (val) {
+  () => [props.visible, props.version?.path, props.version?.versionId] as const,
+  ([visible]) => {
+    flushProfileSave()
+    if (visible) {
       loadProfileForm()
       void instanceProfileApi.categories().then((items) => (categories.value = items))
-    } else {
-      flushProfileSave()
     }
   },
   { immediate: true }

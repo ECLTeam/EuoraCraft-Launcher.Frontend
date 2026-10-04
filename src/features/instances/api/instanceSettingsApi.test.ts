@@ -77,30 +77,13 @@ describe('instanceSettingsApi', () => {
     expect(result).toMatchObject({ isolationMode: 'enabled', customMemory: true, memory: 6144 })
   })
 
-  it('版本设置文件为空时回退读取旧版 setting.json 配置', async () => {
-    mocks.get.mockResolvedValue({
-      success: true,
-      data: {
-        'd:/games/.minecraft::1.20.1': {
-          isolated: true,
-          customMemory: false,
-          memory: 8192,
-          customJava: false,
-          javaPath: '',
-          jvmArgs: '',
-          gameArgs: '',
-          wrapperCommand: '',
-          postExitCommand: '',
-          envVars: '',
-          windowTitle: '',
-          launcherVisibility: 'inherit',
-        },
-      },
+  it('接受后端已消除歧义的历史覆盖，不读取全局旧分区', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: { isolated: true, memory: 8192 } })
+    expect(await instanceSettingsApi.get({ versionId: '1.20.1', path: 'D:/Game' })).toMatchObject({
+      isolationMode: 'enabled',
+      memory: 8192,
     })
-
-    const result = await instanceSettingsApi.get({ versionId: '1.20.1', path: 'D:\\Games\\.minecraft' })
-
-    expect(result).toMatchObject({ isolationMode: 'enabled', memory: 8192 })
+    expect(mocks.get).not.toHaveBeenCalled()
   })
 
   it('读取不存在的版本设置时返回默认值', async () => {
@@ -153,6 +136,6 @@ describe('instanceSettingsApi', () => {
       }
     )
 
-    expect(mocks.set).toHaveBeenCalledWith('version_settings', {})
+    expect(mocks.set).not.toHaveBeenCalled()
   })
 })

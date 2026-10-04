@@ -8,7 +8,7 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
     load: vi.fn(),
     saveUi: vi.fn(),
     saveGame: vi.fn(),
-    saveDownload: vi.fn(),
+    patchDownload: vi.fn(),
     saveConnector: vi.fn(),
     listJava: vi.fn(),
     selectImage: vi.fn(),

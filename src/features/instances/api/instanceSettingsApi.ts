@@ -1,7 +1,6 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import {
-  createVersionSettingsKey,
   normalizeVersionSettings,
   type VersionLaunchSettings,
   type VersionSettingsTarget,
@@ -11,21 +10,6 @@ import {
  * （.minecraft/versions/<versionId>/.ecl/settings.json），
  * 不再写入全局 setting.json，避免全局配置携带实例相关数据。
  */
-const LEGACY_SETTINGS_SECTION = 'version_settings'
-
-async function readLegacySettings(): Promise<Record<string, VersionLaunchSettings>> {
-  const result = await backend.config.get<Record<string, VersionLaunchSettings>>(LEGACY_SETTINGS_SECTION)
-  return assertSuccess(result, '读取旧版实例设置') ?? {}
-}
-
-async function removeLegacyEntry(target: VersionSettingsTarget): Promise<void> {
-  const legacy = await readLegacySettings()
-  const key = createVersionSettingsKey(target)
-  if (!(key in legacy)) return
-  delete legacy[key]
-  await backend.config.set(LEGACY_SETTINGS_SECTION, legacy)
-}
-
 export const instanceSettingsApi = {
   async get(target: VersionSettingsTarget): Promise<VersionLaunchSettings> {
     const result = await backend.command('game_version_settings_get', {
@@ -33,11 +17,8 @@ export const instanceSettingsApi = {
       version_id: target.versionId,
     })
     const stored = assertSuccess(result, '读取版本独立设置')
-    if (stored && typeof stored === 'object' && Object.keys(stored).length > 0) {
-      return normalizeVersionSettings(stored)
-    }
-    const legacy = await readLegacySettings()
-    return normalizeVersionSettings(legacy[createVersionSettingsKey(target)])
+    // 旧配置的唯一性判断与原子迁移由后端负责，前端不再写回整个历史分区。
+    return normalizeVersionSettings(stored)
   },
 
   async save(target: VersionSettingsTarget, value: Partial<VersionLaunchSettings>): Promise<void> {
@@ -47,7 +28,6 @@ export const instanceSettingsApi = {
       data: normalizeVersionSettings(value),
     })
     assertSuccess(result, '保存版本独立设置')
-    await removeLegacyEntry(target)
   },
 
   async reset(target: VersionSettingsTarget): Promise<void> {
@@ -57,7 +37,6 @@ export const instanceSettingsApi = {
       data: {},
     })
     assertSuccess(result, '重置版本独立设置')
-    await removeLegacyEntry(target)
   },
 
   async effective(target: VersionSettingsTarget): Promise<Record<string, unknown>> {
