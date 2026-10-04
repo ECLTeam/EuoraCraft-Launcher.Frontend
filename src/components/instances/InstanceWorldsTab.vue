@@ -166,13 +166,15 @@
 
 <script setup lang="ts">
 import { NButton, NDropdown, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useRequestScope } from '@/composables/useRequestScope'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import {
   instanceWorkspaceApi,
   workspaceTarget,
@@ -218,6 +220,7 @@ const savingOptions = ref(false)
 const optionsEntries = ref<GameOptionEntry[]>([])
 const optionValues = reactive<Record<string, number | string | boolean>>({})
 const target = computed(() => workspaceTarget(props.version))
+const worldRequests = useRequestScope(() => instanceKey(props.version))
 const sortOptions = [
   { label: '名称', value: 'name' },
   { label: '修改时间', value: 'modifiedAt' },
@@ -248,15 +251,23 @@ const filtered = computed(() => {
 })
 const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleString() : '从未游玩')
 async function load() {
+  const isCurrent = worldRequests.begin()
+  const requestedTarget = target.value
   loading.value = true
   try {
-    worlds.value = await instanceWorkspaceApi.worlds(target.value)
-    emit('changed', worlds.value)
-    for (const world of worlds.value) {
-      if (world.iconPath) iconUrls[world.id] = (await backend.file.toUrl(world.iconPath)) || ''
+    const loaded = await instanceWorkspaceApi.worlds(requestedTarget)
+    const icons: Record<string, string> = {}
+    for (const world of loaded) {
+      if (world.iconPath) icons[world.id] = (await backend.file.toUrl(world.iconPath)) || ''
     }
+    if (!isCurrent()) return
+    worlds.value = loaded
+    Object.assign(iconUrls, icons)
+    emit('changed', loaded)
+  } catch (reason) {
+    if (isCurrent()) message.error(getErrorMessage(reason))
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 async function openFolder() {
@@ -458,7 +469,16 @@ async function handleConfirm() {
   }
 }
 
-onMounted(load)
+watch(
+  () => instanceKey(props.version),
+  () => {
+    worlds.value = []
+    for (const key of Object.keys(iconUrls)) delete iconUrls[key]
+    editorVisible.value = backupsVisible.value = optionsVisible.value = false
+    void load()
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

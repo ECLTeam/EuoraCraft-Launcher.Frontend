@@ -4,7 +4,7 @@ import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instancePathConfigApi } from '@/features/instances/api/instancePathConfigApi'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { ScannedVersion } from '@/types/instances'
-import { normalizeGamePath } from '@/utils/path'
+import { gamePathIdentity, normalizeGamePath } from '@/utils/path'
 
 export interface VersionItem {
   id: string
@@ -24,6 +24,7 @@ export const useInstanceStore = defineStore('versions', () => {
   let hasLoaded = false
   let stopWatching: (() => void) | null = null
   let latestLoadId = 0
+  let selectionRevision = 0
 
   const loading = computed(() => loadingCount.value > 0)
   const versions = computed<VersionItem[]>(() =>
@@ -84,14 +85,17 @@ export const useInstanceStore = defineStore('versions', () => {
 
   async function loadAllImpl(force: boolean): Promise<void> {
     const loadId = ++latestLoadId
+    const initialSelectionRevision = selectionRevision
     startWatching()
     await settingsStore.load()
     if (loadId !== latestLoadId) return
     const paths = settingsStore.game.minecraft_paths.map((entry) => (typeof entry === 'string' ? entry : entry.path))
     if (paths.length === 0) {
       scannedVersions.value = []
-      selectedVersion.value = ''
-      currentGamePath.value = ''
+      if (initialSelectionRevision === selectionRevision) {
+        selectedVersion.value = ''
+        currentGamePath.value = ''
+      }
       hasLoaded = true
       return
     }
@@ -109,17 +113,21 @@ export const useInstanceStore = defineStore('versions', () => {
         .filter((version) => {
           const id = version.versionId || version.id
           const gamePath = getVersionGamePath(version, firstPath)
-          const key = `${gamePath}\0${id}`
+          const key = version.instanceKey ?? `${gamePathIdentity(gamePath)}\0${id}`
           if (seen.has(key)) return false
           seen.add(key)
           return true
         })
         .map((version) => ({ ...version, path: getVersionGamePath(version, firstPath) }))
       scannedVersions.value = deduped
+      hasLoaded = true
+      if (initialSelectionRevision !== selectionRevision) return
 
       // 确定当前激活的游戏路径：优先用全局 active_path，其次用之前已选中的路径，最后用第一个
       const activePath = settingsStore.game.active_path || currentGamePath.value || firstPath || ''
-      const pathVersions = versions.value.filter((version) => version.gamePath === activePath)
+      const pathVersions = versions.value.filter(
+        (version) => gamePathIdentity(version.gamePath) === gamePathIdentity(activePath)
+      )
 
       // 尝试从该路径的 ecl.json 读取 activeVersion
       let activeVersionId: string | null = null
@@ -127,6 +135,7 @@ export const useInstanceStore = defineStore('versions', () => {
         try {
           activeVersionId = await instancePathConfigApi.getActiveVersion(activePath, { force })
         } catch (error) {
+          if (initialSelectionRevision !== selectionRevision || loadId !== latestLoadId) return
           console.warn('[instanceStore] 读取 ecl.json activeVersion 失败:', error)
         }
       }
@@ -139,7 +148,7 @@ export const useInstanceStore = defineStore('versions', () => {
         ) ??
         versions.value.find((version) => version.id === selectedVersion.value) ??
         versions.value[0]
-      if (loadId !== latestLoadId) return
+      if (loadId !== latestLoadId || initialSelectionRevision !== selectionRevision) return
       if (selected) {
         selectVersion(selected.id, selected.gamePath)
       } else {
@@ -175,10 +184,13 @@ export const useInstanceStore = defineStore('versions', () => {
   }
 
   function selectVersion(versionId: string, gamePath?: string): void {
+    selectionRevision++
     const prevId = selectedVersion.value
     const prevPath = currentGamePath.value
     const selected = gamePath
-      ? versions.value.find((version) => version.id === versionId && version.gamePath === gamePath)
+      ? versions.value.find(
+          (version) => version.id === versionId && gamePathIdentity(version.gamePath) === gamePathIdentity(gamePath)
+        )
       : versions.value.find((version) => version.id === versionId)
     const resolvedPath = selected?.gamePath || gamePath || currentGamePath.value
     selectedVersion.value = selected?.id || versionId
@@ -192,6 +204,7 @@ export const useInstanceStore = defineStore('versions', () => {
   }
 
   function setGamePath(path: string): void {
+    selectionRevision++
     currentGamePath.value = path
   }
 
@@ -200,6 +213,7 @@ export const useInstanceStore = defineStore('versions', () => {
    * 作为该路径下的选中实例；若没有则选第一个。
    */
   async function switchPath(gamePath: string, options: { forceConfig?: boolean } = {}): Promise<void> {
+    const revision = ++selectionRevision
     currentGamePath.value = gamePath
     const settingsStore = useSettingsStore()
     // 持久化全局 active_path
@@ -214,10 +228,12 @@ export const useInstanceStore = defineStore('versions', () => {
     try {
       activeVersionId = await instancePathConfigApi.getActiveVersion(gamePath, { force: options.forceConfig })
     } catch (error) {
+      if (revision !== selectionRevision) return
       console.warn('[instanceStore] 读取 ecl.json activeVersion 失败:', error)
     }
 
-    const pathVersions = versions.value.filter((v) => normalizeGamePath(v.gamePath) === normalizeGamePath(gamePath))
+    if (revision !== selectionRevision) return
+    const pathVersions = versions.value.filter((v) => gamePathIdentity(v.gamePath) === gamePathIdentity(gamePath))
     const matched = activeVersionId ? pathVersions.find((v) => v.id === activeVersionId) : null
     const target = matched ?? pathVersions[0]
     if (target) {
@@ -229,11 +245,12 @@ export const useInstanceStore = defineStore('versions', () => {
   }
 
   function removePath(path: string): void {
-    const key = normalizeGamePath(path)
-    scannedVersions.value = scannedVersions.value.filter((version) => normalizeGamePath(version.path) !== key)
+    selectionRevision++
+    const key = gamePathIdentity(path)
+    scannedVersions.value = scannedVersions.value.filter((version) => gamePathIdentity(version.path) !== key)
     instanceInstallApi.invalidateScanCache(path)
     instancePathConfigApi.invalidateActiveVersionCache(path)
-    if (normalizeGamePath(currentGamePath.value) === key) {
+    if (gamePathIdentity(currentGamePath.value) === key) {
       const next = versions.value[0]
       selectVersion(next?.id ?? '', next?.gamePath ?? '')
     }

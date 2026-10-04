@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BackendMockState } from '@/test/mockBackend'
+import { registerGamePathIdentity } from '@/utils/path'
 import { instanceWorkspaceApi } from './instanceWorkspaceApi'
 
 const mock = vi.hoisted<{ state?: BackendMockState }>(() => ({ state: undefined }))
@@ -19,6 +20,8 @@ describe('instanceWorkspaceApi cache', () => {
   })
 
   it('reuses normalized world lists, clones cached entries, and invalidates after a mutation', async () => {
+    registerGamePathIdentity('D:/Minecraft', 'D:/Minecraft')
+    registerGamePathIdentity('d:\\minecraft\\', 'D:/Minecraft')
     mocks.command.mockImplementation((name) => {
       if (name === 'game_world_list') {
         return Promise.resolve({ success: true, data: [{ id: 'survival', name: '生存', path: 'saves/survival' }] })

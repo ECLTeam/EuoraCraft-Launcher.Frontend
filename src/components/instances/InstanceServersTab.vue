@@ -144,11 +144,13 @@
 
 <script setup lang="ts">
 import { NButton, NInput, NSwitch } from 'naive-ui'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useRequestScope } from '@/composables/useRequestScope'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import type { ScannedVersion, ServerEntry, ServerStatus } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
@@ -178,6 +180,8 @@ const form = reactive<{ id?: string; name: string; address: string; favorite: bo
   favorite: false,
 })
 const target = computed(() => workspaceTarget(props.version))
+const serverRequests = useRequestScope(() => instanceKey(props.version))
+const statusRequests = useRequestScope(() => instanceKey(props.version))
 const filtered = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase()
   return servers.value.filter(
@@ -215,11 +219,16 @@ function latencyClass(server: ServerEntry): string {
   return 'bad'
 }
 async function load() {
+  const isCurrent = serverRequests.begin()
+  const requestedTarget = target.value
   loading.value = true
   try {
-    servers.value = await instanceWorkspaceApi.servers(target.value)
+    const loaded = await instanceWorkspaceApi.servers(requestedTarget)
+    if (isCurrent()) servers.value = loaded
+  } catch (reason) {
+    if (isCurrent()) message.error(reason instanceof Error ? reason.message : '读取服务器失败')
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 async function reload() {
@@ -227,15 +236,19 @@ async function reload() {
   await load()
 }
 async function refreshStatus() {
+  const isCurrent = statusRequests.begin()
   statusLoading.value = true
   try {
     const addresses = [...new Set(servers.value.map((server) => server.address))]
     for (let offset = 0; offset < addresses.length; offset += 64) {
-      for (const status of await instanceWorkspaceApi.serverStatuses(addresses.slice(offset, offset + 64)))
-        statuses[status.address] = status
+      const loaded = await instanceWorkspaceApi.serverStatuses(addresses.slice(offset, offset + 64))
+      if (!isCurrent()) return
+      for (const status of loaded) statuses[status.address] = status
     }
+  } catch (reason) {
+    if (isCurrent()) message.error(reason instanceof Error ? reason.message : '查询服务器失败')
   } finally {
-    statusLoading.value = false
+    if (isCurrent()) statusLoading.value = false
   }
 }
 function edit(server?: ServerEntry) {
@@ -270,10 +283,19 @@ function remove(server: ServerEntry) {
     true
   )
 }
-onMounted(async () => {
-  await load()
-  await refreshStatus()
-})
+watch(
+  () => instanceKey(props.version),
+  async () => {
+    const key = instanceKey(props.version)
+    servers.value = []
+    for (const address of Object.keys(statuses)) delete statuses[address]
+    failedIcons.clear()
+    editorVisible.value = false
+    await load()
+    if (key === instanceKey(props.version)) await refreshStatus()
+  },
+  { immediate: true }
+)
 
 const confirmVisible = ref(false)
 const confirmTitle = ref('')

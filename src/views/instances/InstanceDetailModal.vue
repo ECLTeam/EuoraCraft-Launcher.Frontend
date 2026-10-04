@@ -36,7 +36,7 @@
       <main class="vdm-main">
         <div class="vdm-content">
           <Transition name="page" mode="out-in">
-            <div v-if="activeTab === 'overview'" :key="activeTab" class="vdm-page overview-page">
+            <div v-if="activeTab === 'overview'" :key="detailPageKey" class="vdm-page overview-page">
               <InstanceDetailOverviewTab
                 :version="version"
                 :runStats="runStats"
@@ -50,19 +50,23 @@
               />
             </div>
 
-            <div v-else-if="activeTab === 'profile'" :key="activeTab" class="vdm-page profile-page">
+            <div v-else-if="activeTab === 'profile'" :key="detailPageKey" class="vdm-page profile-page">
               <InstanceDetailProfileTab :version="version" :visible="visible" @updated="emit('updated')" />
             </div>
 
-            <div v-else-if="activeTab === 'mods' && isModdedInstance" :key="activeTab" class="vdm-page mods-page">
+            <div v-else-if="activeTab === 'mods' && isModdedInstance" :key="detailPageKey" class="vdm-page mods-page">
               <InstanceDetailModsTab :version="version" @openOnlineSearch="handleOnlineSearch" />
             </div>
 
-            <div v-else-if="activeTab === 'settings'" :key="activeTab" class="vdm-page version-settings-page">
+            <div v-else-if="activeTab === 'settings'" :key="detailPageKey" class="vdm-page version-settings-page">
               <InstanceDetailSettingsTab :version="version" :visible="visible" />
             </div>
 
-            <div v-else-if="activeTab === 'resourcepacks' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div
+              v-else-if="activeTab === 'resourcepacks' && version"
+              :key="detailPageKey"
+              class="vdm-page workspace-page"
+            >
               <InstanceResourcesTab
                 :version="version"
                 :worldOptions="worldOptions"
@@ -71,7 +75,11 @@
                 @openOnlineSearch="handleOnlineSearch"
               />
             </div>
-            <div v-else-if="activeTab === 'shaderpacks' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div
+              v-else-if="activeTab === 'shaderpacks' && version"
+              :key="detailPageKey"
+              class="vdm-page workspace-page"
+            >
               <InstanceResourcesTab
                 :version="version"
                 :worldOptions="worldOptions"
@@ -80,7 +88,7 @@
                 @openOnlineSearch="handleOnlineSearch"
               />
             </div>
-            <div v-else-if="activeTab === 'datapacks' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div v-else-if="activeTab === 'datapacks' && version" :key="detailPageKey" class="vdm-page workspace-page">
               <InstanceResourcesTab
                 :version="version"
                 :worldOptions="worldOptions"
@@ -89,7 +97,7 @@
                 @openOnlineSearch="handleOnlineSearch"
               />
             </div>
-            <div v-else-if="activeTab === 'schematics' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div v-else-if="activeTab === 'schematics' && version" :key="detailPageKey" class="vdm-page workspace-page">
               <InstanceResourcesTab
                 :version="version"
                 :worldOptions="worldOptions"
@@ -97,13 +105,17 @@
                 :allowedTypes="['schematic']"
               />
             </div>
-            <div v-else-if="activeTab === 'worlds' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div v-else-if="activeTab === 'worlds' && version" :key="detailPageKey" class="vdm-page workspace-page">
               <InstanceWorldsTab :version="version" @changed="handleWorldsChanged" />
             </div>
-            <div v-else-if="activeTab === 'screenshots' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div
+              v-else-if="activeTab === 'screenshots' && version"
+              :key="detailPageKey"
+              class="vdm-page workspace-page"
+            >
               <InstanceScreenshotsTab :version="version" @updated="emit('updated')" />
             </div>
-            <div v-else-if="activeTab === 'servers' && version" :key="activeTab" class="vdm-page workspace-page">
+            <div v-else-if="activeTab === 'servers' && version" :key="detailPageKey" class="vdm-page workspace-page">
               <InstanceServersTab :version="version" />
             </div>
           </Transition>
@@ -205,6 +217,7 @@ const visible = computed({
 const title = computed(() => props.version?.displayName || props.version?.versionId || t('versions.detail.settings'))
 
 const activeTab = ref<DetailTab>('overview')
+const detailPageKey = computed(() => `${props.version ? instanceKey(props.version) : ''}\0${activeTab.value}`)
 
 /** Mod 导航项对应本地模组管理视图 */
 function isTabActive(id: DetailTab): boolean {

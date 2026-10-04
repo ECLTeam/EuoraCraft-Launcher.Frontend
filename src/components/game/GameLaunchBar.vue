@@ -130,7 +130,7 @@ import { instanceDisplayName } from '@/features/instances/model/instancePresenta
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
-import { normalizeGamePath } from '@/utils/path'
+import { gamePathIdentity } from '@/utils/path'
 
 const props = defineProps<{
   versionsCount: number
@@ -168,7 +168,7 @@ const getPathDisplayName = (gamePath: string): string => {
 
 function matchedInstance(versionId: string, gamePath: string) {
   return instanceStore.scannedVersions.find(
-    (v) => v.versionId === versionId && normalizeGamePath(v.path) === normalizeGamePath(gamePath)
+    (v) => v.versionId === versionId && gamePathIdentity(v.path) === gamePathIdentity(gamePath)
   )
 }
 
@@ -179,7 +179,7 @@ function instanceNameOf(item: RecentInstance): string {
 
 function instancePathNameOf(item: RecentInstance): string {
   const entry = settingsStore.game.minecraft_paths.find(
-    (p) => normalizeGamePath(typeof p === 'string' ? p : p.path) === normalizeGamePath(item.gamePath)
+    (p) => gamePathIdentity(typeof p === 'string' ? p : p.path) === gamePathIdentity(item.gamePath)
   )
   if (!entry) return getPathDisplayName(item.gamePath)
   return typeof entry === 'string' ? getPathDisplayName(entry) : entry.name || getPathDisplayName(entry.path)

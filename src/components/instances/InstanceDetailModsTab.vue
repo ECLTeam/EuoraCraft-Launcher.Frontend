@@ -139,6 +139,8 @@ import { useI18n } from 'vue-i18n'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useRequestScope } from '@/composables/useRequestScope'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { getLoaderName } from '@/config/version'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { modApi } from '@/features/mods/api/modApi'
@@ -160,6 +162,7 @@ const message = useLauncherMessage()
 
 const mods = ref<ModItem[]>([])
 const modsLoading = ref(false)
+const modRequests = useRequestScope(() => (props.version ? instanceKey(props.version) : ''))
 const modTogglePending = ref(new Set<ModItem>())
 const modSearchQuery = ref('')
 const modFilter = ref<'all' | 'enabled' | 'disabled'>('all')
@@ -195,16 +198,19 @@ function getTarget() {
 }
 
 async function loadMods() {
+  const isCurrent = modRequests.begin()
+  modsLoading.value = false
   if (!modSupported.value) return
   const target = getTarget()
   if (!target) return
   modsLoading.value = true
   try {
-    mods.value = await instanceWorkspaceApi.mods(target)
+    const loaded = await instanceWorkspaceApi.mods(target)
+    if (isCurrent()) mods.value = loaded
   } catch (error) {
-    message.error(error instanceof Error ? error.message : t('versions.mods.modAddFailed'))
+    if (isCurrent()) message.error(error instanceof Error ? error.message : t('versions.mods.modAddFailed'))
   } finally {
-    modsLoading.value = false
+    if (isCurrent()) modsLoading.value = false
   }
 }
 
@@ -306,8 +312,11 @@ async function handleOpenOnline(mod: ModItem) {
 
 // 实例切换时重新加载模组列表
 watch(
-  () => props.version?.versionId,
-  () => void loadMods(),
+  () => (props.version ? instanceKey(props.version) : ''),
+  () => {
+    mods.value = []
+    void loadMods()
+  },
   { immediate: true }
 )
 

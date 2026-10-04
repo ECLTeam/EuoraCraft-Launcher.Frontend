@@ -3,13 +3,14 @@ import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import type { ScannedVersion } from '@/types/instances'
+import { gamePathIdentity } from '@/utils/path'
 
 /** 安装位置缓存键：在线资源类型 + 存档（存档仅本地导入）。 */
 export type InstallTargetKey = string
 
 /** 用 path\u0000versionId 拼接的实例唯一键，与现存各页选择器一致。 */
-export function instanceKey(version: Pick<ScannedVersion, 'path' | 'versionId'>): string {
-  return `${version.path}\u0000${version.versionId}`
+export function instanceKey(version: Pick<ScannedVersion, 'path' | 'versionId' | 'instanceKey'>): string {
+  return version.instanceKey ?? `${gamePathIdentity(version.path)}\u0000${version.versionId}`
 }
 
 export function parseInstanceKey(key: string): { path: string; versionId: string } {
@@ -29,13 +30,17 @@ export function resolveInitialResourceTarget(
   if (cached) {
     if (!cached.gamePath || !cached.versionId) return null
     const hit = installable.find(
-      (version) => version.path === cached.gamePath && version.versionId === cached.versionId
+      (version) =>
+        gamePathIdentity(version.path) === gamePathIdentity(cached.gamePath) && version.versionId === cached.versionId
     )
     if (hit) return hit
   }
   if (!autoSelect) return null
   return (
-    installable.find((version) => version.versionId === selectedVersion && version.path === currentGamePath) ??
+    installable.find(
+      (version) =>
+        version.versionId === selectedVersion && gamePathIdentity(version.path) === gamePathIdentity(currentGamePath)
+    ) ??
     installable[0] ??
     null
   )

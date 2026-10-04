@@ -7,6 +7,7 @@ import { MAX_PINNED_ITEMS, type RecentInstance } from '@/composables/useRecentIn
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
+import { registerGamePathIdentity } from '@/utils/path'
 import GameLaunchBar from './GameLaunchBar.vue'
 
 function mountLaunchBar(
@@ -89,6 +90,8 @@ describe('GameLaunchBar', () => {
   it.each(['c:/games/.minecraft', 'C:\\Games\\.minecraft', 'C:/Games/.minecraft/'])(
     '游戏目录规范化后仍能找到当前实例：%s',
     (currentGamePath) => {
+      registerGamePathIdentity(currentGamePath, 'C:/Games/.minecraft')
+      registerGamePathIdentity('C:/Games/.minecraft', 'C:/Games/.minecraft')
       const wrapper = mountLaunchBar({ currentGamePath }, [makeVersion({ alias: '朋友生存服' })])
 
       expect(wrapper.get('.launch-version').text()).toBe('朋友生存服')

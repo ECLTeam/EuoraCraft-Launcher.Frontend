@@ -59,12 +59,14 @@
 
 <script setup lang="ts">
 import { NButton, NInput, NSelect } from 'naive-ui'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useRequestScope } from '@/composables/useRequestScope'
+import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import type { ScannedVersion, ScreenshotEntry } from '@/types/instances'
 import InstanceContentState from './InstanceContentState.vue'
@@ -76,6 +78,7 @@ const shots = ref<ScreenshotEntry[]>([])
 const query = ref('')
 const direction = ref<'desc' | 'asc'>('desc')
 const target = computed(() => workspaceTarget(props.version))
+const screenshotRequests = useRequestScope(() => instanceKey(props.version))
 const sortOptions = [
   { label: '最新在前', value: 'desc' },
   { label: '最早在前', value: 'asc' },
@@ -92,17 +95,22 @@ const groups = computed(() => {
   return [...map].map(([date, items]) => ({ date, items }))
 })
 async function load() {
+  const isCurrent = screenshotRequests.begin()
+  const requestedTarget = target.value
   loading.value = true
   try {
-    shots.value = await instanceWorkspaceApi.screenshots(target.value)
+    const loaded = await instanceWorkspaceApi.screenshots(requestedTarget)
     await Promise.all(
-      shots.value.map(async (shot) => {
-        const thumb = await instanceWorkspaceApi.thumbnail(target.value, shot.id)
+      loaded.map(async (shot) => {
+        const thumb = await instanceWorkspaceApi.thumbnail(requestedTarget, shot.id)
         shot.thumbnailUrl = (await backend.file.toUrl(thumb.path)) || ''
       })
     )
+    if (isCurrent()) shots.value = loaded
+  } catch (reason) {
+    if (isCurrent()) message.error(reason instanceof Error ? reason.message : '读取截图失败')
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 async function openFolder() {
@@ -167,7 +175,14 @@ async function handleConfirm() {
   }
 }
 
-onMounted(load)
+watch(
+  () => instanceKey(props.version),
+  () => {
+    shots.value = []
+    void load()
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>

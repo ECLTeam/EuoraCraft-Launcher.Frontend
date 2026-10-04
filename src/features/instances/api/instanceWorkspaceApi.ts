@@ -20,6 +20,7 @@ import type {
   WorldPatch,
 } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
+import { gamePathIdentity } from '@/utils/path'
 export function workspaceTarget(version: ScannedVersion, versionIsolation?: boolean): InstanceTargetPayload {
   const target = { game_path: version.path, version_id: version.versionId }
   return versionIsolation === undefined ? target : { ...target, version_isolation: versionIsolation }
@@ -41,11 +42,7 @@ const pendingThumbnails = new Map<string, Promise<{ path: string }>>()
 const cacheRevisions = new Map<string, number>()
 
 function workspaceCacheKey(target: InstanceTargetPayload): string {
-  const gamePath = target.game_path
-    .trim()
-    .replace(/[\\/]+$/, '')
-    .replace(/\\/g, '/')
-    .toLowerCase()
+  const gamePath = gamePathIdentity(target.game_path)
   return `${gamePath}\0${target.version_id}\0${target.version_isolation ? 'isolated' : 'shared'}`
 }
 

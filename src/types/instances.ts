@@ -83,6 +83,11 @@ export interface InstanceProfile {
 }
 
 export interface ScannedVersion {
+  /** 后端规范目录身份，旧后端缺失时在 API 边界使用保守路径键。 */
+  rootKey?: string
+  instanceKey?: string
+  instanceDirectoryName?: string
+  minecraftVersion?: string
   id: string
   versionId: string
   /** 后端解析得到的原版版本类型，前端不再根据版本名称猜测 */

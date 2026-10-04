@@ -5,7 +5,7 @@ import { assertParams } from '@/app/validation'
 import type { SelectResult } from '@/types/accounts'
 import type { CommandPayloadMap } from '@/types/api'
 import type { InstallVersionResult, MinecraftVersionCatalog, ScannedVersion } from '@/types/instances'
-import { normalizeGamePath } from '@/utils/path'
+import { normalizeGamePath, registerGamePathIdentity } from '@/utils/path'
 
 export type InstallableLoader = 'fabric' | 'forge' | 'neoforge' | 'quilt'
 export type VersionsChangedHandler = (payload: { gamePath: string }) => void
@@ -119,9 +119,12 @@ export const instanceInstallApi = {
           ) ?? []
         const snapshots = new Map([...generations.keys()].map((key) => [key, [] as ScannedVersion[]]))
         scanned.forEach((version) => {
+          if (version.rootKey) registerGamePathIdentity(version.path, version.rootKey)
           const fallbackPath = missingPaths.length === 1 ? (missingPaths[0] ?? '') : ''
           const key = normalizeGamePath(version.path || fallbackPath)
-          snapshots.get(key)?.push({ ...version })
+          snapshots
+            .get(key)
+            ?.push({ ...version, instanceDirectoryName: version.versionId, minecraftVersion: version.vanillaName })
         })
         for (const [key, snapshot] of snapshots) {
           if ((scanGenerations.get(key) ?? 0) === generations.get(key)) scanCache.set(key, snapshot)
