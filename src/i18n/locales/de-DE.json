@@ -61,7 +61,30 @@
       "ipv6NotDetected": "Kein öffentliches IPv6 erkannt",
       "timeout": "Zeitüberschreitung. Netzwerk prüfen und erneut versuchen.",
       "busy": "Eine Prüfung läuft bereits. Bitte später erneut versuchen.",
-      "probeFailed": "Netzwerkprüfung fehlgeschlagen. Bitte erneut versuchen."
+      "probeFailed": "Netzwerkprüfung fehlgeschlagen. Bitte erneut versuchen.",
+      "downloadOptions": "Downloadoptionen",
+      "downloadNameSummary": "Dateiname: {name}",
+      "natDetails": "Erkennungsdetails",
+      "skinAvatar": {
+        "title": "Skin-Avatar zuschneiden",
+        "choose": "Skin-PNG auswählen",
+        "hint": "Minecraft-Skin als PNG auswählen, um das Gesicht als Avatar zu exportieren.",
+        "preview": "Avatar-Vorschau",
+        "settings": "Exporteinstellungen",
+        "includeHat": "Hutebene einbeziehen",
+        "size": "Ausgabegröße",
+        "hatOn": "Hutebene an",
+        "hatOff": "Hutebene aus",
+        "summary": "{size} × {size} · {hat}",
+        "export": "PNG exportieren",
+        "saved": "Avatar exportiert",
+        "invalidPng": "Bitte eine gültige Skin-PNG auswählen",
+        "invalidDimensions": "Die Breite muss ein Vielfaches von 64 sein; die Höhe entspricht der Breite oder ihrer Hälfte, maximal 1024×1024",
+        "tooLarge": "Skin-Dateien dürfen 5 MiB nicht überschreiten",
+        "decodeFailed": "Das Skin-Bild ist beschädigt oder kann nicht dekodiert werden",
+        "sourceConflict": "Der Avatar darf den ursprünglichen Skin nicht ersetzen. Bitte einen anderen Dateinamen wählen",
+        "invalidExtension": "Bitte einen Dateinamen mit der Endung .png wählen"
+      }
     },
     "create": {
       "tab": "Raum erstellen",

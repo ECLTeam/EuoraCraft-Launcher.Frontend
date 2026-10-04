@@ -6,6 +6,7 @@
           <PageHeader :title="t('connect.nav.tools')" icon="toolbox" />
           <div class="connect-tools-grid">
             <CustomDownloadCard />
+            <SkinAvatarToolCard />
             <NatToolCard />
           </div>
         </div>
@@ -18,6 +19,7 @@
 import { useI18n } from 'vue-i18n'
 import CustomDownloadCard from '@/components/connect/CustomDownloadCard.vue'
 import NatToolCard from '@/components/connect/NatToolCard.vue'
+import SkinAvatarToolCard from '@/components/connect/SkinAvatarToolCard.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 
 const { t } = useI18n()

@@ -61,7 +61,30 @@
       "ipv6NotDetected": "パブリック IPv6 は未検出",
       "timeout": "診断がタイムアウトしました。ネットワークを確認して再試行してください。",
       "busy": "診断中です。しばらくしてから再試行してください。",
-      "probeFailed": "ネットワーク診断に失敗しました。再試行してください。"
+      "probeFailed": "ネットワーク診断に失敗しました。再試行してください。",
+      "downloadOptions": "ダウンロード設定",
+      "downloadNameSummary": "保存名：{name}",
+      "natDetails": "検出の詳細",
+      "skinAvatar": {
+        "title": "スキンからアバターを切り出す",
+        "choose": "スキン PNG を選択",
+        "hint": "Minecraft のスキン PNG から顔を切り出し、アバターを保存します。",
+        "preview": "アバターのプレビュー",
+        "settings": "書き出し設定",
+        "includeHat": "帽子レイヤーを含める",
+        "size": "出力サイズ",
+        "hatOn": "帽子レイヤーあり",
+        "hatOff": "帽子レイヤーなし",
+        "summary": "{size} × {size} · {hat}",
+        "export": "PNG を保存",
+        "saved": "アバターを保存しました",
+        "invalidPng": "有効な PNG スキンファイルを選択してください",
+        "invalidDimensions": "幅は 64 の倍数、高さは幅と同じか半分で、最大 1024×1024 です",
+        "tooLarge": "スキンファイルは 5 MiB 以下にしてください",
+        "decodeFailed": "スキン画像が破損しているか、読み込めません",
+        "sourceConflict": "元のスキンには上書きできません。別のファイル名を選択してください",
+        "invalidExtension": ".png で終わる保存ファイル名を選択してください"
+      }
     },
     "create": {
       "tab": "ルームを作成",

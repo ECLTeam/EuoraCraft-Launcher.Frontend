@@ -1,0 +1,79 @@
+.skin-avatar-card {
+  min-width: 0;
+}
+
+.skin-avatar-card :deep(.card-body) {
+  padding: 12px;
+}
+
+.skin-avatar-body {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.skin-avatar-preview {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.skin-avatar-preview img {
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.skin-avatar-preview p,
+.skin-avatar-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.skin-avatar-settings {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.skin-avatar-settings label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.skin-avatar-settings input {
+  accent-color: var(--primary);
+}
+
+.skin-avatar-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.skin-avatar-sizes legend {
+  margin-bottom: 8px;
+}
+
+.skin-avatar-error {
+  margin: 0;
+  color: var(--error);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.skin-avatar-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}

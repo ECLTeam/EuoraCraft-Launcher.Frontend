@@ -61,7 +61,30 @@
       "ipv6NotDetected": "Public IPv6 not detected",
       "timeout": "Detection timed out. Check your network and retry.",
       "busy": "Detection is already running. Retry shortly.",
-      "probeFailed": "Network probe failed. Retry shortly."
+      "probeFailed": "Network probe failed. Retry shortly.",
+      "downloadOptions": "Download options",
+      "downloadNameSummary": "Save name: {name}",
+      "natDetails": "Detection details",
+      "skinAvatar": {
+        "title": "Skin avatar crop",
+        "choose": "Choose skin PNG",
+        "hint": "Choose a Minecraft skin PNG to extract the face and export an avatar.",
+        "preview": "Skin avatar preview",
+        "settings": "Export settings",
+        "includeHat": "Include hat layer",
+        "size": "Output size",
+        "hatOn": "Hat layer on",
+        "hatOff": "Hat layer off",
+        "summary": "{size} × {size} · {hat}",
+        "export": "Export PNG",
+        "saved": "Avatar exported",
+        "invalidPng": "Choose a valid PNG skin file",
+        "invalidDimensions": "Skin width must be a multiple of 64; height must equal the width or half of it, up to 1024×1024",
+        "tooLarge": "Skin files must not exceed 5 MiB",
+        "decodeFailed": "The skin image is damaged or cannot be decoded",
+        "sourceConflict": "The avatar cannot replace the source skin. Choose another filename",
+        "invalidExtension": "Choose a save filename ending in .png"
+      }
     },
     "create": {
       "tab": "Create room",

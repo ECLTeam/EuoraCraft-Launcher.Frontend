@@ -337,6 +337,7 @@ export interface CommandPayloadMap {
   image_fetch_data_url: { url: string }
   image_save_url: { url: string }
   image_save_as: ImageSaveAsPayload
+  skin_avatar_export: { data_url: string; size: 64 | 128 | 256 | 512; source_path: string }
   image_read_file: { path: string }
   image_list_files: { path: string }
   background_video_open: undefined
@@ -769,6 +770,7 @@ export const COMMAND_NAMES = {
   image_fetch_data_url: 'image_fetch_data_url',
   image_save_url: 'image_save_url',
   image_save_as: 'image_save_as',
+  skin_avatar_export: 'skin_avatar_export',
   image_read_file: 'image_read_file',
   image_list_files: 'image_list_files',
   background_video_open: 'background_video_open',
@@ -1025,6 +1027,7 @@ export interface CommandResponseMap {
   image_fetch_data_url: ImageDataUrl
   image_save_url: ImageSaveUrlResult
   image_save_as: SelectResult
+  skin_avatar_export: SelectResult
   image_read_file: ImageDataUrl
   image_list_files: ImageListResult
   background_video_open: { url: string }

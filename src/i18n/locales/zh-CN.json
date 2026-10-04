@@ -61,7 +61,30 @@
       "ipv6NotDetected": "未检测到公网 IPv6",
       "timeout": "检测超时，请检查网络后重试",
       "busy": "已有检测正在进行，请稍后重试",
-      "probeFailed": "网络探测失败，请稍后重试"
+      "probeFailed": "网络探测失败，请稍后重试",
+      "downloadOptions": "下载选项",
+      "downloadNameSummary": "保存名称：{name}",
+      "natDetails": "检测详情",
+      "skinAvatar": {
+        "title": "皮肤头像裁剪",
+        "choose": "选择皮肤 PNG",
+        "hint": "选择 Minecraft 皮肤 PNG，自动提取脸部并导出头像。",
+        "preview": "皮肤头像预览",
+        "settings": "导出设置",
+        "includeHat": "包含帽子层",
+        "size": "输出尺寸",
+        "hatOn": "帽子层开启",
+        "hatOff": "帽子层关闭",
+        "summary": "{size} × {size} · {hat}",
+        "export": "导出 PNG",
+        "saved": "头像已导出",
+        "invalidPng": "请选择有效的 PNG 皮肤文件",
+        "invalidDimensions": "皮肤宽度须为 64 的整数倍，高度须为宽度的一半或相同，最大 1024×1024",
+        "tooLarge": "皮肤文件不能超过 5 MiB",
+        "decodeFailed": "皮肤图片损坏或无法解码",
+        "sourceConflict": "头像不能覆盖导入的皮肤，请选择其他文件名",
+        "invalidExtension": "请选择以 .png 结尾的保存文件"
+      }
     },
     "create": {
       "tab": "创建房间",

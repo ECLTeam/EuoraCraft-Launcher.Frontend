@@ -61,7 +61,30 @@
       "ipv6NotDetected": "未偵測到公網 IPv6",
       "timeout": "偵測逾時，請檢查網路後重試",
       "busy": "已有偵測正在進行，請稍後重試",
-      "probeFailed": "網路探測失敗，請稍後重試"
+      "probeFailed": "網路探測失敗，請稍後重試",
+      "downloadOptions": "下載選項",
+      "downloadNameSummary": "儲存名稱：{name}",
+      "natDetails": "檢測詳情",
+      "skinAvatar": {
+        "title": "皮膚頭像裁剪",
+        "choose": "選擇皮膚 PNG",
+        "hint": "選擇 Minecraft 皮膚 PNG，自動擷取臉部並匯出頭像。",
+        "preview": "皮膚頭像預覽",
+        "settings": "匯出設定",
+        "includeHat": "包含帽子圖層",
+        "size": "輸出尺寸",
+        "hatOn": "帽子圖層開啟",
+        "hatOff": "帽子圖層關閉",
+        "summary": "{size} × {size} · {hat}",
+        "export": "匯出 PNG",
+        "saved": "頭像已匯出",
+        "invalidPng": "請選擇有效的 PNG 皮膚檔案",
+        "invalidDimensions": "皮膚寬度須為 64 的整數倍，高度須為寬度的一半或相同，最大 1024×1024",
+        "tooLarge": "皮膚檔案不能超過 5 MiB",
+        "decodeFailed": "皮膚圖片損壞或無法解碼",
+        "sourceConflict": "頭像不能覆蓋匯入的皮膚，請選擇其他檔名",
+        "invalidExtension": "請選擇以 .png 結尾的儲存檔案"
+      }
     },
     "create": {
       "tab": "建立房間",

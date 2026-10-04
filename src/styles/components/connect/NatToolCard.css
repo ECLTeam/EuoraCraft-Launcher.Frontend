@@ -100,3 +100,9 @@
     gap: 2px;
   }
 }
+
+.connect-nat-details {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+}

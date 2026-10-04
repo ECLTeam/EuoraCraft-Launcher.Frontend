@@ -61,6 +61,9 @@ describe('CustomDownloadCard', () => {
       expect(wrapper.get(`input#${id}`).attributes('disabled')).toBeUndefined()
     }
     expect(wrapper.get('[role="radiogroup"]').attributes('aria-labelledby')).toBe('custom-download-naming-label')
+    expect(wrapper.get('details').find('[role="radiogroup"]').exists()).toBe(true)
+    expect(wrapper.get('details').find('#custom-download-url').exists()).toBe(false)
+    expect(wrapper.get('details').attributes('open')).toBeUndefined()
     await wrapper.get('input[type="radio"][value="custom"]').setValue(true)
     expect(useCustomDownloadStore().namingMode).toBe('custom')
     await wrapper.get('#custom-download-name').setValue('保留名称.zip')
@@ -102,6 +105,7 @@ describe('CustomDownloadCard', () => {
     expect(wrapper.findAll('[role="alert"]')).toHaveLength(1)
     expect(wrapper.get('details').find('[role="alert"]').exists()).toBe(false)
     expect(wrapper.get('[role="alert"]').text()).not.toBe('')
+    expect((wrapper.get('details').element as HTMLDetailsElement).open).toBe(true)
     expect(
       wrapper
         .findAll('button')

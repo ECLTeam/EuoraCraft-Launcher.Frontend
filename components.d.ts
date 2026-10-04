@@ -64,6 +64,7 @@ declare module 'vue' {
     SectionLayout: typeof import('./src/components/layout/SectionLayout.vue')['default']
     Select: typeof import('./src/components/ui/Select.vue')['default']
     SideBar: typeof import('./src/components/layout/SideBar.vue')['default']
+    SkinAvatarToolCard: typeof import('./src/components/connect/SkinAvatarToolCard.vue')['default']
     Slider: typeof import('./src/components/ui/Slider.vue')['default']
     Tag: typeof import('./src/components/ui/Tag.vue')['default']
     TaskQueuePanel: typeof import('./src/components/panels/TaskQueuePanel.vue')['default']

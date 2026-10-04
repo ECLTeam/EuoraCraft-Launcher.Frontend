@@ -19,17 +19,22 @@
       </div>
       <div v-else-if="state === 'success' && result" class="connect-nat-result">
         <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
-        <dl class="connect-nat-fields">
-          <div>
-            <dt>{{ t('connect.tools.publicAddress') }}</dt>
-            <dd>
-              <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
-            </dd>
+        <details class="tool-options">
+          <summary><UiIcon name="chevron-right" :size="16" />{{ t('connect.tools.natDetails') }}</summary>
+          <div class="connect-nat-details">
+            <dl class="connect-nat-fields">
+              <div>
+                <dt>{{ t('connect.tools.publicAddress') }}</dt>
+                <dd>
+                  <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
+                </dd>
+              </div>
+            </dl>
+            <span class="connect-nat-ipv6">
+              {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
+            </span>
           </div>
-        </dl>
-        <span class="connect-nat-ipv6">
-          {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
-        </span>
+        </details>
       </div>
       <div v-else-if="state === 'error'" class="connect-nat-error">
         <strong><UiIcon name="alert-circle" :size="15" />{{ t('connect.tools.detectFailed') }}</strong>
@@ -122,3 +127,5 @@ async function detect(): Promise<void> {
 </script>
 
 <style scoped src="@/styles/components/connect/NatToolCard.css"></style>
+
+<style scoped src="@/styles/components/connect/ToolOptions.css"></style>

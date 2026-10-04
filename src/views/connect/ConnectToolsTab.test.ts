@@ -43,6 +43,12 @@ describe('ConnectToolsTab', () => {
 
     expect(wrapper.text()).toContain('尚未检测')
     expect(wrapper.text()).toContain('NAT 类型检测')
+    expect(wrapper.text()).toContain('皮肤头像裁剪')
+    expect(wrapper.findAll('.connect-tools-grid > .ui-card').map((card) => card.get('.title-text').text())).toEqual([
+      '自定义下载',
+      '皮肤头像裁剪',
+      'NAT 类型检测',
+    ])
     expect(wrapper.find('.connect-main-card').exists()).toBe(false)
     expect(mocks.natType).not.toHaveBeenCalled()
   })
@@ -58,6 +64,12 @@ describe('ConnectToolsTab', () => {
     expect(wrapper.text()).toContain('完全锥形 NAT')
     expect(wrapper.text()).toContain('203.0.113.7:51234')
     expect(wrapper.text()).toContain('已检测到公网 IPv6')
+    const details = wrapper.get('.connect-nat-card details')
+    expect(details.attributes('open')).toBeUndefined()
+    expect(wrapper.get('.connect-nat-result > .ui-tag').text()).toContain('完全锥形 NAT')
+    ;(details.element as HTMLDetailsElement).open = true
+    await details.trigger('toggle')
+    expect(wrapper.get('.connect-nat-fields').text()).toContain('203.0.113.7:51234')
   })
 
   it('renders a port range when the mapped port is not fixed', async () => {

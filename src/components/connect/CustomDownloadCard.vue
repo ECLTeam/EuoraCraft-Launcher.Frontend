@@ -14,44 +14,56 @@
           }}</UiButton>
         </div>
       </div>
-      <div class="custom-download-row">
-        <span id="custom-download-naming-label" class="custom-download-label">{{ t('advanced.downloadNaming') }}</span>
-        <div class="custom-download-naming">
-          <NRadioGroup
-            v-model:value="namingMode"
-            role="radiogroup"
-            aria-labelledby="custom-download-naming-label"
-            name="download-naming"
-            :disabled="busy"
-            :themeOverrides="namingTheme"
-          >
-            <NRadioButton value="original">{{ t('advanced.downloadOriginalName') }}</NRadioButton>
-            <NRadioButton value="custom">{{ t('advanced.downloadCustomName') }}</NRadioButton>
-          </NRadioGroup>
-          <div v-if="namingMode === 'custom'" class="custom-download-name">
-            <label for="custom-download-name">{{ t('advanced.downloadFileName') }}</label>
-            <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
-            <p class="custom-download-hint">{{ t('advanced.downloadFileNameHint') }}</p>
-          </div>
-          <p v-else class="custom-download-hint">
-            {{
-              url.trim()
-                ? t('advanced.downloadOriginalHint', { name: estimatedName })
-                : t('advanced.downloadOriginalRule')
-            }}
-          </p>
-        </div>
-      </div>
-      <NCheckbox
-        v-model:checked="overwrite"
-        class="custom-download-overwrite"
-        :themeOverrides="overwriteTheme"
-        :disabled="busy"
-        >{{ t('advanced.downloadOverwrite') }}</NCheckbox
-      >
-      <details class="custom-download-advanced">
-        <summary><UiIcon name="chevron-right" :size="16" />{{ t('advanced.downloadAdvanced') }}</summary>
+      <p class="custom-download-hint custom-download-name-summary">
+        {{
+          t('connect.tools.downloadNameSummary', {
+            name:
+              namingMode === 'custom'
+                ? customName || t('advanced.downloadCustomName')
+                : t('advanced.downloadOriginalName'),
+          })
+        }}
+      </p>
+      <details ref="downloadOptions" class="custom-download-advanced tool-options">
+        <summary><UiIcon name="chevron-right" :size="16" />{{ t('connect.tools.downloadOptions') }}</summary>
         <div class="custom-download-advanced-body">
+          <div class="custom-download-row">
+            <span id="custom-download-naming-label" class="custom-download-label">{{
+              t('advanced.downloadNaming')
+            }}</span>
+            <div class="custom-download-naming">
+              <NRadioGroup
+                v-model:value="namingMode"
+                role="radiogroup"
+                aria-labelledby="custom-download-naming-label"
+                name="download-naming"
+                :disabled="busy"
+                :themeOverrides="namingTheme"
+              >
+                <NRadioButton value="original">{{ t('advanced.downloadOriginalName') }}</NRadioButton>
+                <NRadioButton value="custom">{{ t('advanced.downloadCustomName') }}</NRadioButton>
+              </NRadioGroup>
+              <div v-if="namingMode === 'custom'" class="custom-download-name">
+                <label for="custom-download-name">{{ t('advanced.downloadFileName') }}</label>
+                <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
+                <p class="custom-download-hint">{{ t('advanced.downloadFileNameHint') }}</p>
+              </div>
+              <p v-else class="custom-download-hint">
+                {{
+                  url.trim()
+                    ? t('advanced.downloadOriginalHint', { name: estimatedName })
+                    : t('advanced.downloadOriginalRule')
+                }}
+              </p>
+            </div>
+          </div>
+          <NCheckbox
+            v-model:checked="overwrite"
+            class="custom-download-overwrite"
+            :themeOverrides="overwriteTheme"
+            :disabled="busy"
+            >{{ t('advanced.downloadOverwrite') }}</NCheckbox
+          >
           <div class="custom-download-row">
             <label for="custom-download-ua">{{ t('advanced.downloadUserAgent') }}</label>
             <UiInput id="custom-download-ua" v-model="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
@@ -122,7 +134,7 @@
 <script setup lang="ts">
 import { NCheckbox, NRadioButton, NRadioGroup } from 'naive-ui'
 import { storeToRefs } from 'pinia'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
@@ -174,6 +186,7 @@ const {
 const starting = ref(false)
 const cancelling = ref(false)
 const error = ref('')
+const downloadOptions = ref<HTMLDetailsElement | null>(null)
 let timer: ReturnType<typeof setTimeout> | undefined
 let active = true
 const busy = computed(
@@ -216,6 +229,14 @@ const validationError = computed(() => {
   }
   return seen.size > 64 || size > 32768 ? t('advanced.downloadInvalidHeaders') : ''
 })
+
+watch(
+  [validationError, downloadOptions],
+  ([message, options]) => {
+    if (message && options) options.open = true
+  },
+  { immediate: true, flush: 'post' }
+)
 
 function hasInvalidHeaderCharacters(value: string) {
   return Array.from(value).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) > 126)
@@ -501,3 +522,5 @@ p {
   }
 }
 </style>
+
+<style scoped src="@/styles/components/connect/ToolOptions.css"></style>
