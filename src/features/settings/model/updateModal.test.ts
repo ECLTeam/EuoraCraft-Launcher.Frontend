@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { getUpdateModalTitle } from './updateModal'
+import { getUpdateVersionChannel } from './updateModal'
 
-describe('getUpdateModalTitle', () => {
-  it('uses update content as the dialog theme when release notes are available', () => {
-    expect(getUpdateModalTitle('Added multiplayer improvements', (key) => key)).toBe(
-      'settings.aboutTab.update.notesTitle'
-    )
-  })
-
-  it('falls back to the generic update theme when release notes are empty', () => {
-    expect(getUpdateModalTitle('   ', (key) => key)).toBe('settings.aboutTab.update.updateAvailableTitle')
+describe('getUpdateVersionChannel', () => {
+  it.each([
+    ['0.1.0-beta.2+20260919', 'beta'],
+    ['v0.1.0-RC.1', 'rc'],
+    ['0.0.1-alpha', 'alpha'],
+    ['1.0.0', 'release'],
+    ['1.0.0+build-beta.1', 'release'],
+  ] as const)('labels target version %s as %s', (version, channel) => {
+    expect(getUpdateVersionChannel(version)).toBe(channel)
   })
 })

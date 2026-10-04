@@ -809,9 +809,14 @@
         "updateNow": "Update Now",
         "currentVersion": "Current",
         "latestVersion": "Latest",
-        "updateAvailableTitle": "Update Available",
-        "notesTitle": "Release Notes",
-        "selfUpdateDisabled": "This development build does not support self-update"
+        "updateAvailableTitle": "Update available",
+        "notesTitle": "What's new",
+        "selfUpdateDisabled": "Automatic updates are unavailable in this setup. Get the new version from the release page.",
+        "later": "Later",
+        "notesEmpty": "No release notes are available for this version.",
+        "releasePage": "View release page",
+        "releasePageUnavailable": "No release page link is available for this version.",
+        "updating": "Updating…"
       },
       "technologyCategories": {
         "runtimeFrameworks": "Runtime & Frameworks",

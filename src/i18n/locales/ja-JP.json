@@ -809,9 +809,14 @@
         "updateNow": "今すぐ更新",
         "currentVersion": "現在のバージョン",
         "latestVersion": "最新版",
-        "updateAvailableTitle": "新しい更新があります",
-        "notesTitle": "更新情報",
-        "selfUpdateDisabled": "開発版のため自動更新できません"
+        "updateAvailableTitle": "更新があります",
+        "notesTitle": "更新内容",
+        "selfUpdateDisabled": "現在の実行環境では自動更新を利用できません。リリースページから新しいバージョンを取得してください。",
+        "later": "後で",
+        "notesEmpty": "このバージョンの更新内容はまだ提供されていません。",
+        "releasePage": "リリースページを開く",
+        "releasePageUnavailable": "このバージョンのリリースページへのリンクは提供されていません。",
+        "updating": "更新中…"
       },
       "technologyCategories": {
         "runtimeFrameworks": "ランタイムとフレームワーク",

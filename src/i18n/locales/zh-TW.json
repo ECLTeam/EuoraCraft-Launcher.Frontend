@@ -809,9 +809,14 @@
         "updateNow": "立即更新",
         "currentVersion": "目前版本",
         "latestVersion": "最新版本",
-        "updateAvailableTitle": "發現新更新",
-        "notesTitle": "更新說明",
-        "selfUpdateDisabled": "目前為開發版，無法自動更新"
+        "updateAvailableTitle": "有可用更新",
+        "notesTitle": "更新內容",
+        "selfUpdateDisabled": "目前的執行方式不支援自動更新，請前往發佈頁手動取得新版。",
+        "later": "稍後",
+        "notesEmpty": "此版本暫未提供更新說明。",
+        "releasePage": "查看發佈頁",
+        "releasePageUnavailable": "此版本暫未提供發佈頁連結。",
+        "updating": "正在更新…"
       },
       "technologyCategories": {
         "runtimeFrameworks": "執行時與框架",

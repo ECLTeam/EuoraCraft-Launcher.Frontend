@@ -1,8 +1,9 @@
-type Translate = (key: string) => string
-
-const updateKeyPrefix = 'settings.aboutTab.update.'
-
-/** 根据更新内容决定更新弹窗的主题；空内容时才回退至通用更新提示。 */
-export function getUpdateModalTitle(notes: string | null | undefined, translate: Translate): string {
-  return translate(`${updateKeyPrefix}${notes?.trim() ? 'notesTitle' : 'updateAvailableTitle'}`)
+/** 根据目标版本的预发布标记显示通道，不以当前安装版本的通道代替。 */
+export function getUpdateVersionChannel(version: string): 'alpha' | 'beta' | 'rc' | 'release' {
+  const prerelease = version
+    .split('+', 1)[0]
+    ?.match(/-(alpha|beta|rc)(?:[.-]|$)/i)?.[1]
+    ?.toLowerCase()
+  if (prerelease === 'alpha' || prerelease === 'beta' || prerelease === 'rc') return prerelease
+  return 'release'
 }

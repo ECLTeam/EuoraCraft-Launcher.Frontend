@@ -810,8 +810,13 @@
         "currentVersion": "Aktuelle Version",
         "latestVersion": "Neueste Version",
         "updateAvailableTitle": "Update verfügbar",
-        "notesTitle": "Versionshinweise",
-        "selfUpdateDisabled": "Diese Entwicklungsversion unterstützt kein automatisches Update"
+        "notesTitle": "Neuerungen",
+        "selfUpdateDisabled": "Automatische Updates sind in dieser Umgebung nicht verfügbar. Lade die neue Version auf der Veröffentlichungsseite herunter.",
+        "later": "Später",
+        "notesEmpty": "Für diese Version sind keine Versionshinweise verfügbar.",
+        "releasePage": "Veröffentlichungsseite öffnen",
+        "releasePageUnavailable": "Für diese Version ist kein Link zur Veröffentlichungsseite verfügbar.",
+        "updating": "Wird aktualisiert…"
       },
       "technologyCategories": {
         "runtimeFrameworks": "Laufzeitumgebung & Frameworks",

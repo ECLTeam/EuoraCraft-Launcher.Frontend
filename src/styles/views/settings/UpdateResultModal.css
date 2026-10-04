@@ -1,93 +1,148 @@
+.modal-container.update-result-modal-container {
+  background: var(--bg-base);
+}
+
 .update-result-modal {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
 }
 
-/* 版本号只保留为更新说明下方的辅助元数据。 */
-.update-result-modal__version-summary {
+.update-result-modal__target {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 4px 7px;
-  padding: 0 2px;
-  color: var(--text-tertiary);
-  font-family: var(--ecl-font-body, var(--font-body));
-  font-size: 10px;
-  line-height: 1.5;
+  gap: 8px 12px;
 }
 
-.update-result-modal__version-summary strong {
-  color: var(--primary);
-  font-weight: 600;
-}
-
-/* 更新说明是弹窗主体。 */
-.update-result-modal__notes {
-  flex: 1;
-  min-height: 220px;
-  max-height: 360px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: color-mix(in srgb, var(--ecl-surface) 78%, transparent);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.update-result-modal__notes p {
-  flex: 1;
-  margin: 0;
-  padding: 12px 14px 16px;
-  min-height: 0;
-  overflow-y: auto;
+.update-result-modal__version {
+  min-width: 0;
   color: var(--text-primary);
-  font-size: 12px;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
-/* 开发版禁用提示 */
-.update-result-modal__hint {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 12px;
-  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+.update-result-modal__channel {
+  flex-shrink: 0;
+  padding: 3px 8px;
   border-radius: var(--r-sm);
-  background: color-mix(in srgb, var(--warning) 12%, transparent);
-  color: var(--warning);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
   font-size: 11px;
   font-weight: 500;
   line-height: 1.5;
 }
 
-/* 下载进度 */
+.update-result-modal__current {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.update-result-modal__notes {
+  min-width: 0;
+}
+
+.update-result-modal__notes h4 {
+  margin: 0 0 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.update-result-modal__notes-content,
+.update-result-modal__notes-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.update-result-modal__notes-content {
+  max-height: min(280px, 35vh);
+  padding-right: 8px;
+  overflow-y: auto;
+}
+
+.update-result-modal__notes-empty {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg-hover);
+}
+
+.update-result-modal__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.update-result-modal__hint .icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.update-result-modal__unavailable {
+  margin: -12px 0 0 24px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
 .update-result-modal__progress {
-  position: relative;
-  width: 100%;
-  height: 18px;
-  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
-  border-radius: 5px;
-  background: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.update-result-modal__progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-hover);
   overflow: hidden;
 }
 
 .update-result-modal__progress-bar {
   height: 100%;
-  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: inherit;
+  background: var(--primary);
   transition: width var(--duration-normal) var(--ease-emphasized);
 }
 
+.update-result-modal__progress-bar.is-indeterminate {
+  width: 35%;
+  animation: update-progress 1.4s ease-in-out infinite;
+}
+
 .update-result-modal__progress-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--ecl-font-body, var(--font-body));
-  font-size: 10px;
-  color: var(--text-primary);
-  line-height: 1;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@keyframes update-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-result-modal__progress-bar.is-indeterminate {
+    animation: none;
+  }
 }
