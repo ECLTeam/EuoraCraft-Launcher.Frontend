@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { BackendCommandError } from '@/app/runtime/errorPresentation'
+import NatToolCard from '@/components/connect/NatToolCard.vue'
 import { i18n } from '@/i18n'
 import type { NatTypeResult } from '@/types/connect'
 import ConnectToolsTab from './ConnectToolsTab.vue'
@@ -43,6 +44,7 @@ describe('ConnectToolsTab', () => {
     expect(wrapper.text()).toContain('尚未检测')
     expect(wrapper.text()).toContain('NAT 类型检测')
     expect(wrapper.find('.connect-main-card').exists()).toBe(false)
+    expect(mocks.natType).not.toHaveBeenCalled()
   })
 
   it('renders the detected type and public address', async () => {
@@ -162,7 +164,7 @@ describe('ConnectToolsTab', () => {
     wrapper.unmount()
     resolveDetection(natResult())
     await flushPromises()
-    expect((wrapper.vm as unknown as { result: NatTypeResult | null }).result).toBeNull()
+    expect((wrapper.findComponent(NatToolCard).vm as unknown as { result: NatTypeResult | null }).result).toBeNull()
   })
 
   it.each([

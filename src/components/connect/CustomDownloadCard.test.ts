@@ -94,6 +94,22 @@ describe('CustomDownloadCard', () => {
     ).toBeDefined()
     wrapper.unmount()
   })
+  it('shows one blocking validation message outside the advanced settings', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: { downloadDirectory: 'D:/Default', userAgent: 'Default' } })
+    Object.assign(useCustomDownloadStore(), { namingMode: 'custom', customName: '../invalid' })
+    const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
+    await flushPromises()
+    expect(wrapper.findAll('[role="alert"]')).toHaveLength(1)
+    expect(wrapper.get('details').find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.get('[role="alert"]').text()).not.toBe('')
+    expect(
+      wrapper
+        .findAll('button')
+        .find((button) => button.text() === '开始下载')!
+        .attributes('disabled')
+    ).toBeDefined()
+    wrapper.unmount()
+  })
   it('uses a folder dialog and retains the selected folder when cancelled', async () => {
     mocks.command.mockImplementation(async (name: string) => ({
       success: true,

@@ -1,0 +1,102 @@
+.connect-nat-card {
+  min-width: 0;
+  border-radius: 8px;
+  container-type: inline-size;
+}
+
+.connect-nat-card :deep(.card-header) {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.connect-nat-card :deep(.card-header > .header-content) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.connect-nat-card :deep(.header-actions) {
+  margin-left: auto;
+}
+
+.connect-nat-card :deep(.card-body) {
+  padding: 12px;
+}
+
+.connect-nat-action {
+  flex-shrink: 0;
+}
+
+.connect-nat-body {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.connect-nat-result {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.connect-nat-result :deep(.ui-tag) {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.connect-nat-fields {
+  margin: 0;
+}
+
+.connect-nat-fields > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
+}
+
+.connect-nat-fields dt,
+.connect-nat-ipv6 {
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.connect-nat-fields dd {
+  min-width: 0;
+  margin: 0;
+}
+
+.connect-nat-fields code {
+  color: var(--ecl-text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.connect-nat-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+}
+
+.connect-nat-error strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--error);
+  font-size: 12px;
+}
+
+.connect-nat-error p {
+  margin: 6px 0 0;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@container (max-width: 300px) {
+  .connect-nat-fields > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

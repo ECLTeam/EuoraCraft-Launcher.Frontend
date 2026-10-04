@@ -1,8 +1,5 @@
 <template>
-  <UiCard class="custom-download-card">
-    <template #header
-      ><strong>{{ t('advanced.downloadTitle') }}</strong></template
-    >
+  <UiCard class="custom-download-card" :title="t('advanced.downloadTitle')" icon="download">
     <div class="custom-download-form">
       <div class="custom-download-row">
         <label for="custom-download-url">{{ t('advanced.downloadUrl') }}</label>
@@ -45,6 +42,13 @@
           </p>
         </div>
       </div>
+      <NCheckbox
+        v-model:checked="overwrite"
+        class="custom-download-overwrite"
+        :themeOverrides="overwriteTheme"
+        :disabled="busy"
+        >{{ t('advanced.downloadOverwrite') }}</NCheckbox
+      >
       <details class="custom-download-advanced">
         <summary><UiIcon name="chevron-right" :size="16" />{{ t('advanced.downloadAdvanced') }}</summary>
         <div class="custom-download-advanced-body">
@@ -80,7 +84,6 @@
               <p class="custom-download-hint">{{ t('advanced.downloadHeadersHint') }}</p>
             </div>
           </div>
-          <p v-if="validationError" class="custom-download-error" role="alert">{{ validationError }}</p>
         </div>
       </details>
       <p v-if="error || validationError" class="custom-download-error" role="alert">{{ error || validationError }}</p>
@@ -90,13 +93,6 @@
         <p v-if="operation.path" class="custom-download-target">{{ operation.path }}</p>
       </div>
       <div class="custom-download-footer">
-        <NCheckbox
-          v-model:checked="overwrite"
-          class="custom-download-overwrite"
-          :themeOverrides="overwriteTheme"
-          :disabled="busy"
-          >{{ t('advanced.downloadOverwrite') }}</NCheckbox
-        >
         <div class="custom-download-actions">
           <UiButton v-if="busy && operation" variant="secondary" size="lg" :disabled="cancelling" @click="cancel">{{
             t('common.cancel')
@@ -360,20 +356,25 @@ onBeforeUnmount(() => {
 .custom-download-header-row > * {
   min-width: 0;
 }
+.custom-download-card {
+  container-type: inline-size;
+}
+.custom-download-card :deep(.card-body) {
+  padding: 12px;
+}
 .custom-download-form,
 .custom-download-advanced-body {
   display: grid;
-  gap: 16px;
+  gap: 12px;
 }
 .custom-download-row {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 16px;
+  gap: 6px;
 }
 .custom-download-row > label,
 .custom-download-label {
-  padding-top: 6px;
   color: var(--text-primary);
   font-size: 13px;
   line-height: 17px;
@@ -426,8 +427,7 @@ p {
   color: var(--error);
 }
 .custom-download-advanced {
-  border-top: 1px solid var(--divider);
-  padding-top: 12px;
+  min-width: 0;
 }
 .custom-download-advanced summary {
   display: flex;
@@ -475,15 +475,13 @@ p {
 .custom-download-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px 16px;
-  border-top: 1px solid var(--divider);
-  padding-top: 16px;
 }
 .custom-download-overwrite {
-  flex: 1;
-  min-width: 160px;
+  justify-self: start;
+  max-width: 100%;
 }
 .custom-download-overwrite :deep(.n-checkbox__label) {
   white-space: normal;
@@ -495,14 +493,6 @@ p {
   margin-left: auto;
 }
 @container (max-width: 519px) {
-  .custom-download-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-  .custom-download-row > label,
-  .custom-download-label {
-    padding-top: 0;
-  }
   .custom-download-header-row {
     grid-template-columns: minmax(0, 1fr) auto;
   }

@@ -1171,126 +1171,27 @@
   padding: 2px 0;
 }
 
-.connect-nat-card {
+.connect-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+  gap: 12px;
   min-width: 0;
-  border-radius: 8px;
 }
 
 .connect-tools-page .connect-workspace {
   height: 100%;
 }
 
-.connect-nat-card :deep(.card-body) {
-  padding: 12px;
+.connect-tools-layout > .ecl-page-header {
+  margin-bottom: 0;
 }
 
-.connect-nat-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px 16px;
+.connect-tools-layout :deep(.ecl-page-header__icon) {
+  width: 28px;
+  height: 28px;
 }
 
-.connect-nat-action {
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.connect-nat-heading {
-  display: grid;
-  flex-shrink: 0;
-  min-width: 0;
-  grid-template-columns: 16px minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-}
-
-.connect-nat-heading > svg {
-  color: var(--primary);
-}
-
-.connect-nat-heading strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  color: var(--ecl-text);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.connect-nat-body {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.connect-nat-result {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-}
-
-.connect-nat-result :deep(.ui-tag) {
-  max-width: 100%;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.connect-nat-fields {
-  margin: 0;
-}
-
-.connect-nat-fields > div {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 6px;
-}
-
-.connect-nat-fields dt,
-.connect-nat-ipv6 {
-  color: var(--ecl-text-secondary);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.connect-nat-fields dd {
-  min-width: 0;
-  margin: 0;
-}
-
-.connect-nat-fields code {
-  color: var(--ecl-text);
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-.connect-nat-state {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-}
-
-.connect-nat-error strong {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--error);
-  font-size: 12px;
-}
-
-.connect-nat-error p {
-  margin: 0;
-  padding-top: 6px;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-  line-height: 1.6;
-}
-
-@container (max-width: 450px) {
-  .connect-nat-body {
-    order: 3;
-    flex-basis: 100%;
-  }
+.connect-tools-layout :deep(.ecl-page-header__title) {
+  font-size: 16px;
 }
