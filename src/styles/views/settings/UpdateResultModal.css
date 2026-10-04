@@ -1,7 +1,3 @@
-.modal-container.update-result-modal-container {
-  background: var(--bg-base);
-}
-
 .update-result-modal {
   display: flex;
   flex-direction: column;

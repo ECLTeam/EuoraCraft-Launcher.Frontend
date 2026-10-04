@@ -5,7 +5,7 @@ import { useInstanceStore } from './instanceStore'
 const mocks = vi.hoisted(() => ({
   loadSettings: vi.fn(),
   scan: vi.fn(),
-  onVersionsChanged: vi.fn(() => () => undefined),
+  onVersionsChanged: vi.fn((_handler: (payload: { gamePath: string }) => void) => () => undefined),
 }))
 
 vi.mock('@/features/settings/stores/settingsStore', () => ({
@@ -19,6 +19,17 @@ vi.mock('@/features/instances/api/instanceInstallApi', () => ({
 }))
 
 describe('instanceStore 启动预取', () => {
+  it('后台版本变更会触发强制全量刷新，而非复用路径旧请求', async () => {
+    let changed!: (payload: { gamePath: string }) => void
+    mocks.onVersionsChanged.mockImplementationOnce((handler) => {
+      changed = handler
+      return () => undefined
+    })
+    const store = useInstanceStore()
+    await store.loadAll()
+    changed({ gamePath: 'D:/Minecraft' })
+    await vi.waitFor(() => expect(mocks.loadSettings).toHaveBeenCalledTimes(2))
+  })
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()

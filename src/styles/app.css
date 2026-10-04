@@ -1,19 +1,27 @@
-#app {
+#app,
+.launcher-app {
   position: relative;
   width: 100vw;
   height: 100vh;
   min-width: 820px;
   min-height: 600px;
   overflow: hidden;
-  border-radius: var(--ecl-radius-window, var(--window-radius));
-  clip-path: inset(0 round var(--ecl-radius-window, var(--window-radius)));
+  border-radius: 0;
+  clip-path: none;
   isolation: isolate;
 }
 
+#app[data-window-chrome='custom'] {
+  border-radius: var(--ecl-radius-window, var(--window-radius));
+  clip-path: inset(0 round var(--ecl-radius-window, var(--window-radius)));
+}
+
 #app[data-window-chrome='native'],
-#app[data-window-chrome='system_shadow'] {
-  border-radius: 0;
-  clip-path: none;
+#app[data-window-chrome='system_shadow'],
+body:has(#app[data-window-chrome='native']),
+body:has(#app[data-window-chrome='system_shadow']) {
+  border-radius: 0 !important;
+  clip-path: none !important;
 }
 
 /* 弹出层可能挂在 body 下；纯自绘模式的裁剪也须覆盖这些窗口内元素。 */

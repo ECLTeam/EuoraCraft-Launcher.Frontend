@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { readonly, ref } from 'vue'
 import backend from '@/api/client'
 
 const CACHE_TTL = 30 * 60 * 1000
@@ -20,6 +20,7 @@ const avatarCache = new Map<string, CacheEntry>()
 const textureCache = new Map<string, CacheEntry>()
 const pendingTextures = new Map<string, Promise<string | null>>()
 const pendingAvatars = new Map<string, Promise<string | null>>()
+const cacheRevision = ref(0)
 
 function hashCode(value: string): number {
   let hash = 0
@@ -43,6 +44,7 @@ function getCached(cache: Map<string, CacheEntry>, key: string): string | null {
 }
 
 export function clearAvatarCache(): void {
+  cacheRevision.value += 1
   avatarCache.clear()
   textureCache.clear()
   pendingTextures.clear()
@@ -67,17 +69,18 @@ export async function fetchTextureDataUrl(url: string): Promise<string | null> {
   if (!backend.runtime.isAvailable) return url
   const pending = pendingTextures.get(url)
   if (pending) return pending
+  const revision = cacheRevision.value
   const request = (async () => {
     const response = await backend.command('image_fetch_data_url', { url })
     const dataUrl = response.success ? response.data?.dataUrl : null
-    if (dataUrl) setCached(textureCache, url, dataUrl)
+    if (dataUrl && revision === cacheRevision.value) setCached(textureCache, url, dataUrl)
     return dataUrl || null
   })()
   pendingTextures.set(url, request)
   try {
     return await request
   } finally {
-    pendingTextures.delete(url)
+    if (pendingTextures.get(url) === request) pendingTextures.delete(url)
   }
 }
 
@@ -147,6 +150,7 @@ export function useAvatarRenderer() {
       if (cached) return cached
       const pending = pendingAvatars.get(key)
       if (pending) return await pending
+      const revision = cacheRevision.value
       const request = (async () => {
         let texture = skinUrl?.trim()
         if (!texture && accountId && accountType === 'authlib') {
@@ -155,7 +159,7 @@ export function useAvatarRenderer() {
         const resolved = texture || defaultSkin(identifier)
         const avatar = await renderSkinAvatar(resolved, size)
         if (avatar) {
-          setCached(avatarCache, key, avatar)
+          if (revision === cacheRevision.value) setCached(avatarCache, key, avatar)
           return avatar
         }
         return renderSkinAvatar(defaultSkin(identifier), size)
@@ -166,7 +170,7 @@ export function useAvatarRenderer() {
         if (!avatar) error.value = true
         return avatar
       } finally {
-        pendingAvatars.delete(key)
+        if (pendingAvatars.get(key) === request) pendingAvatars.delete(key)
       }
     } catch (reason) {
       console.warn('[Avatar] 前端头像渲染失败，使用默认皮肤:', reason)
@@ -177,5 +181,5 @@ export function useAvatarRenderer() {
     }
   }
 
-  return { loading, error, renderAvatar }
+  return { loading, error, renderAvatar, cacheRevision: readonly(cacheRevision) }
 }

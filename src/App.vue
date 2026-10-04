@@ -1,6 +1,6 @@
 <template>
   <div
-    id="app"
+    class="launcher-app"
     :data-window-chrome="activeWindowChrome"
     @dragenter.prevent="handleDragEnter"
     @dragover.prevent="handleDragOver"

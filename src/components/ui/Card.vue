@@ -33,20 +33,24 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import UiIcon from '@/components/ui/Icon.vue'
 
 defineOptions({ name: 'UiCard' })
 
-const props = defineProps<{
-  title?: string
-  icon?: string
-  hoverable?: boolean
-  interactive?: boolean
-  bodyClass?: string
-  /** 设计器使用的稳定页面节点 ID。 */
-  themeNode?: string
-  /** 数据实例本机覆盖使用的稳定散列 key。 */
-  themeInstance?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    title?: string
+    icon?: string
+    hoverable?: boolean
+    interactive?: boolean
+    bodyClass?: string
+    /** 设计器使用的稳定页面节点 ID。 */
+    themeNode?: string
+    /** 数据实例本机覆盖使用的稳定散列 key。 */
+    themeInstance?: string
+  }>(),
+  { title: '', icon: 'cube', bodyClass: '', themeNode: undefined, themeInstance: undefined }
+)
 
 const emit = defineEmits<{
   click: [event: MouseEvent]

@@ -557,7 +557,9 @@ async function handleDeriveModeChange(value: string | number) {
   await setDeriveMode(mode)
 }
 
-const radiusWindow = computed(() => appearance.value.radius_window ?? 12)
+const radiusWindow = computed(() =>
+  windowChromePreference.value === 'custom' ? (appearance.value.radius_window ?? 12) : 0
+)
 const radiusCard = computed(() => appearance.value.radius_card ?? 8)
 const radiusControl = computed(() => appearance.value.radius_control ?? 6)
 const radiusDialog = computed(() => appearance.value.radius_dialog ?? 10)
@@ -572,6 +574,7 @@ const fontOverrideCount = computed(
 )
 
 function handleRadiusChange(key: keyof ThemeAppearanceConfig, value: number | null) {
+  if (key === 'radius_window' && windowChromePreference.value !== 'custom') return
   if (typeof value !== 'number') return
   setAppearance({ [key]: Math.round(value) }, true)
 }

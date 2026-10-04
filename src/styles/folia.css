@@ -4,13 +4,14 @@
  * existing theme studio without leaking its glass treatment into other skins.
  */
 [data-ui-skin='folia'] {
-  --bg-base-alt: #e9ebef;
-  --bg-elevated: #ffffff;
+  --bg-base-alt: var(--ecl-surface-muted);
+  --bg-elevated: var(--ecl-control-surface);
   --bg-surface: rgba(255, 255, 255, calc(0.62 * var(--card-opacity, 1)));
   --card-bg: rgba(255, 255, 255, calc(0.6 * var(--card-opacity, 1)));
   /* 让用 --ecl-surface 的 scoped 面板（mod/资源包/存档等实底 0.88）也走上玻璃半透明，与左侧菜单卡一致 */
   --ecl-surface: rgba(255, 255, 255, calc(0.6 * var(--card-opacity, 1)));
-  --bg-hover: #f0f1f3;
+  --ecl-surface-muted: rgba(248, 249, 252, calc(0.6 * var(--card-opacity, 1)));
+  --bg-hover: var(--ecl-hover);
   --bg-hover-strong: rgba(var(--primary-rgb, 91, 111, 245), 0.08);
   --bg-active: rgba(var(--primary-rgb, 91, 111, 245), 0.14);
   --border-strong: rgba(29, 36, 51, 0.16);
@@ -27,16 +28,17 @@
   --row-h: 42px;
   --row-h-sm: 34px;
   --glass-bg: rgba(255, 255, 255, calc(0.6 * var(--card-opacity, 1)));
-  --glass-bg-sidebar: rgba(255, 255, 255, 0.55);
+  --glass-bg-sidebar: rgba(255, 255, 255, calc(0.55 * var(--card-opacity, 1)));
   --glass-border: rgba(29, 36, 51, 0.12);
   --glass-divider: rgba(29, 36, 51, 0.1);
-  --glass-item-hover: #f0f1f3;
+  --glass-item-hover: var(--ecl-hover);
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   --sidebar-item-active-bg: color-mix(in srgb, var(--primary) 18%, var(--bg-elevated));
   --sidebar-item-active-border: color-mix(in srgb, var(--primary) 70%, transparent);
   --folia-glass: rgba(255, 255, 255, calc(0.6 * var(--card-opacity, 1)));
   --folia-glass-border: rgba(29, 36, 51, 0.12);
-  --control-bg: rgba(255, 255, 255, 0.5);
+  --ecl-control-surface: rgba(255, 255, 255, calc(0.5 * var(--card-opacity, 1)));
+  --control-bg: var(--ecl-control-surface);
   --control-bg-hover: rgba(var(--primary-rgb, 91, 111, 245), 0.08);
   --control-bg-active: rgba(var(--primary-rgb, 91, 111, 245), 0.14);
   --control-border: rgba(var(--primary-rgb, 91, 111, 245), 0.22);
@@ -55,11 +57,12 @@
 }
 
 [data-theme='dark'][data-ui-skin='folia'] {
-  --bg-base-alt: #21242b;
-  --bg-elevated: #21242b;
+  --bg-base-alt: var(--ecl-surface-muted);
+  --bg-elevated: var(--ecl-control-surface);
   --bg-surface: rgba(32, 36, 46, calc(0.62 * var(--card-opacity, 1)));
   --card-bg: rgba(34, 38, 48, calc(0.6 * var(--card-opacity, 1)));
   --ecl-surface: rgba(34, 38, 48, calc(0.62 * var(--card-opacity, 1)));
+  --ecl-surface-muted: rgba(41, 46, 57, calc(0.62 * var(--card-opacity, 1)));
   --bg-hover: rgba(255, 255, 255, 0.06);
   --bg-hover-strong: rgba(var(--primary-rgb, 130, 145, 255), 0.12);
   --bg-active: rgba(var(--primary-rgb, 130, 145, 255), 0.2);
@@ -67,7 +70,7 @@
   --border-hover: rgba(var(--primary-rgb, 130, 145, 255), 0.55);
   --divider: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(34, 38, 48, calc(0.62 * var(--card-opacity, 1)));
-  --glass-bg-sidebar: rgba(27, 30, 38, 0.55);
+  --glass-bg-sidebar: rgba(27, 30, 38, calc(0.55 * var(--card-opacity, 1)));
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-divider: rgba(255, 255, 255, 0.09);
   --glass-item-hover: rgba(255, 255, 255, 0.1);
@@ -75,7 +78,8 @@
   --sidebar-item-active-bg: color-mix(in srgb, var(--primary) 24%, rgba(255, 255, 255, 0.1));
   --folia-glass: rgba(34, 38, 48, calc(0.62 * var(--card-opacity, 1)));
   --folia-glass-border: rgba(255, 255, 255, 0.1);
-  --control-bg: rgba(34, 38, 48, 0.5);
+  --ecl-control-surface: rgba(34, 38, 48, calc(0.5 * var(--card-opacity, 1)));
+  --control-bg: var(--ecl-control-surface);
   --control-bg-hover: rgba(var(--primary-rgb, 130, 145, 255), 0.12);
   --control-bg-active: rgba(var(--primary-rgb, 130, 145, 255), 0.2);
   --control-border: rgba(var(--primary-rgb, 130, 145, 255), 0.3);

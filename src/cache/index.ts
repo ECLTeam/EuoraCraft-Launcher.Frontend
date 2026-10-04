@@ -30,6 +30,26 @@ function isCacheItem(value: unknown): value is CacheItem {
 }
 
 class GlobalCache {
+  private revisions = new Map<string, number>()
+  private keyGroups = new Map<string, string>()
+  private listeners = new Set<(key: string | null) => void>()
+
+  getRevision(key: string, group?: string): number {
+    if (!this.revisions.has(key)) this.revisions.set(key, 0)
+    if (group !== undefined || !this.keyGroups.has(key)) this.keyGroups.set(key, group ?? 'default')
+    return this.revisions.get(key) ?? 0
+  }
+
+  subscribe(listener: (key: string | null) => void): () => void {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
+  }
+
+  private changed(key: string | null): void {
+    const keys = key === null ? this.revisions.keys() : [key]
+    for (const item of keys) this.revisions.set(item, this.getRevision(item) + 1)
+    for (const listener of this.listeners) listener(key)
+  }
   private memoryCache = new Map<string, CacheItem>()
   private readonly PREFIX = 'euora-cache-'
   private readonly DEFAULT_TTL = 30 * 60 * 1000 // 30分钟
@@ -51,6 +71,7 @@ class GlobalCache {
     }
 
     this.memoryCache.set(key, cacheItem)
+    this.keyGroups.set(key, group)
 
     if (persistent) {
       try {
@@ -60,6 +81,7 @@ class GlobalCache {
         console.warn('本地存储写入失败:', error)
       }
     }
+    this.changed(key)
   }
 
   /**
@@ -101,6 +123,7 @@ class GlobalCache {
     } catch (error) {
       console.warn('本地存储删除失败:', error)
     }
+    this.changed(key)
   }
 
   /**
@@ -128,6 +151,7 @@ class GlobalCache {
     } catch (error) {
       console.warn('清空本地存储失败:', error)
     }
+    this.changed(null)
   }
 
   /**
@@ -135,11 +159,9 @@ class GlobalCache {
    * @param group - 缓存分组名称
    */
   clearGroup(group: string): void {
-    for (const [key, item] of this.memoryCache.entries()) {
-      if (item.group === group) {
-        this.memoryCache.delete(key)
-      }
-    }
+    const keys = new Set([...this.memoryCache].filter(([, item]) => item.group === group).map(([key]) => key))
+    for (const [key, cachedGroup] of this.keyGroups) if (cachedGroup === group) keys.add(key)
+    for (const key of keys) this.delete(key)
 
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -148,6 +170,7 @@ class GlobalCache {
           const item = this.readPersistentItem(key)
           if (!item || item.group === group) {
             localStorage.removeItem(key)
+            this.changed(key.slice(this.PREFIX.length))
           }
         }
       }
@@ -216,7 +239,7 @@ class GlobalCache {
   private cleanupExpired(): void {
     for (const [key, item] of this.memoryCache.entries()) {
       if (this.isExpired(item)) {
-        this.memoryCache.delete(key)
+        this.delete(key)
       }
     }
 

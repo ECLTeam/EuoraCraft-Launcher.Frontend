@@ -148,7 +148,7 @@
   --control-glow: none;
 
   --glass-bg: rgba(255, 255, 255, calc(0.92 * var(--card-opacity, 1)));
-  --glass-bg-sidebar: rgba(251, 251, 252, 0.96);
+  --glass-bg-sidebar: rgba(251, 251, 252, calc(0.96 * var(--card-opacity, 1)));
   --glass-border: #e0e0e0;
   --glass-divider: #e0e0e0;
   --glass-item-hover: #f0f1f3;
@@ -221,7 +221,7 @@
   --control-glow: none;
 
   --glass-bg: rgba(35, 38, 45, calc(0.92 * var(--card-opacity, 1)));
-  --glass-bg-sidebar: rgba(31, 34, 41, 0.96);
+  --glass-bg-sidebar: rgba(31, 34, 41, calc(0.96 * var(--card-opacity, 1)));
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-divider: rgba(255, 255, 255, 0.08);
   --glass-item-hover: rgba(255, 255, 255, 0.1);

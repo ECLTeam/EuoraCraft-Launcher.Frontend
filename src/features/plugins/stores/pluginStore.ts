@@ -18,20 +18,32 @@ export const usePluginStore = defineStore('plugins', () => {
   let unlistenStatus: (() => void) | null = null
   let refreshTimer: ReturnType<typeof setTimeout> | null = null
   let loadPromise: Promise<void> | null = null
+  let reloadRequested = false
 
   const reloadingPlugins = computed(() =>
     activeOperations.value.filter((operation) => operation.startsWith('reload:')).map((operation) => operation.slice(7))
   )
 
   async function load(force = false): Promise<void> {
+    if (loadPromise) {
+      if (force) reloadRequested = true
+      return loadPromise
+    }
     if (!force && !isListStale.value) return
-    if (loadPromise) return loadPromise
 
     loading.value = true
     error.value = ''
     const request = (async () => {
       try {
-        plugins.value = await pluginManagementApi.list()
+        do {
+          reloadRequested = false
+          try {
+            const snapshot = await pluginManagementApi.list()
+            if (!reloadRequested) plugins.value = snapshot
+          } catch (reason) {
+            if (!reloadRequested) throw reason
+          }
+        } while (reloadRequested)
         isListStale.value = false
       } catch (reason) {
         plugins.value = []
@@ -113,6 +125,7 @@ export const usePluginStore = defineStore('plugins', () => {
 
   function scheduleRefresh(): void {
     isListStale.value = true
+    if (loadPromise) reloadRequested = true
     if (refreshTimer) clearTimeout(refreshTimer)
     refreshTimer = setTimeout(() => {
       void load().catch(() => {})

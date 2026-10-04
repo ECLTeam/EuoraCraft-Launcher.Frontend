@@ -1,12 +1,16 @@
 import { computed, readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
+import { clearAvatarCache } from '@/composables/useAvatarRenderer'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
+import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
+import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n, supportedLocales } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
@@ -70,8 +74,33 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   let started = false
   let syncingPendingErrors = false
   let notifySeq = 0
+  let settingsRefreshTimer: ReturnType<typeof setTimeout> | null = null
+  const changedSettings = new Set<string>()
 
-  async function applyConfig(payload: BackendEvents['config:init']): Promise<void> {
+  async function syncChangedSettings(): Promise<void> {
+    const sections = new Set(changedSettings)
+    changedSettings.clear()
+    const store = useSettingsStore()
+    const previousBackground = JSON.stringify(store.ui.background)
+    const previousPaths = JSON.stringify(store.game.minecraft_paths)
+    await store.refreshAfterWrites()
+    if (!started) return
+    if (sections.has('ui')) {
+      await applyConfig({
+        ui: {
+          ...store.ui,
+          background: JSON.stringify(store.ui.background) === previousBackground ? undefined : store.ui.background,
+        },
+      })
+    }
+    if (sections.has('game')) {
+      gameConfig.value = store.game
+      if (JSON.stringify(store.game.minecraft_paths) !== previousPaths) await useInstanceStore().loadAll(true)
+    }
+    if (sections.has('download')) downloadConfig.value = store.download
+  }
+
+  async function applyConfig(payload: Partial<BackendEvents['config:init']>): Promise<void> {
     const launcher = payload.launcher
     if (launcher) {
       isDevMode.value = launcher.debug === true
@@ -179,6 +208,10 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
 
   function registerBackendEvents(): void {
     cleanupCallbacks.push(
+      backend.on('accounts_changed', (snapshot) => {
+        clearAvatarCache()
+        useAccountStore().applySnapshot(snapshot)
+      }),
       backend.on('launcher:notify', (payload) => {
         const source = payload.source === 'plugin' ? 'plugin' : 'launcher'
         // 警告与错误影响功能使用，升级为弹窗按优先级排队展示；info 仍是瞬时通知。
@@ -226,9 +259,17 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         void applyConfig(payload)
       }),
       backend.on('config:updated', (payload) => {
-        if (payload.section !== 'launcher') return
-        const launcher = (payload.data as { debug?: boolean } | null) ?? {}
-        isDevMode.value = launcher.debug === true
+        if (payload.section === 'launcher') {
+          const launcher = (payload.data as { debug?: boolean } | null) ?? {}
+          isDevMode.value = launcher.debug === true
+        }
+        if (!['ui', 'game', 'download', 'launcher', 'connector'].includes(payload.section)) return
+        changedSettings.add(payload.section)
+        if (settingsRefreshTimer) clearTimeout(settingsRefreshTimer)
+        settingsRefreshTimer = setTimeout(() => {
+          settingsRefreshTimer = null
+          void syncChangedSettings().catch((error) => console.warn('[AppRuntime] 同步设置变更失败:', error))
+        }, 50)
       }),
       backend.on('plugin:css_injected', (payload) => {
         const pluginName = payload.plugin || 'unknown'
@@ -363,6 +404,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   }
 
   function stop(): void {
+    if (settingsRefreshTimer) clearTimeout(settingsRefreshTimer)
+    settingsRefreshTimer = null
+    changedSettings.clear()
     if (!started) return
     cleanupCallbacks.splice(0).forEach((cleanup) => cleanup())
     destroyPluginBridge()

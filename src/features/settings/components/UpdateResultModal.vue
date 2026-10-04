@@ -2,6 +2,7 @@
   <Modal
     :visible="visible"
     :title="t('settings.aboutTab.update.updateAvailableTitle')"
+    icon="download"
     width="min(540px, calc(100vw - 32px))"
     wrapperClass="update-result-modal-container"
     :closable="!busy"

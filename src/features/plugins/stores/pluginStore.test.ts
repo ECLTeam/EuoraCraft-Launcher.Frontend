@@ -33,6 +33,24 @@ const plugin = {
 }
 
 describe('pluginStore', () => {
+  it('插件变更发生在旧列表加载期间时，丢弃旧结果并完成后续刷新', async () => {
+    let finish!: (value: Array<typeof plugin>) => void
+    vi.mocked(pluginManagementApi.list).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    vi.mocked(pluginManagementApi.list).mockResolvedValue([{ ...plugin, status: 'disabled' }])
+    const store = usePluginStore()
+    const loading = store.load()
+    const changing = store.toggle(plugin)
+    await Promise.resolve()
+    finish([plugin])
+    await Promise.all([loading, changing])
+    expect(pluginManagementApi.list).toHaveBeenCalledTimes(2)
+    expect(store.plugins[0]?.status).toBe('disabled')
+  })
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()

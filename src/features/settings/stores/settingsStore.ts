@@ -93,6 +93,8 @@ export const useSettingsStore = defineStore('settings', () => {
   const javaInstallations = ref<JavaInstallation[]>([])
   let loadPromise: Promise<void> | null = null
   let javaScanPromise: Promise<JavaInstallation[]> | null = null
+  let javaScanId = 0
+  let isJavaScanForced = false
   let latestLoadId = 0
   let configRevision = 0
   const writeQueues = new Map<string, Promise<void>>()
@@ -108,7 +110,11 @@ export const useSettingsStore = defineStore('settings', () => {
       try {
         const config = await settingsApi.load()
         // 读取期间若已有本地写入完成，旧快照不能覆盖新状态。
-        if (loadId !== latestLoadId || revisionAtStart !== configRevision) return
+        if (loadId !== latestLoadId) return
+        if (revisionAtStart !== configRevision) {
+          status.value = 'ready'
+          return
+        }
         ui.value = config.ui
         game.value = { ...DEFAULT_GAME_CONFIG, ...config.game }
         download.value = { ...DEFAULT_DOWNLOAD_CONFIG, ...config.download }
@@ -131,17 +137,21 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function loadJavaInstallations(force = false): Promise<JavaInstallation[]> {
     if (!force && javaStatus.value === 'ready') return javaInstallations.value
-    if (javaScanPromise) return javaScanPromise
+    if (javaScanPromise && (!force || isJavaScanForced)) return javaScanPromise
 
+    const scanId = ++javaScanId
+    isJavaScanForced = force
     javaStatus.value = 'loading'
     const request = settingsApi.listJava().then(
       (installations) => {
-        javaInstallations.value = installations
-        javaStatus.value = 'ready'
+        if (scanId === javaScanId) {
+          javaInstallations.value = installations
+          javaStatus.value = 'ready'
+        }
         return installations
       },
       (reason: unknown) => {
-        javaStatus.value = 'error'
+        if (scanId === javaScanId) javaStatus.value = 'error'
         throw reason
       }
     )
@@ -158,6 +168,9 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function invalidateJavaInstallations(): void {
+    javaScanId += 1
+    javaScanPromise = null
+    isJavaScanForced = false
     javaStatus.value = 'idle'
     javaInstallations.value = []
   }
@@ -180,6 +193,11 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function ensureReady(): Promise<void> {
     if (status.value !== 'ready') await load()
+  }
+
+  async function refreshAfterWrites(): Promise<void> {
+    await Promise.all([...writeQueues.values()])
+    await load(true)
   }
 
   async function patchUi(patch: Partial<UiConfig>): Promise<void> {
@@ -302,6 +320,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   return {
+    refreshAfterWrites,
     ui,
     game,
     download,

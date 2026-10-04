@@ -1,10 +1,61 @@
+import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import backend from '@/api/client'
-import { clearAvatarCache, renderSkinAvatar, useAvatarRenderer } from './useAvatarRenderer'
+import AvatarRenderer from '@/components/game/AvatarRenderer.vue'
+import { clearAvatarCache, fetchTextureDataUrl, renderSkinAvatar, useAvatarRenderer } from './useAvatarRenderer'
 
-vi.mock('@/api/client', () => ({ default: { command: vi.fn() } }))
+vi.mock('@/api/client', () => ({ default: { command: vi.fn(), runtime: { isAvailable: true } } }))
 
 describe('renderSkinAvatar', () => {
+  it('相同账户属性未变化时，清理缓存也会自动重绘已显示头像', async () => {
+    class MockImage {
+      naturalWidth = 64
+      naturalHeight = 64
+      onload: (() => void) | null = null
+      set src(_value: string) {
+        queueMicrotask(() => this.onload?.())
+      }
+    }
+    vi.stubGlobal('Image', MockImage)
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D)
+    const canvas = vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,old')
+    const avatar = mount(AvatarRenderer, { props: { username: 'Player', skinUrl: 'data:image/png;base64,same-url' } })
+    await flushPromises()
+    expect(avatar.get('img').attributes('src')).toBe('data:image/png;base64,old')
+    canvas.mockReturnValue('data:image/png;base64,fresh')
+    clearAvatarCache()
+    await flushPromises()
+    expect(avatar.get('img').attributes('src')).toBe('data:image/png;base64,fresh')
+    avatar.unmount()
+  })
+  it('清理皮肤缓存后，迟到旧请求不回填旧皮肤或清除新的在途请求', async () => {
+    let finishOld!: (value: { success: boolean; data: { dataUrl: string } }) => void
+    let finishNew!: (value: { success: boolean; data: { dataUrl: string } }) => void
+    vi.mocked(backend.command).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishOld = resolve
+        })
+    )
+    const old = fetchTextureDataUrl('https://example.com/skin.png')
+    clearAvatarCache()
+    vi.mocked(backend.command).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishNew = resolve
+        })
+    )
+    const fresh = fetchTextureDataUrl('https://example.com/skin.png')
+    finishOld({ success: true, data: { dataUrl: 'data:image/png;base64,old' } })
+    await old
+    const same = fetchTextureDataUrl('https://example.com/skin.png')
+    finishNew({ success: true, data: { dataUrl: 'data:image/png;base64,fresh' } })
+    await Promise.all([fresh, same])
+    expect(await fetchTextureDataUrl('https://example.com/skin.png')).toBe('data:image/png;base64,fresh')
+    expect(backend.command).toHaveBeenCalledTimes(2)
+  })
   afterEach(() => {
     clearAvatarCache()
     vi.mocked(backend.command).mockReset()

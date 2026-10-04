@@ -22,13 +22,12 @@ import type {
   WardrobeKind,
 } from '@/types/accounts'
 import type {
-  BackgroundConfig,
   ConfigSection,
   DownloadConfig,
   GameConfig,
   LauncherConfig,
   SystemMemoryInfo,
-  ThemeConfig,
+  UiConfig,
   WindowBounds,
   WindowMetadata,
 } from '@/types/config'
@@ -122,10 +121,7 @@ export interface BackendEvents {
     launcher: LauncherConfig
     game: GameConfig
     download: DownloadConfig
-    ui: ThemeConfig & {
-      locale?: string
-      background?: Partial<BackgroundConfig>
-    }
+    ui: UiConfig
   }
   'launcher:open_page': { page: 'games' | 'instances' | 'download' | 'settings' | 'more' }
   'launcher:visibility': {

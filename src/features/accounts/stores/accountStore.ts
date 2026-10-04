@@ -34,6 +34,8 @@ export const useAccountStore = defineStore('accounts', () => {
   const error = ref('')
   let loadPromise: Promise<void> | null = null
   let reloadRequested = false
+  let accountsRevision = 0
+  let currentLoadId = 0
 
   function accountIdentity(account: MinecraftAccount): string {
     const accountUuid = account.uuid?.replaceAll('-', '').trim().toLowerCase()
@@ -83,6 +85,7 @@ export const useAccountStore = defineStore('accounts', () => {
             currentAccount.value = result.current
               ? (loadedAccounts.find((account) => account.id === result.current?.id) ?? result.current)
               : null
+            accountsRevision += 1
           } catch (reason) {
             if (!reloadRequested) throw reason
           }
@@ -101,7 +104,22 @@ export const useAccountStore = defineStore('accounts', () => {
   }
 
   async function loadCurrent(): Promise<void> {
-    currentAccount.value = await accountsApi.current()
+    const revision = accountsRevision
+    const loadId = ++currentLoadId
+    const account = await accountsApi.current()
+    if (revision === accountsRevision && loadId === currentLoadId) currentAccount.value = account
+  }
+
+  function applySnapshot(result: { accounts: MinecraftAccount[]; current: MinecraftAccount | null }): void {
+    accountsRevision += 1
+    if (loadPromise) reloadRequested = true
+    const snapshot = deduplicateAccounts(result.accounts ?? [], result.current?.id)
+    accounts.value = snapshot
+    currentAccount.value = result.current
+      ? (snapshot.find((account) => account.id === result.current?.id) ?? result.current)
+      : null
+    if (!loadPromise) status.value = 'ready'
+    error.value = ''
   }
 
   /**
@@ -234,6 +252,7 @@ export const useAccountStore = defineStore('accounts', () => {
   }
 
   return {
+    applySnapshot,
     accounts,
     currentAccount,
     authlibServers,

@@ -86,7 +86,7 @@
 }
 
 .technology-category__count {
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 10px;

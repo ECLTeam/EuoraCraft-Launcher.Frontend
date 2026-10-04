@@ -151,7 +151,7 @@ const { t } = useI18n()
   width: 100%;
   padding: 12px 16px;
   border-radius: var(--r-sm);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
 }
 
 .lp-info-row {

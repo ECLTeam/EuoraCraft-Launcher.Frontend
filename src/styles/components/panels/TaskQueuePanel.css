@@ -1,5 +1,5 @@
 .task-queue-wrapper {
-  background: var(--bg-base) !important;
+  background: var(--ecl-surface-muted) !important;
 }
 
 .task-queue-body {
@@ -115,7 +115,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--r-sm);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   color: var(--text-secondary);
 }
 
@@ -143,7 +143,7 @@
 .tq-task-ver {
   font-size: 10px;
   color: var(--text-tertiary);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   padding: 1px 5px;
   border-radius: var(--r-xs);
 }
@@ -223,7 +223,7 @@
 .tq-task-detail {
   padding: 0 var(--s-lg) var(--s-lg) 60px;
   border-top: 1px solid var(--divider);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
 }
 
 .tq-task-message {
@@ -381,7 +381,7 @@
   padding: var(--s-sm) var(--s-md);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
 }
 
 .tq-live-metric-label {
@@ -405,7 +405,7 @@
   height: 120px;
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   overflow: hidden;
 }
 

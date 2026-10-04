@@ -184,7 +184,7 @@ const iconType = computed(() => {
     case 'agreement':
       return 'file-text'
     default:
-      return ''
+      return 'info'
   }
 })
 

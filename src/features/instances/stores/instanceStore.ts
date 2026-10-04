@@ -40,7 +40,9 @@ export const useInstanceStore = defineStore('versions', () => {
   function startWatching(): void {
     if (stopWatching) return
     stopWatching = instanceInstallApi.onVersionsChanged(({ gamePath }) => {
-      void scanPath(gamePath)
+      void loadAll(true).catch((error) => {
+        console.warn('[instanceStore] 同步实例变更失败:', gamePath, error)
+      })
     })
   }
 
@@ -137,6 +139,7 @@ export const useInstanceStore = defineStore('versions', () => {
         ) ??
         versions.value.find((version) => version.id === selectedVersion.value) ??
         versions.value[0]
+      if (loadId !== latestLoadId) return
       if (selected) {
         selectVersion(selected.id, selected.gamePath)
       } else {
@@ -151,7 +154,12 @@ export const useInstanceStore = defineStore('versions', () => {
 
   async function loadAll(force = false): Promise<void> {
     if (!force && loadAllRequest) return loadAllRequest
-    if (force && loadAllRequest) await loadAllRequest.catch(() => undefined)
+    if (force && loadAllRequest) {
+      latestLoadId += 1
+      const previous = loadAllRequest
+      await previous.catch(() => undefined)
+      if (loadAllRequest && loadAllRequest !== previous) return loadAllRequest
+    }
     const request = loadAllImpl(force)
     loadAllRequest = request
     try {

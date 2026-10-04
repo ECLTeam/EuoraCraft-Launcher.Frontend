@@ -42,7 +42,7 @@
 }
 
 .error-detail-box {
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   overflow: hidden;
@@ -91,7 +91,7 @@
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -172,7 +172,7 @@
   display: block;
   padding: 6px 8px;
   border-radius: var(--r-xs);
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   color: var(--text-secondary);
   font: 11px/1.45 var(--font-mono);
   white-space: pre-wrap;

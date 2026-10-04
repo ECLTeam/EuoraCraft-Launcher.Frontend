@@ -7,6 +7,7 @@ vi.mock('@/api/client', () => ({ default: { runtime: { isAvailable: true }, comm
 
 describe('detectActiveWindowChrome', () => {
   afterEach(() => {
+    document.querySelector('#chrome-test-mount')?.remove()
     vi.restoreAllMocks()
     command.mockReset()
   })
@@ -32,6 +33,10 @@ describe('detectActiveWindowChrome', () => {
   })
 
   it('无系统标题栏时按启动快照使用系统阴影，保存设置不会提前改变外观', async () => {
+    const mountHost = document.createElement('div')
+    mountHost.id = 'chrome-test-mount'
+    mountHost.innerHTML = '<div id="app"></div>'
+    document.body.append(mountHost)
     vi.spyOn(desktopWindow, 'isDecorated').mockResolvedValue(false)
     command.mockResolvedValue({
       success: true,
@@ -41,6 +46,7 @@ describe('detectActiveWindowChrome', () => {
     await detectActiveWindowChrome()
 
     expect(useActiveWindowChrome().value).toBe('system_shadow')
+    expect(document.querySelector('#app')?.getAttribute('data-window-chrome')).toBe('system_shadow')
     expect(useSystemShadowSupported().value).toBe(true)
     expect(command).toHaveBeenCalledWith('launcher_info', undefined, 3000)
   })

@@ -13,9 +13,9 @@
 .modal-container {
   background: var(--card-bg);
   border: 1px solid var(--ecl-border);
-  border-radius: var(--r-sm);
-  backdrop-filter: var(--glass-backdrop);
-  -webkit-backdrop-filter: var(--glass-backdrop);
+  border-radius: var(--ecl-radius-dialog);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   min-width: 324px;
   max-width: 90vw;
   max-height: 90vh;
@@ -57,6 +57,7 @@
 .header-title .icon {
   font-size: 18px;
   flex-shrink: 0;
+  color: var(--primary);
 }
 
 .type-confirm .header-title .icon {

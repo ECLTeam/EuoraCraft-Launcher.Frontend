@@ -61,8 +61,8 @@
   border: 1px solid var(--control-border);
   border-radius: var(--r-md);
   box-shadow: var(--shadow-md);
-  backdrop-filter: var(--glass-backdrop);
-  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
 }
 
 .select-search {

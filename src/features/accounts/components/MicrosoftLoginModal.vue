@@ -3,6 +3,7 @@
     :visible="visible"
     :parentId="parentId"
     :title="t('game.login.title')"
+    icon="microsoft"
     :closable="false"
     wrapperClass="microsoft-login-modal"
     width="min(460px, calc(100vw - 32px))"

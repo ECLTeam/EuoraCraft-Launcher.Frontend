@@ -12,6 +12,25 @@ vi.mock('@/api/client', async () => {
 const { mocks } = mock.state!
 
 describe('instanceInstallApi scan cache', () => {
+  it('强制扫描完成后，迟到旧扫描不能重新写入缓存；普通并发调用合并', async () => {
+    instanceInstallApi.invalidateScanCache()
+    let finish!: (value: { success: boolean; data: never[] }) => void
+    mocks.command.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const old = instanceInstallApi.scan(['D:/ScanRace'])
+    const same = instanceInstallApi.scan(['D:/ScanRace'])
+    mocks.command.mockResolvedValueOnce({ success: true, data: [{ versionId: 'new-version', path: 'D:/ScanRace' }] })
+    const fresh = await instanceInstallApi.scan(['D:/ScanRace'], { force: true })
+    finish({ success: true, data: [] })
+    await Promise.all([old, same])
+    expect(await instanceInstallApi.scan(['D:/ScanRace'])).toEqual(fresh)
+    expect(fresh[0]?.versionId).toBe('new-version')
+    expect(mocks.command).toHaveBeenCalledTimes(2)
+  })
   beforeEach(() => {
     mocks.command.mockReset()
     instanceInstallApi.invalidateScanCache()

@@ -1,5 +1,7 @@
 .ui-card {
   background: var(--card-bg);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   border-radius: var(--r-sm);
   border: 1px solid var(--ecl-border);
   overflow: hidden;
@@ -42,7 +44,7 @@
 
 .header-content .icon {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--primary);
 }
 
 .title-text {

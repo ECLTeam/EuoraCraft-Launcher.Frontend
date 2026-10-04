@@ -174,9 +174,9 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
 
   const accountTypeLabel = computed(() => t(getAccountTypeLabelKey(currentAccount.value?.type)))
 
-  async function loadAccounts() {
+  async function loadAccounts(force = false) {
     try {
-      await accountStore.load()
+      await accountStore.load(force)
     } catch {
       notifyLauncherPopup({
         id: 'account-load-failed',

@@ -505,7 +505,7 @@
       :accounts="account.accounts"
       :currentAccount="account.currentAccount"
       @back="returnToAccountManagement"
-      @accountsChanged="account.loadAccounts"
+      @accountsChanged="account.loadAccounts(true)"
     />
 
     <MicrosoftLoginModal

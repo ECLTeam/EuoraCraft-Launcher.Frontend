@@ -61,6 +61,8 @@
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-card);
   background: var(--ecl-surface);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   box-shadow:
     var(--ecl-shadow-surface),
     inset 0 1px 0 var(--glass-highlight);
@@ -76,6 +78,8 @@
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-card);
   background: var(--ecl-surface);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   box-shadow: inset 0 1px 0 var(--glass-highlight);
 }
 

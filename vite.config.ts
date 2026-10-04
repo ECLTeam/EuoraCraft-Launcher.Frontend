@@ -72,7 +72,8 @@ export default defineConfig(({ mode }) => {
     envPrefix: ['VITE_', 'TAURI_'],
     build: {
       target: 'chrome100',
-      cssMinify: true,
+      // 保留标准 backdrop-filter；当前 Lightning CSS 会在 chrome100 下只输出 WebKit 前缀。
+      cssMinify: 'esbuild',
       sourcemap: false,
       rolldownOptions: {
         output: {

@@ -22,6 +22,7 @@ export async function detectActiveWindowChrome(): Promise<void> {
     : result?.success && result.data?.active_window_chrome === 'system_shadow'
       ? 'system_shadow'
       : 'custom'
+  document.getElementById('app')?.setAttribute('data-window-chrome', activeWindowChrome.value)
 }
 
 export function useActiveWindowChrome() {

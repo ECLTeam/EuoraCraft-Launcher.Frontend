@@ -11,6 +11,8 @@ export type InstallableLoader = 'fabric' | 'forge' | 'neoforge' | 'quilt'
 export type VersionsChangedHandler = (payload: { gamePath: string }) => void
 
 const scanCache = new Map<string, ScannedVersion[]>()
+const scanGenerations = new Map<string, number>()
+const pendingScans = new Map<string, { generation: number; promise: Promise<void> }>()
 let catalogRequest: Promise<MinecraftVersionCatalog> | null = null
 const versionsChangedHandlers = new Set<VersionsChangedHandler>()
 let isListeningForVersionChanges = false
@@ -20,10 +22,12 @@ function cloneVersions(versions: ScannedVersion[]): ScannedVersion[] {
 }
 
 function invalidateScanCache(path?: string): void {
-  if (path) {
-    scanCache.delete(normalizeGamePath(path))
-  } else {
-    scanCache.clear()
+  const keys = path
+    ? [normalizeGamePath(path)]
+    : new Set([...scanCache.keys(), ...pendingScans.keys(), ...scanGenerations.keys()])
+  for (const key of keys) {
+    scanGenerations.set(key, (scanGenerations.get(key) ?? 0) + 1)
+    scanCache.delete(key)
   }
 }
 
@@ -89,22 +93,48 @@ export const instanceInstallApi = {
     const requestedPaths = [...new Set(paths.filter((path) => path.trim()))]
     if (options.force) requestedPaths.forEach((path) => invalidateScanCache(path))
 
-    const missingPaths = requestedPaths.filter((path) => !scanCache.has(normalizeGamePath(path)))
+    const waiting: Promise<void>[] = []
+    const missingPaths = requestedPaths.filter((path) => {
+      const key = normalizeGamePath(path)
+      if (scanCache.has(key)) return false
+      const pending = pendingScans.get(key)
+      if (pending && pending.generation === (scanGenerations.get(key) ?? 0)) {
+        waiting.push(pending.promise)
+        return false
+      }
+      return true
+    })
     if (missingPaths.length > 0) {
-      const scanned =
-        assertSuccess(
-          await backend.command('game_scan', { paths: missingPaths, force: options.force || undefined }),
-          '扫描本地实例'
-        ) ?? []
-      const missingKeys = new Set(missingPaths.map(normalizeGamePath))
-      missingKeys.forEach((key) => scanCache.set(key, []))
-      scanned.forEach((version) => {
-        const fallbackPath = missingPaths.length === 1 ? (missingPaths[0] ?? '') : ''
-        const key = normalizeGamePath(version.path || fallbackPath)
-        if (!missingKeys.has(key)) return
-        scanCache.get(key)?.push({ ...version })
-      })
+      const generations = new Map(
+        missingPaths.map((path) => {
+          const key = normalizeGamePath(path)
+          return [key, scanGenerations.get(key) ?? 0] as const
+        })
+      )
+      const request = (async () => {
+        const scanned =
+          assertSuccess(
+            await backend.command('game_scan', { paths: missingPaths, force: options.force || undefined }),
+            '扫描本地实例'
+          ) ?? []
+        const snapshots = new Map([...generations.keys()].map((key) => [key, [] as ScannedVersion[]]))
+        scanned.forEach((version) => {
+          const fallbackPath = missingPaths.length === 1 ? (missingPaths[0] ?? '') : ''
+          const key = normalizeGamePath(version.path || fallbackPath)
+          snapshots.get(key)?.push({ ...version })
+        })
+        for (const [key, snapshot] of snapshots) {
+          if ((scanGenerations.get(key) ?? 0) === generations.get(key)) scanCache.set(key, snapshot)
+        }
+      })()
+      for (const [key, generation] of generations) pendingScans.set(key, { generation, promise: request })
+      const cleanup = () => {
+        for (const key of generations.keys()) if (pendingScans.get(key)?.promise === request) pendingScans.delete(key)
+      }
+      void request.then(cleanup, cleanup)
+      waiting.push(request)
     }
+    await Promise.all(waiting)
 
     return requestedPaths.flatMap((path) => cloneVersions(scanCache.get(normalizeGamePath(path)) ?? []))
   },

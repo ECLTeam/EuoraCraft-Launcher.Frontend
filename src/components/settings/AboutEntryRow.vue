@@ -64,7 +64,7 @@ const { t } = useI18n()
   justify-content: center;
   border: 1px solid var(--border);
   border-radius: 50%;
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 600;

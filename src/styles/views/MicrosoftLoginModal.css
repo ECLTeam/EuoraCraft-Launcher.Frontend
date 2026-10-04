@@ -1,7 +1,3 @@
-.modal-container.microsoft-login-modal {
-  background: var(--bg-base);
-}
-
 .microsoft-login-content {
   display: flex;
   min-width: 0;

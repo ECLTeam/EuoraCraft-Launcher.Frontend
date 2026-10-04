@@ -38,7 +38,7 @@ interface Props {
 }
 
 const avatarUrl = ref<string>('')
-const { loading, error, renderAvatar } = useAvatarRenderer()
+const { loading, error, renderAvatar, cacheRevision } = useAvatarRenderer()
 let renderRequest = 0
 
 const containerStyle = computed<CSSProperties>(() => ({
@@ -73,6 +73,7 @@ watch(
     () => props.skinUrl,
     () => props.accountId,
     () => props.size,
+    cacheRevision,
   ],
   updateAvatar
 )

@@ -20,6 +20,75 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
 }))
 
 describe('settingsStore', () => {
+  it('后台配置刷新等待本地写入完成，再读取最新配置', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    let finishSaving!: () => void
+    vi.mocked(settingsApi.saveGame).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishSaving = resolve
+        })
+    )
+    const saving = store.patchGame({ memory_size: 8192 })
+    await vi.waitFor(() => expect(settingsApi.saveGame).toHaveBeenCalledOnce())
+    const refreshing = store.refreshAfterWrites()
+    expect(settingsApi.load).toHaveBeenCalledTimes(1)
+    finishSaving()
+    await Promise.all([saving, refreshing])
+    expect(settingsApi.load).toHaveBeenCalledTimes(2)
+    expect(store.status).toBe('ready')
+  })
+  it.each(['force', 'invalidate'])('Java %s 不复用旧扫描，迟到的旧结果不覆盖最新列表', async (mode) => {
+    const store = useSettingsStore()
+    let finish!: (value: never[]) => void
+    vi.mocked(settingsApi.listJava).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const old = store.loadJavaInstallations()
+    const installations = [
+      { path: 'C:/Java/21/bin/java.exe', version: '21', major_version: 21, java_type: 'JRE', arch: 'x64', sources: [] },
+    ]
+    vi.mocked(settingsApi.listJava).mockResolvedValueOnce(installations)
+    if (mode === 'invalidate') store.invalidateJavaInstallations()
+    await store.loadJavaInstallations(mode === 'force')
+    finish([])
+    await old
+    expect(store.javaInstallations).toEqual(installations)
+    expect(settingsApi.listJava).toHaveBeenCalledTimes(2)
+  })
+
+  it('设置刷新途中本地写入完成时，保留新值并结束加载状态', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    let finish!: (value: Awaited<ReturnType<typeof settingsApi.load>>) => void
+    const snapshot = vi.mocked(settingsApi.load).mock.results[0]!.value
+    vi.mocked(settingsApi.load).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    let finishSaving!: () => void
+    vi.mocked(settingsApi.saveGame).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishSaving = resolve
+        })
+    )
+    const saving = store.patchGame({ memory_size: 8192 })
+    await vi.waitFor(() => expect(settingsApi.saveGame).toHaveBeenCalledOnce())
+    const loading = store.load(true)
+    finishSaving()
+    await saving
+    finish(await snapshot)
+    await loading
+    expect(store.game.memory_size).toBe(8192)
+    expect(store.status).toBe('ready')
+  })
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()

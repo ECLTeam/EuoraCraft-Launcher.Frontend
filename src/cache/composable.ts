@@ -1,7 +1,7 @@
 // 提供响应式缓存管理，方便Vue组件使用
 // 简单持久化单值场景推荐使用 VueUse 的 useLocalStorage，本模块保留用于 TTL/分组/批量场景
 
-import { ref, onScopeDispose, type Ref } from 'vue'
+import { ref, getCurrentScope, onScopeDispose, type Ref } from 'vue'
 import { globalCache, type CacheOptions, CACHE_KEYS, CACHE_GROUPS } from '@/cache'
 
 /**
@@ -86,8 +86,12 @@ export function useGlobalCache<T = unknown>(
     loadFromCache()
   }
 
-  // 注意：globalCache 基于 Map，非响应式，无法通过 watch 监听其变化。
-  // 跨组件缓存同步需依赖 setCache/deleteCache 方法手动更新 data ref。
+  if (getCurrentScope())
+    onScopeDispose(
+      globalCache.subscribe((changedKey) => {
+        if (changedKey === null || changedKey === key) loadFromCache()
+      })
+    )
 
   loadFromCache()
 
@@ -113,9 +117,12 @@ export function useAutoRefreshCache<T = unknown>(
   const { autoRefresh = true, ...cacheOptions } = options
   const cache = useGlobalCache<T>(key, null, cacheOptions)
   const { data, loading, error, setCache, isValid } = cache
+  let pendingRequest: Promise<T | null> | null = null
+  let latestRequest = 0
 
   // 自动获取数据
   const fetchData = async (forceRefresh = false): Promise<T | null> => {
+    if (!forceRefresh && pendingRequest) return pendingRequest
     if (!forceRefresh) {
       // 启动预取可能在组件创建后、首次 fetchData 前完成；再次读取共享缓存避免重复请求。
       const latestCached = globalCache.get<T>(key)
@@ -129,18 +136,27 @@ export function useAutoRefreshCache<T = unknown>(
 
     loading.value = true
     error.value = false
-
-    try {
-      const result = await fetchFn()
-      setCache(result, cacheOptions)
-      return result
-    } catch (e) {
-      console.error(`获取数据失败 [${key}]:`, e)
-      error.value = true
-      return null
-    } finally {
-      loading.value = false
+    const requestId = ++latestRequest
+    const revision = globalCache.getRevision(key, cacheOptions.group)
+    const request = (async () => {
+      try {
+        const result = await fetchFn()
+        if (requestId === latestRequest && revision === globalCache.getRevision(key)) setCache(result, cacheOptions)
+        return result
+      } catch (e) {
+        console.error(`获取数据失败 [${key}]:`, e)
+        if (requestId === latestRequest) error.value = true
+        return null
+      } finally {
+        if (requestId === latestRequest) loading.value = false
+      }
+    })()
+    pendingRequest = request
+    const cleanup = () => {
+      if (pendingRequest === request) pendingRequest = null
     }
+    void request.then(cleanup, cleanup)
+    return request
   }
 
   // 自动刷新逻辑
@@ -150,9 +166,7 @@ export function useAutoRefreshCache<T = unknown>(
     const refreshInterval = Math.min(cacheOptions.ttl, 5 * 60 * 1000) // 最多5分钟刷新一次
 
     autoRefreshTimer = setInterval(() => {
-      if (isValid.value) {
-        fetchData(true).catch(console.error)
-      }
+      fetchData(true).catch(console.error)
     }, refreshInterval)
   }
 
@@ -172,7 +186,10 @@ export function useAutoRefreshCache<T = unknown>(
     error: cache.error,
     setCache: cache.setCache,
     deleteCache: cache.deleteCache,
-    refresh: cache.refresh,
+    refresh: () => {
+      cache.deleteCache()
+      return fetchData(true)
+    },
     isValid: cache.isValid,
     fetchData,
     stopAutoRefresh,

@@ -10,6 +10,20 @@
   display: none;
 }
 
+.n-card,
+.n-dialog,
+.n-popover,
+.n-popconfirm,
+.n-dropdown-menu,
+.n-tooltip,
+.n-base-select-menu,
+.n-base-auto-complete-menu,
+.select-dropdown,
+.task-queue-wrapper {
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
+}
+
 /* Naive UI 选择框：展开时翻转默认下拉箭头，便于反馈菜单状态。 */
 .n-select .n-base-suffix .n-base-suffix__arrow {
   transform-origin: center;
@@ -35,6 +49,8 @@
 }
 
 .toolbar {
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,6 +93,8 @@
 }
 
 .panel {
+  backdrop-filter: var(--ecl-surface-backdrop);
+  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
@@ -177,7 +195,7 @@
   color: var(--error);
 }
 .badge-default {
-  background: var(--bg-base);
+  background: var(--ecl-surface-muted);
   color: var(--text-secondary);
   border: 1px solid var(--border);
 }
@@ -207,7 +225,7 @@
 
 .loader-btn {
   padding: 5px 11px;
-  background: var(--bg-base);
+  background: var(--ecl-control-surface);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   color: var(--text-secondary);
