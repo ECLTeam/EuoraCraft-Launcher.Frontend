@@ -268,10 +268,21 @@
       "failed": "Не удалось выполнить вход",
       "stage": {
         "authorization_confirmed": "Авторизация Microsoft подтверждена",
-        "minecraft_token": "Получение токена Minecraft",
-        "profile": "Чтение профиля",
+        "minecraft_token": "Проверка аккаунта Minecraft",
+        "profile": "Чтение профиля Minecraft",
         "saving": "Сохранение аккаунта",
-        "completed": "Вход в аккаунт завершён"
+        "completed": "Вход в аккаунт завершён",
+        "waiting_authorization": "Подготовка входа"
+      },
+      "authorize": "Авторизуйтесь в браузере",
+      "authorizationHint": "Завершите авторизацию Microsoft в браузере. Лаунчер продолжит автоматически.",
+      "preparingHint": "Получение данных авторизации. Подождите.",
+      "processingHint": "Авторизация Microsoft завершена. Подготовка игрового аккаунта.",
+      "openBrowser": "Открыть страницу авторизации",
+      "steps": {
+        "authorization": "Авторизация",
+        "profile": "Чтение аккаунта",
+        "saving": "Сохранение"
       }
     },
     "showcase": {

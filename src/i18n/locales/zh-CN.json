@@ -268,10 +268,21 @@
       "failed": "登录失败",
       "stage": {
         "authorization_confirmed": "微软授权已确认",
-        "minecraft_token": "正在获取 Minecraft 令牌",
-        "profile": "正在读取档案",
+        "minecraft_token": "正在验证 Minecraft 账户",
+        "profile": "正在读取 Minecraft 档案",
         "saving": "正在保存账户",
-        "completed": "账户登录完成"
+        "completed": "账户登录完成",
+        "waiting_authorization": "正在准备登录"
+      },
+      "authorize": "在浏览器中完成授权",
+      "authorizationHint": "请在浏览器中完成微软授权，启动器会自动继续。",
+      "preparingHint": "正在获取授权信息，请稍后。",
+      "processingHint": "微软授权已完成，正在准备你的游戏账户。",
+      "openBrowser": "打开授权页面",
+      "steps": {
+        "authorization": "授权确认",
+        "profile": "读取账户",
+        "saving": "保存账户"
       }
     },
     "showcase": {

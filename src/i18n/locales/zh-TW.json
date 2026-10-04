@@ -268,10 +268,21 @@
       "failed": "登入失敗",
       "stage": {
         "authorization_confirmed": "微軟授權已確認",
-        "minecraft_token": "正在獲取 Minecraft 令牌",
-        "profile": "正在讀取檔案",
+        "minecraft_token": "正在驗證 Minecraft 帳戶",
+        "profile": "正在讀取 Minecraft 檔案",
         "saving": "正在儲存帳戶",
-        "completed": "帳戶登入完成"
+        "completed": "帳戶登入完成",
+        "waiting_authorization": "正在準備登入"
+      },
+      "authorize": "在瀏覽器中完成授權",
+      "authorizationHint": "請在瀏覽器中完成 Microsoft 授權，啟動器會自動繼續。",
+      "preparingHint": "正在取得授權資訊，請稍候。",
+      "processingHint": "Microsoft 授權已完成，正在準備你的遊戲帳戶。",
+      "openBrowser": "開啟授權頁面",
+      "steps": {
+        "authorization": "授權確認",
+        "profile": "讀取帳戶",
+        "saving": "儲存帳戶"
       }
     },
     "showcase": {

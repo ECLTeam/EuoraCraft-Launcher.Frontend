@@ -109,6 +109,56 @@ describe('useAccountManager Microsoft login', () => {
     expect(accountsApi.startMicrosoftLogin).not.toHaveBeenCalled()
   })
 
+  it('shows a login already processing without reopening the authorization page', async () => {
+    vi.mocked(accountsApi.startMicrosoftLogin).mockResolvedValue({ status: 'progress', stage: 'profile' })
+    const account = useAccountManager((key) => key)
+    await account.loadMicrosoftLoginConfig()
+    await account.startMicrosoftLogin()
+    expect(account.showMicrosoftLoginModal).toBe(true)
+    expect(account.microsoftLoginStatus).toBe('loading')
+    expect(account.microsoftLoginStage).toBe('profile')
+    expect(openExternalUrl).not.toHaveBeenCalled()
+  })
+
+  it.each(['progress', 'ready', 'cancelled'] as const)(
+    'handles an early %s event before the start response',
+    async (status) => {
+      const player = { id: 'microsoft-account', alias: 'Player', type: 'microsoft' as const, isCurrent: true }
+      vi.mocked(accountsApi.startMicrosoftLogin).mockImplementation(async () => {
+        microsoftLoginStatusHandler?.({ status, stage: 'profile' })
+        return { status: 'pending', userCode: 'ABCD', verificationUri: 'https://microsoft.com/link' }
+      })
+      vi.mocked(accountsApi.completeMicrosoftLogin).mockResolvedValue({ status: 'completed', account: player })
+      vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [player], current: player })
+      const account = useAccountManager((key) => key)
+      await account.loadMicrosoftLoginConfig()
+      await account.startMicrosoftLogin()
+      expect(account.showMicrosoftLoginModal).toBe(status === 'progress')
+      if (status === 'progress') expect(account.microsoftLoginStage).toBe('profile')
+      if (status === 'ready') expect(account.currentAccount?.alias).toBe('Player')
+      expect(openExternalUrl).not.toHaveBeenCalled()
+    }
+  )
+
+  it.each(['cancelled', 'progress'] as const)('does not open a delayed browser after %s', async (status) => {
+    vi.useFakeTimers()
+    try {
+      vi.mocked(accountsApi.startMicrosoftLogin).mockResolvedValue({
+        status: 'pending',
+        userCode: 'ABCD',
+        verificationUri: 'https://microsoft.com/link',
+      })
+      const account = useAccountManager((key) => key)
+      await account.loadMicrosoftLoginConfig()
+      await account.startMicrosoftLogin()
+      microsoftLoginStatusHandler?.({ status, stage: 'profile' })
+      await vi.advanceTimersByTimeAsync(2000)
+      expect(openExternalUrl).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   it('添加离线账户时向后端传递有效的自定义 UUID', async () => {
     vi.mocked(accountsApi.addOffline).mockResolvedValue({
       id: 'offline:custom',

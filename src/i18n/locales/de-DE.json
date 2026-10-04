@@ -268,10 +268,21 @@
       "failed": "Anmeldung fehlgeschlagen",
       "stage": {
         "authorization_confirmed": "Microsoft-Autorisierung bestätigt",
-        "minecraft_token": "Minecraft-Token wird abgerufen",
-        "profile": "Profil wird gelesen",
+        "minecraft_token": "Minecraft-Konto wird geprüft",
+        "profile": "Minecraft-Profil wird geladen",
         "saving": "Konto wird gespeichert",
-        "completed": "Kontoanmeldung abgeschlossen"
+        "completed": "Kontoanmeldung abgeschlossen",
+        "waiting_authorization": "Anmeldung wird vorbereitet"
+      },
+      "authorize": "Im Browser autorisieren",
+      "authorizationHint": "Schließe die Microsoft-Autorisierung im Browser ab. Der Launcher fährt automatisch fort.",
+      "preparingHint": "Autorisierungsdetails werden geladen. Bitte warten.",
+      "processingHint": "Microsoft-Autorisierung abgeschlossen. Dein Spielkonto wird vorbereitet.",
+      "openBrowser": "Autorisierungsseite öffnen",
+      "steps": {
+        "authorization": "Autorisierung",
+        "profile": "Konto laden",
+        "saving": "Konto speichern"
       }
     },
     "showcase": {

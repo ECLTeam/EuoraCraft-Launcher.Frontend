@@ -526,44 +526,6 @@
   color: var(--error);
 }
 
-.ms-login-content {
-  min-width: 0;
-}
-
-.ms-login-url {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ms-code :deep(input) {
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-align: center;
-}
-
-.ms-login-status {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-}
-
-.ms-login-fetching {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-}
-
 .microsoft-client-id-alert p {
   margin: 0 0 6px;
 }

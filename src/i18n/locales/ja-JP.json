@@ -268,10 +268,21 @@
       "failed": "ログインに失敗しました",
       "stage": {
         "authorization_confirmed": "Microsoft の認証を確認しました",
-        "minecraft_token": "Minecraft トークンを取得中",
-        "profile": "プロフィールを読み込み中",
+        "minecraft_token": "Minecraft アカウントを確認中",
+        "profile": "Minecraft プロフィールを取得中",
         "saving": "アカウントを保存中",
-        "completed": "アカウントのログインが完了しました"
+        "completed": "アカウントのログインが完了しました",
+        "waiting_authorization": "ログインを準備中"
+      },
+      "authorize": "ブラウザーで認証を完了",
+      "authorizationHint": "ブラウザーで Microsoft の認証を完了してください。ランチャーは自動的に続行します。",
+      "preparingHint": "認証情報を取得しています。しばらくお待ちください。",
+      "processingHint": "Microsoft の認証が完了しました。ゲームアカウントを準備しています。",
+      "openBrowser": "認証ページを開く",
+      "steps": {
+        "authorization": "認証確認",
+        "profile": "アカウント取得",
+        "saving": "アカウント保存"
       }
     },
     "showcase": {

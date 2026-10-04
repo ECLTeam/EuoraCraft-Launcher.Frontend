@@ -80,6 +80,53 @@ describe('accountStore', () => {
     expect(accountsApi.list).toHaveBeenCalledTimes(2)
   })
 
+  it.each(['start', 'complete'])('微软登录 %s 完成后替换已有缓存并同步当前账户', async (step) => {
+    const store = useAccountStore()
+    await store.load()
+    const microsoft = { id: 'microsoft-player', alias: '正版玩家', type: 'microsoft' as const, isCurrent: true }
+    vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [account, microsoft], current: microsoft })
+    if (step === 'start') {
+      vi.mocked(accountsApi.startMicrosoftLogin).mockResolvedValue({ status: 'completed' })
+      await store.startMicrosoftLogin()
+    } else {
+      vi.mocked(accountsApi.completeMicrosoftLogin).mockResolvedValue({ status: 'completed', account: microsoft })
+      await store.completeMicrosoftLogin()
+    }
+    expect(store.accounts).toEqual([account, microsoft])
+    expect(store.currentAccount).toEqual(microsoft)
+  })
+
+  it('登录完成时旧列表请求未结束，等待后续刷新并丢弃旧快照', async () => {
+    const store = useAccountStore()
+    let finishOld!: (value: { accounts: Array<typeof account>; current: typeof account }) => void
+    vi.mocked(accountsApi.list).mockImplementationOnce(() => new Promise((resolve) => (finishOld = resolve)))
+    const initialLoad = store.load()
+    const microsoft = { id: 'microsoft-player', alias: '正版玩家', type: 'microsoft' as const, isCurrent: true }
+    vi.mocked(accountsApi.completeMicrosoftLogin).mockResolvedValue({ status: 'completed', account: microsoft })
+    vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [account, microsoft], current: microsoft })
+    const login = store.completeMicrosoftLogin()
+    await Promise.resolve()
+    finishOld({ accounts: [account], current: account })
+    await Promise.all([initialLoad, login])
+    expect(store.accounts).toEqual([account, microsoft])
+    expect(store.currentAccount).toEqual(microsoft)
+    expect(accountsApi.list).toHaveBeenCalledTimes(2)
+  })
+
+  it('外置登录完成后刷新已加载账户，未完成的微软登录不刷新', async () => {
+    const store = useAccountStore()
+    await store.load()
+    const authlib = { id: 'authlib-player', alias: '外置玩家', type: 'authlib' as const }
+    vi.mocked(accountsApi.addAuthlib).mockResolvedValue(authlib)
+    vi.mocked(accountsApi.listAuthlibServers).mockResolvedValue([])
+    vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [account, authlib], current: account })
+    await store.addAuthlib('https://example.com', 'player', 'password')
+    expect(store.accounts).toEqual([account, authlib])
+    vi.mocked(accountsApi.completeMicrosoftLogin).mockResolvedValue({ status: 'pending' })
+    await store.completeMicrosoftLogin()
+    expect(accountsApi.list).toHaveBeenCalledTimes(2)
+  })
+
   it('按账户 UUID 合并重复账户并保留当前账户', async () => {
     const previousAccount = {
       id: 'microsoft-old',

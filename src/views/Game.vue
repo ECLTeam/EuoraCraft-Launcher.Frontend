@@ -508,45 +508,19 @@
       @accountsChanged="account.loadAccounts"
     />
 
-    <Modal
-      v-model:visible="account.showMicrosoftLoginModal"
+    <MicrosoftLoginModal
+      :visible="account.showMicrosoftLoginModal"
       :parentId="accountModalRef?.modalId"
-      :title="t('game.login.title')"
-      :closable="false"
-      bodyClass="ms-login-body"
-      width="420px"
-    >
-      <div class="ms-login-content">
-        <div v-if="account.microsoftLoginStatus === 'pending'" class="ms-login-pending">
-          <NAlert type="info">{{ t('game.microsoftLoginHint') }}</NAlert>
-          <NButton block @click="account.openMicrosoftLoginPage">
-            <span class="ms-login-url">{{ account.microsoftLoginData.verificationUri }}</span>
-            <template #icon><UiIcon name="external-link" :size="14" /></template>
-          </NButton>
-          <NInput class="ms-code" readonly :value="account.microsoftLoginData.userCode" />
-          <NButton block @click="account.copyUserCode">
-            <template #icon>
-              <UiIcon :name="account.copiedUserCode ? 'check' : 'copy'" :size="14" />
-            </template>
-            {{ account.copiedUserCode ? t('game.login.copied') : t('game.login.copyCode') }}
-          </NButton>
-          <div class="ms-login-status">
-            <UiLoading mode="inline" size="sm" decorative />
-            <span>{{ t('game.login.autoDetecting') }}</span>
-          </div>
-        </div>
-        <div v-else-if="account.microsoftLoginStatus === 'loading'" class="ms-login-fetching">
-          <UiLoading mode="inline" size="sm" decorative />
-          <span>{{ t('game.login.fetching') }}</span>
-        </div>
-        <NAlert v-else-if="account.microsoftLoginStatus === 'error'" type="error">
-          {{ account.microsoftLoginError }}
-        </NAlert>
-      </div>
-      <template #footer>
-        <NButton @click="account.cancelMicrosoftLogin">{{ t('common.cancel') }}</NButton>
-      </template>
-    </Modal>
+      :status="account.microsoftLoginStatus"
+      :stage="account.microsoftLoginStage"
+      :userCode="account.microsoftLoginData.userCode || ''"
+      :verificationUri="account.microsoftLoginData.verificationUri || ''"
+      :copied="account.copiedUserCode"
+      :error="account.microsoftLoginError"
+      @cancel="account.cancelMicrosoftLogin"
+      @copyCode="account.copyUserCode"
+      @openBrowser="account.openMicrosoftLoginPage"
+    />
 
     <ConfirmDialog
       v-model:visible="account.showDeleteConfirmModal"
@@ -600,6 +574,7 @@ import { useRecentInstances, type RecentInstance } from '@/composables/useRecent
 import { useUiSkin } from '@/composables/useUiSkin'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
+import MicrosoftLoginModal from '@/features/accounts/components/MicrosoftLoginModal.vue'
 import WardrobeModal from '@/features/accounts/components/WardrobeModal.vue'
 import { useGameInfoCard } from '@/features/game-home/composables/useGameInfoCard'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
@@ -729,8 +704,8 @@ async function returnToAccountManagement() {
 }
 
 async function startMicrosoftFromAddModal() {
-  await account.startMicrosoftLogin()
-  if (account.showMicrosoftLoginModal) showAddAccountModal.value = false
+  const started = await account.startMicrosoftLogin()
+  if (started) showAddAccountModal.value = false
 }
 
 async function addOfflineFromModal() {

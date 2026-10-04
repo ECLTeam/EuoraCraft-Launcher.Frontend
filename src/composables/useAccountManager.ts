@@ -156,6 +156,7 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     verificationUri: '',
   })
   const microsoftLoginError = ref('')
+  let pendingMicrosoftLoginEvent: MicrosoftLoginStatusEvent | undefined
 
   const showDeleteConfirmModal = ref(false)
   const deletingAccount = ref(false)
@@ -378,8 +379,9 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
   }
 
   async function startMicrosoftLogin() {
-    if (!microsoftLoginConfig.value.available) return
+    if (!microsoftLoginConfig.value.available || startingMicrosoftLogin.value) return
     startingMicrosoftLogin.value = true
+    pendingMicrosoftLoginEvent = undefined
     microsoftLoginStage.value = 'waiting_authorization'
     let result: MicrosoftLoginData
     try {
@@ -396,20 +398,23 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     }
     if (result.status === 'completed') {
       message.success(t('game.login.success'))
-      await loadAccounts()
-      return
+      return true
     }
-    if (result.status === 'pending' || (result.verificationUri && result.userCode)) {
+    if (result.status === 'progress' || result.status === 'pending' || (result.verificationUri && result.userCode)) {
       microsoftLoginData.value = {
         userCode: result.userCode || '',
         verificationUri: result.verificationUri || '',
       }
-      microsoftLoginStatus.value = 'pending'
-      microsoftLoginStage.value = 'waiting_authorization'
+      microsoftLoginStatus.value = result.status === 'progress' ? 'loading' : 'pending'
+      microsoftLoginStage.value = result.stage || 'waiting_authorization'
       microsoftLoginError.value = ''
       showMicrosoftLoginModal.value = true
-      void openMicrosoftLoginPage()
-      return
+      if (pendingMicrosoftLoginEvent) {
+        await handleMicrosoftLoginStatus(pendingMicrosoftLoginEvent)
+        pendingMicrosoftLoginEvent = undefined
+      }
+      if (showMicrosoftLoginModal.value && microsoftLoginStatus.value === 'pending') void openMicrosoftLoginPage()
+      return true
     }
     message.error(result.message || t('game.login.failed'))
   }
@@ -470,14 +475,26 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
 
   async function openMicrosoftLoginPage() {
     const verificationUri = microsoftLoginData.value.verificationUri
+    const userCode = microsoftLoginData.value.userCode
     if (!verificationUri) return
     // 先复制授权码，稍作延迟再拉起浏览器，避免弹窗尚未呈现即被切换窗口。
     await copyUserCode()
     await new Promise((resolve) => setTimeout(resolve, 2000))
+    if (
+      !showMicrosoftLoginModal.value ||
+      microsoftLoginStatus.value !== 'pending' ||
+      microsoftLoginData.value.userCode !== userCode ||
+      microsoftLoginData.value.verificationUri !== verificationUri
+    )
+      return
     await openExternalUrl(verificationUri)
   }
 
   async function handleMicrosoftLoginStatus(event: MicrosoftLoginStatusEvent) {
+    if (startingMicrosoftLogin.value && !showMicrosoftLoginModal.value) {
+      pendingMicrosoftLoginEvent = event
+      return
+    }
     if (event.status === 'cancelled') {
       showMicrosoftLoginModal.value = false
       microsoftLoginStatus.value = 'pending'

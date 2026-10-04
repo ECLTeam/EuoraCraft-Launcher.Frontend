@@ -33,6 +33,7 @@ export const useAccountStore = defineStore('accounts', () => {
   const { status: authlibLoginConfigStatus, isLoading: isAuthlibLoginConfigLoading } = useAsyncState()
   const error = ref('')
   let loadPromise: Promise<void> | null = null
+  let reloadRequested = false
 
   function accountIdentity(account: MinecraftAccount): string {
     const accountUuid = account.uuid?.replaceAll('-', '').trim().toLowerCase()
@@ -61,19 +62,31 @@ export const useAccountStore = defineStore('accounts', () => {
   }
 
   async function load(force = false): Promise<void> {
+    if (loadPromise) {
+      if (force) reloadRequested = true
+      return loadPromise
+    }
     if (!force && status.value === 'ready') return
-    if (loadPromise) return loadPromise
 
     status.value = 'loading'
     error.value = ''
     const request = (async () => {
       try {
-        const result = await accountsApi.list()
-        const loadedAccounts = deduplicateAccounts(result.accounts ?? [], result.current?.id)
-        accounts.value = loadedAccounts
-        currentAccount.value = result.current
-          ? (loadedAccounts.find((account) => account.id === result.current?.id) ?? result.current)
-          : null
+        do {
+          reloadRequested = false
+          try {
+            const result = await accountsApi.list()
+            // 账户变更发生在旧请求途中时，丢弃旧快照并合并执行一次后续刷新。
+            if (reloadRequested) continue
+            const loadedAccounts = deduplicateAccounts(result.accounts ?? [], result.current?.id)
+            accounts.value = loadedAccounts
+            currentAccount.value = result.current
+              ? (loadedAccounts.find((account) => account.id === result.current?.id) ?? result.current)
+              : null
+          } catch (reason) {
+            if (!reloadRequested) throw reason
+          }
+        } while (reloadRequested)
         status.value = 'ready'
       } catch (reason) {
         status.value = 'error'
@@ -117,7 +130,7 @@ export const useAccountStore = defineStore('accounts', () => {
     return runAndReload(
       () => accountsApi.addAuthlib(serverUrl, email, password),
       async () => {
-        await Promise.all([load(), loadAuthlibServers(true)])
+        await Promise.all([load(true), loadAuthlibServers(true)])
       }
     )
   }
@@ -164,8 +177,10 @@ export const useAccountStore = defineStore('accounts', () => {
     return runAndReload(() => accountsApi.addPluginAccount(providerId, values))
   }
 
-  function startMicrosoftLogin(): Promise<MicrosoftLoginData> {
-    return accountsApi.startMicrosoftLogin()
+  async function startMicrosoftLogin(): Promise<MicrosoftLoginData> {
+    const result = await accountsApi.startMicrosoftLogin()
+    if (result.status === 'completed') await load(true)
+    return result
   }
 
   async function loadMicrosoftLoginConfig(): Promise<void> {
@@ -202,7 +217,7 @@ export const useAccountStore = defineStore('accounts', () => {
 
   async function completeMicrosoftLogin(): Promise<MicrosoftCompleteData> {
     const result = await accountsApi.completeMicrosoftLogin()
-    if (result.account) await load()
+    if (result.account) await load(true)
     return result
   }
 

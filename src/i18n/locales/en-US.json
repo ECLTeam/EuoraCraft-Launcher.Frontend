@@ -268,10 +268,21 @@
       "failed": "Login failed",
       "stage": {
         "authorization_confirmed": "Microsoft authorization confirmed",
-        "minecraft_token": "Getting the Minecraft token",
-        "profile": "Loading the game profile",
+        "minecraft_token": "Verifying Minecraft account",
+        "profile": "Reading Minecraft profile",
         "saving": "Saving the account",
-        "completed": "Account login complete"
+        "completed": "Account login complete",
+        "waiting_authorization": "Preparing sign-in"
+      },
+      "authorize": "Authorize in your browser",
+      "authorizationHint": "Complete Microsoft authorization in your browser. The launcher will continue automatically.",
+      "preparingHint": "Getting authorization details. Please wait.",
+      "processingHint": "Microsoft authorization is complete. Preparing your game account.",
+      "openBrowser": "Open authorization page",
+      "steps": {
+        "authorization": "Authorization",
+        "profile": "Read account",
+        "saving": "Save account"
       }
     },
     "showcase": {
