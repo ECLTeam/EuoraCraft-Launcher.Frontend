@@ -549,7 +549,7 @@ import {
   getPopularPage,
   getResourceSourceConfig,
   type DownloadResourceType,
-} from '@/features/download/model/downloadPrefetch'
+} from '@/features/download/model/downloadQueries'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { useModpackImportStore } from '@/features/instances/stores/modpackImportStore'

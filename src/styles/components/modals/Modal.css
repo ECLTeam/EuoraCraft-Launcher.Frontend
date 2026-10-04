@@ -14,8 +14,8 @@
   background: var(--card-bg);
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-dialog);
-  backdrop-filter: var(--ecl-surface-backdrop);
-  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
+  backdrop-filter: var(--ecl-overlay-backdrop);
+  -webkit-backdrop-filter: var(--ecl-overlay-backdrop);
   min-width: 324px;
   max-width: 90vw;
   max-height: 90vh;

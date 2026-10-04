@@ -396,7 +396,6 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       void useGameHomeStore()
         .load()
         .catch(() => undefined)
-      void backend.command('launcher_preload_connector').catch(() => undefined)
     }
     // 启动时同步一次积压错误；此后依赖 launcher:error 事件实时推送，低频轮询仅作兜底
     const pendingErrorTimer = window.setInterval(() => void syncPendingErrors(), 1_000)

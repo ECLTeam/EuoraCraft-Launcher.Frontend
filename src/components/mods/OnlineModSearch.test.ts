@@ -36,7 +36,7 @@ vi.mock('@/cache/composable', () => ({
 vi.mock('@/features/mods/api/modApi', () => ({
   modApi: { search: mocks.search, info: mocks.info, versions: mocks.versions },
 }))
-vi.mock('@/features/download/model/downloadPrefetch', () => ({
+vi.mock('@/features/download/model/downloadQueries', () => ({
   getPopularPage: mocks.popular,
   getResourceSourceConfig: async () => ({ curseforge: { available: true } }),
 }))

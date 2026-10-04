@@ -165,7 +165,6 @@ import { useFullscreenModal } from '@/composables/useFullscreenModal'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { useUserAgreement } from '@/composables/useUserAgreement'
-import { prefetchDownloadData } from '@/features/download/model/downloadPrefetch'
 import { useModpackImportStore, extractPackPath } from '@/features/instances/stores/modpackImportStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import UpdateResultModal from '@/features/settings/components/UpdateResultModal.vue'
@@ -361,41 +360,11 @@ provide('runtimeMode', appRuntime.runtimeMode)
 
 provide('agreementAccepted', readonly(isAgreementAccepted))
 
-// 根据当前语言选择 Naive UI 的 locale
-let runtimeReady = false
-let downloadPrefetchScheduled = false
-let downloadPrefetchTimer: ReturnType<typeof setTimeout> | null = null
-
-function scheduleDownloadPrefetch(): void {
-  if (
-    !runtimeReady ||
-    downloadPrefetchScheduled ||
-    !isAgreementAccepted.value ||
-    appRuntime.runtimeMode.value !== 'desktop' ||
-    appRuntime.isShowcaseMode.value
-  )
-    return
-  downloadPrefetchScheduled = true
-  downloadPrefetchTimer = setTimeout(() => {
-    downloadPrefetchTimer = null
-    if (!isAgreementAccepted.value) {
-      downloadPrefetchScheduled = false
-      return
-    }
-    void prefetchDownloadData().catch((error) => console.warn('[App] 下载页预取失败:', error))
-  }, 500)
-}
-
-onBeforeUnmount(() => {
-  if (downloadPrefetchTimer) clearTimeout(downloadPrefetchTimer)
-})
-
 const handleAgreementAccept = async () => {
   const success = await acceptUserAgreement()
   if (success) {
     showAgreementModal.value = false
     fullscreenModal.reset()
-    scheduleDownloadPrefetch()
   }
 }
 
@@ -416,8 +385,6 @@ onMounted(async () => {
   fullscreenModal.reset()
   try {
     await appRuntime.start()
-    runtimeReady = true
-    scheduleDownloadPrefetch()
   } catch (error) {
     console.error('[App] 应用运行层初始化失败:', error)
     notifyLauncherPopup({

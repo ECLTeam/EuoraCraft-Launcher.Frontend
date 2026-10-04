@@ -6,7 +6,8 @@
   --ecl-surface: rgba(255, 255, 255, calc(0.88 * var(--card-opacity, 1)));
   --ecl-surface-muted: rgba(248, 249, 252, calc(0.88 * var(--card-opacity, 1)));
   --ecl-control-surface: rgba(255, 255, 255, calc(0.94 * var(--card-opacity, 1)));
-  --ecl-surface-backdrop: blur(16px) saturate(1.2);
+  --ecl-surface-backdrop: none;
+  --ecl-overlay-backdrop: blur(16px) saturate(1.2);
   --ecl-text: #1d2433;
   --ecl-text-secondary: #596275;
   --ecl-text-tertiary: #8a94a8;

@@ -10,7 +10,6 @@
   display: none;
 }
 
-.n-card,
 .n-dialog,
 .n-popover,
 .n-popconfirm,
@@ -20,6 +19,11 @@
 .n-base-auto-complete-menu,
 .select-dropdown,
 .task-queue-wrapper {
+  backdrop-filter: var(--ecl-overlay-backdrop);
+  -webkit-backdrop-filter: var(--ecl-overlay-backdrop);
+}
+
+.n-card {
   backdrop-filter: var(--ecl-surface-backdrop);
   -webkit-backdrop-filter: var(--ecl-surface-backdrop);
 }
