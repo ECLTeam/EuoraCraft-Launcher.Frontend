@@ -39,16 +39,15 @@ describe('InstanceTerminalModule', () => {
     return mount(InstanceTerminalModule, { global: { plugins: [i18n] } })
   }
 
-  it('挂载时订阅实例事件并拉取快照，卸载时解除订阅', async () => {
+  it('展示模块不重复订阅或释放应用持有的进程会话', async () => {
     const wrapper = mountModule()
     await Promise.resolve()
-    expect(initSpy).toHaveBeenCalledTimes(1)
-    expect(mocks.on).toHaveBeenCalledWith('process:instance_log', expect.any(Function))
-    expect(mocks.on).toHaveBeenCalledWith('process:instances_changed', expect.any(Function))
-    expect(terminalMocks.getProcessInstances).toHaveBeenCalled()
+    expect(initSpy).not.toHaveBeenCalled()
+    expect(mocks.on).not.toHaveBeenCalled()
+    expect(terminalMocks.getProcessInstances).not.toHaveBeenCalled()
 
     wrapper.unmount()
-    expect(disposeSpy).toHaveBeenCalledTimes(1)
+    expect(disposeSpy).not.toHaveBeenCalled()
   })
 
   it('点击返回按钮触发 back 事件', async () => {

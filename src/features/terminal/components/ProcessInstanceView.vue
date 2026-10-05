@@ -1,7 +1,7 @@
 <template>
   <div class="piv">
     <UiEmptyState
-      v-if="instances.length === 0"
+      v-if="sessions.length === 0"
       icon="cpu"
       :title="t('terminal.instances.emptyTitle')"
       :description="t('terminal.instances.emptyDesc')"
@@ -10,15 +10,21 @@
       <!-- 左列：运行实例列表 -->
       <div class="piv-list">
         <button
-          v-for="item in instances"
-          :key="item.id"
+          v-for="item in sessions"
+          :key="item.processId"
           class="piv-item"
-          :class="{ 'piv-item--active': item.id === selectedId }"
-          @click="select(item.id)"
+          :class="{ 'piv-item--active': item.processId === selectedProcessId }"
+          @click="select(item.processId)"
         >
-          <span class="piv-item-dot" :class="{ 'piv-item-dot--stop': !item.running }" />
+          <span class="piv-item-dot" :class="{ 'piv-item-dot--stop': !item.isRunning }" />
           <span class="piv-item-name" :title="item.name">{{ item.name }}</span>
-          <span class="piv-item-type">{{ typeLabel(item.type) }}</span>
+          <span class="piv-item-type">{{
+            item.state === 'stopped'
+              ? t('terminal.instances.stopped')
+              : item.state === 'unknown'
+                ? t('terminal.instances.awaitingSnapshot')
+                : typeLabel(item.type)
+          }}</span>
         </button>
       </div>
 
@@ -34,7 +40,7 @@
               {{ line }}
             </div>
             <div v-if="selectedOutput.length === 0" class="piv-empty-output">
-              {{ activeInstance.running ? t('terminal.instances.selectHint') : t('terminal.instances.stopped') }}
+              {{ activeInstance.isRunning ? t('terminal.instances.selectHint') : t('terminal.instances.stopped') }}
             </div>
           </div>
 
@@ -42,7 +48,8 @@
             <button
               class="piv-btn piv-btn--stop"
               :title="t('terminal.instances.stop')"
-              :disabled="!activeInstance.running"
+              :aria-label="t('terminal.instances.stop')"
+              :disabled="!activeInstance.isRunning"
               @click="stopSelected"
             >
               <UiIcon name="stop" :size="15" />
@@ -52,10 +59,15 @@
                 v-model="inputText"
                 class="piv-input"
                 :placeholder="t('terminal.instances.inputPlaceholder')"
-                :disabled="!activeInstance.running"
+                :disabled="!activeInstance.isRunning"
                 @keydown.enter="onEnter"
               />
-              <button class="piv-btn piv-btn--primary" :disabled="!canSend" @click="onEnter">
+              <button
+                class="piv-btn piv-btn--primary"
+                :aria-label="t('terminal.instances.send')"
+                :disabled="!canSend"
+                @click="onEnter"
+              >
                 <UiIcon name="send" :size="15" />
               </button>
             </template>
@@ -77,7 +89,7 @@ defineOptions({ name: 'ProcessInstanceView' })
 
 const { t } = useI18n()
 const process = useProcessInstances()
-const { instances, selectedId, selectedOutput, select, sendInput, stop } = process
+const { sessions, selectedProcessId, selectedOutput, select, sendInput, stop } = process
 
 const activeInstance = computed(() => process.active())
 
@@ -87,7 +99,7 @@ let userScrolledAway = false
 
 const canSend = computed(() => {
   const instance = activeInstance.value
-  return !!instance && instance.stdin && instance.running && inputText.value.trim().length > 0
+  return !!instance && instance.stdin && instance.isRunning && inputText.value.trim().length > 0
 })
 
 function typeLabel(type: string): string {
@@ -97,14 +109,15 @@ function typeLabel(type: string): string {
 function onEnter(): void {
   if (!canSend.value) return
   const text = inputText.value.trim()
+  const processId = selectedProcessId.value
   void sendInput(text).then((sent) => {
-    if (sent) inputText.value = ''
+    if (sent && processId === selectedProcessId.value && inputText.value.trim() === text) inputText.value = ''
   })
 }
 
 function stopSelected(): void {
   const instance = activeInstance.value
-  if (instance) void stop(instance.id)
+  if (instance) void stop(instance.processId)
 }
 
 async function copyLine(line: string): Promise<void> {
@@ -121,8 +134,13 @@ function onScroll(): void {
   userScrolledAway = el.scrollHeight - el.scrollTop - el.clientHeight > 16
 }
 
+watch(selectedProcessId, () => {
+  inputText.value = ''
+  userScrolledAway = false
+})
+
 watch(
-  () => selectedOutput.value.length + (selectedId.value ?? ''),
+  () => selectedOutput.value.length + (selectedProcessId.value ?? ''),
   async () => {
     if (userScrolledAway) return
     await nextTick()

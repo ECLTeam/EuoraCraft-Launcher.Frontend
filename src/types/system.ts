@@ -155,6 +155,13 @@ export interface ProcessInstance {
   lines: string[]
 }
 
+/** 终端会话记录，生命周期独立于后端存活进程快照。 */
+export interface TerminalSession extends Omit<ProcessInstance, 'id' | 'running' | 'lines'> {
+  readonly processId: string
+  isRunning: boolean
+  state: 'unknown' | 'running' | 'stopped'
+}
+
 /** 实时推送的某实例单行输出 */
 
 export type LauncherPopupLevel = 'info' | 'warning' | 'critical'

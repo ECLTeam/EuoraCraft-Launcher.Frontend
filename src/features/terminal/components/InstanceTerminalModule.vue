@@ -18,19 +18,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiIcon from '@/components/ui/Icon.vue'
-import { globalProcessInstances } from '../composables/useProcessInstances'
 import ProcessInstanceView from './ProcessInstanceView.vue'
 
 defineOptions({ name: 'InstanceTerminalModule' })
 
 const emit = defineEmits<{ (e: 'back'): void }>()
 const { t } = useI18n()
-
-onMounted(() => globalProcessInstances.init())
-onUnmounted(() => globalProcessInstances.dispose())
 </script>
 
 <style scoped>

@@ -6,9 +6,14 @@ import ProcessInstanceView from './ProcessInstanceView.vue'
 vi.mock('@/api/client', () => ({ default: { on: vi.fn(() => vi.fn()) } }))
 vi.mock('../api/terminalApi', () => ({ terminalApi: {} }))
 
-afterEach(() => useProcessInstances().syncList([]))
+afterEach(() => {
+  const state = useProcessInstances()
+  state.sessions.value = []
+  state.outputByProcessId.value = {}
+  state.selectedProcessId.value = null
+})
 
-it('空实例只显示统一占位，实例进入和退出后正确恢复布局', async () => {
+it('空态显示统一占位，退出后保留输出并禁用进程控制', async () => {
   const process = useProcessInstances()
   const wrapper = mount(ProcessInstanceView, { global: { plugins: [i18n] } })
   expect(wrapper.findAll('[role="status"]')).toHaveLength(1)
@@ -17,10 +22,13 @@ it('空实例只显示统一占位，实例进入和退出后正确恢复布局'
   process.syncList([{ id: 'test', pid: 123, name: 'test', type: 'Minecraft', running: true, stdin: false, lines: [] }])
   await flushPromises()
   expect(wrapper.find('.piv-list').exists()).toBe(true)
-  expect(wrapper.find('.piv-hint').exists()).toBe(true)
+  expect(wrapper.find('.piv-output').exists()).toBe(true)
+  process.onLog({ instanceId: 'test', name: 'test', type: 'Minecraft', line: 'final output' })
   process.syncList([])
   await flushPromises()
-  expect(wrapper.findAll('[role="status"]')).toHaveLength(1)
-  expect(wrapper.find('.piv-main').exists()).toBe(false)
+  expect(wrapper.find('.piv-main').exists()).toBe(true)
+  expect(wrapper.text()).toContain('final output')
+  expect(wrapper.text()).toContain('已停止')
+  expect(wrapper.get('.piv-btn--stop').attributes('disabled')).toBeDefined()
   wrapper.unmount()
 })

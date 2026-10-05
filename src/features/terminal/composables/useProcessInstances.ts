@@ -1,124 +1,173 @@
 import { computed, ref } from 'vue'
 import backend from '@/api/client'
-import type { ProcessInstance, ProcessLogEntry } from '@/types/system'
+import type { ProcessInstance, ProcessLogEntry, TerminalSession } from '@/types/system'
 import { terminalApi } from '../api/terminalApi'
 
-/** 单实例输出环形缓冲上限，与全局日志 MAX_LINES 保持一致 */
-const INSTANCE_LINE_LIMIT = 300
-
-/** 后端登记的子进程实例列表（仅存活实例，退出即移除） */
-const instances = ref<ProcessInstance[]>([])
-/** 每实例实时输出缓冲，实例退出后保留选中实例直到切换，避免过早丢历史 */
-const outputs = ref<Record<string, string[]>>({})
-/** 当前选中的实例标识 */
-const selectedId = ref<string | null>(null)
-/** 正在从后端拉取实例快照 */
+const sessionLineLimit = 300
+const stoppedSessionLimit = 20
+const sessions = ref<TerminalSession[]>([])
+const outputByProcessId = ref<Record<string, string[]>>({})
+const selectedProcessId = ref<string | null>(null)
 const loading = ref(false)
+const stoppedOrderById = new Map<string, number>()
+const evictedProcessIds: string[] = []
+let stoppedOrder = 0
+let initialized = false
+let generation = 0
+let snapshotRevision = 0
+let refreshRevision = 0
+let offLog: (() => void) | null = null
+let offChanged: (() => void) | null = null
 
-/**
- * 子进程实例终端状态控制器。
- *
- * 与悬浮窗组件同生命周期在 App 根部实例化：订阅 ``process:instance_log``
- * 与 ``process:instances_changed`` 事件维护实例列表与输出缓冲，供实例视图驱动。
- *
- * @return: 实例列表、选中态、输出与动作集合
- */
-export function useProcessInstances() {
-  function trim(lines: string[]): void {
-    if (lines.length > INSTANCE_LINE_LIMIT) lines.splice(0, lines.length - INSTANCE_LINE_LIMIT)
-  }
+function trim(lines: string[]): void {
+  if (lines.length > sessionLineLimit) lines.splice(0, lines.length - sessionLineLimit)
+}
 
-  function onLog(entry: ProcessLogEntry): void {
-    if (!outputs.value[entry.instanceId]) outputs.value[entry.instanceId] = []
-    const lines = outputs.value[entry.instanceId]!
-    lines.push(entry.line)
-    trim(lines)
-  }
-
-  function syncList(list: ProcessInstance[]): void {
-    const incoming = new Set(list.map((item) => item.id))
-    instances.value = list
-    for (const item of list) {
-      if (!outputs.value[item.id]) outputs.value[item.id] = item.lines ? [...item.lines] : []
-    }
-    // 回收已退出且非选中的实例输出，避免无界增长
-    for (const id of Object.keys(outputs.value)) {
-      if (!incoming.has(id) && id !== selectedId.value) delete outputs.value[id]
-    }
-    if (selectedId.value && !incoming.has(selectedId.value)) selectedId.value = null
-  }
-
-  async function refresh(): Promise<void> {
-    loading.value = true
-    try {
-      const list = await terminalApi.getProcessInstances()
-      syncList(list)
-      if (!selectedId.value && list.length > 0) selectedId.value = list[0]!.id
-    } finally {
-      loading.value = false
-    }
-  }
-
-  function select(id: string): void {
-    selectedId.value = id
-  }
-
-  function active() {
-    return instances.value.find((item) => item.id === selectedId.value) ?? null
-  }
-
-  const selectedOutput = computed<string[]>(() => {
-    if (!selectedId.value) return []
-    return outputs.value[selectedId.value] ?? []
-  })
-
-  async function sendInput(text: string): Promise<boolean> {
-    const instance = active()
-    if (!instance || !instance.stdin || !instance.running) return false
-    return terminalApi.sendProcessInput(instance.id, text)
-  }
-
-  async function stop(id: string, force = false): Promise<void> {
-    await terminalApi.stopProcess(id, force)
-  }
-
-  let offLog: (() => void) | null = null
-  let offChanged: (() => void) | null = null
-
-  /** 订阅实例事件并拉取首帧快照，由宿主组件在 onMounted 调用 */
-  function init(): void {
-    offLog?.()
-    offChanged?.()
-    offLog = backend.on('process:instance_log', onLog)
-    offChanged = backend.on('process:instances_changed', (list) => syncList(list))
-    void refresh()
-  }
-
-  /** 解除事件订阅并清理内部状态，由宿主组件在 onUnmounted 调用 */
-  function dispose(): void {
-    offLog?.()
-    offChanged?.()
-    offLog = null
-    offChanged = null
-  }
-
-  return {
-    instances,
-    outputs,
-    selectedId,
-    loading,
-    selectedOutput,
-    onLog,
-    syncList,
-    refresh,
-    select,
-    active,
-    sendInput,
-    stop,
-    init,
-    dispose,
+function reclaimStoppedSessions(): void {
+  const stopped = sessions.value
+    .filter((session) => session.state !== 'running')
+    .sort((a, b) => (stoppedOrderById.get(a.processId) ?? 0) - (stoppedOrderById.get(b.processId) ?? 0))
+  let excess = stopped.length - stoppedSessionLimit
+  for (const session of stopped) {
+    if (excess <= 0) break
+    if (session.processId === selectedProcessId.value) continue
+    sessions.value = sessions.value.filter((item) => item.processId !== session.processId)
+    delete outputByProcessId.value[session.processId]
+    stoppedOrderById.delete(session.processId)
+    evictedProcessIds.push(session.processId)
+    if (evictedProcessIds.length > 64) evictedProcessIds.shift()
+    excess--
   }
 }
 
-/** 悬浮窗根部实例的模块级单例 */
-export const globalProcessInstances = useProcessInstances()
+function onLog(entry: ProcessLogEntry): void {
+  if (evictedProcessIds.includes(entry.instanceId)) return
+  if (!sessions.value.some((session) => session.processId === entry.instanceId)) {
+    stoppedOrderById.set(entry.instanceId, ++stoppedOrder)
+    sessions.value.push({
+      processId: entry.instanceId,
+      name: entry.name,
+      type: entry.type,
+      pid: null,
+      stdin: false,
+      isRunning: false,
+      state: 'unknown',
+    })
+  }
+  const lines = outputByProcessId.value[entry.instanceId] ?? (outputByProcessId.value[entry.instanceId] = [])
+  lines.push(entry.line)
+  trim(lines)
+  reclaimStoppedSessions()
+}
+
+function syncList(list: ProcessInstance[]): void {
+  snapshotRevision++
+  const byId = new Map(sessions.value.map((session) => [session.processId, session]))
+  const incoming = new Set(list.map((item) => item.id))
+  for (const item of list) {
+    byId.set(item.id, {
+      processId: item.id,
+      name: item.name,
+      type: item.type,
+      pid: item.pid,
+      stdin: item.stdin,
+      isRunning: item.running,
+      state: item.running ? 'running' : 'stopped',
+    })
+    if (!outputByProcessId.value[item.id]) {
+      outputByProcessId.value[item.id] = [...item.lines]
+      trim(outputByProcessId.value[item.id]!)
+    }
+    if (item.running) stoppedOrderById.delete(item.id)
+  }
+  for (const session of byId.values()) {
+    if (!incoming.has(session.processId)) {
+      session.isRunning = false
+      session.state = 'stopped'
+    }
+    if (session.state === 'stopped' && !stoppedOrderById.has(session.processId))
+      stoppedOrderById.set(session.processId, ++stoppedOrder)
+  }
+  sessions.value = [...byId.values()]
+  reclaimStoppedSessions()
+  if (!selectedProcessId.value && sessions.value.length) selectedProcessId.value = sessions.value[0]!.processId
+}
+
+async function refresh(): Promise<void> {
+  const requestGeneration = generation
+  const listRevision = snapshotRevision
+  const requestRevision = ++refreshRevision
+  loading.value = true
+  try {
+    const list = await terminalApi.getProcessInstances()
+    if (requestGeneration === generation && requestRevision === refreshRevision && listRevision === snapshotRevision)
+      syncList(list)
+  } finally {
+    if (requestGeneration === generation && requestRevision === refreshRevision) loading.value = false
+  }
+}
+
+function select(processId: string): void {
+  if (sessions.value.some((session) => session.processId === processId)) selectedProcessId.value = processId
+  reclaimStoppedSessions()
+}
+function active(): TerminalSession | null {
+  return sessions.value.find((item) => item.processId === selectedProcessId.value) ?? null
+}
+const selectedOutput = computed(() =>
+  selectedProcessId.value ? (outputByProcessId.value[selectedProcessId.value] ?? []) : []
+)
+
+async function sendInput(text: string): Promise<boolean> {
+  const session = active()
+  if (!session?.stdin || !session.isRunning) return false
+  return terminalApi.sendProcessInput(session.processId, text)
+}
+async function stop(processId: string, force = false): Promise<void> {
+  if (sessions.value.find((session) => session.processId === processId)?.state === 'stopped') return
+  await terminalApi.stopProcess(processId, force)
+}
+
+function init(): void {
+  if (initialized) return
+  initialized = true
+  const currentGeneration = ++generation
+  offLog = backend.on('process:instance_log', (entry) => {
+    if (initialized && generation === currentGeneration) onLog(entry)
+  })
+  offChanged = backend.on('process:instances_changed', (list) => {
+    if (initialized && generation === currentGeneration) syncList(list)
+  })
+  void refresh().catch((error) => console.warn('读取进程会话失败', error))
+}
+function dispose(): void {
+  generation++
+  initialized = false
+  offLog?.()
+  offChanged?.()
+  offLog = null
+  offChanged = null
+  loading.value = false
+}
+
+const controller = {
+  sessions,
+  outputByProcessId,
+  selectedProcessId,
+  loading,
+  selectedOutput,
+  onLog,
+  syncList,
+  refresh,
+  select,
+  active,
+  sendInput,
+  stop,
+  init,
+  dispose,
+}
+/** 应用会话中的终端控制器；运行快照消失后保留有界的已退出会话。 */
+export function useProcessInstances() {
+  return controller
+}
+export const globalProcessInstances = controller

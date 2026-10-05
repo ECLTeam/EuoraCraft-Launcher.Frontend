@@ -16,6 +16,7 @@ import { useApplicationOperationStore } from '@/features/operations/stores/appli
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
+import { globalProcessInstances } from '@/features/terminal/composables/useProcessInstances'
 import { i18n, supportedLocales } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
@@ -212,6 +213,8 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   }
 
   function registerBackendEvents(): void {
+    globalProcessInstances.init()
+    cleanupCallbacks.push(globalProcessInstances.dispose)
     const connector = useConnector({ onError: (error) => options.message.error(error) })
     cleanupCallbacks.push(connector.dispose)
     const operationStore = useApplicationOperationStore()
