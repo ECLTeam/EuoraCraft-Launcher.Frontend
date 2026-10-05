@@ -33,6 +33,22 @@ const plugin = {
 }
 
 describe('pluginStore', () => {
+  it('同一插件的重复或冲突动作返回 skipped，不产生第二次执行', async () => {
+    let finish!: () => void
+    vi.mocked(pluginManagementApi.reload).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve
+        })
+    )
+    const store = usePluginStore()
+    const first = store.reload('demo')
+    await expect(store.reload('demo')).resolves.toEqual({ status: 'skipped' })
+    await expect(store.toggle(plugin)).resolves.toEqual({ status: 'skipped' })
+    expect(pluginManagementApi.disable).not.toHaveBeenCalled()
+    finish()
+    await expect(first).resolves.toEqual({ status: 'success', value: undefined })
+  })
   it('插件变更发生在旧列表加载期间时，丢弃旧结果并完成后续刷新', async () => {
     let finish!: (value: Array<typeof plugin>) => void
     vi.mocked(pluginManagementApi.list).mockImplementationOnce(

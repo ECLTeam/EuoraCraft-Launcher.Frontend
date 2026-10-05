@@ -165,7 +165,7 @@ import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
 
 const { t } = useI18n()
 const { isFolia } = useUiSkin()
-const { run } = useAsyncAction({ showSuccess: false, showError: false })
+const { run, runResult } = useAsyncAction({ showSuccess: false, showError: false })
 const pluginStore = usePluginStore()
 const { plugins, loading, reloadingPlugins } = storeToRefs(pluginStore)
 const searchQuery = ref('')
@@ -228,7 +228,7 @@ function pluginDescription(plugin: PluginInfo): string {
 
 async function togglePlugin(plugin: PluginInfo) {
   const action = plugin.status === 'enabled' ? 'disable' : 'enable'
-  await run(async () => pluginStore.toggle(plugin), {
+  await runResult(async () => pluginStore.toggle(plugin), {
     showSuccess: true,
     successMessage: t(`plugins.${action}Success`, { name: plugin.title || plugin.name }),
     showError: true,
@@ -238,7 +238,7 @@ async function togglePlugin(plugin: PluginInfo) {
 
 async function reloadPlugin(plugin: PluginInfo) {
   if (reloadingPlugins.value.includes(plugin.name)) return
-  await run(async () => pluginStore.reload(plugin.name), {
+  await runResult(async () => pluginStore.reload(plugin.name), {
     showSuccess: true,
     successMessage: t('plugins.reloadSuccess', { name: plugin.title || plugin.name }),
     showError: true,
@@ -247,7 +247,7 @@ async function reloadPlugin(plugin: PluginInfo) {
 }
 
 async function unloadPlugin(plugin: PluginInfo) {
-  await run(async () => pluginStore.unload(plugin.name), {
+  await runResult(async () => pluginStore.unload(plugin.name), {
     showSuccess: true,
     successMessage: t('plugins.unloadSuccess', { name: plugin.title || plugin.name }),
     showError: true,

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import type { ActionResult } from '@/composables/useAsyncAction'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type {
   PluginInfo,
@@ -58,28 +59,31 @@ export const usePluginStore = defineStore('plugins', () => {
     return request
   }
 
-  async function runOperation(operation: string, action: () => Promise<void>): Promise<void> {
-    if (activeOperations.value.includes(operation)) return
+  async function runOperation<T>(operation: string, action: () => Promise<T>): Promise<ActionResult<T>> {
+    const pluginName = operation.slice(operation.indexOf(':') + 1)
+    if (activeOperations.value.some((active) => active.slice(active.indexOf(':') + 1) === pluginName))
+      return { status: 'skipped' }
     activeOperations.value = [...activeOperations.value, operation]
     try {
-      await action()
+      const value = await action()
       isListStale.value = true
       await load(true)
+      return { status: 'success', value }
     } finally {
       activeOperations.value = activeOperations.value.filter((item) => item !== operation)
     }
   }
 
-  function toggle(plugin: PluginInfo): Promise<void> {
+  function toggle(plugin: PluginInfo): Promise<ActionResult<void>> {
     const action = plugin.status === 'enabled' ? pluginManagementApi.disable : pluginManagementApi.enable
     return runOperation(`toggle:${plugin.name}`, () => action(plugin.name))
   }
 
-  function reload(pluginName: string): Promise<void> {
+  function reload(pluginName: string): Promise<ActionResult<void>> {
     return runOperation(`reload:${pluginName}`, () => pluginManagementApi.reload(pluginName))
   }
 
-  function unload(pluginName: string): Promise<void> {
+  function unload(pluginName: string): Promise<ActionResult<void>> {
     return runOperation(`unload:${pluginName}`, () => pluginManagementApi.unload(pluginName))
   }
 
@@ -99,11 +103,10 @@ export const usePluginStore = defineStore('plugins', () => {
     selection: PluginPackageSelection,
     options: { allowNetwork: boolean }
   ): Promise<PluginPackageInstallResult | undefined> {
-    let result: PluginPackageInstallResult | undefined
-    await runOperation(`install:${selection.preflight.package.name}`, async () => {
-      result = await pluginManagementApi.installPackage(selection.path, options)
-    })
-    return result
+    const result = await runOperation(`install:${selection.preflight.package.name}`, () =>
+      pluginManagementApi.installPackage(selection.path, options)
+    )
+    return result.status === 'success' ? result.value : undefined
   }
 
   async function getSettings(pluginName: string): Promise<PluginSettingsData> {
