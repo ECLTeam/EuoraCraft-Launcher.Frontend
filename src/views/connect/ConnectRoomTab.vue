@@ -1,6 +1,6 @@
 <template>
-  <div class="connect-page">
-    <section class="connect-workspace">
+  <div class="connect-page workspace-page">
+    <section class="connect-workspace workspace-shell">
       <div class="connect-workspace__body">
         <div v-if="flowDebug" class="connect-debug-bar">
           <span class="connect-debug-bar__label">
@@ -45,7 +45,7 @@
         </div>
 
         <div
-          class="connect-scroll-area"
+          class="connect-scroll-area workspace-scroll-area"
           :class="{ 'connect-room-container': displayStatus.mode === 'host' || displayStatus.mode === 'guest' }"
         >
           <Transition name="page" mode="out-in">
@@ -410,6 +410,7 @@ const roomCodeField = ref<HTMLDivElement>()
 const runningInstances = ref<GameInstance[]>([])
 let unsubscribeRunning: (() => void) | null = null
 
+const connector = useConnectorContext()
 const {
   availability,
   status,
@@ -425,7 +426,8 @@ const {
   startPortScan,
   stopPortScan,
   refreshStatus,
-} = useConnectorContext()
+} = connector
+const { initialize } = connector
 
 function openConnectorSettings() {
   if (busy.value || status.value.mode === 'starting') return
@@ -612,13 +614,17 @@ watch(
 )
 
 onMounted(() => {
+  void initialize()
   void loadRunningInstances()
   unsubscribeRunning = instanceRuntimeApi.onChanged(() => void loadRunningInstances())
 })
 
 onUnmounted(() => {
+  stopPortScan()
   unsubscribeRunning?.()
 })
 </script>
 
 <style scoped src="@/styles/views/Connect.css"></style>
+
+<style scoped src="@/styles/views/Workspace.css"></style>

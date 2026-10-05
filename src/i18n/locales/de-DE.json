@@ -1,9 +1,5 @@
 {
-  "app": {
-    "title": "EuoraCraft Launcher",
-    "loading": "Wird geladen...",
-    "delete": "Löschen"
-  },
+  "app": { "title": "EuoraCraft Launcher", "loading": "Wird geladen...", "delete": "Löschen" },
   "sidebar": {
     "toggle": "Seitenleiste umschalten",
     "collapse": "Seitenleiste einklappen",
@@ -20,71 +16,12 @@
   },
   "connect": {
     "description": "Erstelle einen Mehrspieler-Raum für Minecraft oder tritt einem bei",
-    "nav": {
-      "room": "Verbindung",
-      "plugins": "Plugins",
-      "tools": "Werkzeuge"
-    },
     "copy": "Kopieren",
     "copied": "In die Zwischenablage kopiert",
     "unavailable": {
       "title": "Der Mehrspieler-Dienst ist noch nicht verfügbar",
       "description": "Die Oberfläche ist bereit und wartet auf die IPC-Schnittstelle des Mehrspieler-Backends.",
       "retry": "Erneut verbinden"
-    },
-    "nat": {
-      "detect": "NAT-Erkennung",
-      "resultTitle": "Ergebnis der NAT-Erkennung",
-      "cone": "Vollständiger Cone",
-      "symmetric": "Streng symmetrisch",
-      "blocked": "Nicht durchlässig",
-      "unknown": "Typ unbekannt",
-      "openInternet": "Direkte Internetverbindung",
-      "noPat": "Öffentliche Adresse (keine Portübersetzung)",
-      "fullCone": "Full-Cone-NAT",
-      "restricted": "Restricted-Cone-NAT",
-      "portRestricted": "Port-restricted-Cone-NAT",
-      "symmetricEasy": "Einfach vorhersagbares symmetrisches NAT",
-      "symmetricFirewall": "Symmetrische UDP-Firewall",
-      "udpBlocked": "UDP nicht verfügbar",
-      "ipv6Available": "Öffentliches IPv6 verfügbar"
-    },
-    "tools": {
-      "natCardTitle": "NAT-Typ ermitteln",
-      "detecting": "Netzwerktyp wird ermittelt...",
-      "detectFailed": "Ermittlung fehlgeschlagen",
-      "idleTitle": "Noch nicht ermittelt",
-      "publicAddress": "Öffentliche Adresse",
-      "notObtained": "Nicht ermittelt",
-      "unknownType": "Typ nicht bestimmbar",
-      "ipv6Detected": "Öffentliches IPv6 erkannt",
-      "ipv6NotDetected": "Kein öffentliches IPv6 erkannt",
-      "timeout": "Zeitüberschreitung. Netzwerk prüfen und erneut versuchen.",
-      "busy": "Eine Prüfung läuft bereits. Bitte später erneut versuchen.",
-      "probeFailed": "Netzwerkprüfung fehlgeschlagen. Bitte erneut versuchen.",
-      "downloadOptions": "Downloadoptionen",
-      "downloadNameSummary": "Dateiname: {name}",
-      "natDetails": "Erkennungsdetails",
-      "skinAvatar": {
-        "title": "Skin-Avatar zuschneiden",
-        "choose": "Skin-PNG auswählen",
-        "hint": "Minecraft-Skin als PNG auswählen, um das Gesicht als Avatar zu exportieren.",
-        "preview": "Avatar-Vorschau",
-        "settings": "Exporteinstellungen",
-        "includeHat": "Hutebene einbeziehen",
-        "size": "Ausgabegröße",
-        "hatOn": "Hutebene an",
-        "hatOff": "Hutebene aus",
-        "summary": "{size} × {size} · {hat}",
-        "export": "PNG exportieren",
-        "saved": "Avatar exportiert",
-        "invalidPng": "Bitte eine gültige Skin-PNG auswählen",
-        "invalidDimensions": "Die Breite muss ein Vielfaches von 64 sein; die Höhe entspricht der Breite oder ihrer Hälfte, maximal 1024×1024",
-        "tooLarge": "Skin-Dateien dürfen 5 MiB nicht überschreiten",
-        "decodeFailed": "Das Skin-Bild ist beschädigt oder kann nicht dekodiert werden",
-        "sourceConflict": "Der Avatar darf den ursprünglichen Skin nicht ersetzen. Bitte einen anderen Dateinamen wählen",
-        "invalidExtension": "Bitte einen Dateinamen mit der Endung .png wählen"
-      }
     },
     "create": {
       "tab": "Raum erstellen",
@@ -183,9 +120,7 @@
       "game": "Spielversion",
       "creator": "Ersteller"
     },
-    "roomActions": {
-      "title": "Raumaktionen"
-    }
+    "roomActions": { "title": "Raumaktionen" }
   },
   "game": {
     "title": "Spiel",
@@ -302,11 +237,7 @@
       "preparingHint": "Autorisierungsdetails werden geladen. Bitte warten.",
       "processingHint": "Microsoft-Autorisierung abgeschlossen. Dein Spielkonto wird vorbereitet.",
       "openBrowser": "Autorisierungsseite öffnen",
-      "steps": {
-        "authorization": "Autorisierung",
-        "profile": "Konto laden",
-        "saving": "Konto speichern"
-      }
+      "steps": { "authorization": "Autorisierung", "profile": "Konto laden", "saving": "Konto speichern" }
     },
     "showcase": {
       "title": "Demomodus",
@@ -1232,11 +1163,7 @@
       "suspectedMods": "Verdächtige Mods",
       "suggestions": "Empfohlene Maßnahmen",
       "genericSuggestion": "Exportiere den Absturzbericht und untersuche zusammen mit den vollständigen Protokollen weitere Ursachen.",
-      "confidence": {
-        "certain": "Hohe Sicherheit",
-        "likely": "Wahrscheinlich",
-        "possible": "Möglich"
-      },
+      "confidence": { "certain": "Hohe Sicherheit", "likely": "Wahrscheinlich", "possible": "Möglich" },
       "viewOutput": "Ausgabe anzeigen",
       "hideOutput": "Ausgabe ausblenden",
       "output": "Spielausgabe",
@@ -1590,19 +1517,9 @@
     "pleaseAccept": "Bitte akzeptiere zuerst die Nutzungsvereinbarung, um Funktionen zu nutzen",
     "acceptRequired": "Bitte akzeptiere zuerst die Nutzungsvereinbarung"
   },
-  "modal": {
-    "confirm": "Bestätigen",
-    "cancel": "Abbrechen",
-    "ok": "OK",
-    "agree": "Zustimmen",
-    "disagree": "Ablehnen"
-  },
-  "launch": {
-    "title": "Instanz starten"
-  },
-  "launcherPopup": {
-    "doNotShowAgain": "Nicht mehr anzeigen"
-  },
+  "modal": { "confirm": "Bestätigen", "cancel": "Abbrechen", "ok": "OK", "agree": "Zustimmen", "disagree": "Ablehnen" },
+  "launch": { "title": "Instanz starten" },
+  "launcherPopup": { "doNotShowAgain": "Nicht mehr anzeigen" },
   "dev": {
     "title": "Komponenten-Debug-Werkzeuge",
     "desc": "Klicke auf die Schaltflächen unten, um die Komponenten zu testen",
@@ -1954,37 +1871,11 @@
     "dropHint": "Loslassen, um das Modpaket zu importieren"
   },
   "advanced": {
-    "downloadTitle": "Benutzerdefinierter Download",
-    "downloadUrl": "Download-URL",
-    "downloadFolder": "Downloadordner",
-    "downloadNaming": "Dateiname beim Speichern",
-    "downloadOriginalName": "Originaldateiname",
-    "downloadCustomName": "Eigener Name",
-    "downloadFileName": "Dateiname",
-    "downloadFileNameHint": "Wird genau wie eingegeben gespeichert; gewünschte Dateiendung angeben",
-    "downloadOriginalHint": "Erwarteter Dateiname: {name}; der Server kann einen anderen Namen angeben",
-    "downloadOriginalRule": "Dateiname vom Server verwenden, sonst den Namen aus der Download-URL",
-    "downloadAdvanced": "Erweiterte Einstellungen",
-    "downloadUserAgent": "User-Agent (leer für Standardwert)",
-    "downloadHeaders": "Weitere HTTP-Header",
-    "downloadAddHeader": "Header hinzufügen",
-    "downloadHeaderName": "Headername",
-    "downloadHeaderValue": "Headerwert",
-    "downloadHeadersHint": "Header bleiben nur in dieser Sitzung und werden nicht im Aufgabenprotokoll gespeichert.",
-    "downloadInvalidName": "Einen gültigen einzelnen Dateinamen mit gewünschter Endung eingeben",
-    "downloadInvalidHeaders": "Ungültige, doppelte oder zu große HTTP-Header",
-    "downloadUaHeader": "User-Agent im UA-Feld einstellen",
-    "downloadOverwrite": "Vorhandene Dateien überschreiben (Original bei Fehler behalten)",
-    "downloadStart": "Download starten",
     "nodesTitle": "Mehrspieler",
     "nodesEntry": "Mehrspieler-Einstellungen",
     "nodesPolicy": "Knotenauswahl",
     "nodesAddresses": "Eigene Knotenadressen",
-    "nodesMode": {
-      "automatic": "Automatisch",
-      "append": "Öffentliche und eigene",
-      "custom": "Nur eigene"
-    }
+    "nodesMode": { "automatic": "Automatisch", "append": "Öffentliche und eigene", "custom": "Nur eigene" }
   },
   "operations": {
     "unknown": "Hintergrundaufgabe",
@@ -2006,5 +1897,85 @@
     "submitted": "Übermittelt. Das Ergebnis steht in der Aufgabenliste.",
     "retryOriginal": "Vorherigen Download wiederholen",
     "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe."
+  },
+  "more": { "nav": { "room": "Verbindung", "plugins": "Plugins", "tools": "Werkzeuge" } },
+  "tools": {
+    "natCardTitle": "NAT-Typ ermitteln",
+    "detecting": "Netzwerktyp wird ermittelt...",
+    "detectFailed": "Ermittlung fehlgeschlagen",
+    "idleTitle": "Noch nicht ermittelt",
+    "publicAddress": "Öffentliche Adresse",
+    "notObtained": "Nicht ermittelt",
+    "unknownType": "Typ nicht bestimmbar",
+    "ipv6Detected": "Öffentliches IPv6 erkannt",
+    "ipv6NotDetected": "Kein öffentliches IPv6 erkannt",
+    "timeout": "Zeitüberschreitung. Netzwerk prüfen und erneut versuchen.",
+    "busy": "Eine Prüfung läuft bereits. Bitte später erneut versuchen.",
+    "probeFailed": "Netzwerkprüfung fehlgeschlagen. Bitte erneut versuchen.",
+    "downloadOptions": "Downloadoptionen",
+    "downloadNameSummary": "Dateiname: {name}",
+    "natDetails": "Erkennungsdetails",
+    "skinAvatar": {
+      "title": "Skin-Avatar zuschneiden",
+      "choose": "Skin-PNG auswählen",
+      "hint": "Minecraft-Skin als PNG auswählen, um das Gesicht als Avatar zu exportieren.",
+      "preview": "Avatar-Vorschau",
+      "settings": "Exporteinstellungen",
+      "includeHat": "Hutebene einbeziehen",
+      "size": "Ausgabegröße",
+      "hatOn": "Hutebene an",
+      "hatOff": "Hutebene aus",
+      "summary": "{size} × {size} · {hat}",
+      "export": "PNG exportieren",
+      "saved": "Avatar exportiert",
+      "invalidPng": "Bitte eine gültige Skin-PNG auswählen",
+      "invalidDimensions": "Die Breite muss ein Vielfaches von 64 sein; die Höhe entspricht der Breite oder ihrer Hälfte, maximal 1024×1024",
+      "tooLarge": "Skin-Dateien dürfen 5 MiB nicht überschreiten",
+      "decodeFailed": "Das Skin-Bild ist beschädigt oder kann nicht dekodiert werden",
+      "sourceConflict": "Der Avatar darf den ursprünglichen Skin nicht ersetzen. Bitte einen anderen Dateinamen wählen",
+      "invalidExtension": "Bitte einen Dateinamen mit der Endung .png wählen"
+    },
+    "nat": {
+      "detect": "NAT-Erkennung",
+      "resultTitle": "Ergebnis der NAT-Erkennung",
+      "cone": "Vollständiger Cone",
+      "symmetric": "Streng symmetrisch",
+      "blocked": "Nicht durchlässig",
+      "unknown": "Typ unbekannt",
+      "openInternet": "Direkte Internetverbindung",
+      "noPat": "Öffentliche Adresse (keine Portübersetzung)",
+      "fullCone": "Full-Cone-NAT",
+      "restricted": "Restricted-Cone-NAT",
+      "portRestricted": "Port-restricted-Cone-NAT",
+      "symmetricEasy": "Einfach vorhersagbares symmetrisches NAT",
+      "symmetricFirewall": "Symmetrische UDP-Firewall",
+      "udpBlocked": "UDP nicht verfügbar",
+      "ipv6Available": "Öffentliches IPv6 verfügbar"
+    },
+    "title": "Werkzeuge",
+    "download": {
+      "title": "Benutzerdefinierter Download",
+      "url": "Download-URL",
+      "folder": "Downloadordner",
+      "naming": "Dateiname beim Speichern",
+      "originalName": "Originaldateiname",
+      "customName": "Eigener Name",
+      "fileName": "Dateiname",
+      "fileNameHint": "Wird genau wie eingegeben gespeichert; gewünschte Dateiendung angeben",
+      "originalHint": "Erwarteter Dateiname: {name}; der Server kann einen anderen Namen angeben",
+      "originalRule": "Dateiname vom Server verwenden, sonst den Namen aus der Download-URL",
+      "advanced": "Erweiterte Einstellungen",
+      "userAgent": "User-Agent (leer für Standardwert)",
+      "headers": "Weitere HTTP-Header",
+      "addHeader": "Header hinzufügen",
+      "headerName": "Headername",
+      "headerValue": "Headerwert",
+      "headersHint": "Header bleiben nur in dieser Sitzung und werden nicht im Aufgabenprotokoll gespeichert.",
+      "invalidName": "Einen gültigen einzelnen Dateinamen mit gewünschter Endung eingeben",
+      "invalidHeaders": "Ungültige, doppelte oder zu große HTTP-Header",
+      "uaHeader": "User-Agent im UA-Feld einstellen",
+      "overwrite": "Vorhandene Dateien überschreiben (Original bei Fehler behalten)",
+      "start": "Download starten"
+    }
   }
 }

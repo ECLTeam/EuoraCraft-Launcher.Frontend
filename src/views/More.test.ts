@@ -1,20 +1,25 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted } from 'vue'
 import { createMemoryHistory, createRouter, type Router } from 'vue-router'
+import { useConnector } from '@/features/connect/composables/useConnector'
+import { useConnectorContext } from '@/features/connect/connectorContext'
 import { i18n } from '@/i18n'
-import Connect from './Connect.vue'
+import More from './More.vue'
 
-const mocks = vi.hoisted(() => ({ useConnector: vi.fn() }))
-
-vi.mock('@/features/connect/composables/useConnector', () => ({
-  useConnector: mocks.useConnector,
-}))
+const mocks = vi.hoisted(() => ({ status: vi.fn(), easyTierStatus: vi.fn() }))
+vi.mock('@/features/connect/api/connectorApi', () => ({ connectorApi: mocks }))
 
 // 与 App.vue 一致：外壳由路由渲染，测试挂载 RouterView 宿主避免直接挂载外壳导致自渲染
 const Host = defineComponent({ template: '<RouterView />' })
 
-const RoomStub = { template: '<div class="stub-room">联机子页</div>' }
+const RoomStub = defineComponent({
+  setup() {
+    const session = useConnectorContext()
+    onMounted(() => void session.initialize())
+  },
+  template: '<div class="stub-room">联机子页</div>',
+})
 const PluginsStub = { template: '<div class="stub-plugins">插件子页</div>' }
 const ToolsStub = { template: '<div class="stub-tools">工具子页</div>' }
 
@@ -25,7 +30,7 @@ function createTestRouter(): Router {
       { path: '/', component: { template: '<div />' } },
       {
         path: '/more',
-        component: Connect,
+        component: More,
         redirect: '/more/room',
         children: [
           { path: 'room', name: 'more-room', component: RoomStub },
@@ -37,18 +42,49 @@ function createTestRouter(): Router {
   })
 }
 
-async function mountShell() {
+async function mountShell(path = '/more') {
   const router = createTestRouter()
-  await router.push('/more')
+  await router.push(path)
   await router.isReady()
   const wrapper = mount(Host, { global: { plugins: [i18n, router] } })
   await flushPromises()
   return { wrapper, router }
 }
 
-describe('Connect shell', () => {
+describe('More shell', () => {
   beforeEach(() => {
-    mocks.useConnector.mockReset().mockReturnValue({})
+    useConnector().dispose()
+    mocks.status.mockReset().mockResolvedValue({
+      mode: 'idle',
+      roomCode: null,
+      mcHost: null,
+      mcPort: null,
+      gameInfo: null,
+      players: [],
+      nodes: [],
+      error: null,
+    })
+    mocks.easyTierStatus
+      .mockReset()
+      .mockResolvedValue({ installed: false, status: 'missing', progress: 0, speed: 0, error: null })
+  })
+
+  it('直接进入工具或插件不初始化联机，首次进入房间后跨外壳导航复用会话', async () => {
+    const { wrapper, router } = await mountShell('/more/tools')
+    expect(mocks.status).not.toHaveBeenCalled()
+    await router.push('/more/plugins')
+    await flushPromises()
+    expect(mocks.easyTierStatus).not.toHaveBeenCalled()
+    await router.push('/more/room')
+    await flushPromises()
+    expect(mocks.status).toHaveBeenCalledOnce()
+    await router.push('/')
+    await flushPromises()
+    await router.push('/more/room')
+    await flushPromises()
+    expect(mocks.status).toHaveBeenCalledOnce()
+    wrapper.unmount()
+    useConnector().dispose()
   })
 
   it('renders the in-page menu with all three sub-pages', async () => {

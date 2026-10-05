@@ -87,7 +87,7 @@ const defineCustomDownloadStore = defineStore('customDownload', () => {
       if (currentGeneration !== generation) return
       if (!isRetry) lastSubmittedDownload.value = structuredClone(intent)
       operationId.value = accepted.operationId
-      await operations.track(accepted, i18n.global.t('advanced.downloadTitle'))
+      await operations.track(accepted, i18n.global.t('tools.download.title'))
     } catch (cause) {
       if (currentGeneration === generation) error.value = getErrorMessage(cause)
     } finally {

@@ -31,12 +31,12 @@ describe('跨平台下载文件名', () => {
         { id: 1, name: 'x-test', value: 'b' },
       ],
     }
-    expect(downloadValidationKey(options)).toBe('advanced.downloadInvalidHeaders')
+    expect(downloadValidationKey(options)).toBe('tools.download.invalidHeaders')
     expect(downloadValidationKey({ ...options, headerRows: [{ id: 0, name: 'User-Agent', value: 'a' }] })).toBe(
-      'advanced.downloadUaHeader'
+      'tools.download.uaHeader'
     )
     expect(downloadValidationKey({ ...options, headerRows: [], userAgent: '中文' })).toBe(
-      'advanced.downloadInvalidHeaders'
+      'tools.download.invalidHeaders'
     )
   })
 })

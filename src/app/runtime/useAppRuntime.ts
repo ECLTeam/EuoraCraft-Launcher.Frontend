@@ -7,6 +7,7 @@ import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composa
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
+import { useConnector } from '@/features/connect/composables/useConnector'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
@@ -211,6 +212,8 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   }
 
   function registerBackendEvents(): void {
+    const connector = useConnector({ onError: (error) => options.message.error(error) })
+    cleanupCallbacks.push(connector.dispose)
     const operationStore = useApplicationOperationStore()
     const finishedOperations = new Set<string>()
     function refreshFinishedTargets(): void {

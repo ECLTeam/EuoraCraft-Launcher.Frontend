@@ -1,10 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { BackendCommandError } from '@/app/runtime/errorPresentation'
-import NatToolCard from '@/components/connect/NatToolCard.vue'
+import NatToolCard from '@/components/tools/NatToolCard.vue'
 import { i18n } from '@/i18n'
 import type { NatTypeResult } from '@/types/connect'
-import ConnectToolsTab from './ConnectToolsTab.vue'
 
 const mocks = vi.hoisted(() => ({ natType: vi.fn() }))
 
@@ -26,31 +25,16 @@ function natResult(overrides: Partial<NatTypeResult> = {}): NatTypeResult {
 
 function mountToolsTab() {
   i18n.global.locale.value = 'zh-CN'
-  return mount(ConnectToolsTab, { global: { plugins: [i18n] } })
+  return mount(NatToolCard, { global: { plugins: [i18n] } })
 }
 
 function detectButton(wrapper: ReturnType<typeof mountToolsTab>) {
   return wrapper.findAll('button').find((candidate) => candidate.text().includes('NAT 检测'))
 }
 
-describe('ConnectToolsTab', () => {
+describe('NatToolCard', () => {
   beforeEach(() => {
     mocks.natType.mockReset()
-  })
-
-  it('renders the idle state before any detection', () => {
-    const wrapper = mountToolsTab()
-
-    expect(wrapper.text()).toContain('尚未检测')
-    expect(wrapper.text()).toContain('NAT 类型检测')
-    expect(wrapper.text()).toContain('皮肤头像裁剪')
-    expect(wrapper.findAll('.connect-tools-grid > .ui-card').map((card) => card.get('.title-text').text())).toEqual([
-      '自定义下载',
-      '皮肤头像裁剪',
-      'NAT 类型检测',
-    ])
-    expect(wrapper.find('.connect-main-card').exists()).toBe(false)
-    expect(mocks.natType).not.toHaveBeenCalled()
   })
 
   it('renders the detected type and public address', async () => {
@@ -64,12 +48,12 @@ describe('ConnectToolsTab', () => {
     expect(wrapper.text()).toContain('完全锥形 NAT')
     expect(wrapper.text()).toContain('203.0.113.7:51234')
     expect(wrapper.text()).toContain('已检测到公网 IPv6')
-    const details = wrapper.get('.connect-nat-card details')
+    const details = wrapper.get('.nat-tool-card details')
     expect(details.attributes('open')).toBeUndefined()
-    expect(wrapper.get('.connect-nat-result > .ui-tag').text()).toContain('完全锥形 NAT')
+    expect(wrapper.get('.nat-tool-result > .ui-tag').text()).toContain('完全锥形 NAT')
     ;(details.element as HTMLDetailsElement).open = true
     await details.trigger('toggle')
-    expect(wrapper.get('.connect-nat-fields').text()).toContain('203.0.113.7:51234')
+    expect(wrapper.get('.nat-tool-fields').text()).toContain('203.0.113.7:51234')
   })
 
   it('renders a port range when the mapped port is not fixed', async () => {
@@ -176,7 +160,7 @@ describe('ConnectToolsTab', () => {
     wrapper.unmount()
     resolveDetection(natResult())
     await flushPromises()
-    expect((wrapper.findComponent(NatToolCard).vm as unknown as { result: NatTypeResult | null }).result).toBeNull()
+    expect((wrapper.vm as unknown as { result: NatTypeResult | null }).result).toBeNull()
   })
 
   it.each([

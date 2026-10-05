@@ -1,9 +1,5 @@
 {
-  "app": {
-    "title": "EuoraCraft Launcher",
-    "loading": "載入中...",
-    "delete": "刪除"
-  },
+  "app": { "title": "EuoraCraft Launcher", "loading": "載入中...", "delete": "刪除" },
   "sidebar": {
     "toggle": "切換側邊欄",
     "collapse": "收起側邊欄",
@@ -20,71 +16,12 @@
   },
   "connect": {
     "description": "建立或加入 Minecraft 聯機房間",
-    "nav": {
-      "room": "連線",
-      "plugins": "外掛",
-      "tools": "工具"
-    },
     "copy": "複製",
     "copied": "已複製到剪貼簿",
     "unavailable": {
       "title": "聯機服務尚不可用",
       "description": "前端介面已經就緒，等待後端實現聯機 IPC 介面。",
       "retry": "重新連線"
-    },
-    "nat": {
-      "detect": "NAT 檢測",
-      "resultTitle": "NAT 檢測結果",
-      "cone": "完全錐形",
-      "symmetric": "嚴格對稱",
-      "blocked": "不可穿透",
-      "unknown": "型別未知",
-      "openInternet": "公網直連",
-      "noPat": "公網地址（無埠轉換）",
-      "fullCone": "完全錐形 NAT",
-      "restricted": "受限錐形 NAT",
-      "portRestricted": "埠受限錐形 NAT",
-      "symmetricEasy": "易預測對稱 NAT",
-      "symmetricFirewall": "對稱 UDP 防火牆",
-      "udpBlocked": "UDP 不可用",
-      "ipv6Available": "支援公網 IPv6"
-    },
-    "tools": {
-      "natCardTitle": "NAT 類型偵測",
-      "detecting": "正在偵測網路類型...",
-      "detectFailed": "偵測失敗",
-      "idleTitle": "尚未偵測",
-      "publicAddress": "公網位址",
-      "notObtained": "未取得",
-      "unknownType": "無法確定類型",
-      "ipv6Detected": "已偵測到公網 IPv6",
-      "ipv6NotDetected": "未偵測到公網 IPv6",
-      "timeout": "偵測逾時，請檢查網路後重試",
-      "busy": "已有偵測正在進行，請稍後重試",
-      "probeFailed": "網路探測失敗，請稍後重試",
-      "downloadOptions": "下載選項",
-      "downloadNameSummary": "儲存名稱：{name}",
-      "natDetails": "檢測詳情",
-      "skinAvatar": {
-        "title": "皮膚頭像裁剪",
-        "choose": "選擇皮膚 PNG",
-        "hint": "選擇 Minecraft 皮膚 PNG，自動擷取臉部並匯出頭像。",
-        "preview": "皮膚頭像預覽",
-        "settings": "匯出設定",
-        "includeHat": "包含帽子圖層",
-        "size": "輸出尺寸",
-        "hatOn": "帽子圖層開啟",
-        "hatOff": "帽子圖層關閉",
-        "summary": "{size} × {size} · {hat}",
-        "export": "匯出 PNG",
-        "saved": "頭像已匯出",
-        "invalidPng": "請選擇有效的 PNG 皮膚檔案",
-        "invalidDimensions": "皮膚寬度須為 64 的整數倍，高度須為寬度的一半或相同，最大 1024×1024",
-        "tooLarge": "皮膚檔案不能超過 5 MiB",
-        "decodeFailed": "皮膚圖片損壞或無法解碼",
-        "sourceConflict": "頭像不能覆蓋匯入的皮膚，請選擇其他檔名",
-        "invalidExtension": "請選擇以 .png 結尾的儲存檔案"
-      }
     },
     "create": {
       "tab": "建立房間",
@@ -128,16 +65,8 @@
       "paste": "貼上",
       "action": "加入房間"
     },
-    "starting": {
-      "title": "正在建立聯機房間",
-      "description": "正在建立聯機網路，請稍候。",
-      "failed": "建立房間失敗"
-    },
-    "host": {
-      "title": "房間已建立",
-      "description": "將房間碼分享給其他玩家",
-      "close": "關閉房間"
-    },
+    "starting": { "title": "正在建立聯機房間", "description": "正在建立聯機網路，請稍候。", "failed": "建立房間失敗" },
+    "host": { "title": "房間已建立", "description": "將房間碼分享給其他玩家", "close": "關閉房間" },
     "guest": {
       "title": "已加入房間",
       "description": "複製伺服器地址，在遊戲中加入",
@@ -171,21 +100,9 @@
       "pasteFailed": "無法讀取剪貼簿",
       "copyFailed": "無法寫入剪貼簿"
     },
-    "side": {
-      "title": "連線狀態",
-      "hint": "服務與連線資訊",
-      "service": "聯機元件",
-      "availability": "服務狀態"
-    },
-    "roomInfo": {
-      "title": "房間資訊",
-      "hint": "當前房間詳情",
-      "game": "遊戲版本",
-      "creator": "建立者"
-    },
-    "roomActions": {
-      "title": "房間操作"
-    }
+    "side": { "title": "連線狀態", "hint": "服務與連線資訊", "service": "聯機元件", "availability": "服務狀態" },
+    "roomInfo": { "title": "房間資訊", "hint": "當前房間詳情", "game": "遊戲版本", "creator": "建立者" },
+    "roomActions": { "title": "房間操作" }
   },
   "game": {
     "title": "遊戲",
@@ -302,16 +219,9 @@
       "preparingHint": "正在取得授權資訊，請稍候。",
       "processingHint": "Microsoft 授權已完成，正在準備你的遊戲帳戶。",
       "openBrowser": "開啟授權頁面",
-      "steps": {
-        "authorization": "授權確認",
-        "profile": "讀取帳戶",
-        "saving": "儲存帳戶"
-      }
+      "steps": { "authorization": "授權確認", "profile": "讀取帳戶", "saving": "儲存帳戶" }
     },
-    "showcase": {
-      "title": "演示模式",
-      "description": "當前為演示模式，帳戶操作僅作介面展示，不會實際儲存或登入。"
-    },
+    "showcase": { "title": "演示模式", "description": "當前為演示模式，帳戶操作僅作介面展示，不會實際儲存或登入。" },
     "clientId": {
       "title": "未配置 Microsoft 登入",
       "description": "正版登入需要 Microsoft OAuth 客戶端 ID，需要自行從 Azure 申請。",
@@ -513,11 +423,7 @@
       "broken": "損壞",
       "isolated": "實例隔離",
       "isolatedDesc": "可繼承全域策略，或為目前實例強制指定隔離狀態",
-      "isolationModes": {
-        "inherit": "跟隨預設策略",
-        "enabled": "強制隔離",
-        "disabled": "強制不隔離"
-      },
+      "isolationModes": { "inherit": "跟隨預設策略", "enabled": "強制隔離", "disabled": "強制不隔離" },
       "customMemory": "自定義記憶體",
       "customMemoryDesc": "為此實例單獨設定記憶體大小",
       "memorySize": "記憶體大小",
@@ -815,13 +721,7 @@
         "label": "啟動器版本",
         "demoMode": "演示模式",
         "frontendLabel": "前端版本",
-        "types": {
-          "dev": "開發版",
-          "alpha": "開發版",
-          "beta": "測試版",
-          "rc": "正式版候選",
-          "release": "正式版"
-        }
+        "types": { "dev": "開發版", "alpha": "開發版", "beta": "測試版", "rc": "正式版候選", "release": "正式版" }
       },
       "update": {
         "check": "檢查更新",
@@ -1091,12 +991,7 @@
     "windowTitlePlaceholder": "{instance} - {account}",
     "launcherVisibility": "啟動時啟動器行為",
     "launcherVisibilityDesc": "遊戲啟動成功後對啟動器視窗的處理；選擇退出後本次執行不進行崩潰偵測與統計",
-    "visibilityOptions": {
-      "inherit": "跟隨全域",
-      "none": "不動作",
-      "minimize": "最小化",
-      "quit": "結束啟動器"
-    },
+    "visibilityOptions": { "inherit": "跟隨全域", "none": "不動作", "minimize": "最小化", "quit": "結束啟動器" },
     "preferHighPerformanceGpu": "要求 Java 使用高效能顯示卡",
     "preferHighPerformanceGpuDesc": "僅 Windows：為實際使用的 Java 寫入目前使用者的高效能 GPU 偏好",
     "useJavaExe": "使用 java.exe 而不是 javaw.exe",
@@ -1232,11 +1127,7 @@
       "suspectedMods": "可疑模組",
       "suggestions": "建議操作",
       "genericSuggestion": "匯出崩潰報告並結合完整日誌進一步排查。",
-      "confidence": {
-        "certain": "高置信度",
-        "likely": "較可能",
-        "possible": "可能"
-      },
+      "confidence": { "certain": "高置信度", "likely": "較可能", "possible": "可能" },
       "viewOutput": "檢視輸出",
       "hideOutput": "收起輸出",
       "output": "遊戲輸出",
@@ -1473,19 +1364,9 @@
     "pleaseAccept": "請先同意使用者協議以使用功能",
     "acceptRequired": "請先同意使用者協議"
   },
-  "modal": {
-    "confirm": "確認",
-    "cancel": "取消",
-    "ok": "確定",
-    "agree": "同意",
-    "disagree": "不同意"
-  },
-  "launch": {
-    "title": "啟動實例"
-  },
-  "launcherPopup": {
-    "doNotShowAgain": "不再顯示"
-  },
+  "modal": { "confirm": "確認", "cancel": "取消", "ok": "確定", "agree": "同意", "disagree": "不同意" },
+  "launch": { "title": "啟動實例" },
+  "launcherPopup": { "doNotShowAgain": "不再顯示" },
   "dev": {
     "title": "元件除錯工具",
     "desc": "點選下方按鈕測試各個元件",
@@ -1670,7 +1551,7 @@
     "searchSavedServer": "搜尋皮膚站連結...",
     "noSavedServers": "暫無已新增的連結",
     "serverUrlPlaceholder": "https://example.com/api/yggdrasil",
-    "serverUrlHint": "會記住此連結和登入名，密碼不會儲存；多角色帳戶可在登入後選擇角色",
+    "serverUrlHint": "會記住此連結和登入名，密碼不��儲存；多角色帳戶可在登入後選擇角色",
     "serverUrlRequired": "請輸入伺服器地址",
     "fieldRequired": "請填寫「{field}」",
     "emailRequired": "請輸入角色名或郵箱",
@@ -1772,11 +1653,7 @@
     "regions": "共 {count} 個區域"
   },
   "task": {
-    "subtask": {
-      "downloadJson": "下載實例資訊",
-      "downloadAssets": "下載資原始檔",
-      "checkFiles": "校驗檔案"
-    },
+    "subtask": { "downloadJson": "下載實例資訊", "downloadAssets": "下載資原始檔", "checkFiles": "校驗檔案" },
     "title": "任務"
   },
   "taskQueue": {
@@ -1837,37 +1714,11 @@
     "dropHint": "鬆開以匯入整合包"
   },
   "advanced": {
-    "downloadTitle": "自訂下載",
-    "downloadUrl": "下載網址",
-    "downloadFolder": "下載資料夾",
-    "downloadNaming": "儲存名稱",
-    "downloadOriginalName": "原始檔名",
-    "downloadCustomName": "自訂名稱",
-    "downloadFileName": "檔案名稱",
-    "downloadFileNameHint": "依輸入名稱儲存，請包含所需副檔名",
-    "downloadOriginalHint": "預估檔名：{name}，實際名稱依伺服器回應為準",
-    "downloadOriginalRule": "優先使用伺服器提供的檔名，否則使用下載網址中的名稱",
-    "downloadAdvanced": "進階設定",
-    "downloadUserAgent": "User-Agent（留空使用預設值）",
-    "downloadHeaders": "其他 HTTP 請求標頭",
-    "downloadAddHeader": "新增標頭",
-    "downloadHeaderName": "標頭名稱",
-    "downloadHeaderValue": "標頭值",
-    "downloadHeadersHint": "標頭僅在本次工作階段中保留，不寫入下載工作記錄。",
-    "downloadInvalidName": "請輸入有效的單一檔名，包含所需副檔名",
-    "downloadInvalidHeaders": "標頭格式無效、名稱重複或超過大小限制",
-    "downloadUaHeader": "請在 UA 欄位中設定 User-Agent",
-    "downloadOverwrite": "允許覆寫現有檔案（失敗時保留原檔）",
-    "downloadStart": "開始下載",
     "nodesTitle": "連線",
     "nodesEntry": "連線設定",
     "nodesPolicy": "節點策略",
     "nodesAddresses": "自訂節點位址",
-    "nodesMode": {
-      "automatic": "自動",
-      "append": "公共與自訂",
-      "custom": "僅自訂"
-    }
+    "nodesMode": { "automatic": "自動", "append": "公共與自訂", "custom": "僅自訂" }
   },
   "operations": {
     "unknown": "背景工作",
@@ -1889,5 +1740,85 @@
     "submitted": "已提交，可在工作清單查看結果",
     "retryOriginal": "重試上次下載",
     "cancelRequested": "已請求取消，等待工作停止"
+  },
+  "more": { "nav": { "room": "連線", "plugins": "外掛", "tools": "工具" } },
+  "tools": {
+    "natCardTitle": "NAT 類型偵測",
+    "detecting": "正在偵測網路類型...",
+    "detectFailed": "偵測失敗",
+    "idleTitle": "尚未偵測",
+    "publicAddress": "公網位址",
+    "notObtained": "未取得",
+    "unknownType": "無法確定類型",
+    "ipv6Detected": "已偵測到公網 IPv6",
+    "ipv6NotDetected": "未偵測到公網 IPv6",
+    "timeout": "偵測逾時，請檢查網路後重試",
+    "busy": "已有偵測正在進行，請稍後重試",
+    "probeFailed": "網路探測失敗，請稍後重試",
+    "downloadOptions": "下載選項",
+    "downloadNameSummary": "儲存名稱：{name}",
+    "natDetails": "檢測詳情",
+    "skinAvatar": {
+      "title": "皮膚頭像裁剪",
+      "choose": "選擇皮膚 PNG",
+      "hint": "選擇 Minecraft 皮膚 PNG，自動擷取臉部並匯出頭像。",
+      "preview": "皮膚頭像預覽",
+      "settings": "匯出設定",
+      "includeHat": "包含帽子圖層",
+      "size": "輸出尺寸",
+      "hatOn": "帽子圖層開啟",
+      "hatOff": "帽子圖層關閉",
+      "summary": "{size} × {size} · {hat}",
+      "export": "匯出 PNG",
+      "saved": "頭像已匯出",
+      "invalidPng": "請選擇有效的 PNG 皮膚檔案",
+      "invalidDimensions": "皮膚寬度須為 64 的整數倍，高度須為寬度的一半或相同，最大 1024×1024",
+      "tooLarge": "皮膚檔案不能超過 5 MiB",
+      "decodeFailed": "皮膚圖片損壞或無法解碼",
+      "sourceConflict": "頭像不能覆蓋匯入的皮膚，請選擇其他檔名",
+      "invalidExtension": "請選擇以 .png 結尾的儲存檔案"
+    },
+    "nat": {
+      "detect": "NAT 檢測",
+      "resultTitle": "NAT 檢測結果",
+      "cone": "完全錐形",
+      "symmetric": "嚴格對稱",
+      "blocked": "不可穿透",
+      "unknown": "型別未知",
+      "openInternet": "公網直連",
+      "noPat": "公網地址（無埠轉換）",
+      "fullCone": "完全錐形 NAT",
+      "restricted": "受限錐形 NAT",
+      "portRestricted": "埠受限錐形 NAT",
+      "symmetricEasy": "易預測對稱 NAT",
+      "symmetricFirewall": "對稱 UDP 防火牆",
+      "udpBlocked": "UDP 不可用",
+      "ipv6Available": "支援公網 IPv6"
+    },
+    "title": "工具",
+    "download": {
+      "title": "自訂下載",
+      "url": "下載網址",
+      "folder": "下載資料夾",
+      "naming": "儲存名稱",
+      "originalName": "原始檔名",
+      "customName": "自訂名稱",
+      "fileName": "檔案名稱",
+      "fileNameHint": "依輸入名稱儲存，請包含所需副檔名",
+      "originalHint": "預估檔名：{name}，實際名稱依伺服器回應為準",
+      "originalRule": "優先使用伺服器提供的檔名，否則使用下載網址中的名稱",
+      "advanced": "進階設定",
+      "userAgent": "User-Agent（留空使用預設值）",
+      "headers": "其他 HTTP 請求標頭",
+      "addHeader": "新增標頭",
+      "headerName": "標頭名稱",
+      "headerValue": "標頭值",
+      "headersHint": "標頭僅在本次工作階段中保留，不寫入下載工作記錄。",
+      "invalidName": "請輸入有效的單一檔名，包含所需副檔名",
+      "invalidHeaders": "標頭格式無效、名稱重複或超過大小限制",
+      "uaHeader": "請在 UA 欄位中設定 User-Agent",
+      "overwrite": "允許覆寫現有檔案（失敗時保留原檔）",
+      "start": "開始下載"
+    }
   }
 }

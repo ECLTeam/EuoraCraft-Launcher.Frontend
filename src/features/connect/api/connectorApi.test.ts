@@ -38,7 +38,11 @@ describe('connectorApi', () => {
   ] as const)('%s uses the typed IPC contract', async (method, args, expectedCommand, expectedPayload) => {
     await (connectorApi[method] as (...params: never[]) => Promise<unknown>)(...(args as unknown as never[]))
 
-    if (expectedPayload === undefined) expect(mocks.command).toHaveBeenCalledWith(expectedCommand)
+    const timeout = (
+      { status: 5000, easyTierStatus: 5000, detectPorts: 10000, searchMcPort: 10000 } as Record<string, number>
+    )[method]
+    if (timeout) expect(mocks.command).toHaveBeenCalledWith(expectedCommand, expectedPayload, timeout)
+    else if (expectedPayload === undefined) expect(mocks.command).toHaveBeenCalledWith(expectedCommand)
     else expect(mocks.command).toHaveBeenCalledWith(expectedCommand, expectedPayload)
   })
 })

@@ -1,77 +1,77 @@
-.connect-nat-card {
+.nat-tool-card {
   min-width: 0;
   border-radius: 8px;
   container-type: inline-size;
 }
 
-.connect-nat-card :deep(.card-header) {
+.nat-tool-card :deep(.card-header) {
   flex-wrap: wrap;
   gap: 8px 12px;
 }
 
-.connect-nat-card :deep(.card-header > .header-content) {
+.nat-tool-card :deep(.card-header > .header-content) {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.connect-nat-card :deep(.header-actions) {
+.nat-tool-card :deep(.header-actions) {
   margin-left: auto;
 }
 
-.connect-nat-card :deep(.card-body) {
+.nat-tool-card :deep(.card-body) {
   padding: 12px;
 }
 
-.connect-nat-action {
+.nat-tool-action {
   flex-shrink: 0;
 }
 
-.connect-nat-body {
+.nat-tool-body {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.connect-nat-result {
+.nat-tool-result {
   display: grid;
   justify-items: start;
   gap: 8px;
 }
 
-.connect-nat-result :deep(.ui-tag) {
+.nat-tool-result :deep(.ui-tag) {
   max-width: 100%;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-.connect-nat-fields {
+.nat-tool-fields {
   margin: 0;
 }
 
-.connect-nat-fields > div {
+.nat-tool-fields > div {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 6px;
 }
 
-.connect-nat-fields dt,
-.connect-nat-ipv6 {
+.nat-tool-fields dt,
+.nat-tool-ipv6 {
   color: var(--ecl-text-secondary);
   font-size: 11px;
   line-height: 1.5;
 }
 
-.connect-nat-fields dd {
+.nat-tool-fields dd {
   min-width: 0;
   margin: 0;
 }
 
-.connect-nat-fields code {
+.nat-tool-fields code {
   color: var(--ecl-text);
   font-size: 12px;
   line-height: 1.6;
 }
 
-.connect-nat-state {
+.nat-tool-state {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -79,7 +79,7 @@
   font-size: 12px;
 }
 
-.connect-nat-error strong {
+.nat-tool-error strong {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -87,7 +87,7 @@
   font-size: 12px;
 }
 
-.connect-nat-error p {
+.nat-tool-error p {
   margin: 6px 0 0;
   color: var(--ecl-text-secondary);
   font-size: 12px;
@@ -95,13 +95,13 @@
 }
 
 @container (max-width: 300px) {
-  .connect-nat-fields > div {
+  .nat-tool-fields > div {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
 }
 
-.connect-nat-details {
+.nat-tool-details {
   display: grid;
   gap: 8px;
   padding-top: 12px;

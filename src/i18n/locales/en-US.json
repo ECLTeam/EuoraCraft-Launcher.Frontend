@@ -1,9 +1,5 @@
 {
-  "app": {
-    "title": "EuoraCraft Launcher",
-    "loading": "Loading...",
-    "delete": "Delete"
-  },
+  "app": { "title": "EuoraCraft Launcher", "loading": "Loading...", "delete": "Delete" },
   "sidebar": {
     "toggle": "Toggle Sidebar",
     "collapse": "Collapse Sidebar",
@@ -20,71 +16,12 @@
   },
   "connect": {
     "description": "Create or join a Minecraft multiplayer room",
-    "nav": {
-      "room": "Connect",
-      "plugins": "Plugins",
-      "tools": "Tools"
-    },
     "copy": "Copy",
     "copied": "Copied to clipboard",
     "unavailable": {
       "title": "Multiplayer service unavailable",
       "description": "The frontend is ready and is waiting for the multiplayer IPC backend.",
       "retry": "Reconnect"
-    },
-    "nat": {
-      "detect": "Detect NAT",
-      "resultTitle": "NAT detection result",
-      "cone": "Full cone",
-      "symmetric": "Symmetric",
-      "blocked": "Blocked",
-      "unknown": "Unknown",
-      "openInternet": "Open Internet",
-      "noPat": "Public address (no port translation)",
-      "fullCone": "Full-cone NAT",
-      "restricted": "Restricted-cone NAT",
-      "portRestricted": "Port-restricted-cone NAT",
-      "symmetricEasy": "Predictable symmetric NAT",
-      "symmetricFirewall": "Symmetric UDP firewall",
-      "udpBlocked": "UDP unavailable",
-      "ipv6Available": "Public IPv6 available"
-    },
-    "tools": {
-      "natCardTitle": "NAT Type Detection",
-      "detecting": "Detecting network type...",
-      "detectFailed": "Detection failed",
-      "idleTitle": "Not detected yet",
-      "publicAddress": "Public address",
-      "notObtained": "Not obtained",
-      "unknownType": "Type undetermined",
-      "ipv6Detected": "Public IPv6 detected",
-      "ipv6NotDetected": "Public IPv6 not detected",
-      "timeout": "Detection timed out. Check your network and retry.",
-      "busy": "Detection is already running. Retry shortly.",
-      "probeFailed": "Network probe failed. Retry shortly.",
-      "downloadOptions": "Download options",
-      "downloadNameSummary": "Save name: {name}",
-      "natDetails": "Detection details",
-      "skinAvatar": {
-        "title": "Skin avatar crop",
-        "choose": "Choose skin PNG",
-        "hint": "Choose a Minecraft skin PNG to extract the face and export an avatar.",
-        "preview": "Skin avatar preview",
-        "settings": "Export settings",
-        "includeHat": "Include hat layer",
-        "size": "Output size",
-        "hatOn": "Hat layer on",
-        "hatOff": "Hat layer off",
-        "summary": "{size} × {size} · {hat}",
-        "export": "Export PNG",
-        "saved": "Avatar exported",
-        "invalidPng": "Choose a valid PNG skin file",
-        "invalidDimensions": "Skin width must be a multiple of 64; height must equal the width or half of it, up to 1024×1024",
-        "tooLarge": "Skin files must not exceed 5 MiB",
-        "decodeFailed": "The skin image is damaged or cannot be decoded",
-        "sourceConflict": "The avatar cannot replace the source skin. Choose another filename",
-        "invalidExtension": "Choose a save filename ending in .png"
-      }
     },
     "create": {
       "tab": "Create room",
@@ -133,11 +70,7 @@
       "description": "Setting up the multiplayer network, please wait.",
       "failed": "Failed to create the room"
     },
-    "host": {
-      "title": "Room created",
-      "description": "Share the room code with other players",
-      "close": "Close room"
-    },
+    "host": { "title": "Room created", "description": "Share the room code with other players", "close": "Close room" },
     "guest": {
       "title": "Room joined",
       "description": "Copy the server address to join in Minecraft",
@@ -177,15 +110,8 @@
       "service": "Connect Component",
       "availability": "Service Status"
     },
-    "roomInfo": {
-      "title": "Room Info",
-      "hint": "Current room details",
-      "game": "Game Version",
-      "creator": "Creator"
-    },
-    "roomActions": {
-      "title": "Room Actions"
-    }
+    "roomInfo": { "title": "Room Info", "hint": "Current room details", "game": "Game Version", "creator": "Creator" },
+    "roomActions": { "title": "Room Actions" }
   },
   "game": {
     "title": "Game",
@@ -302,11 +228,7 @@
       "preparingHint": "Getting authorization details. Please wait.",
       "processingHint": "Microsoft authorization is complete. Preparing your game account.",
       "openBrowser": "Open authorization page",
-      "steps": {
-        "authorization": "Authorization",
-        "profile": "Read account",
-        "saving": "Save account"
-      }
+      "steps": { "authorization": "Authorization", "profile": "Read account", "saving": "Save account" }
     },
     "showcase": {
       "title": "Showcase Mode",
@@ -815,13 +737,7 @@
         "label": "Launcher Version",
         "demoMode": "Demo Mode",
         "frontendLabel": "Frontend Version",
-        "types": {
-          "dev": "Dev",
-          "alpha": "Dev",
-          "beta": "Beta",
-          "rc": "Release Candidate",
-          "release": "Release"
-        }
+        "types": { "dev": "Dev", "alpha": "Dev", "beta": "Beta", "rc": "Release Candidate", "release": "Release" }
       },
       "update": {
         "check": "Check for Updates",
@@ -1232,11 +1148,7 @@
       "suspectedMods": "Suspected mods",
       "suggestions": "Recommended steps",
       "genericSuggestion": "Export the crash report and inspect the complete logs for more context.",
-      "confidence": {
-        "certain": "High confidence",
-        "likely": "Likely",
-        "possible": "Possible"
-      },
+      "confidence": { "certain": "High confidence", "likely": "Likely", "possible": "Possible" },
       "viewOutput": "View Output",
       "hideOutput": "Hide Output",
       "output": "Game Output",
@@ -1576,19 +1488,9 @@
     "pleaseAccept": "Please accept the User Agreement to access features",
     "acceptRequired": "Please accept the User Agreement first"
   },
-  "modal": {
-    "confirm": "Confirm",
-    "cancel": "Cancel",
-    "ok": "OK",
-    "agree": "Agree",
-    "disagree": "Disagree"
-  },
-  "launch": {
-    "title": "Launch Game"
-  },
-  "launcherPopup": {
-    "doNotShowAgain": "Don't show again"
-  },
+  "modal": { "confirm": "Confirm", "cancel": "Cancel", "ok": "OK", "agree": "Agree", "disagree": "Disagree" },
+  "launch": { "title": "Launch Game" },
+  "launcherPopup": { "doNotShowAgain": "Don't show again" },
   "dev": {
     "title": "Component Debug Tools",
     "desc": "Click buttons below to test components",
@@ -1961,39 +1863,12 @@
   "advanced": {
     "nodesTitle": "Multiplayer",
     "nodesAddresses": "Custom node addresses",
-    "nodesMode": {
-      "automatic": "Automatic",
-      "append": "Public and custom",
-      "custom": "Custom only"
-    },
-    "downloadTitle": "Custom download",
-    "downloadUrl": "Download URL",
-    "downloadPath": "Destination file",
-    "downloadOverwrite": "Allow overwriting existing files (keep originals on failure)",
-    "downloadStart": "Start download",
+    "nodesMode": { "automatic": "Automatic", "append": "Public and custom", "custom": "Custom only" },
     "shortcutTitle": "Instance shortcuts",
     "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
     "shortcutDesktop": "Create desktop shortcut",
     "shortcutChoose": "Choose destination",
     "shortcutCreated": "Instance shortcut created",
-    "downloadFolder": "Download folder",
-    "downloadNaming": "Save name",
-    "downloadOriginalName": "Original filename",
-    "downloadCustomName": "Custom name",
-    "downloadFileName": "Filename",
-    "downloadFileNameHint": "Saved exactly as entered; include the extension you need",
-    "downloadOriginalHint": "Estimated filename: {name}; the server may provide a different name",
-    "downloadOriginalRule": "Use the filename provided by the server, or fall back to the download URL",
-    "downloadAdvanced": "Advanced settings",
-    "downloadUserAgent": "User-Agent (leave blank for default)",
-    "downloadHeaders": "Other HTTP headers",
-    "downloadAddHeader": "Add header",
-    "downloadHeaderName": "Header name",
-    "downloadHeaderValue": "Header value",
-    "downloadHeadersHint": "Headers are kept only in this session and excluded from task records.",
-    "downloadInvalidName": "Enter a valid single filename, including the extension you need",
-    "downloadInvalidHeaders": "Invalid, duplicate, or oversized HTTP headers",
-    "downloadUaHeader": "Set User-Agent in the UA field",
     "nodesEntry": "Multiplayer settings",
     "nodesPolicy": "Node policy"
   },
@@ -2017,5 +1892,86 @@
     "submitted": "Submitted. View the result in the task list.",
     "retryOriginal": "Retry previous download",
     "cancelRequested": "Cancellation requested. Waiting for the task to stop."
+  },
+  "more": { "nav": { "room": "Connect", "plugins": "Plugins", "tools": "Tools" } },
+  "tools": {
+    "natCardTitle": "NAT Type Detection",
+    "detecting": "Detecting network type...",
+    "detectFailed": "Detection failed",
+    "idleTitle": "Not detected yet",
+    "publicAddress": "Public address",
+    "notObtained": "Not obtained",
+    "unknownType": "Type undetermined",
+    "ipv6Detected": "Public IPv6 detected",
+    "ipv6NotDetected": "Public IPv6 not detected",
+    "timeout": "Detection timed out. Check your network and retry.",
+    "busy": "Detection is already running. Retry shortly.",
+    "probeFailed": "Network probe failed. Retry shortly.",
+    "downloadOptions": "Download options",
+    "downloadNameSummary": "Save name: {name}",
+    "natDetails": "Detection details",
+    "skinAvatar": {
+      "title": "Skin avatar crop",
+      "choose": "Choose skin PNG",
+      "hint": "Choose a Minecraft skin PNG to extract the face and export an avatar.",
+      "preview": "Skin avatar preview",
+      "settings": "Export settings",
+      "includeHat": "Include hat layer",
+      "size": "Output size",
+      "hatOn": "Hat layer on",
+      "hatOff": "Hat layer off",
+      "summary": "{size} × {size} · {hat}",
+      "export": "Export PNG",
+      "saved": "Avatar exported",
+      "invalidPng": "Choose a valid PNG skin file",
+      "invalidDimensions": "Skin width must be a multiple of 64; height must equal the width or half of it, up to 1024×1024",
+      "tooLarge": "Skin files must not exceed 5 MiB",
+      "decodeFailed": "The skin image is damaged or cannot be decoded",
+      "sourceConflict": "The avatar cannot replace the source skin. Choose another filename",
+      "invalidExtension": "Choose a save filename ending in .png"
+    },
+    "nat": {
+      "detect": "Detect NAT",
+      "resultTitle": "NAT detection result",
+      "cone": "Full cone",
+      "symmetric": "Symmetric",
+      "blocked": "Blocked",
+      "unknown": "Unknown",
+      "openInternet": "Open Internet",
+      "noPat": "Public address (no port translation)",
+      "fullCone": "Full-cone NAT",
+      "restricted": "Restricted-cone NAT",
+      "portRestricted": "Port-restricted-cone NAT",
+      "symmetricEasy": "Predictable symmetric NAT",
+      "symmetricFirewall": "Symmetric UDP firewall",
+      "udpBlocked": "UDP unavailable",
+      "ipv6Available": "Public IPv6 available"
+    },
+    "title": "Tools",
+    "download": {
+      "title": "Custom download",
+      "url": "Download URL",
+      "path": "Destination file",
+      "overwrite": "Allow overwriting existing files (keep originals on failure)",
+      "start": "Start download",
+      "folder": "Download folder",
+      "naming": "Save name",
+      "originalName": "Original filename",
+      "customName": "Custom name",
+      "fileName": "Filename",
+      "fileNameHint": "Saved exactly as entered; include the extension you need",
+      "originalHint": "Estimated filename: {name}; the server may provide a different name",
+      "originalRule": "Use the filename provided by the server, or fall back to the download URL",
+      "advanced": "Advanced settings",
+      "userAgent": "User-Agent (leave blank for default)",
+      "headers": "Other HTTP headers",
+      "addHeader": "Add header",
+      "headerName": "Header name",
+      "headerValue": "Header value",
+      "headersHint": "Headers are kept only in this session and excluded from task records.",
+      "invalidName": "Enter a valid single filename, including the extension you need",
+      "invalidHeaders": "Invalid, duplicate, or oversized HTTP headers",
+      "uaHeader": "Set User-Agent in the UA field"
+    }
   }
 }

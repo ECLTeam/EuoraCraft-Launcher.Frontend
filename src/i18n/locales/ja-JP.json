@@ -1,9 +1,5 @@
 {
-  "app": {
-    "title": "EuoraCraft Launcher",
-    "loading": "読み込み中...",
-    "delete": "削除"
-  },
+  "app": { "title": "EuoraCraft Launcher", "loading": "読み込み中...", "delete": "削除" },
   "sidebar": {
     "toggle": "サイドバーの切り替え",
     "collapse": "サイドバーを折りたたむ",
@@ -20,71 +16,12 @@
   },
   "connect": {
     "description": "Minecraft のマルチプレイルームを作成または参加",
-    "nav": {
-      "room": "接続",
-      "plugins": "プラグイン",
-      "tools": "ツール"
-    },
     "copy": "コピー",
     "copied": "クリップボードにコピーしました",
     "unavailable": {
       "title": "マルチプレイサービスはまだ利用できません",
       "description": "フロントエンドは準備完了です。バックエンドのマルチプレイ IPC 実装を待っています。",
       "retry": "再接続"
-    },
-    "nat": {
-      "detect": "NAT 検出",
-      "resultTitle": "NAT 検出結果",
-      "cone": "フルコーン",
-      "symmetric": "対称型",
-      "blocked": "越境不可",
-      "unknown": "タイプ不明",
-      "openInternet": "インターネット直接接続",
-      "noPat": "パブリックアドレス（ポート変換なし）",
-      "fullCone": "フルコーン NAT",
-      "restricted": "制限付きコーン NAT",
-      "portRestricted": "ポート制限付きコーン NAT",
-      "symmetricEasy": "予測可能な対称 NAT",
-      "symmetricFirewall": "対称 UDP ファイアウォール",
-      "udpBlocked": "UDP 利用不可",
-      "ipv6Available": "パブリック IPv6 対応"
-    },
-    "tools": {
-      "natCardTitle": "NAT タイプ診断",
-      "detecting": "ネットワークタイプを診断中...",
-      "detectFailed": "診断に失敗しました",
-      "idleTitle": "未診断",
-      "publicAddress": "グローバルアドレス",
-      "notObtained": "未取得",
-      "unknownType": "タイプを判定できません",
-      "ipv6Detected": "パブリック IPv6 を検出",
-      "ipv6NotDetected": "パブリック IPv6 は未検出",
-      "timeout": "診断がタイムアウトしました。ネットワークを確認して再試行してください。",
-      "busy": "診断中です。しばらくしてから再試行してください。",
-      "probeFailed": "ネットワーク診断に失敗しました。再試行してください。",
-      "downloadOptions": "ダウンロード設定",
-      "downloadNameSummary": "保存名：{name}",
-      "natDetails": "検出の詳細",
-      "skinAvatar": {
-        "title": "スキンからアバターを切り出す",
-        "choose": "スキン PNG を選択",
-        "hint": "Minecraft のスキン PNG から顔を切り出し、アバターを保存します。",
-        "preview": "アバターのプレビュー",
-        "settings": "書き出し設定",
-        "includeHat": "帽子レイヤーを含める",
-        "size": "出力サイズ",
-        "hatOn": "帽子レイヤーあり",
-        "hatOff": "帽子レイヤーなし",
-        "summary": "{size} × {size} · {hat}",
-        "export": "PNG を保存",
-        "saved": "アバターを保存しました",
-        "invalidPng": "有効な PNG スキンファイルを選択してください",
-        "invalidDimensions": "幅は 64 の倍数、高さは幅と同じか半分で、最大 1024×1024 です",
-        "tooLarge": "スキンファイルは 5 MiB 以下にしてください",
-        "decodeFailed": "スキン画像が破損しているか、読み込めません",
-        "sourceConflict": "元のスキンには上書きできません。別のファイル名を選択してください",
-        "invalidExtension": ".png で終わる保存ファイル名を選択してください"
-      }
     },
     "create": {
       "tab": "ルームを作成",
@@ -183,9 +120,7 @@
       "game": "ゲームバージョン",
       "creator": "作成者"
     },
-    "roomActions": {
-      "title": "ルーム操作"
-    }
+    "roomActions": { "title": "ルーム操作" }
   },
   "game": {
     "title": "ゲーム",
@@ -302,11 +237,7 @@
       "preparingHint": "認証情報を取得しています。しばらくお待ちください。",
       "processingHint": "Microsoft の認証が完了しました。ゲームアカウントを準備しています。",
       "openBrowser": "認証ページを開く",
-      "steps": {
-        "authorization": "認証確認",
-        "profile": "アカウント取得",
-        "saving": "アカウント保存"
-      }
+      "steps": { "authorization": "認証確認", "profile": "アカウント取得", "saving": "アカウント保存" }
     },
     "showcase": {
       "title": "デモモード",
@@ -815,13 +746,7 @@
         "label": "ランチャーバージョン",
         "demoMode": "デモモード",
         "frontendLabel": "フロントエンドバージョン",
-        "types": {
-          "dev": "開発版",
-          "alpha": "開発版",
-          "beta": "ベータ版",
-          "rc": "リリース候補",
-          "release": "正式版"
-        }
+        "types": { "dev": "開発版", "alpha": "開発版", "beta": "ベータ版", "rc": "リリース候補", "release": "正式版" }
       },
       "update": {
         "check": "更新を確認",
@@ -1232,18 +1157,14 @@
       "suspectedMods": "疑わしいMod",
       "suggestions": "推奨される対処",
       "genericSuggestion": "クラッシュレポートをエクスポートし、完全なログと併せてさらに調査してください。",
-      "confidence": {
-        "certain": "高確度",
-        "likely": "可能性が高い",
-        "possible": "可能性あり"
-      },
+      "confidence": { "certain": "高確度", "likely": "可能性が高い", "possible": "可能性あり" },
       "viewOutput": "出力を表示",
       "hideOutput": "出力を折りたたむ",
       "output": "ゲーム出力",
       "outputFailed": "ゲーム出力の読み取りに失敗しました",
       "exportReport": "クラッシュレポートをエクスポート",
       "exportFailed": "クラッシュレポートのエクスポートに失敗しました",
-      "exported": "クラッシュレポートのエクスポート先：{path}",
+      "exported": "クラッシュレポートのエクスポー��先：{path}",
       "reasons": {
         "jvm_invalid_arguments": {
           "title": "JVM 引数が無効です",
@@ -1590,19 +1511,9 @@
     "pleaseAccept": "機能を使用するには先に利用規約に同意してください",
     "acceptRequired": "先に利用規約に同意してください"
   },
-  "modal": {
-    "confirm": "確認",
-    "cancel": "キャンセル",
-    "ok": "OK",
-    "agree": "同意",
-    "disagree": "同意しない"
-  },
-  "launch": {
-    "title": "インスタンスを起動"
-  },
-  "launcherPopup": {
-    "doNotShowAgain": "今後表示しない"
-  },
+  "modal": { "confirm": "確認", "cancel": "キャンセル", "ok": "OK", "agree": "同意", "disagree": "同意しない" },
+  "launch": { "title": "インスタンスを起動" },
+  "launcherPopup": { "doNotShowAgain": "今後表示しない" },
   "dev": {
     "title": "コンポーネントデバッグツール",
     "desc": "下のボタンをクリックして各コンポーネントをテスト",
@@ -1954,37 +1865,11 @@
     "dropHint": "離してModパックをインポート"
   },
   "advanced": {
-    "downloadTitle": "カスタムダウンロード",
-    "downloadUrl": "ダウンロード URL",
-    "downloadFolder": "保存フォルダー",
-    "downloadNaming": "保存名",
-    "downloadOriginalName": "元のファイル名",
-    "downloadCustomName": "カスタム名",
-    "downloadFileName": "ファイル名",
-    "downloadFileNameHint": "入力した名前で保存します。必要な拡張子を含めてください",
-    "downloadOriginalHint": "推定ファイル名：{name}。実際の名前はサーバーの応答に従います",
-    "downloadOriginalRule": "サーバーのファイル名を優先し、なければダウンロード URL の名前を使用します",
-    "downloadAdvanced": "詳細設定",
-    "downloadUserAgent": "User-Agent（空欄で既定値）",
-    "downloadHeaders": "その他の HTTP ヘッダー",
-    "downloadAddHeader": "ヘッダーを追加",
-    "downloadHeaderName": "ヘッダー名",
-    "downloadHeaderValue": "ヘッダー値",
-    "downloadHeadersHint": "ヘッダーはこのセッションでのみ保持され、タスク記録には保存されません。",
-    "downloadInvalidName": "拡張子を含む有効なファイル名を入力してください",
-    "downloadInvalidHeaders": "ヘッダーが無効、重複、または上限を超えています",
-    "downloadUaHeader": "User-Agent は UA 欄で設定してください",
-    "downloadOverwrite": "既存のファイルを上書きする（失敗時は元のファイルを保持）",
-    "downloadStart": "ダウンロード開始",
     "nodesTitle": "マルチプレイ",
     "nodesEntry": "マルチプレイ設定",
     "nodesPolicy": "ノードの選択方式",
     "nodesAddresses": "カスタムノードのアドレス",
-    "nodesMode": {
-      "automatic": "自動",
-      "append": "公開とカスタム",
-      "custom": "カスタムのみ"
-    }
+    "nodesMode": { "automatic": "自動", "append": "公開とカスタム", "custom": "カスタムのみ" }
   },
   "operations": {
     "unknown": "バックグラウンドタスク",
@@ -2006,5 +1891,85 @@
     "submitted": "送信しました。タスク一覧で結果を確認できます。",
     "retryOriginal": "前回のダウンロードを再試行",
     "cancelRequested": "キャンセルを要求しました。停止を待っています。"
+  },
+  "more": { "nav": { "room": "接続", "plugins": "プラグイン", "tools": "ツール" } },
+  "tools": {
+    "natCardTitle": "NAT タイプ診断",
+    "detecting": "ネットワークタイプを診断中...",
+    "detectFailed": "診断に失敗しました",
+    "idleTitle": "未診断",
+    "publicAddress": "グローバルアドレス",
+    "notObtained": "未取得",
+    "unknownType": "タイプを判定できません",
+    "ipv6Detected": "パブリック IPv6 を検出",
+    "ipv6NotDetected": "パブリック IPv6 は未検出",
+    "timeout": "診断がタイムアウトしました。ネットワークを確認して再試行してください。",
+    "busy": "診断中です。しばらくしてから再試行してください。",
+    "probeFailed": "ネットワーク診断に失敗しました。再試行してください。",
+    "downloadOptions": "ダウンロード設定",
+    "downloadNameSummary": "保存名：{name}",
+    "natDetails": "検出の詳細",
+    "skinAvatar": {
+      "title": "スキンからアバターを切り出す",
+      "choose": "スキン PNG を選択",
+      "hint": "Minecraft のスキン PNG から顔を切り出し、アバターを保存します。",
+      "preview": "アバターのプレビュー",
+      "settings": "書き出し設定",
+      "includeHat": "帽子レイヤーを含める",
+      "size": "出力サイズ",
+      "hatOn": "帽子レイヤーあり",
+      "hatOff": "帽子レイヤーなし",
+      "summary": "{size} × {size} · {hat}",
+      "export": "PNG を保存",
+      "saved": "アバターを保存しました",
+      "invalidPng": "有効な PNG スキンファイルを選択してください",
+      "invalidDimensions": "幅は 64 の倍数、高さは幅と同じか半分で、最大 1024×1024 です",
+      "tooLarge": "スキンファイルは 5 MiB 以下にしてください",
+      "decodeFailed": "スキン画像が破損しているか、読み込めません",
+      "sourceConflict": "元のスキンには上書きできません。別のファイル名を選択してください",
+      "invalidExtension": ".png で終わる保存ファイル名を選択してください"
+    },
+    "nat": {
+      "detect": "NAT 検出",
+      "resultTitle": "NAT 検出結果",
+      "cone": "フルコーン",
+      "symmetric": "対称型",
+      "blocked": "越境不可",
+      "unknown": "タイプ不明",
+      "openInternet": "インターネット直接接続",
+      "noPat": "パブリックアドレス（ポート変換なし）",
+      "fullCone": "フルコーン NAT",
+      "restricted": "制限付きコーン NAT",
+      "portRestricted": "ポート制限付きコーン NAT",
+      "symmetricEasy": "予測可能な対称 NAT",
+      "symmetricFirewall": "対称 UDP ファイアウォール",
+      "udpBlocked": "UDP 利用不可",
+      "ipv6Available": "パブリック IPv6 対応"
+    },
+    "title": "ツール",
+    "download": {
+      "title": "カスタムダウンロード",
+      "url": "ダウンロード URL",
+      "folder": "保存フォルダー",
+      "naming": "保存名",
+      "originalName": "元のファイル名",
+      "customName": "カスタム名",
+      "fileName": "ファイル名",
+      "fileNameHint": "入力した名前で保存します。必要な拡張子を含めてください",
+      "originalHint": "推定ファイル名：{name}。実際の名前はサーバーの応答に従います",
+      "originalRule": "サーバーのファイル名を優先し、なければダウンロード URL の名前を使用します",
+      "advanced": "詳細設定",
+      "userAgent": "User-Agent（空欄で既定値）",
+      "headers": "その他の HTTP ヘッダー",
+      "addHeader": "ヘッダーを追加",
+      "headerName": "ヘッダー名",
+      "headerValue": "ヘッダー値",
+      "headersHint": "ヘッダーはこのセッションでのみ保持され、タスク記録には保存されません。",
+      "invalidName": "拡張子を含む有効なファイル名を入力してください",
+      "invalidHeaders": "ヘッダーが無効、重複、または上限を超えています",
+      "uaHeader": "User-Agent は UA 欄で設定してください",
+      "overwrite": "既存のファイルを上書きする（失敗時は元のファイルを保持）",
+      "start": "ダウンロード開始"
+    }
   }
 }

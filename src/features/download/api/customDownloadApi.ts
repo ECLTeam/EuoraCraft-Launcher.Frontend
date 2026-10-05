@@ -8,12 +8,12 @@ export type CustomDownloadIntent = CommandPayloadMap['custom_download_start']
 
 export const customDownloadApi = {
   async defaults() {
-    return unwrapResponse(await backend.command('custom_download_defaults'), i18n.global.t('advanced.downloadTitle'))
+    return unwrapResponse(await backend.command('custom_download_defaults'), i18n.global.t('tools.download.title'))
   },
   async start(intent: CustomDownloadIntent): Promise<ApplicationOperation> {
     const result = unwrapResponse(
       await backend.command('custom_download_start', intent),
-      i18n.global.t('advanced.downloadTitle')
+      i18n.global.t('tools.download.title')
     )
     return { operationId: result.operationId, kind: 'custom_download', status: 'pending' }
   },
@@ -30,7 +30,7 @@ export const customDownloadApi = {
         purpose: 'custom-download',
         default_directory: defaultDirectory || undefined,
       }),
-      i18n.global.t('advanced.downloadFolder')
+      i18n.global.t('tools.download.folder')
     )
   },
 }

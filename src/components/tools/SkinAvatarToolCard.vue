@@ -1,41 +1,41 @@
 <template>
-  <UiCard class="skin-avatar-card" :title="t('connect.tools.skinAvatar.title')" icon="photo">
+  <UiCard class="skin-avatar-card" :title="t('tools.skinAvatar.title')" icon="photo">
     <div class="skin-avatar-body">
       <UiButton variant="secondary" icon="folder-open" :disabled="saving" :loading="loading" @click="chooseSkin">
-        {{ t('connect.tools.skinAvatar.choose') }}
+        {{ t('tools.skinAvatar.choose') }}
       </UiButton>
-      <div v-if="preview" class="skin-avatar-preview">
-        <img :src="preview" :alt="t('connect.tools.skinAvatar.preview')" width="96" height="96" />
-        <p>{{ t('connect.tools.skinAvatar.summary', { size, hat: hatSummary }) }}</p>
+      <div v-if="avatarPngDataUrl" class="skin-avatar-preview">
+        <img :src="avatarPngDataUrl" :alt="t('tools.skinAvatar.preview')" width="96" height="96" />
+        <p>{{ t('tools.skinAvatar.summary', { size: avatarSize, hat: hatSummary }) }}</p>
       </div>
-      <p v-else class="skin-avatar-hint">{{ t('connect.tools.skinAvatar.hint') }}</p>
+      <p v-else class="skin-avatar-hint">{{ t('tools.skinAvatar.hint') }}</p>
       <details class="tool-options">
-        <summary><UiIcon name="chevron-right" :size="16" />{{ t('connect.tools.skinAvatar.settings') }}</summary>
+        <summary><UiIcon name="chevron-right" :size="16" />{{ t('tools.skinAvatar.settings') }}</summary>
         <div class="skin-avatar-settings">
           <label class="skin-avatar-hat">
             <input v-model="includeHat" type="checkbox" :disabled="saving" />
-            {{ t('connect.tools.skinAvatar.includeHat') }}
+            {{ t('tools.skinAvatar.includeHat') }}
           </label>
           <fieldset class="skin-avatar-sizes" :disabled="saving">
-            <legend>{{ t('connect.tools.skinAvatar.size') }}</legend>
+            <legend>{{ t('tools.skinAvatar.size') }}</legend>
             <label v-for="option in avatarSizes" :key="option">
-              <input v-model="size" type="radio" :value="option" name="skin-avatar-size" />
+              <input v-model="avatarSize" type="radio" :value="option" name="skin-avatar-size" />
               {{ option }} × {{ option }}
             </label>
           </fieldset>
         </div>
       </details>
       <p v-if="error" class="skin-avatar-error" role="alert">{{ error }}</p>
-      <p v-if="saved" class="skin-avatar-hint" role="status">{{ t('connect.tools.skinAvatar.saved') }}</p>
+      <p v-if="saved" class="skin-avatar-hint" role="status">{{ t('tools.skinAvatar.saved') }}</p>
       <div class="skin-avatar-actions">
         <UiButton
           size="lg"
           icon="download"
-          :disabled="!preview || loading || saving"
+          :disabled="!avatarPngDataUrl || loading || saving"
           :loading="saving"
           @click="exportAvatar"
         >
-          {{ t('connect.tools.skinAvatar.export') }}
+          {{ t('tools.skinAvatar.export') }}
         </UiButton>
       </div>
     </div>
@@ -61,43 +61,43 @@ import {
 import { getErrorMessage } from '@/utils/error'
 
 const { t } = useI18n()
-const skin = shallowRef<SkinPixels | null>(null)
-const sourcePath = ref('')
-const size = ref<AvatarSize>(128)
+const skinPixels = shallowRef<SkinPixels | null>(null)
+const skinSourcePath = ref('')
+const avatarSize = ref<AvatarSize>(128)
 const includeHat = ref(true)
-const preview = ref('')
+const avatarPngDataUrl = ref('')
 const loading = ref(false)
 const saving = ref(false)
 const saved = ref(false)
 const error = ref('')
 let active = true
-let requestVersion = 0
+let selectionRevision = 0
 let decoderController: AbortController | undefined
-const hatSummary = computed(() => t(`connect.tools.skinAvatar.${includeHat.value ? 'hatOn' : 'hatOff'}`))
+const hatSummary = computed(() => t(`tools.skinAvatar.${includeHat.value ? 'hatOn' : 'hatOff'}`))
 
 function describeError(reason: unknown): string {
-  if (reason instanceof SkinAvatarError) return t(`connect.tools.skinAvatar.${reason.reason}`)
+  if (reason instanceof SkinAvatarError) return t(`tools.skinAvatar.${reason.reason}`)
   if (reason instanceof BackendCommandError) {
-    if (reason.errorCode === 'SKIN_AVATAR_SOURCE_CONFLICT') return t('connect.tools.skinAvatar.sourceConflict')
-    if (reason.errorCode === 'SKIN_AVATAR_INVALID_EXTENSION') return t('connect.tools.skinAvatar.invalidExtension')
+    if (reason.errorCode === 'SKIN_AVATAR_SOURCE_CONFLICT') return t('tools.skinAvatar.sourceConflict')
+    if (reason.errorCode === 'SKIN_AVATAR_INVALID_EXTENSION') return t('tools.skinAvatar.invalidExtension')
   }
   return getErrorMessage(reason)
 }
 
-watch([skin, size, includeHat], () => {
+watch([skinPixels, avatarSize, includeHat], () => {
   saved.value = false
-  if (!skin.value) return
+  if (!skinPixels.value) return
   try {
-    preview.value = renderAvatarPng(skin.value, size.value, includeHat.value)
+    avatarPngDataUrl.value = renderAvatarPng(skinPixels.value, avatarSize.value, includeHat.value)
   } catch (reason) {
-    preview.value = ''
+    avatarPngDataUrl.value = ''
     error.value = describeError(reason)
   }
 })
 
 async function chooseSkin(): Promise<void> {
   if (saving.value || loading.value) return
-  const version = ++requestVersion
+  const version = ++selectionRevision
   decoderController = new AbortController()
   loading.value = true
   error.value = ''
@@ -105,41 +105,41 @@ async function chooseSkin(): Promise<void> {
   try {
     const selected = unwrapResponse(
       await backend.command('select_image', { purpose: 'skin' }),
-      t('connect.tools.skinAvatar.choose')
+      t('tools.skinAvatar.choose')
     )
-    if (!active || version !== requestVersion || !selected.path) return
+    if (!active || version !== selectionRevision || !selected.path) return
     const file = unwrapResponse(
       await backend.command('fs_read_file', { path: selected.path, mode: 'base64' }),
-      t('connect.tools.skinAvatar.choose')
+      t('tools.skinAvatar.choose')
     )
-    if (!active || version !== requestVersion) return
+    if (!active || version !== selectionRevision) return
     const pixels = await loadSkinPixels(file.content, decoderController.signal)
-    if (!active || version !== requestVersion) return
+    if (!active || version !== selectionRevision) return
     // 只有完整解码成功才替换旧结果，取消或损坏文件不会丢失已有预览。
-    const nextPreview = renderAvatarPng(pixels, size.value, includeHat.value)
-    sourcePath.value = selected.path
-    skin.value = pixels
-    preview.value = nextPreview
+    const nextPreview = renderAvatarPng(pixels, avatarSize.value, includeHat.value)
+    skinSourcePath.value = selected.path
+    skinPixels.value = pixels
+    avatarPngDataUrl.value = nextPreview
   } catch (reason) {
-    if (active && version === requestVersion) error.value = describeError(reason)
+    if (active && version === selectionRevision) error.value = describeError(reason)
   } finally {
-    if (active && version === requestVersion) loading.value = false
+    if (active && version === selectionRevision) loading.value = false
   }
 }
 
 async function exportAvatar(): Promise<void> {
-  if (!preview.value || saving.value || loading.value) return
+  if (!avatarPngDataUrl.value || saving.value || loading.value) return
   saving.value = true
   saved.value = false
   error.value = ''
   try {
     const result = unwrapResponse(
       await backend.command('skin_avatar_export', {
-        data_url: preview.value,
-        size: size.value,
-        source_path: sourcePath.value,
+        data_url: avatarPngDataUrl.value,
+        size: avatarSize.value,
+        source_path: skinSourcePath.value,
       }),
-      t('connect.tools.skinAvatar.export')
+      t('tools.skinAvatar.export')
     )
     if (active) saved.value = !!result.path
   } catch (reason) {
@@ -151,12 +151,12 @@ async function exportAvatar(): Promise<void> {
 
 onBeforeUnmount(() => {
   active = false
-  requestVersion++
+  selectionRevision++
   decoderController?.abort()
-  skin.value = null
+  skinPixels.value = null
 })
 </script>
 
-<style scoped src="@/styles/components/connect/SkinAvatarToolCard.css"></style>
+<style scoped src="@/styles/components/tools/SkinAvatarToolCard.css"></style>
 
-<style scoped src="@/styles/components/connect/ToolOptions.css"></style>
+<style scoped src="@/styles/components/tools/ToolOptions.css"></style>

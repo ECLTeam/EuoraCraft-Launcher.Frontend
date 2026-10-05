@@ -1,47 +1,47 @@
 <template>
-  <UiCard class="connect-nat-card" :title="t('connect.tools.natCardTitle')" icon="activity">
+  <UiCard class="nat-tool-card" :title="t('tools.natCardTitle')" icon="activity">
     <template #actions>
       <UiButton
-        class="connect-nat-action"
+        class="nat-tool-action"
         variant="secondary"
         size="md"
         icon="wifi"
         :loading="isDetecting"
         :disabled="isDetecting"
         @click="detect"
-        >{{ t('connect.nat.detect') }}</UiButton
+        >{{ t('tools.nat.detect') }}</UiButton
       >
     </template>
-    <div class="connect-nat-body" role="status" aria-live="polite" :aria-busy="isDetecting">
-      <div v-if="isDetecting" class="connect-nat-state">
+    <div class="nat-tool-body" role="status" aria-live="polite" :aria-busy="isDetecting">
+      <div v-if="isDetecting" class="nat-tool-state">
         <UiLoading mode="inline" size="sm" decorative />
-        <span>{{ t('connect.tools.detecting') }}</span>
+        <span>{{ t('tools.detecting') }}</span>
       </div>
-      <div v-else-if="state === 'success' && result" class="connect-nat-result">
+      <div v-else-if="state === 'success' && result" class="nat-tool-result">
         <UiTag :tone="resultTone" size="medium">{{ resultLabel }}</UiTag>
         <details class="tool-options">
-          <summary><UiIcon name="chevron-right" :size="16" />{{ t('connect.tools.natDetails') }}</summary>
-          <div class="connect-nat-details">
-            <dl class="connect-nat-fields">
+          <summary><UiIcon name="chevron-right" :size="16" />{{ t('tools.natDetails') }}</summary>
+          <div class="nat-tool-details">
+            <dl class="nat-tool-fields">
               <div>
-                <dt>{{ t('connect.tools.publicAddress') }}</dt>
+                <dt>{{ t('tools.publicAddress') }}</dt>
                 <dd>
-                  <code>{{ publicAddress || t('connect.tools.notObtained') }}</code>
+                  <code>{{ publicAddress || t('tools.notObtained') }}</code>
                 </dd>
               </div>
             </dl>
-            <span class="connect-nat-ipv6">
-              {{ t(result.supportsIpv6 ? 'connect.tools.ipv6Detected' : 'connect.tools.ipv6NotDetected') }}
+            <span class="nat-tool-ipv6">
+              {{ t(result.supportsIpv6 ? 'tools.ipv6Detected' : 'tools.ipv6NotDetected') }}
             </span>
           </div>
         </details>
       </div>
-      <div v-else-if="state === 'error'" class="connect-nat-error">
-        <strong><UiIcon name="alert-circle" :size="15" />{{ t('connect.tools.detectFailed') }}</strong>
+      <div v-else-if="state === 'error'" class="nat-tool-error">
+        <strong><UiIcon name="alert-circle" :size="15" />{{ t('tools.detectFailed') }}</strong>
         <p>{{ error }}</p>
       </div>
-      <div v-else class="connect-nat-state">
-        <span>{{ t('connect.tools.idleTitle') }}</span>
+      <div v-else class="nat-tool-state">
+        <span>{{ t('tools.idleTitle') }}</span>
       </div>
     </div>
   </UiCard>
@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
 
 const resultLabel = computed(() => {
   const kind = result.value?.detailType ?? result.value?.type ?? 'unknown'
-  return t(kind === 'unknown' ? 'connect.tools.unknownType' : `connect.nat.${kind}`)
+  return t(kind === 'unknown' ? 'tools.unknownType' : `tools.nat.${kind}`)
 })
 
 const resultTone = computed<'default' | 'success' | 'warning' | 'error'>(() => {
@@ -113,11 +113,11 @@ async function detect(): Promise<void> {
   } catch (cause) {
     if (!isActive) return
     if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_TIMEOUT') {
-      error.value = t('connect.tools.timeout')
+      error.value = t('tools.timeout')
     } else if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_BUSY') {
-      error.value = t('connect.tools.busy')
+      error.value = t('tools.busy')
     } else if (cause instanceof BackendCommandError && cause.errorCode === 'CONNECTOR_NAT_TYPE_FAILED') {
-      error.value = t('connect.tools.probeFailed')
+      error.value = t('tools.probeFailed')
     } else {
       error.value = getErrorMessage(cause)
     }
@@ -126,6 +126,6 @@ async function detect(): Promise<void> {
 }
 </script>
 
-<style scoped src="@/styles/components/connect/NatToolCard.css"></style>
+<style scoped src="@/styles/components/tools/NatToolCard.css"></style>
 
-<style scoped src="@/styles/components/connect/ToolOptions.css"></style>
+<style scoped src="@/styles/components/tools/ToolOptions.css"></style>

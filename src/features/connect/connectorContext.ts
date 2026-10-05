@@ -5,12 +5,7 @@ export type ConnectorContext = ReturnType<typeof useConnector>
 
 const connectorKey: InjectionKey<ConnectorContext> = Symbol('connect-connector')
 
-/**
- * 由联机页外壳调用一次，把连接状态与轮询下发给子页。
- *
- * 状态必须由外壳持有：子页切换时外壳不重挂，轮询定时器与房间状态才能跨子页延续，
- * 否则每次切回联机子页都会重新初始化并丢失实时状态。
- */
+/** 更多外壳下发应用唯一会话，查询和释放由联机页与应用宿主分别负责。 */
 export function provideConnector(context: ConnectorContext): void {
   provide(connectorKey, context)
 }

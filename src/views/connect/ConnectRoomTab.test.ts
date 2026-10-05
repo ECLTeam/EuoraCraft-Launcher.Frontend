@@ -81,6 +81,7 @@ function idleStatus(): ConnectorStatus {
 
 function connectorState(status: ConnectorStatus, available = true) {
   return {
+    initialize: vi.fn(async () => {}),
     availability: ref(available ? 'available' : 'unavailable'),
     unavailableReason: ref(available ? '' : 'Unknown backend command: connector_status'),
     status: ref(status),

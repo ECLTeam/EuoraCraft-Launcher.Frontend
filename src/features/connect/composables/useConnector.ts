@@ -1,12 +1,14 @@
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { defineStore, storeToRefs } from 'pinia'
+import { ref, watch } from 'vue'
+import { pinia } from '@/app/stores'
 import { connectorApi } from '@/features/connect/api/connectorApi'
 import type { ConnectorPlayer, ConnectorStatus, EasyTierStatus } from '@/types/connect'
 import type { InstanceTargetPayload } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 
-const STATUS_POLL_MS = 2_000
-const PORT_SCAN_MS = 1_000
-const MAX_SEARCH_MISSES = 5
+const statusPollMs = 2000
+const portScanMs = 1000
+const maxSearchMisses = 5
 
 function idleStatus(): ConnectorStatus {
   return {
@@ -25,7 +27,7 @@ interface UseConnectorOptions {
   onError?: (message: string) => void
 }
 
-export function useConnector(options: UseConnectorOptions = {}) {
+const defineConnectorSession = defineStore('connectorSession', () => {
   const availability = ref<'checking' | 'available' | 'unavailable'>('checking')
   const unavailableReason = ref('')
   const status = ref<ConnectorStatus>(idleStatus())
@@ -35,80 +37,138 @@ export function useConnector(options: UseConnectorOptions = {}) {
   const detectedPort = ref<number | null>(null)
   const scanPhase = ref<'detecting' | 'searching'>('detecting')
   const candidatePorts = ref<number[]>([])
+  let onError: UseConnectorOptions['onError']
+  let isDisposed = false
+  let isInitialized = false
+  let sessionRevision = 0
+  let scanRevision = 0
   let searchMisses = 0
+  let statusTimer: ReturnType<typeof setTimeout> | undefined
+  let scanTimer: ReturnType<typeof setTimeout> | undefined
+  let statusRequest: { revision: number; promise: Promise<boolean> } | null = null
+  let initialization: Promise<void> | null = null
+  let scanRequest: Promise<void> | null = null
 
-  let statusTimer: ReturnType<typeof setInterval> | null = null
-  let portScanTimer: ReturnType<typeof setInterval> | null = null
-
+  function setErrorHandler(handler: UseConnectorOptions['onError']): void {
+    onError = handler
+  }
   function report(error: unknown): void {
-    options.onError?.(getErrorMessage(error))
+    onError?.(getErrorMessage(error))
   }
 
-  function clearTimer(timer: ReturnType<typeof setInterval> | null): void {
-    if (timer) clearInterval(timer)
+  function scheduleStatusPoll(): void {
+    clearTimeout(statusTimer)
+    statusTimer = undefined
+    if (isDisposed || !isInitialized || status.value.mode === 'idle') return
+    statusTimer = setTimeout(() => {
+      statusTimer = undefined
+      void refreshStatus()
+    }, statusPollMs)
   }
 
   async function refreshStatus(initial = false): Promise<boolean> {
-    try {
-      status.value = await connectorApi.status()
-      availability.value = 'available'
-      unavailableReason.value = ''
-      return true
-    } catch (error) {
-      if (initial || availability.value === 'checking') {
-        availability.value = 'unavailable'
-        unavailableReason.value = getErrorMessage(error)
-        status.value = idleStatus()
-      }
-      return false
+    if (isDisposed) return false
+    const revision = sessionRevision
+    if (statusRequest) {
+      if (statusRequest.revision === revision) return statusRequest.promise
+      await statusRequest.promise
+      if (isDisposed || revision !== sessionRevision) return false
+      return refreshStatus(initial)
     }
+    const promise = (async () => {
+      try {
+        const next = await connectorApi.status()
+        if (isDisposed || revision !== sessionRevision) return false
+        status.value = next
+        availability.value = 'available'
+        unavailableReason.value = ''
+        return true
+      } catch (error) {
+        if (isDisposed || revision !== sessionRevision) return false
+        if (initial || availability.value === 'checking') {
+          availability.value = 'unavailable'
+          unavailableReason.value = getErrorMessage(error)
+          status.value = idleStatus()
+        }
+        return false
+      }
+    })()
+    const tracked = promise.finally(() => {
+      if (statusRequest?.promise === tracked) statusRequest = null
+      if (!isDisposed && revision === sessionRevision) scheduleStatusPoll()
+    })
+    statusRequest = { revision, promise: tracked }
+    return tracked
   }
 
   async function refreshEasyTier(silent = true): Promise<void> {
+    const revision = sessionRevision
     try {
-      easyTier.value = await connectorApi.easyTierStatus()
+      const next = await connectorApi.easyTierStatus()
+      if (!isDisposed && revision === sessionRevision) easyTier.value = next
     } catch (error) {
-      if (!silent) report(error)
+      if (!isDisposed && revision === sessionRevision && !silent) report(error)
     }
   }
 
-  async function initialize(): Promise<void> {
+  function initialize(force = false): Promise<void> {
+    if (initialization) return initialization
+    if (isInitialized && !force && !isDisposed) return Promise.resolve()
+    isDisposed = false
+    isInitialized = true
+    const revision = ++sessionRevision
     availability.value = 'checking'
-    if (await refreshStatus(true)) await refreshEasyTier()
+    const promise = (async () => {
+      if (await refreshStatus(true)) await refreshEasyTier()
+    })()
+    const tracked = promise.finally(() => {
+      if (initialization === tracked) initialization = null
+      if (revision === sessionRevision) scheduleStatusPoll()
+    })
+    initialization = tracked
+    return tracked
   }
 
-  async function retryAvailability(): Promise<void> {
-    await initialize()
+  function retryAvailability(): Promise<void> {
+    return initialize(true)
   }
 
   async function runAction(action: () => Promise<unknown>): Promise<boolean> {
-    if (busy.value) return false
+    if (busy.value || isDisposed) return false
+    const revision = ++sessionRevision
     busy.value = true
+    clearTimeout(statusTimer)
     try {
       await action()
+      if (isDisposed || revision !== sessionRevision) return false
       await refreshStatus()
-      return true
+      return !isDisposed && revision === sessionRevision
     } catch (error) {
-      report(error)
+      if (!isDisposed && revision === sessionRevision) report(error)
       return false
     } finally {
-      busy.value = false
+      if (!isDisposed && revision === sessionRevision) {
+        busy.value = false
+        scheduleStatusPoll()
+      }
     }
   }
 
   function hostPort(port: number): Promise<boolean> {
     return runAction(() => connectorApi.hostPort(port))
   }
-
   function hostInstance(target: InstanceTargetPayload): Promise<boolean> {
     return runAction(() => connectorApi.hostInstance(target))
   }
-
   function join(code: string): Promise<boolean> {
     return runAction(() => connectorApi.join(code))
   }
+  function kick(player: ConnectorPlayer): Promise<boolean> {
+    return runAction(() => connectorApi.kick(player.machineId))
+  }
 
   async function leave(): Promise<boolean> {
+    stopPortScan()
     const succeeded = await runAction(() => connectorApi.leave())
     if (succeeded) {
       detectedPort.value = null
@@ -119,71 +179,83 @@ export function useConnector(options: UseConnectorOptions = {}) {
     return succeeded
   }
 
-  function kick(player: ConnectorPlayer): Promise<boolean> {
-    return runAction(() => connectorApi.kick(player.machineId))
-  }
-
-  async function scanPortOnce(): Promise<void> {
-    try {
-      if (scanPhase.value === 'detecting') {
-        const result = await connectorApi.detectPorts()
-        if (result.ports.length > 0) {
-          candidatePorts.value = result.ports
-          scanPhase.value = 'searching'
-          searchMisses = 0
-        }
-        return
-      }
-      const result = await connectorApi.searchMcPort(candidatePorts.value)
-      if (result.port !== null) {
-        detectedPort.value = result.port
-        stopPortScan()
-        return
-      }
-      searchMisses += 1
-      // 连续未命中说明候选端口可能过期（游戏在探测后才开启局域网），重新探测
-      if (searchMisses >= MAX_SEARCH_MISSES) {
-        candidatePorts.value = []
-        scanPhase.value = 'detecting'
-        searchMisses = 0
-      }
-    } catch (error) {
-      stopPortScan()
-      report(error)
+  async function scanPortOnce(revision: number): Promise<void> {
+    const isCurrent = () => !isDisposed && scanning.value && revision === scanRevision
+    if (scanRequest) {
+      await scanRequest
+      if (isCurrent()) return scanPortOnce(revision)
+      return
     }
+    const promise = (async () => {
+      try {
+        if (scanPhase.value === 'detecting') {
+          const result = await connectorApi.detectPorts()
+          if (!isCurrent()) return
+          if (result.ports.length) {
+            candidatePorts.value = result.ports
+            scanPhase.value = 'searching'
+            searchMisses = 0
+          }
+        } else {
+          const result = await connectorApi.searchMcPort([...candidatePorts.value])
+          if (!isCurrent()) return
+          if (result.port !== null) {
+            detectedPort.value = result.port
+            stopPortScan()
+            return
+          }
+          if (++searchMisses >= maxSearchMisses) {
+            candidatePorts.value = []
+            scanPhase.value = 'detecting'
+            searchMisses = 0
+          }
+        }
+      } catch (error) {
+        if (isCurrent()) {
+          stopPortScan()
+          report(error)
+        }
+      }
+    })()
+    const tracked = promise.finally(() => {
+      if (scanRequest === tracked) scanRequest = null
+      if (isCurrent()) scanTimer = setTimeout(() => void scanPortOnce(revision), portScanMs)
+    })
+    scanRequest = tracked
+    await tracked
   }
 
   function startPortScan(): void {
-    clearTimer(portScanTimer)
+    if (isDisposed) return
+    stopPortScan()
     detectedPort.value = null
     candidatePorts.value = []
     scanPhase.value = 'detecting'
     searchMisses = 0
     scanning.value = true
-    void scanPortOnce()
-    portScanTimer = setInterval(() => void scanPortOnce(), PORT_SCAN_MS)
+    void scanPortOnce(scanRevision)
   }
 
   function stopPortScan(): void {
-    clearTimer(portScanTimer)
-    portScanTimer = null
+    scanRevision++
+    clearTimeout(scanTimer)
+    scanTimer = undefined
     scanning.value = false
   }
 
-  watch(
-    () => status.value.mode,
-    (mode) => {
-      clearTimer(statusTimer)
-      statusTimer = mode === 'idle' ? null : setInterval(() => void refreshStatus(), STATUS_POLL_MS)
-    }
-  )
+  function dispose(): void {
+    isDisposed = true
+    sessionRevision++
+    isInitialized = false
+    initialization = null
+    clearTimeout(statusTimer)
+    statusTimer = undefined
+    stopPortScan()
+    busy.value = false
+    onError = undefined
+  }
 
-  onMounted(() => void initialize())
-  onUnmounted(() => {
-    clearTimer(statusTimer)
-    clearTimer(portScanTimer)
-  })
-
+  watch(() => status.value.mode, scheduleStatusPoll)
   return {
     availability,
     unavailableReason,
@@ -193,6 +265,7 @@ export function useConnector(options: UseConnectorOptions = {}) {
     scanning,
     scanPhase,
     detectedPort,
+    initialize,
     refreshStatus,
     refreshEasyTier,
     retryAvailability,
@@ -203,5 +276,28 @@ export function useConnector(options: UseConnectorOptions = {}) {
     kick,
     startPortScan,
     stopPortScan,
+    dispose,
+    setErrorHandler,
+  }
+})
+
+/** 应用唯一的联机会话；获取状态不会启动查询，由联机页显式初始化。 */
+export function useConnector(options: UseConnectorOptions = {}) {
+  const session = defineConnectorSession(pinia)
+  if (options.onError) session.setErrorHandler(options.onError)
+  return {
+    ...storeToRefs(session),
+    initialize: session.initialize,
+    refreshStatus: session.refreshStatus,
+    refreshEasyTier: session.refreshEasyTier,
+    retryAvailability: session.retryAvailability,
+    hostPort: session.hostPort,
+    hostInstance: session.hostInstance,
+    join: session.join,
+    leave: session.leave,
+    kick: session.kick,
+    startPortScan: session.startPortScan,
+    stopPortScan: session.stopPortScan,
+    dispose: session.dispose,
   }
 }

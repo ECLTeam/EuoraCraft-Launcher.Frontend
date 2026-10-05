@@ -25,12 +25,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/more',
-    component: withErrorBoundary(() => import('@/views/Connect.vue')),
+    component: withErrorBoundary(() => import('@/views/More.vue')),
     redirect: '/more/room',
     children: [
       { path: 'room', name: 'more-room', component: () => import('@/views/connect/ConnectRoomTab.vue') },
       { path: 'plugins', name: 'more-plugins', component: withErrorBoundary(() => import('@/views/Plugins.vue')) },
-      { path: 'tools', name: 'more-tools', component: () => import('@/views/connect/ConnectToolsTab.vue') },
+      { path: 'tools', name: 'more-tools', component: () => import('@/views/more/ToolsTab.vue') },
     ],
   },
   { path: '/download', name: 'download', component: withErrorBoundary(() => import('@/views/Download.vue')) },

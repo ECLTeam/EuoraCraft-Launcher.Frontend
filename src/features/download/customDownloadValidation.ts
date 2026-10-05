@@ -23,20 +23,20 @@ export function downloadValidationKey(options: {
   headerRows: HeaderRow[]
 }): string {
   if (options.namingMode === 'custom' && !isValidDownloadFilename(options.customName))
-    return 'advanced.downloadInvalidName'
+    return 'tools.download.invalidName'
   const invalidHeader = (value: string) =>
     Array.from(value).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) > 126)
-  if (options.userAgent.length > 4096 || invalidHeader(options.userAgent)) return 'advanced.downloadInvalidHeaders'
+  if (options.userAgent.length > 4096 || invalidHeader(options.userAgent)) return 'tools.download.invalidHeaders'
   const seen = new Set<string>()
   let size = 0
   for (const header of options.headerRows) {
     if (!header.name && !header.value) continue
     const key = header.name.toLowerCase()
-    if (key === 'user-agent') return 'advanced.downloadUaHeader'
+    if (key === 'user-agent') return 'tools.download.uaHeader'
     if (seen.has(key) || !/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(header.name) || invalidHeader(header.value))
-      return 'advanced.downloadInvalidHeaders'
+      return 'tools.download.invalidHeaders'
     seen.add(key)
     size += header.name.length + header.value.length
   }
-  return seen.size > 64 || size > 32768 ? 'advanced.downloadInvalidHeaders' : ''
+  return seen.size > 64 || size > 32768 ? 'tools.download.invalidHeaders' : ''
 }

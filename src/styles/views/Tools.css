@@ -1,0 +1,33 @@
+.tools-layout {
+  display: grid;
+  container-type: inline-size;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tools-page .tools-workspace {
+  height: 100%;
+}
+
+.tools-layout > .ecl-page-header {
+  margin-bottom: 0;
+}
+
+.tools-layout :deep(.ecl-page-header__icon) {
+  width: 28px;
+  height: 28px;
+}
+
+.tools-layout :deep(.ecl-page-header__title) {
+  font-size: 16px;
+}

@@ -1,12 +1,12 @@
 <template>
-  <UiCard class="custom-download-card" :title="t('advanced.downloadTitle')" icon="download">
+  <UiCard class="custom-download-card" :title="t('tools.download.title')" icon="download">
     <div class="custom-download-form">
       <div class="custom-download-row">
-        <label for="custom-download-url">{{ t('advanced.downloadUrl') }}</label>
+        <label for="custom-download-url">{{ t('tools.download.url') }}</label>
         <UiInput id="custom-download-url" v-model="url" placeholder="https://example.com/file.zip" :disabled="busy" />
       </div>
       <div class="custom-download-row">
-        <label for="custom-download-folder">{{ t('advanced.downloadFolder') }}</label>
+        <label for="custom-download-folder">{{ t('tools.download.folder') }}</label>
         <div class="custom-download-path">
           <UiInput id="custom-download-folder" v-model="downloadDirectory" :disabled="busy" />
           <UiButton variant="secondary" icon="folder-open" :disabled="busy" @click="browse">{{
@@ -16,20 +16,18 @@
       </div>
       <p class="custom-download-hint custom-download-name-summary">
         {{
-          t('connect.tools.downloadNameSummary', {
+          t('tools.downloadNameSummary', {
             name:
-              namingMode === 'custom'
-                ? customName || t('advanced.downloadCustomName')
-                : t('advanced.downloadOriginalName'),
+              namingMode === 'custom' ? customName || t('tools.download.customName') : t('tools.download.originalName'),
           })
         }}
       </p>
       <details ref="downloadOptions" class="custom-download-advanced tool-options">
-        <summary><UiIcon name="chevron-right" :size="16" />{{ t('connect.tools.downloadOptions') }}</summary>
+        <summary><UiIcon name="chevron-right" :size="16" />{{ t('tools.downloadOptions') }}</summary>
         <div class="custom-download-advanced-body">
           <div class="custom-download-row">
             <span id="custom-download-naming-label" class="custom-download-label">{{
-              t('advanced.downloadNaming')
+              t('tools.download.naming')
             }}</span>
             <div class="custom-download-naming">
               <NRadioGroup
@@ -40,19 +38,19 @@
                 :disabled="busy"
                 :themeOverrides="namingTheme"
               >
-                <NRadioButton value="original">{{ t('advanced.downloadOriginalName') }}</NRadioButton>
-                <NRadioButton value="custom">{{ t('advanced.downloadCustomName') }}</NRadioButton>
+                <NRadioButton value="original">{{ t('tools.download.originalName') }}</NRadioButton>
+                <NRadioButton value="custom">{{ t('tools.download.customName') }}</NRadioButton>
               </NRadioGroup>
               <div v-if="namingMode === 'custom'" class="custom-download-name">
-                <label for="custom-download-name">{{ t('advanced.downloadFileName') }}</label>
+                <label for="custom-download-name">{{ t('tools.download.fileName') }}</label>
                 <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
-                <p class="custom-download-hint">{{ t('advanced.downloadFileNameHint') }}</p>
+                <p class="custom-download-hint">{{ t('tools.download.fileNameHint') }}</p>
               </div>
               <p v-else class="custom-download-hint">
                 {{
                   url.trim()
-                    ? t('advanced.downloadOriginalHint', { name: estimatedName })
-                    : t('advanced.downloadOriginalRule')
+                    ? t('tools.download.originalHint', { name: estimatedName })
+                    : t('tools.download.originalRule')
                 }}
               </p>
             </div>
@@ -62,26 +60,26 @@
             class="custom-download-overwrite"
             :themeOverrides="overwriteTheme"
             :disabled="busy"
-            >{{ t('advanced.downloadOverwrite') }}</NCheckbox
+            >{{ t('tools.download.overwrite') }}</NCheckbox
           >
           <div class="custom-download-row">
-            <label for="custom-download-ua">{{ t('advanced.downloadUserAgent') }}</label>
+            <label for="custom-download-ua">{{ t('tools.download.userAgent') }}</label>
             <UiInput id="custom-download-ua" v-model="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
           </div>
           <div class="custom-download-row">
-            <span class="custom-download-label">{{ t('advanced.downloadHeaders') }}</span>
+            <span class="custom-download-label">{{ t('tools.download.headers') }}</span>
             <div class="custom-download-headers">
               <div v-for="header in headers" :key="header.id" class="custom-download-header-row">
                 <UiInput
                   v-model="header.name"
-                  :placeholder="t('advanced.downloadHeaderName')"
-                  :aria-label="t('advanced.downloadHeaderName')"
+                  :placeholder="t('tools.download.headerName')"
+                  :aria-label="t('tools.download.headerName')"
                   :disabled="busy"
                 />
                 <UiInput
                   v-model="header.value"
-                  :placeholder="t('advanced.downloadHeaderValue')"
-                  :aria-label="t('advanced.downloadHeaderValue')"
+                  :placeholder="t('tools.download.headerValue')"
+                  :aria-label="t('tools.download.headerValue')"
                   :disabled="busy"
                 />
                 <UiButton variant="text" :disabled="busy" @click="removeHeader(header.id)">{{
@@ -90,10 +88,10 @@
               </div>
               <div class="custom-download-header-actions">
                 <UiButton variant="secondary" icon="plus" :disabled="busy || headers.length >= 64" @click="addHeader">{{
-                  t('advanced.downloadAddHeader')
+                  t('tools.download.addHeader')
                 }}</UiButton>
               </div>
-              <p class="custom-download-hint">{{ t('advanced.downloadHeadersHint') }}</p>
+              <p class="custom-download-hint">{{ t('tools.download.headersHint') }}</p>
             </div>
           </div>
         </div>
@@ -133,7 +131,7 @@
             :disabled="busy || !url.trim() || !downloadDirectory.trim() || !!validationError"
             :loading="starting"
             @click="start"
-            >{{ t('advanced.downloadStart') }}</UiButton
+            >{{ t('tools.download.start') }}</UiButton
           >
         </div>
       </div>
@@ -397,4 +395,4 @@ p {
 }
 </style>
 
-<style scoped src="@/styles/components/connect/ToolOptions.css"></style>
+<style scoped src="@/styles/components/tools/ToolOptions.css"></style>

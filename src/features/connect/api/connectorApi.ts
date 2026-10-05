@@ -6,7 +6,9 @@ import type { InstanceTargetPayload } from '@/types/instances'
 
 export const connectorApi = {
   status(): Promise<ConnectorStatus> {
-    return backend.command(COMMAND_NAMES.connector_status).then((response) => unwrapResponse(response, '读取联机状态'))
+    return backend
+      .command(COMMAND_NAMES.connector_status, undefined, 5000)
+      .then((response) => unwrapResponse(response, '读取联机状态'))
   },
 
   hostPort(port: number): Promise<{ roomCode: string }> {
@@ -45,7 +47,7 @@ export const connectorApi = {
 
   easyTierStatus(): Promise<EasyTierStatus> {
     return backend
-      .command(COMMAND_NAMES.connector_easytier_status)
+      .command(COMMAND_NAMES.connector_easytier_status, undefined, 5000)
       .then((response) => unwrapResponse(response, '读取 EasyTier 状态'))
   },
 
@@ -57,13 +59,13 @@ export const connectorApi = {
 
   detectPorts(): Promise<{ ports: number[] }> {
     return backend
-      .command(COMMAND_NAMES.connector_detect_ports)
+      .command(COMMAND_NAMES.connector_detect_ports, undefined, 10000)
       .then((response) => unwrapResponse(response, '探测本地端口'))
   },
 
   searchMcPort(ports: number[]): Promise<{ port: number | null }> {
     return backend
-      .command(COMMAND_NAMES.connector_search_mc_port, { ports })
+      .command(COMMAND_NAMES.connector_search_mc_port, { ports }, 10000)
       .then((response) => unwrapResponse(response, '搜索 MC 端口'))
   },
 
