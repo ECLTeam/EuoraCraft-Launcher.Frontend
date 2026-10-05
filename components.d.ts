@@ -51,6 +51,7 @@ declare module 'vue' {
     Loading: typeof import('./src/components/ui/Loading.vue')['default']
     MarkdownContent: typeof import('./src/components/ui/MarkdownContent.vue')['default']
     Modal: typeof import('./src/components/modals/Modal.vue')['default']
+    ModDiagnostics: typeof import('./src/components/instances/ModDiagnostics.vue')['default']
     ModpackImportModal: typeof import('./src/components/instances/ModpackImportModal.vue')['default']
     NatToolCard: typeof import('./src/components/tools/NatToolCard.vue')['default']
     OnlineModSearch: typeof import('./src/components/mods/OnlineModSearch.vue')['default']
