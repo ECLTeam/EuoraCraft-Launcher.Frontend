@@ -140,6 +140,7 @@ import UiInput from '@/components/ui/Input.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalLaunchProgress } from '@/composables/useLaunchProgress'
 import { useRecentInstances } from '@/composables/useRecentInstances'
+import { useRequestScope } from '@/composables/useRequestScope'
 import { LAUNCH_PROGRESS, LAUNCH_SUCCESS_HIDE_DELAY, LAUNCH_ERROR_HIDE_DELAY } from '@/config/game'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instancePathConfigApi } from '@/features/instances/api/instancePathConfigApi'
@@ -153,6 +154,7 @@ import type { MinecraftPathEntry } from '@/types/config'
 import type { ScannedVersion } from '@/types/instances'
 import type { LaunchProgress } from '@/types/system'
 import { getErrorMessage } from '@/utils/error'
+import { gamePathIdentity } from '@/utils/path'
 import InstanceDetailModal from '@/views/instances/InstanceDetailModal.vue'
 
 const { t } = useI18n()
@@ -164,6 +166,12 @@ const settingsStore = useSettingsStore()
 
 const gamePaths = ref<GamePath[]>([])
 const selectedPathIndex = ref<number>(-1)
+const selectionRequests = useRequestScope(
+  () => `${selectedPathIndex.value}\0${gamePaths.value[selectedPathIndex.value]?.path ?? ''}`
+)
+const pathScanRequests = useRequestScope(
+  () => `${selectedPathIndex.value}\0${gamePaths.value[selectedPathIndex.value]?.path ?? ''}`
+)
 const showPathModal = ref(false)
 const isEditing = ref(false)
 const editingIndex = ref(-1)
@@ -240,16 +248,19 @@ const currentPathName = computed(() => currentPath.value?.name || t('versions.ma
 
 const currentPathVersions = computed(() => {
   if (!currentPath.value) return []
-  return instanceStore.scannedVersions.filter((v) => v.path === currentPath.value?.path)
+  return instanceStore.scannedVersions.filter(
+    (v) => gamePathIdentity(v.path) === gamePathIdentity(currentPath.value!.path)
+  )
 })
 
 const pathVersionCounts = computed(() =>
-  instanceStore.scannedVersions.reduce<Record<string, number>>((counts, version) => {
-    if (version.path) {
-      counts[version.path] = (counts[version.path] ?? 0) + 1
-    }
-    return counts
-  }, {})
+  Object.fromEntries(
+    gamePaths.value.map(({ path }) => [
+      path,
+      instanceStore.scannedVersions.filter((version) => gamePathIdentity(version.path) === gamePathIdentity(path))
+        .length,
+    ])
+  )
 )
 
 onMounted(async () => {
@@ -273,7 +284,9 @@ const fetchGamePaths = async () => {
     if (gamePaths.value.length > 0) {
       const requestedPath = typeof route.query.gamePath === 'string' ? route.query.gamePath : ''
       selectedPathIndex.value = findGamePathIndex(gamePaths.value, requestedPath, settingsStore.game.last_manage_path)
+      const isCurrent = selectionRequests.begin()
       await Promise.all([scanCurrentPath(), rememberSelectedPath(currentPath.value?.path ?? '')])
+      if (!isCurrent()) return
       // 从 ecl.json 恢复该路径的选中实例
       if (currentPath.value) {
         await instanceStore.switchPath(currentPath.value.path)
@@ -302,18 +315,21 @@ const scanCurrentPath = async (force = false) => {
 
   loading.value = true
   const currentPathValue = currentPath.value.path
+  const isCurrent = pathScanRequests.begin()
   try {
     await instanceStore.scanPath(currentPathValue, force)
   } catch (error) {
-    console.error(t('versions.manage.scanFailed'), error)
+    if (isCurrent()) console.error(t('versions.manage.scanFailed'), error)
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 
 const handleRefresh = async () => {
+  const isCurrent = selectionRequests.begin()
   refreshLoading.value = true
   await scanCurrentPath(true)
+  if (!isCurrent()) return
   if (currentPath.value) await instanceStore.switchPath(currentPath.value.path, { forceConfig: true })
   refreshLoading.value = false
 }
@@ -330,7 +346,10 @@ const selectPath = async (index: number) => {
   const path = gamePaths.value[index]
   if (!path) return
   selectedPathIndex.value = index
+  refreshLoading.value = false
+  const isCurrent = selectionRequests.begin()
   await Promise.all([scanCurrentPath(), rememberSelectedPath(path.path)])
+  if (!isCurrent()) return
   // 扫描完成后，根据该路径的 ecl.json 恢复选中的实例
   await instanceStore.switchPath(path.path)
 }

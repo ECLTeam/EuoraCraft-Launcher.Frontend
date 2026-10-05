@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import type { ScannedVersion } from '@/types/instances'
 import { useInstanceStore } from './instanceStore'
 
@@ -11,8 +12,27 @@ vi.mock('@/features/settings/stores/settingsStore', () => ({
   }),
 }))
 vi.mock('@/features/instances/api/instancePathConfigApi', () => ({ instancePathConfigApi: mocks }))
+vi.mock('@/features/instances/api/instanceInstallApi', () => ({
+  instanceInstallApi: { scan: vi.fn(), onVersionsChanged: vi.fn(() => vi.fn()) },
+}))
 
 describe('目录选择时序', () => {
+  it('扫描已确认的同根目录别名时替换原实例，不累计重复卡片', async () => {
+    const store = useInstanceStore()
+    const version = {
+      versionId: 'same',
+      path: 'A',
+      rootKey: 'canonical-root',
+      instanceKey: 'canonical-root\0same',
+    } as ScannedVersion
+    vi.mocked(instanceInstallApi.scan)
+      .mockResolvedValueOnce([version])
+      .mockResolvedValueOnce([{ ...version, path: 'AliasA' }])
+    await store.scanPath('A')
+    await store.scanPath('AliasA')
+    expect(store.scannedVersions).toHaveLength(1)
+    expect(store.scannedVersions[0]?.path).toBe('AliasA')
+  })
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()

@@ -84,12 +84,14 @@ export interface InstanceProfile {
 
 export interface ScannedVersion {
   /** 后端规范目录身份，旧后端缺失时在 API 边界使用保守路径键。 */
-  rootKey?: string
-  instanceKey?: string
-  instanceDirectoryName?: string
-  minecraftVersion?: string
+  readonly rootKey?: string
+  /** 仅包含后端在本次扫描中确认属于相同根目录的输入路径。 */
+  readonly rootAliases?: readonly string[]
+  readonly instanceKey?: string
+  readonly instanceDirectoryName?: string
+  readonly minecraftVersion?: string
   id: string
-  versionId: string
+  readonly versionId: string
   /** 后端解析得到的原版版本类型，前端不再根据版本名称猜测 */
   versionType: Exclude<MinecraftVersionType, 'all'>
   path: string

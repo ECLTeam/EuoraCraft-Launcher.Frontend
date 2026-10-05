@@ -5,7 +5,7 @@ import { assertParams } from '@/app/validation'
 import type { SelectResult } from '@/types/accounts'
 import type { CommandPayloadMap } from '@/types/api'
 import type { InstallVersionResult, MinecraftVersionCatalog, ScannedVersion } from '@/types/instances'
-import { normalizeGamePath, registerGamePathIdentity } from '@/utils/path'
+import { gamePathIdentity, normalizeGamePath, registerGamePathIdentity } from '@/utils/path'
 
 export type InstallableLoader = 'fabric' | 'forge' | 'neoforge' | 'quilt'
 export type VersionsChangedHandler = (payload: { gamePath: string }) => void
@@ -16,15 +16,21 @@ const pendingScans = new Map<string, { generation: number; promise: Promise<void
 let catalogRequest: Promise<MinecraftVersionCatalog> | null = null
 const versionsChangedHandlers = new Set<VersionsChangedHandler>()
 let isListeningForVersionChanges = false
+let scanRequestCounter = 0
+const latestRequestByRootKey = new Map<string, number>()
 
 function cloneVersions(versions: ScannedVersion[]): ScannedVersion[] {
   return versions.map((version) => ({ ...version }))
 }
 
 function invalidateScanCache(path?: string): void {
+  const cachedKeys = new Set([...scanCache.keys(), ...pendingScans.keys(), ...scanGenerations.keys()])
   const keys = path
-    ? [normalizeGamePath(path)]
-    : new Set([...scanCache.keys(), ...pendingScans.keys(), ...scanGenerations.keys()])
+    ? new Set([
+        normalizeGamePath(path),
+        ...[...cachedKeys].filter((key) => gamePathIdentity(key) === gamePathIdentity(path)),
+      ])
+    : cachedKeys
   for (const key of keys) {
     scanGenerations.set(key, (scanGenerations.get(key) ?? 0) + 1)
     scanCache.delete(key)
@@ -94,6 +100,7 @@ export const instanceInstallApi = {
     if (options.force) requestedPaths.forEach((path) => invalidateScanCache(path))
 
     const waiting: Promise<void>[] = []
+    const supersededRootByPath = new Map<string, string>()
     const missingPaths = requestedPaths.filter((path) => {
       const key = normalizeGamePath(path)
       if (scanCache.has(key)) return false
@@ -105,6 +112,7 @@ export const instanceInstallApi = {
       return true
     })
     if (missingPaths.length > 0) {
+      const requestId = ++scanRequestCounter
       const generations = new Map(
         missingPaths.map((path) => {
           const key = normalizeGamePath(path)
@@ -119,13 +127,53 @@ export const instanceInstallApi = {
           ) ?? []
         const snapshots = new Map([...generations.keys()].map((key) => [key, [] as ScannedVersion[]]))
         scanned.forEach((version) => {
-          if (version.rootKey) registerGamePathIdentity(version.path, version.rootKey)
           const fallbackPath = missingPaths.length === 1 ? (missingPaths[0] ?? '') : ''
           const key = normalizeGamePath(version.path || fallbackPath)
+          const affectedKeys = missingPaths
+            .map(normalizeGamePath)
+            .filter(
+              (candidate) =>
+                candidate === key || version.rootAliases?.some((alias) => normalizeGamePath(alias) === candidate)
+            )
+          if (!affectedKeys.some((candidate) => (scanGenerations.get(candidate) ?? 0) === generations.get(candidate)))
+            return
+          const rootKey = version.rootKey ?? gamePathIdentity(version.path || fallbackPath)
+          if ((latestRequestByRootKey.get(rootKey) ?? 0) > requestId) {
+            affectedKeys.forEach((candidate) => {
+              if ((scanGenerations.get(candidate) ?? 0) !== generations.get(candidate)) return
+              supersededRootByPath.set(candidate, rootKey)
+              registerGamePathIdentity(candidate, rootKey)
+            })
+            return
+          }
+          latestRequestByRootKey.set(rootKey, requestId)
+          if (version.rootKey) {
+            registerGamePathIdentity(version.path, version.rootKey)
+            version.rootAliases?.forEach((alias) => registerGamePathIdentity(alias, version.rootKey!))
+          }
           snapshots
             .get(key)
             ?.push({ ...version, instanceDirectoryName: version.versionId, minecraftVersion: version.vanillaName })
         })
+        for (const path of missingPaths) {
+          const key = normalizeGamePath(path)
+          if (snapshots.get(key)?.length) continue
+          const matchingVersions = scanned.filter(
+            (version) =>
+              version.rootKey &&
+              (latestRequestByRootKey.get(version.rootKey) ?? 0) <= requestId &&
+              version.rootAliases?.some((alias) => normalizeGamePath(alias) === key)
+          )
+          snapshots.set(
+            key,
+            matchingVersions.map((version) => ({
+              ...version,
+              path,
+              instanceDirectoryName: version.versionId,
+              minecraftVersion: version.vanillaName,
+            }))
+          )
+        }
         for (const [key, snapshot] of snapshots) {
           if ((scanGenerations.get(key) ?? 0) === generations.get(key)) scanCache.set(key, snapshot)
         }
@@ -139,7 +187,14 @@ export const instanceInstallApi = {
     }
     await Promise.all(waiting)
 
-    return requestedPaths.flatMap((path) => cloneVersions(scanCache.get(normalizeGamePath(path)) ?? []))
+    return requestedPaths.flatMap((path) => {
+      const cached = scanCache.get(normalizeGamePath(path))
+      if (cached?.length) return cloneVersions(cached)
+      const rootKey = supersededRootByPath.get(normalizeGamePath(path))
+      if (!rootKey) return []
+      const shared = [...scanCache.values()].find((versions) => versions.some((version) => version.rootKey === rootKey))
+      return shared ? cloneVersions(shared).map((version) => ({ ...version, path })) : []
+    })
   },
 
   invalidateScanCache,

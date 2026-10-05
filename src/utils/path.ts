@@ -18,6 +18,7 @@ const rootKeyByPath = new Map<string, string>()
 /** 后端解析过的实际目录身份，用于选择比较；不修改原始文件路径。 */
 export function registerGamePathIdentity(path: string, rootKey: string): void {
   rootKeyByPath.set(normalizeGamePath(path), rootKey)
+  rootKeyByPath.set(normalizeGamePath(rootKey), rootKey)
 }
 
 export function gamePathIdentity(path: string): string {

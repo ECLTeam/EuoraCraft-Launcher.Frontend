@@ -12,6 +12,61 @@ vi.mock('@/api/client', async () => {
 const { mocks } = mock.state!
 
 describe('instanceInstallApi scan cache', () => {
+  it('后端确认的目录别名共享实例，规范根目录变更事件使所有别名失效', async () => {
+    mocks.command.mockResolvedValue({
+      success: true,
+      data: [
+        {
+          versionId: 'pack',
+          path: 'D:/RealRoot',
+          rootKey: 'D:\\RealRoot',
+          instanceKey: 'same-instance',
+          rootAliases: ['D:/AliasA', 'D:/AliasB'],
+        },
+      ],
+    })
+    const first = await instanceInstallApi.scan(['D:/AliasA', 'D:/AliasB'])
+    expect(first.map((version) => version.path)).toEqual(['D:/AliasA', 'D:/AliasB'])
+    expect(first.map((version) => version.instanceKey)).toEqual(['same-instance', 'same-instance'])
+    mocks.handlers['game:versions_changed']?.({ gamePath: 'D:\\RealRoot' })
+    await instanceInstallApi.scan(['D:/AliasB'])
+    expect(mocks.command).toHaveBeenCalledTimes(2)
+  })
+  it('两个尚未确认的别名并发时，旧回复使用较新的同根目录结果', async () => {
+    let finish!: (response: { success: boolean; data: object[] }) => void
+    mocks.command.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const old = instanceInstallApi.scan(['D:/UnknownAliasB'])
+    mocks.command.mockResolvedValueOnce({
+      success: true,
+      data: [
+        {
+          versionId: 'fresh',
+          path: 'D:/UnknownAliasA',
+          rootKey: 'D:/SharedUnknownRoot',
+          rootAliases: ['D:/UnknownAliasA'],
+        },
+      ],
+    })
+    await instanceInstallApi.scan(['D:/UnknownAliasA'], { force: true })
+    finish({
+      success: true,
+      data: [
+        {
+          versionId: 'old',
+          path: 'D:/UnknownAliasB',
+          rootKey: 'D:/SharedUnknownRoot',
+          rootAliases: ['D:/UnknownAliasB'],
+        },
+      ],
+    })
+    expect((await old)[0]?.versionId).toBe('fresh')
+    expect((await old)[0]?.path).toBe('D:/UnknownAliasB')
+  })
   it('强制扫描完成后，迟到旧扫描不能重新写入缓存；普通并发调用合并', async () => {
     instanceInstallApi.invalidateScanCache()
     let finish!: (value: { success: boolean; data: never[] }) => void

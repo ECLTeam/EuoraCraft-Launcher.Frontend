@@ -48,9 +48,13 @@ export const useInstanceStore = defineStore('versions', () => {
   }
 
   function replacePathVersions(path: string, versionsForPath: ScannedVersion[]): void {
-    const key = normalizeGamePath(path)
+    const key = versionsForPath[0]?.rootKey ?? gamePathIdentity(path)
+    const pathKey = normalizeGamePath(path)
     scannedVersions.value = [
-      ...scannedVersions.value.filter((version) => normalizeGamePath(version.path) !== key),
+      ...scannedVersions.value.filter(
+        (version) =>
+          normalizeGamePath(version.path) !== pathKey && (version.rootKey ?? gamePathIdentity(version.path)) !== key
+      ),
       ...versionsForPath.map((version) => ({ ...version, path })),
     ]
   }
@@ -66,11 +70,11 @@ export const useInstanceStore = defineStore('versions', () => {
     const request = instanceInstallApi
       .scan([path], { force })
       .then((result) => {
-        replacePathVersions(path, result)
+        if (scanRequests.get(key) === request) replacePathVersions(path, result)
         return result
       })
       .finally(() => {
-        scanRequests.delete(key)
+        if (scanRequests.get(key) === request) scanRequests.delete(key)
         loadingCount.value = Math.max(0, loadingCount.value - 1)
       })
     scanRequests.set(key, request)
