@@ -1,6 +1,7 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useAsyncState } from '@/composables/useAsyncState'
+import { toJavaInstallations, useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
 import type {
   BackgroundConfig,
@@ -88,13 +89,10 @@ export const useSettingsStore = defineStore('settings', () => {
   const launcher = ref<LauncherConfig>({ ...DEFAULT_LAUNCHER_CONFIG })
   const connector = ref<ConnectorConfig>({ mode: 'automatic', nodes: [] })
   const { status, isLoading } = useAsyncState()
-  const { status: javaStatus, isLoading: isJavaLoading } = useAsyncState()
+  const javaStore = useJavaRuntimeStore()
+  const { status: javaStatus, isLoading: isJavaLoading, installations: javaInstallations } = storeToRefs(javaStore)
   const error = ref('')
-  const javaInstallations = ref<JavaInstallation[]>([])
   let loadPromise: Promise<void> | null = null
-  let javaScanPromise: Promise<JavaInstallation[]> | null = null
-  let javaScanId = 0
-  let isJavaScanForced = false
   let latestLoadId = 0
   let configRevision = 0
   const writeQueues = new Map<string, Promise<void>>()
@@ -136,43 +134,11 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function loadJavaInstallations(force = false): Promise<JavaInstallation[]> {
-    if (!force && javaStatus.value === 'ready') return javaInstallations.value
-    if (javaScanPromise && (!force || isJavaScanForced)) return javaScanPromise
-
-    const scanId = ++javaScanId
-    isJavaScanForced = force
-    javaStatus.value = 'loading'
-    const request = settingsApi.listJava().then(
-      (installations) => {
-        if (scanId === javaScanId) {
-          javaInstallations.value = installations
-          javaStatus.value = 'ready'
-        }
-        return installations
-      },
-      (reason: unknown) => {
-        if (scanId === javaScanId) javaStatus.value = 'error'
-        throw reason
-      }
-    )
-    javaScanPromise = request
-    void request.then(
-      () => {
-        if (javaScanPromise === request) javaScanPromise = null
-      },
-      () => {
-        if (javaScanPromise === request) javaScanPromise = null
-      }
-    )
-    return request
+    return toJavaInstallations((await javaStore.load(force)).runtimes)
   }
 
   function invalidateJavaInstallations(): void {
-    javaScanId += 1
-    javaScanPromise = null
-    isJavaScanForced = false
-    javaStatus.value = 'idle'
-    javaInstallations.value = []
+    javaStore.invalidate()
   }
 
   /**

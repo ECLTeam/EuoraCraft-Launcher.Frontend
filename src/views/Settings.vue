@@ -31,6 +31,7 @@ const navItems = computed(() => [
   { path: '/settings/launcher', icon: 'settings', label: t('settings.launcherSettings') },
   { path: '/settings/appearance', icon: 'brush', label: t('settings.appearance') },
   { path: '/settings/game', icon: 'game', label: t('settings.gameSettings') },
+  { path: '/settings/java', icon: 'package', label: t('javaManager.title') },
   { path: '/settings/about', icon: 'info', label: t('settings.about') },
 ])
 

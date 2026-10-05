@@ -2,9 +2,16 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { NSelect } from 'naive-ui'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '@/i18n'
+import { javaRuntime } from '@/test/javaFixtures'
 import JavaRuntimeSelector from './JavaRuntimeSelector.vue'
 const mocks = vi.hoisted(() => ({ scan: vi.fn(), browse: vi.fn() }))
 vi.mock('@/features/settings/api/settingsApi', () => ({ settingsApi: { selectJava: mocks.browse } }))
+vi.mock('@/features/java/api/javaApi', () => ({
+  javaApi: {
+    register: vi.fn(async (path: string) => javaRuntime({ executablePath: path })),
+    select: vi.fn(async (runtime) => runtime),
+  },
+}))
 vi.mock('@/features/settings/stores/settingsStore', () => ({
   useSettingsStore: () => ({
     isJavaLoading: false,

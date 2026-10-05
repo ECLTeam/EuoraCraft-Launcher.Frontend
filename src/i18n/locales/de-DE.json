@@ -1925,7 +1925,12 @@
     "refresh": "Status aktualisieren",
     "submitted": "Übermittelt. Das Ergebnis steht in der Aufgabenliste.",
     "retryOriginal": "Vorherigen Download wiederholen",
-    "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe."
+    "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe.",
+    "kinds": {
+      "java_install": "Java installieren",
+      "java_remove": "Java entfernen",
+      "java_cleanup": "Bereinigung wiederholen"
+    }
   },
   "more": {
     "nav": {
@@ -2154,5 +2159,63 @@
     "scanned": "Suche abgeschlossen. Kompatibles Java auswählen oder erneut starten.",
     "requiredMajor": "Java {major} oder neuer erforderlich",
     "unknownRequirement": "Java-Versionsanforderung unbekannt"
+  },
+  "javaManager": {
+    "title": "Java-Verwaltung",
+    "installed": "Installiert",
+    "download": "Download",
+    "rescan": "Erneut suchen",
+    "checkUpdates": "Updates prüfen",
+    "add": "Vorhandenes Java hinzufügen",
+    "search": "Version, Anbieter oder Pfad suchen",
+    "scanning": "Java wird gesucht",
+    "empty": "Kein Java registriert. Runtime suchen oder herunterladen.",
+    "unknownVendor": "Unbekannter Anbieter",
+    "disabled": "Deaktiviert",
+    "inUse": "In Verwendung",
+    "usageUnknown": "Verwendung unbekannt",
+    "referenced": "Von {count} Einstellungen verwendet",
+    "use": "Dieses Java verwenden",
+    "useGlobal": "Global verwenden",
+    "disable": "Deaktivieren",
+    "enable": "Aktivieren",
+    "relocate": "Neu auswählen",
+    "update": "Aktualisieren",
+    "openFolder": "Ordner öffnen",
+    "remove": "Installation entfernen",
+    "forget": "Registrierung entfernen",
+    "version": "Java-Hauptversion",
+    "packageType": "Runtime-Typ",
+    "catalogHint": "Offizielle Pakete für diese Plattform. JRE führt Spiele aus, JDK enthält zusätzlich Entwicklungswerkzeuge.",
+    "loadingCatalog": "Offizielle Downloads werden geladen",
+    "noPackage": "Kein Paket für diese Version und Plattform. Andere Version oder vorhandenes Java auswählen.",
+    "install": "Herunterladen und installieren",
+    "required": "Instanzanforderung",
+    "installTask": "Java installieren",
+    "removeTask": "Java entfernen",
+    "installConfirmTitle": "Java-Installation bestätigen",
+    "removeConfirmTitle": "Java-Entfernung bestätigen",
+    "removeConfirm": "Launcher-installiertes Java {version} entfernen. Von Einstellungen oder Prozessen verwendete Runtimes bleiben erhalten.",
+    "forgetConfirm": "Registrierung für Java {version} entfernen. Externe Installationsdateien bleiben erhalten.",
+    "installConfirm": "Version: {version}\nDownload: {size}\nVerzeichnis: {location}\nEmpfohlener freier Speicher: {space}",
+    "registered": "Java registriert",
+    "applied": "Java-Einstellungen gespeichert",
+    "forgotten": "Registrierung entfernt",
+    "taskSubmitted": "Aufgabe gestartet. Im Aufgabenbereich verfolgen.",
+    "noUpdates": "Keine Updates innerhalb dieser Hauptversion",
+    "requirement": "Diese Instanz benötigt Java {major} oder neuer",
+    "cleanupPending": "{count} temporäre Java-Verzeichnisse müssen bereinigt werden",
+    "retryCleanup": "Bereinigung wiederholen",
+    "manage": "Verwalten / herunterladen",
+    "downloadSuitable": "Kompatibles Java herunterladen",
+    "origins": {
+      "system": "System",
+      "manual": "Manuell registriert",
+      "managed": "Vom Launcher installiert"
+    },
+    "validation": {
+      "missing": "Pfad fehlt",
+      "invalid": "Nicht ausführbar oder unbekannt"
+    }
   }
 }

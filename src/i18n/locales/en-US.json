@@ -1935,7 +1935,12 @@
     "refresh": "Refresh status",
     "submitted": "Submitted. View the result in the task list.",
     "retryOriginal": "Retry previous download",
-    "cancelRequested": "Cancellation requested. Waiting for the task to stop."
+    "cancelRequested": "Cancellation requested. Waiting for the task to stop.",
+    "kinds": {
+      "java_install": "Install Java",
+      "java_remove": "Remove Java",
+      "java_cleanup": "Retry cleanup"
+    }
   },
   "more": {
     "nav": {
@@ -2165,5 +2170,63 @@
     "scanned": "Scan complete. Select compatible Java or retry launching.",
     "requiredMajor": "Requires Java {major} or later",
     "unknownRequirement": "Java version requirement is unknown"
+  },
+  "javaManager": {
+    "title": "Java management",
+    "installed": "Installed",
+    "download": "Download",
+    "rescan": "Rescan",
+    "checkUpdates": "Check updates",
+    "add": "Add existing Java",
+    "search": "Search version, vendor or path",
+    "scanning": "Scanning Java",
+    "empty": "No registered Java. Scan or download a runtime.",
+    "unknownVendor": "Unknown vendor",
+    "disabled": "Disabled",
+    "inUse": "In use",
+    "usageUnknown": "Usage unknown",
+    "referenced": "Used by {count} settings",
+    "use": "Use this Java",
+    "useGlobal": "Use globally",
+    "disable": "Disable",
+    "enable": "Enable",
+    "relocate": "Locate again",
+    "update": "Update",
+    "openFolder": "Open folder",
+    "remove": "Remove installation",
+    "forget": "Remove registration",
+    "version": "Java major version",
+    "packageType": "Runtime type",
+    "catalogHint": "Official packages for this platform. JRE runs games; JDK also includes development tools.",
+    "loadingCatalog": "Loading official downloads",
+    "noPackage": "No package for this version and platform. Choose another version or add an existing Java.",
+    "install": "Download and install",
+    "required": "Required by instance",
+    "installTask": "Install Java",
+    "removeTask": "Remove Java",
+    "installConfirmTitle": "Confirm Java installation",
+    "removeConfirmTitle": "Confirm Java removal",
+    "removeConfirm": "Remove launcher-installed Java {version}. Runtimes referenced by settings or processes are kept.",
+    "forgetConfirm": "Remove the registration for Java {version}. External installation files are kept.",
+    "installConfirm": "Version: {version}\nDownload: {size}\nLocation: {location}\nSuggested free space: {space}",
+    "registered": "Java registered",
+    "applied": "Java settings saved",
+    "forgotten": "Registration removed",
+    "taskSubmitted": "Task submitted. Follow it in the task panel.",
+    "noUpdates": "No updates within this major version",
+    "requirement": "This instance requires Java {major} or later",
+    "cleanupPending": "{count} Java temporary directories need cleanup",
+    "retryCleanup": "Retry cleanup",
+    "manage": "Manage / download",
+    "downloadSuitable": "Download compatible Java",
+    "origins": {
+      "system": "System",
+      "manual": "Manually registered",
+      "managed": "Launcher installed"
+    },
+    "validation": {
+      "missing": "Path missing",
+      "invalid": "Cannot run or identify"
+    }
   }
 }

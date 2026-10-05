@@ -65,6 +65,7 @@
         :isRescanningJava="version.isRescanningJava"
         @rescanJava="version.rescanJava"
         @selectJava="openVersionSettings"
+        @downloadJava="openJavaRecovery"
         @launch="handleLaunch"
         @manageVersions="goToInstallVersion"
         @versionSettings="openVersionSettings"
@@ -526,6 +527,15 @@
       @openBrowser="account.openMicrosoftLoginPage"
     />
 
+    <JavaManagerModal
+      v-model:visible="javaManagerVisible"
+      initialView="download"
+      :requiredMajor="javaTarget?.requiredJava"
+      :gamePath="javaTarget?.path"
+      :versionId="javaTarget?.versionId"
+      :scopeKey="javaTarget?.instanceKey || ''"
+      @selected="applyRecoveryJava"
+    />
     <ConfirmDialog
       v-model:visible="account.showDeleteConfirmModal"
       :parentId="accountModalRef?.modalId"
@@ -573,6 +583,7 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAccountManager } from '@/composables/useAccountManager'
 import { useInstanceManager } from '@/composables/useInstanceManager'
+import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalLaunchProgress } from '@/composables/useLaunchProgress'
 import { useRecentInstances, type RecentInstance } from '@/composables/useRecentInstances'
 import { useUiSkin } from '@/composables/useUiSkin'
@@ -583,10 +594,16 @@ import WardrobeModal from '@/features/accounts/components/WardrobeModal.vue'
 import { useGameInfoCard } from '@/features/game-home/composables/useGameInfoCard'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
 import { instanceRuntimeApi } from '@/features/instances/api/instanceRuntimeApi'
+import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useJavaForInstance } from '@/features/java/api/javaPreferences'
+import JavaManagerModal from '@/features/java/components/JavaManagerModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import InstanceTerminalModule from '@/features/terminal/components/InstanceTerminalModule.vue'
 import type { AccountTextures, MinecraftAccount } from '@/types/accounts'
+import type { ScannedVersion } from '@/types/instances'
+import type { JavaRuntime } from '@/types/java'
 import { getAccountTypeLabelKey, getAccountTypeShortLabelKey } from '@/utils/enums'
+import { gamePathIdentity } from '@/utils/path'
 import RunningInstancesTab from '@/views/instances/RunningInstancesTab.vue'
 
 const { t } = useI18n()
@@ -594,6 +611,45 @@ const router = useRouter()
 const account = useAccountManager(t)
 const { isFolia } = useUiSkin()
 const version = useInstanceManager(t)
+const javaManagerVisible = ref(false)
+const javaTarget = ref<ScannedVersion | null>(null)
+const javaMessage = useLauncherMessage()
+let javaRecoveryRevision = 0
+function openJavaRecovery() {
+  const store = useInstanceStore()
+  const target = store.scannedVersions.find(
+    (item) =>
+      item.versionId === version.selectedVersion &&
+      gamePathIdentity(item.path) === gamePathIdentity(version.currentGamePath)
+  )
+  if (!target) return
+  javaTarget.value = { ...target }
+  javaManagerVisible.value = true
+}
+async function applyRecoveryJava(runtime: JavaRuntime) {
+  const target = javaTarget.value
+  if (!target) return
+  const revision = javaRecoveryRevision
+  try {
+    await useJavaForInstance(target, runtime)
+    if (revision === javaRecoveryRevision) {
+      javaManagerVisible.value = false
+      version.javaRecoveryMessage = ''
+      javaMessage.success(t('javaManager.applied'))
+    }
+  } catch (cause) {
+    if (revision === javaRecoveryRevision) javaMessage.error(cause instanceof Error ? cause.message : String(cause))
+  }
+}
+watch(
+  () => `${version.currentGamePath}\0${version.selectedVersion}`,
+  () => {
+    javaRecoveryRevision++
+    javaManagerVisible.value = false
+    javaTarget.value = null
+    version.javaRecoveryMessage = ''
+  }
+)
 const { recentList, togglePin, removeRecent } = useRecentInstances()
 const { progress: launchProgress, smoothPercent } = globalLaunchProgress
 const gameHomeStore = useGameHomeStore()

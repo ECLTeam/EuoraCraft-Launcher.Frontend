@@ -1925,7 +1925,12 @@
     "refresh": "状態を更新",
     "submitted": "送信しました。タスク一覧で結果を確認できます。",
     "retryOriginal": "前回のダウンロードを再試行",
-    "cancelRequested": "キャンセルを要求しました。停止を待っています。"
+    "cancelRequested": "キャンセルを要求しました。停止を待っています。",
+    "kinds": {
+      "java_install": "Javaをインストール",
+      "java_remove": "Javaを削除",
+      "java_cleanup": "整理を再試行"
+    }
   },
   "more": {
     "nav": {
@@ -2154,5 +2159,63 @@
     "scanned": "スキャン完了。互換性のあるJavaを選択するか、起動を再試行してください。",
     "requiredMajor": "Java {major} 以降が必要です",
     "unknownRequirement": "必要なJavaバージョンは不明です"
+  },
+  "javaManager": {
+    "title": "Java管理",
+    "installed": "インストール済み",
+    "download": "ダウンロード",
+    "rescan": "再スキャン",
+    "checkUpdates": "更新を確認",
+    "add": "既存のJavaを追加",
+    "search": "バージョン、ベンダー、パスで検索",
+    "scanning": "Javaをスキャン中",
+    "empty": "登録されたJavaがありません。スキャンまたはダウンロードしてください。",
+    "unknownVendor": "不明なベンダー",
+    "disabled": "無効",
+    "inUse": "使用中",
+    "usageUnknown": "使用状況不明",
+    "referenced": "{count} 件の設定で使用",
+    "use": "このJavaを使用",
+    "useGlobal": "全体のJavaに設定",
+    "disable": "無効にする",
+    "enable": "有効にする",
+    "relocate": "再指定",
+    "update": "更新",
+    "openFolder": "フォルダーを開く",
+    "remove": "インストールを削除",
+    "forget": "登録を削除",
+    "version": "Javaのメジャーバージョン",
+    "packageType": "ランタイムの種類",
+    "catalogHint": "この環境向けの公式パッケージです。JREはゲーム実行用、JDKには開発ツールも含まれます。",
+    "loadingCatalog": "公式ダウンロードを取得中",
+    "noPackage": "このバージョンと環境向けのパッケージがありません。別のバージョンか既存のJavaを選んでください。",
+    "install": "ダウンロードしてインストール",
+    "required": "インスタンスの要件",
+    "installTask": "Javaをインストール",
+    "removeTask": "Javaを削除",
+    "installConfirmTitle": "Javaのインストールを確認",
+    "removeConfirmTitle": "Javaの削除を確認",
+    "removeConfirm": "ランチャーが導入したJava {version} を削除します。設定やプロセスが使用中の場合は保持します。",
+    "forgetConfirm": "Java {version} の登録を削除します。外部のインストールファイルは保持します。",
+    "installConfirm": "バージョン：{version}\nダウンロード：{size}\n導入先：{location}\n推奨空き容量：{space}",
+    "registered": "Javaを登録しました",
+    "applied": "Java設定を保存しました",
+    "forgotten": "登録を削除しました",
+    "taskSubmitted": "タスクを送信しました。タスクパネルで確認できます。",
+    "noUpdates": "同じメジャーバージョンの更新はありません",
+    "requirement": "このインスタンスにはJava {major} 以降が必要です",
+    "cleanupPending": "{count} 件のJava一時フォルダーの整理が必要です",
+    "retryCleanup": "整理を再試行",
+    "manage": "管理 / ダウンロード",
+    "downloadSuitable": "互換性のあるJavaをダウンロード",
+    "origins": {
+      "system": "システム",
+      "manual": "手動登録",
+      "managed": "ランチャー導入"
+    },
+    "validation": {
+      "missing": "パスがありません",
+      "invalid": "実行または識別できません"
+    }
   }
 }

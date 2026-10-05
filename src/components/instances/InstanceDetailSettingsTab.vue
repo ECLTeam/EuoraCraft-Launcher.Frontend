@@ -120,7 +120,13 @@
           <NSelect v-model:value="versionSettings.javaMode" :options="runtimeModeOptions" />
         </SettingRow>
         <SettingRow v-if="versionSettings.javaMode === 'manual'" :label="t('settings.javaPath')">
-          <JavaRuntimeSelector v-model:value="versionSettings.javaPath" />
+          <JavaRuntimeSelector
+            v-model:value="versionSettings.javaPath"
+            :requiredMajor="version?.requiredJava"
+            :gamePath="version?.path"
+            :versionId="version?.versionId"
+            :contextKey="version?.instanceKey || `${version?.path}\0${version?.versionId}`"
+          />
         </SettingRow>
       </div>
 

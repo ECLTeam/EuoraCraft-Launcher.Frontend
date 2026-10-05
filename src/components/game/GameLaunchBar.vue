@@ -6,6 +6,7 @@
         t('javaRecovery.rescan')
       }}</NButton>
       <NButton size="small" @click="emit('selectJava')">{{ t('javaRecovery.select') }}</NButton>
+      <NButton size="small" @click="emit('downloadJava')">{{ t('javaManager.downloadSuitable') }}</NButton>
     </div>
     <PluginSlotHost slotId="plugin-slot-game-launch-before" class="plugin-slot-container" />
     <div class="launch-action-row">
@@ -163,6 +164,7 @@ const emit = defineEmits<{
   removeRecent: [item: RecentInstance]
   rescanJava: []
   selectJava: []
+  downloadJava: []
 }>()
 
 const instanceStore = useInstanceStore()

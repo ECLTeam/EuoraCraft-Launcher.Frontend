@@ -1,7 +1,11 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { javaApi } from '@/features/java/api/javaApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
+import { javaInventory, javaRuntime } from '@/test/javaFixtures'
 import { useSettingsStore } from './settingsStore'
+
+vi.mock('@/features/java/api/javaApi', () => ({ javaApi: { inventory: vi.fn() } }))
 
 vi.mock('@/features/settings/api/settingsApi', () => ({
   settingsApi: {
@@ -39,26 +43,24 @@ describe('settingsStore', () => {
     expect(settingsApi.load).toHaveBeenCalledTimes(2)
     expect(store.status).toBe('ready')
   })
-  it.each(['force', 'invalidate'])('Java %s 不复用旧扫描，迟到的旧结果不覆盖最新列表', async (mode) => {
+  it.each(['force', 'invalidate'])('Java %s 不复用旧请求，旧结果不覆盖唯一清单', async (mode) => {
     const store = useSettingsStore()
-    let finish!: (value: never[]) => void
-    vi.mocked(settingsApi.listJava).mockImplementationOnce(
+    let finish!: (value: ReturnType<typeof javaInventory>) => void
+    vi.mocked(javaApi.inventory).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           finish = resolve
         })
     )
     const old = store.loadJavaInstallations()
-    const installations = [
-      { path: 'C:/Java/21/bin/java.exe', version: '21', major_version: 21, java_type: 'JRE', arch: 'x64', sources: [] },
-    ]
-    vi.mocked(settingsApi.listJava).mockResolvedValueOnce(installations)
+    const current = javaRuntime({ executablePath: 'C:/Java/21/bin/java.exe', fullVersion: '21' })
+    vi.mocked(javaApi.inventory).mockResolvedValueOnce(javaInventory([current]))
     if (mode === 'invalidate') store.invalidateJavaInstallations()
     await store.loadJavaInstallations(mode === 'force')
-    finish([])
+    finish(javaInventory())
     await old
-    expect(store.javaInstallations).toEqual(installations)
-    expect(settingsApi.listJava).toHaveBeenCalledTimes(2)
+    expect(store.javaInstallations[0]?.path).toBe(current.executablePath)
+    expect(javaApi.inventory).toHaveBeenCalledTimes(2)
   })
 
   it('设置刷新途中本地写入完成时，保留新值并结束加载状态', async () => {
@@ -92,6 +94,7 @@ describe('settingsStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    vi.mocked(javaApi.inventory).mockReset().mockResolvedValue(javaInventory())
     vi.mocked(settingsApi.load).mockResolvedValue({
       ui: {},
       game: {
@@ -128,45 +131,16 @@ describe('settingsStore', () => {
     expect(store.download.mirror_source).toBe('bmclapi')
   })
 
-  it('复用 Java 扫描结果，并允许用户强制重新扫描', async () => {
-    vi.mocked(settingsApi.listJava)
-      .mockResolvedValueOnce([
-        {
-          path: 'C:/Java/17/bin/java.exe',
-          version: '17.0.12',
-          major_version: 17,
-          java_type: 'JRE',
-          arch: 'x64',
-          sources: [],
-        },
-      ])
-      .mockResolvedValueOnce([
-        {
-          path: 'C:/Java/21/bin/java.exe',
-          version: '21.0.4',
-          major_version: 21,
-          java_type: 'JRE',
-          arch: 'x64',
-          sources: [],
-        },
-      ])
+  it('设置入口委托唯一 Java 清单，并支持强制刷新', async () => {
+    vi.mocked(javaApi.inventory)
+      .mockResolvedValueOnce(javaInventory([javaRuntime({ fullVersion: '17.0.12', majorVersion: 17 })]))
+      .mockResolvedValueOnce(javaInventory([javaRuntime({ fullVersion: '21.0.4' })]))
     const store = useSettingsStore()
-
     await store.loadJavaInstallations()
     await store.loadJavaInstallations()
-    expect(settingsApi.listJava).toHaveBeenCalledOnce()
-
-    await expect(store.loadJavaInstallations(true)).resolves.toEqual([
-      {
-        path: 'C:/Java/21/bin/java.exe',
-        version: '21.0.4',
-        major_version: 21,
-        java_type: 'JRE',
-        arch: 'x64',
-        sources: [],
-      },
-    ])
-    expect(settingsApi.listJava).toHaveBeenCalledTimes(2)
+    expect(javaApi.inventory).toHaveBeenCalledOnce()
+    expect((await store.loadJavaInstallations(true))[0]?.version).toBe('21.0.4')
+    expect(javaApi.inventory).toHaveBeenCalledTimes(2)
   })
 
   it('更新局部设置时不覆盖路径与 JVM 参数', async () => {

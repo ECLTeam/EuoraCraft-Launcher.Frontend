@@ -222,7 +222,11 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     launching.value = false
 
     if (!launchResult.success) {
-      if (['JAVA_NOT_FOUND', 'JAVA_VERSION_NOT_FOUND'].includes(launchResult.errorCode || '')) {
+      if (
+        ['JAVA_NOT_FOUND', 'JAVA_VERSION_NOT_FOUND', 'JAVA_DISABLED', 'JAVA_INVALID_RUNTIME'].includes(
+          launchResult.errorCode || ''
+        )
+      ) {
         const requirement = selected?.requiredJava
           ? t('javaRecovery.requiredMajor', { major: selected.requiredJava })
           : t('javaRecovery.unknownRequirement')

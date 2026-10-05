@@ -1808,7 +1808,12 @@
     "refresh": "重新整理狀態",
     "submitted": "已提交，可在工作清單查看結果",
     "retryOriginal": "重試上次下載",
-    "cancelRequested": "已請求取消，等待工作停止"
+    "cancelRequested": "已請求取消，等待工作停止",
+    "kinds": {
+      "java_install": "安裝 Java",
+      "java_remove": "移除 Java",
+      "java_cleanup": "重試清理"
+    }
   },
   "more": {
     "nav": {
@@ -2037,5 +2042,63 @@
     "scanned": "掃描完成，請選擇相容 Java 或重試啟動",
     "requiredMajor": "需要 Java {major} 或更新版本",
     "unknownRequirement": "Java 版本要求尚未識別"
+  },
+  "javaManager": {
+    "title": "Java 管理",
+    "installed": "已安裝",
+    "download": "下載",
+    "rescan": "重新掃描",
+    "checkUpdates": "檢查更新",
+    "add": "新增現有 Java",
+    "search": "搜尋版本、供應商或路徑",
+    "scanning": "正在掃描 Java",
+    "empty": "尚未登記 Java，可掃描或下載",
+    "unknownVendor": "供應商未知",
+    "disabled": "已停用",
+    "inUse": "使用中",
+    "usageUnknown": "使用狀態未知",
+    "referenced": "由 {count} 項設定引用",
+    "use": "使用此 Java",
+    "useGlobal": "設為全域 Java",
+    "disable": "停用",
+    "enable": "啟用",
+    "relocate": "重新定位",
+    "update": "更新",
+    "openFolder": "開啟目錄",
+    "remove": "移除安裝",
+    "forget": "移除登記",
+    "version": "Java 主版本",
+    "packageType": "執行環境類型",
+    "catalogHint": "依實際平台查詢官方套件。JRE 執行遊戲，JDK 另包含開發工具。",
+    "loadingCatalog": "正在查詢官方下載目錄",
+    "noPackage": "目前來源沒有此版本與平台的套件，可選其他版本或手動新增 Java",
+    "install": "下載並安裝",
+    "required": "實例需求",
+    "installTask": "安裝 Java",
+    "removeTask": "移除 Java",
+    "installConfirmTitle": "確認安裝 Java",
+    "removeConfirmTitle": "確認移除 Java",
+    "removeConfirm": "移除啟動器安裝的 Java {version}。仍被設定引用或程序使用的執行環境將保留。",
+    "forgetConfirm": "移除 Java {version} 的登記，外部安裝檔案保留。",
+    "installConfirm": "版本：{version}\n下載大小：{size}\n安裝位置：{location}\n建議預留空間：{space}",
+    "registered": "Java 已登記",
+    "applied": "Java 設定已儲存",
+    "forgotten": "登記已移除",
+    "taskSubmitted": "工作已提交，可在工作面板繼續查看",
+    "noUpdates": "沒有同主版本更新",
+    "requirement": "此實例需要 Java {major} 或更新版本",
+    "cleanupPending": "有 {count} 個 Java 暫存目錄待清理",
+    "retryCleanup": "重試清理",
+    "manage": "管理 / 下載",
+    "downloadSuitable": "下載相容 Java",
+    "origins": {
+      "system": "系統發現",
+      "manual": "手動登記",
+      "managed": "啟動器安裝"
+    },
+    "validation": {
+      "missing": "路徑不存在",
+      "invalid": "無法執行或識別"
+    }
   }
 }

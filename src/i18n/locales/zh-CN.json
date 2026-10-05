@@ -1830,7 +1830,12 @@
     "refresh": "刷新状态",
     "submitted": "已提交，可在任务列表查看结果",
     "retryOriginal": "重试上次下载",
-    "cancelRequested": "已请求取消，等待任务停止"
+    "cancelRequested": "已请求取消，等待任务停止",
+    "kinds": {
+      "java_install": "安装 Java",
+      "java_remove": "移除 Java",
+      "java_cleanup": "重试清理"
+    }
   },
   "more": {
     "nav": {
@@ -2060,5 +2065,63 @@
     "scanned": "扫描完成，请选择兼容 Java 或重试启动",
     "requiredMajor": "需要 Java {major} 或更高版本",
     "unknownRequirement": "Java 版本要求尚未识别"
+  },
+  "javaManager": {
+    "title": "Java 管理",
+    "installed": "已安装",
+    "download": "下载",
+    "rescan": "重新扫描",
+    "checkUpdates": "检查更新",
+    "add": "添加现有 Java",
+    "search": "搜索版本、供应商或路径",
+    "scanning": "正在扫描 Java",
+    "empty": "没有登记的 Java，可扫描或下载",
+    "unknownVendor": "供应商未知",
+    "disabled": "已停用",
+    "inUse": "使用中",
+    "usageUnknown": "占用状态未知",
+    "referenced": "已被 {count} 项设置引用",
+    "use": "使用此 Java",
+    "useGlobal": "设为全局 Java",
+    "disable": "停用",
+    "enable": "启用",
+    "relocate": "重新定位",
+    "update": "更新",
+    "openFolder": "打开目录",
+    "remove": "移除安装",
+    "forget": "移除登记",
+    "version": "Java 主版本",
+    "packageType": "运行时类型",
+    "catalogHint": "按实际平台查询官方包。JRE 用于运行游戏，JDK 额外包含开发工具。",
+    "loadingCatalog": "正在查询官方下载目录",
+    "noPackage": "当前来源没有此版本与平台的安装包，可选择其他版本或手动添加 Java",
+    "install": "下载并安装",
+    "required": "实例要求",
+    "installTask": "安装 Java",
+    "removeTask": "移除 Java",
+    "installConfirmTitle": "确认安装 Java",
+    "removeConfirmTitle": "确认移除 Java",
+    "removeConfirm": "移除启动器安装的 Java {version}。仍被设置引用或进程使用的运行时会保留。",
+    "forgetConfirm": "移除 Java {version} 的登记，外部安装文件保留。",
+    "installConfirm": "版本：{version}\n下载大小：{size}\n安装位置：{location}\n建议预留空间：{space}",
+    "registered": "Java 已登记",
+    "applied": "Java 设置已保存",
+    "forgotten": "登记已移除",
+    "taskSubmitted": "任务已提交，可在任务面板继续查看",
+    "noUpdates": "没有同主版本更新",
+    "requirement": "当前实例需要 Java {major} 或更高版本",
+    "cleanupPending": "有 {count} 个 Java 临时目录待清理",
+    "retryCleanup": "重试清理",
+    "manage": "管理 / 下载",
+    "downloadSuitable": "下载适用 Java",
+    "origins": {
+      "system": "系统发现",
+      "manual": "手动登记",
+      "managed": "启动器安装"
+    },
+    "validation": {
+      "missing": "路径不存在",
+      "invalid": "无法运行或识别"
+    }
   }
 }

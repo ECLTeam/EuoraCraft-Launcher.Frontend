@@ -75,7 +75,10 @@ describe('GameLaunchBar', () => {
     )
     expect(wrapper.get('.split-main').attributes('disabled')).toBeDefined()
     expect(wrapper.get('[role="alert"]').text()).toContain('未找到 Java 21')
-    await wrapper.get('.java-recovery button:last-child').trigger('click')
+    await wrapper
+      .findAll('.java-recovery button')
+      .find((button) => button.text().includes('手动'))!
+      .trigger('click')
     expect(wrapper.emitted('selectJava')).toEqual([[]])
   })
   it.each([

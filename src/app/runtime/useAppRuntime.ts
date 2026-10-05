@@ -12,6 +12,7 @@ import { useCustomDownloadStore } from '@/features/download/stores/customDownloa
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
@@ -218,6 +219,14 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     const connector = useConnector({ onError: (error) => options.message.error(error) })
     cleanupCallbacks.push(connector.dispose)
     const operationStore = useApplicationOperationStore()
+    cleanupCallbacks.push(
+      backend.on('java:runtimes_changed', () => {
+        const javaStore = useJavaRuntimeStore()
+        const hasConsumers = javaStore.status !== 'idle'
+        javaStore.invalidate()
+        if (hasConsumers) void javaStore.load().catch(() => undefined)
+      })
+    )
     const finishedOperations = new Set<string>()
     function refreshFinishedTargets(): void {
       for (const operation of Object.values(operationStore.operations)) {
@@ -232,6 +241,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       }
     }
     const operationCommands: Record<string, string> = {
+      game_java_install: 'java_install',
+      game_java_remove: 'java_remove',
+      game_java_cleanup: 'java_cleanup',
       custom_download_start: 'custom_download',
       custom_download_retry: 'custom_download',
       game_instance_import: 'instance_import',

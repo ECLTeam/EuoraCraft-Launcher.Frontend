@@ -57,6 +57,7 @@ import type {
   VersionRunStats,
   WorldEntry,
 } from '@/types/instances'
+import type { JavaCatalog, JavaInstallPlan, JavaInventory, JavaRuntime, JavaUpdate } from '@/types/java'
 import type {
   ModInfo,
   ModInstallResult,
@@ -117,6 +118,7 @@ export type JsonDict = Record<string, unknown>
 // ═══════════════════════════════════════════════════════════════════
 
 export interface BackendEvents {
+  'java:runtimes_changed': Record<string, never>
   'config:init': {
     launcher: LauncherConfig
     game: GameConfig
@@ -252,6 +254,17 @@ export interface CommandPayloadMap {
 
   // Java
   game_java_scan: { paths?: string[] } | undefined
+  game_java_inventory: { force?: boolean } | undefined
+  game_java_register: { path: string }
+  game_java_set_enabled: { runtime_id: string; is_enabled: boolean }
+  game_java_forget: { runtime_id: string }
+  game_java_select: { runtime_id: string; required_major?: number | null; game_path?: string; version_id?: string }
+  game_java_catalog: { major_version?: number | null; runtime_kind?: 'JRE' | 'JDK'; force?: boolean }
+  game_java_install_plan: { package_id: string }
+  game_java_install: { plan_id: string }
+  game_java_check_updates: { force?: boolean } | undefined
+  game_java_remove: { runtime_id: string }
+  game_java_cleanup: { force?: boolean } | undefined
 
   // 版本
   game_versions: { filter_type?: string; classified?: boolean; source?: 'official' | 'bmclapi' } | undefined
@@ -723,6 +736,17 @@ export const COMMAND_NAMES = {
   connector_search_mc_port: 'connector_search_mc_port',
   connector_nat_type: 'connector_nat_type',
   game_java_scan: 'game_java_scan',
+  game_java_inventory: 'game_java_inventory',
+  game_java_register: 'game_java_register',
+  game_java_set_enabled: 'game_java_set_enabled',
+  game_java_forget: 'game_java_forget',
+  game_java_select: 'game_java_select',
+  game_java_catalog: 'game_java_catalog',
+  game_java_install_plan: 'game_java_install_plan',
+  game_java_install: 'game_java_install',
+  game_java_check_updates: 'game_java_check_updates',
+  game_java_remove: 'game_java_remove',
+  game_java_cleanup: 'game_java_cleanup',
   game_versions: 'game_versions',
   game_loader_versions: 'game_loader_versions',
   game_fabric_api_versions: 'game_fabric_api_versions',
@@ -976,6 +1000,17 @@ export interface CommandResponseMap {
   connector_nat_type: NatTypeResult
 
   game_java_scan: JavaInstallation[]
+  game_java_inventory: JavaInventory
+  game_java_register: JavaRuntime
+  game_java_set_enabled: JavaRuntime
+  game_java_forget: { removed: boolean }
+  game_java_select: JavaRuntime
+  game_java_catalog: JavaCatalog
+  game_java_install_plan: JavaInstallPlan
+  game_java_install: GameOperation
+  game_java_check_updates: JavaUpdate[]
+  game_java_remove: GameOperation
+  game_java_cleanup: GameOperation
 
   game_versions: MinecraftVersion[] | MinecraftVersionCatalog
   game_loader_versions: string[]

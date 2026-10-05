@@ -51,6 +51,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/settings/LauncherTab.vue'),
       },
       { path: 'game', name: 'settings-game', component: () => import('@/views/settings/GameTab.vue') },
+      { path: 'java', name: 'settings-java', component: () => import('@/views/settings/JavaTab.vue') },
       { path: 'about', name: 'settings-about', component: () => import('@/views/settings/AboutTab.vue') },
     ],
   },
