@@ -9,7 +9,15 @@ vi.mock('@/features/settings/stores/settingsStore', () => ({
   useSettingsStore: () => ({
     isJavaLoading: false,
     javaInstallations: [
-      { path: 'C:/Java/bin/java.exe', major_version: 21, java_type: 'JDK', version: '21.0.2', arch: 'x64' },
+      {
+        path: 'C:/Java/bin/java.exe',
+        major_version: 21,
+        java_type: 'Microsoft',
+        vendor: 'Microsoft',
+        runtime_kind: 'JDK',
+        version: '21.0.2',
+        arch: 'x64',
+      },
     ],
     loadJavaInstallations: mocks.scan,
   }),
@@ -32,6 +40,7 @@ describe('JavaRuntimeSelector', () => {
       expect.arrayContaining([
         expect.objectContaining({ value: 'D:/Custom Java/java.exe' }),
         expect.objectContaining({ label: expect.stringContaining('21.0.2') }),
+        expect.objectContaining({ label: expect.stringContaining('Microsoft · JDK') }),
       ])
     )
     expect(mocks.scan).toHaveBeenCalledWith(false)

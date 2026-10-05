@@ -32,7 +32,7 @@ const browsing = ref(false)
 const options = computed(() => {
   const options = store.javaInstallations.map((java) => ({
     value: java.path,
-    label: `Java ${java.major_version} (${java.java_type}) · ${java.version} · ${java.arch} · ${java.path}`,
+    label: `Java ${java.major_version} (${[java.vendor || java.java_type, java.runtime_kind].filter(Boolean).join(' · ')}) · ${java.version} · ${java.arch} · ${java.path}`,
   }))
   if (props.value && !options.some((option) => option.value === props.value))
     options.unshift({ value: props.value, label: props.value })

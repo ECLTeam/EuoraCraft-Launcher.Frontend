@@ -14,12 +14,47 @@ export interface ModItem {
   loader_type: string
   game_version: string
   project_id: string
+  mod_id?: string
+  source?: string
+  source_project_id?: string | null
+  source_version_id?: string | null
+  sha512?: string
+  declared_mod_ids?: string[]
+  provided_mod_ids?: string[]
+  dependency_declarations?: LocalModDependency[]
+  diagnostics?: LocalModDiagnostic[]
   dependencies: string[]
   enabled: boolean
   size: number
   /** 从模组 jar 内提取的图标数据 URL，无图标时为空字符串 */
   icon_data: string
   modified_at: string
+}
+
+export interface LocalModDiagnostic {
+  code:
+    | 'metadata_unknown'
+    | 'constraint_unknown'
+    | 'missing_required'
+    | 'disabled_provider'
+    | 'version_mismatch'
+    | 'conflicting_provider'
+    | 'duplicate_provider'
+  modId?: string
+  severity: 'error' | 'warning'
+  constraints?: string[]
+  providers?: string[]
+  detail?: string
+}
+
+export interface LocalModDependency {
+  consumerId: string
+  modId: string
+  kind: string
+  constraints: string[]
+  syntax: 'fabric' | 'quilt' | 'maven'
+  side: string
+  embeddedPath: string
 }
 
 export interface ModSourceConfig {

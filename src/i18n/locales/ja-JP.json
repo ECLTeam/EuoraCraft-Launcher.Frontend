@@ -2125,5 +2125,34 @@
     "gamma": "明るさ",
     "particles": "パーティクル",
     "clouds": "雲"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "メタデータの解析が不完全です",
+    "constraint_unknown": "条件を判定できません：{id}",
+    "missing_required": "必須依存関係がありません：{id}",
+    "disabled_provider": "インストール済みですが無効です：{id}",
+    "version_mismatch": "依存関係のバージョンが不一致：{id}",
+    "conflicting_provider": "競合するMod：{id}",
+    "duplicate_provider": "重複するMod提供元：{id}",
+    "enable": "既存ファイルを有効化",
+    "search": "互換リソースを検索"
+  },
+  "instanceHealth": {
+    "blocked": "起動できません",
+    "missing_json": "バージョンJSONがありません：{id}",
+    "invalid_json": "無効なバージョンJSON：{id}",
+    "missing_parent": "継承元がありません：{id}",
+    "inheritance_cycle": "継承が循環しています：{id}",
+    "invalid_inheritance": "無効な継承宣言：{id}",
+    "missing_jar": "メインJarがありません：{id}",
+    "metadata_unknown": "バージョンメタデータの解析が不完全：{id}"
+  },
+  "javaRecovery": {
+    "missing": "互換性のあるJavaが見つかりません",
+    "rescan": "Javaを再スキャン",
+    "select": "互換性のあるJavaを選択",
+    "scanned": "スキャン完了。互換性のあるJavaを選択するか、起動を再試行してください。",
+    "requiredMajor": "Java {major} 以降が必要です",
+    "unknownRequirement": "必要なJavaバージョンは不明です"
   }
 }

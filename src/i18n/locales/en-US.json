@@ -2136,5 +2136,34 @@
     "gamma": "Brightness",
     "particles": "Particles",
     "clouds": "Clouds"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "Metadata coverage is incomplete",
+    "constraint_unknown": "Constraint could not be evaluated: {id}",
+    "missing_required": "Required dependency missing: {id}",
+    "disabled_provider": "Installed but disabled: {id}",
+    "version_mismatch": "Dependency version mismatch: {id}",
+    "conflicting_provider": "Conflicting mod: {id}",
+    "duplicate_provider": "Duplicate mod provider: {id}",
+    "enable": "Enable installed file",
+    "search": "Search compatible resources"
+  },
+  "instanceHealth": {
+    "blocked": "Cannot launch",
+    "missing_json": "Version JSON missing: {id}",
+    "invalid_json": "Invalid version JSON: {id}",
+    "missing_parent": "Inherited version missing: {id}",
+    "inheritance_cycle": "Inheritance cycle: {id}",
+    "invalid_inheritance": "Invalid inheritance: {id}",
+    "missing_jar": "Main Jar missing: {id}",
+    "metadata_unknown": "Version metadata is only partially recognized: {id}"
+  },
+  "javaRecovery": {
+    "missing": "Compatible Java not found",
+    "rescan": "Rescan Java",
+    "select": "Select compatible Java",
+    "scanned": "Scan complete. Select compatible Java or retry launching.",
+    "requiredMajor": "Requires Java {major} or later",
+    "unknownRequirement": "Java version requirement is unknown"
   }
 }

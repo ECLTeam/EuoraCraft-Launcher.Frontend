@@ -101,12 +101,23 @@
             <strong>{{ item.name || item.id }}</strong
             ><small>{{ item.id }} · {{ item.version || '本地资源' }}</small>
             <span v-if="item.duplicateHash || item.duplicateProjectId" class="resource-warning">检测到重复项</span>
-            <span v-if="item.missingDependencies?.length" class="resource-warning"
+            <span v-if="!item.diagnostics && item.missingDependencies?.length" class="resource-warning"
               >缺少依赖：{{ item.missingDependencies.join(', ') }}</span
             >
+            <ModDiagnostics
+              :diagnostics="item.diagnostics"
+              :busy="loading"
+              @enable="enableProvider"
+              @search="searchDependency"
+            />
           </div>
           <span class="resource-source">{{ item.source }}</span>
-          <NSwitch v-if="resourceType !== 'schematic'" :value="item.enabled" @update:value="toggle(item, $event)" />
+          <NSwitch
+            v-if="resourceType !== 'schematic'"
+            :value="item.enabled"
+            :disabled="loading || pendingResourceIds.has(item.id)"
+            @update:value="toggle(item, $event)"
+          />
           <span v-else class="resource-na">—</span>
           <div class="resource-actions">
             <NButton
@@ -149,6 +160,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
+import ModDiagnostics from '@/components/instances/ModDiagnostics.vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -180,6 +192,7 @@ const failedIcons = ref(new Set<string>())
 const selected = ref(new Set<string>())
 const query = ref('')
 const loading = ref(false)
+const pendingResourceIds = ref(new Set<string>())
 const previewResource = ref<GameResource | null>(null)
 const previewVisible = ref(false)
 const allTypes: Array<{ value: GameResourceType; label: string }> = [
@@ -254,6 +267,11 @@ async function installDropped(event: DragEvent) {
   await install(paths)
 }
 async function toggle(item: GameResource, enabled: boolean) {
+  if (pendingResourceIds.value.has(item.id)) return
+  const resourceId = item.id
+  const scopeKey = JSON.stringify([target.value, resourceType.value, worldId.value])
+  const isMod = resourceType.value === 'mod'
+  pendingResourceIds.value.add(resourceId)
   try {
     await instanceWorkspaceApi.toggleResource(
       target.value,
@@ -262,11 +280,14 @@ async function toggle(item: GameResource, enabled: boolean) {
       enabled,
       worldId.value || undefined
     )
+    item.enabled = enabled
+    if (isMod && scopeKey === JSON.stringify([target.value, resourceType.value, worldId.value])) await load()
   } catch (error) {
     message.error(getErrorMessage(error, '资源状态切换失败'))
     return
+  } finally {
+    pendingResourceIds.value.delete(resourceId)
   }
-  item.enabled = enabled
 }
 function toggleSelected(id: string) {
   const next = new Set(selected.value)
@@ -307,6 +328,13 @@ function removeSelected() {
 function openPreview(item: GameResource) {
   previewResource.value = item
   previewVisible.value = true
+}
+async function enableProvider(filename: string) {
+  const provider = resources.value.find((item) => item.id === filename && !item.enabled)
+  if (provider) await toggle(provider, true)
+}
+function searchDependency(modId: string) {
+  emit('openOnlineSearch', { type: 'mod', worldId: null, query: modId })
 }
 function openOnlineSearch() {
   if (resourceType.value !== 'schematic')

@@ -17,6 +17,14 @@ vi.mock('@/features/instances/api/instanceInstallApi', () => ({
 }))
 
 describe('目录选择时序', () => {
+  it('保留扫描到的损坏实例，供列表说明原因', async () => {
+    const store = useInstanceStore()
+    const version = { path: 'A', versionId: 'broken', isBroken: true, primaryLoader: 'Vanilla' } as ScannedVersion
+    vi.mocked(instanceInstallApi.scan).mockResolvedValue([version])
+    await store.scanPath('A')
+    expect(store.scannedVersions[0]?.isBroken).toBe(true)
+    expect(store.versions[0]?.id).toBe('broken')
+  })
   it('扫描已确认的同根目录别名时替换原实例，不累计重复卡片', async () => {
     const store = useInstanceStore()
     const version = {

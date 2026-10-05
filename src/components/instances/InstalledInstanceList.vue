@@ -62,8 +62,16 @@
               </button>
             </div>
           </div>
+          <p v-if="version.health?.diagnostics.length" class="card-description" role="status">
+            {{
+              version.health.diagnostics
+                .map((issue) => t(`instanceHealth.${issue.code}`, { id: issue.versionId }))
+                .join(' · ')
+            }}
+          </p>
           <p v-if="version.description" class="card-description">{{ version.description }}</p>
           <div class="card-badges">
+            <span v-if="version.isBroken" class="badge">{{ t('instanceHealth.blocked') }}</span>
             <span :class="['badge', 'badge-' + getLoaderClass(version.primaryLoader)]">{{
               loaderDisplayName(version.primaryLoader)
             }}</span>
@@ -123,6 +131,11 @@
                 </span>
               </div>
               <span class="instance-meta" :title="instanceMetadata(version)">{{ instanceMetadata(version) }}</span>
+              <span v-if="version.health?.diagnostics.length" role="status" class="instance-meta">{{
+                version.health.diagnostics
+                  .map((issue) => t(`instanceHealth.${issue.code}`, { id: issue.versionId }))
+                  .join(' · ')
+              }}</span>
             </div>
             <div
               class="instance-labels"

@@ -2125,5 +2125,34 @@
     "gamma": "Helligkeit",
     "particles": "Partikel",
     "clouds": "Wolken"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "Metadaten nur teilweise erkannt",
+    "constraint_unknown": "Versionsbedingung unklar: {id}",
+    "missing_required": "Erforderliche Abhängigkeit fehlt: {id}",
+    "disabled_provider": "Installiert, aber deaktiviert: {id}",
+    "version_mismatch": "Abhängigkeitsversion passt nicht: {id}",
+    "conflicting_provider": "Mod-Konflikt: {id}",
+    "duplicate_provider": "Doppelter Mod-Anbieter: {id}",
+    "enable": "Vorhandene Datei aktivieren",
+    "search": "Kompatible Ressourcen suchen"
+  },
+  "instanceHealth": {
+    "blocked": "Start nicht möglich",
+    "missing_json": "Versions-JSON fehlt: {id}",
+    "invalid_json": "Versions-JSON ungültig: {id}",
+    "missing_parent": "Übergeordnete Version fehlt: {id}",
+    "inheritance_cycle": "Zyklische Vererbung: {id}",
+    "invalid_inheritance": "Ungültige Vererbung: {id}",
+    "missing_jar": "Haupt-Jar fehlt: {id}",
+    "metadata_unknown": "Versionsmetadaten teilweise erkannt: {id}"
+  },
+  "javaRecovery": {
+    "missing": "Kompatibles Java fehlt",
+    "rescan": "Java erneut suchen",
+    "select": "Kompatibles Java auswählen",
+    "scanned": "Suche abgeschlossen. Kompatibles Java auswählen oder erneut starten.",
+    "requiredMajor": "Java {major} oder neuer erforderlich",
+    "unknownRequirement": "Java-Versionsanforderung unbekannt"
   }
 }

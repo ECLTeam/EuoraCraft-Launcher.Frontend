@@ -72,6 +72,12 @@
                 <span v-if="hasTranslatedName(mod)" class="mod-original-name">{{ mod.name }}</span>
                 <span class="mod-list-filename" :title="mod.filename">{{ mod.filename }}</span>
                 <span class="mod-list-metadata">{{ [mod.version, mod.author].filter(Boolean).join(' · ') }}</span>
+                <ModDiagnostics
+                  :diagnostics="mod.diagnostics"
+                  :busy="modTogglePending.size > 0"
+                  @enable="enableProvider"
+                  @search="searchDependency"
+                />
               </div>
             </div>
 
@@ -86,12 +92,7 @@
               <span :class="['mod-status', { enabled: mod.enabled }]">
                 {{ t(mod.enabled ? 'versions.mods.enabled' : 'versions.mods.disabled') }}
               </span>
-              <button
-                v-if="mod.project_id || mod.mcmod_url"
-                class="btn-action"
-                :title="t('versions.mods.checkOnline')"
-                @click="handleOpenOnline(mod)"
-              >
+              <button class="btn-action" :title="t('versions.mods.checkOnline')" @click="handleOpenOnline(mod)">
                 <UiIcon name="external-link" :size="13" />
               </button>
               <button
@@ -136,6 +137,8 @@
 import { NButton, NSwitch } from 'naive-ui'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import backend from '@/api/client'
+import ModDiagnostics from '@/components/instances/ModDiagnostics.vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -155,7 +158,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  openOnlineSearch: []
+  openOnlineSearch: [request?: { type: 'mod'; worldId: null; query: string }]
 }>()
 
 const { t } = useI18n()
@@ -228,6 +231,8 @@ async function handleToggleMod(mod: ModItem) {
     mod.enabled = result.enabled
     const actionText = result.enabled ? t('versions.mods.toggleEnabled') : t('versions.mods.toggleDisabled')
     message.success(t('versions.mods.modToggled', { name: modDisplayName(mod), action: actionText }))
+    if (props.version && target.version_id === props.version.versionId && target.game_path === props.version.path)
+      await loadMods()
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.mods.modToggleFailed'))
   } finally {
@@ -303,13 +308,45 @@ function hasTranslatedName(mod: ModItem): boolean {
   return Boolean(mod.display_name && mod.name && mod.display_name !== mod.name)
 }
 
+function searchDependency(query: string) {
+  emit('openOnlineSearch', { type: 'mod', worldId: null, query })
+}
+
+async function enableProvider(filename: string) {
+  const provider = mods.value.find((mod) => mod.filename === filename && !mod.enabled)
+  if (provider) await handleToggleMod(provider)
+}
+
+const identifyingMods = new Set<ModItem>()
 async function handleOpenOnline(mod: ModItem) {
-  const url = mod.mcmod_url || (mod.project_id ? `https://modrinth.com/mod/${mod.project_id}` : '')
-  if (!url) return
+  if (identifyingMods.has(mod)) return
+  identifyingMods.add(mod)
+  const scopeKey = props.version ? instanceKey(props.version) : ''
   try {
-    await modApi.openUrl(url)
+    let source = mod.source
+    let projectId = mod.source_project_id
+    if (!projectId && !mod.mcmod_url && mod.sha512) {
+      const result = await backend.command('game_resource_identify', { sha512: mod.sha512 })
+      if (result.success && result.data?.matched) {
+        source = result.data.source
+        projectId = result.data.projectId
+      }
+    }
+    if (scopeKey !== (props.version ? instanceKey(props.version) : '')) return
+    let url =
+      source === 'modrinth' && projectId ? `https://modrinth.com/mod/${encodeURIComponent(projectId)}` : mod.mcmod_url
+    if (source === 'curseforge' && projectId) {
+      const info = await modApi.info({ source: 'curseforge', mod_id: projectId })
+      if (scopeKey !== (props.version ? instanceKey(props.version) : '')) return
+      url = info.projectUrl || url
+    }
+    if (url) await modApi.openUrl(url)
+    else searchDependency(mod.name || mod.filename)
   } catch (error) {
-    message.error(error instanceof Error ? error.message : t('versions.mods.openOnlineFailed'))
+    if (scopeKey === (props.version ? instanceKey(props.version) : ''))
+      message.error(error instanceof Error ? error.message : t('versions.mods.openOnlineFailed'))
+  } finally {
+    identifyingMods.delete(mod)
   }
 }
 

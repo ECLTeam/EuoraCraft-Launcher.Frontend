@@ -2031,5 +2031,34 @@
     "gamma": "亮度",
     "particles": "粒子效果",
     "clouds": "云层"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "元数据未完整识别",
+    "constraint_unknown": "约束暂无法判断：{id}",
+    "missing_required": "缺少必需依赖：{id}",
+    "disabled_provider": "已安装但被禁用：{id}",
+    "version_mismatch": "依赖版本不匹配：{id}",
+    "conflicting_provider": "冲突模组：{id}",
+    "duplicate_provider": "重复提供模组：{id}",
+    "enable": "启用已有文件",
+    "search": "搜索兼容资源"
+  },
+  "instanceHealth": {
+    "blocked": "无法启动",
+    "missing_json": "缺少版本 JSON：{id}",
+    "invalid_json": "版本 JSON 无效：{id}",
+    "missing_parent": "缺少继承版本：{id}",
+    "inheritance_cycle": "继承链循环：{id}",
+    "invalid_inheritance": "继承声明无效：{id}",
+    "missing_jar": "缺少主 Jar：{id}",
+    "metadata_unknown": "版本元数据暂无法完整识别：{id}"
+  },
+  "javaRecovery": {
+    "missing": "未找到兼容 Java",
+    "rescan": "重新扫描 Java",
+    "select": "手动选择兼容 Java",
+    "scanned": "扫描完成，请选择兼容 Java 或重试启动",
+    "requiredMajor": "需要 Java {major} 或更高版本",
+    "unknownRequirement": "Java 版本要求尚未识别"
   }
 }

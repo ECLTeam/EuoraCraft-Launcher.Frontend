@@ -2008,5 +2008,34 @@
     "gamma": "亮度",
     "particles": "粒子效果",
     "clouds": "雲層"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "中繼資料未完整識別",
+    "constraint_unknown": "限制暫無法判斷：{id}",
+    "missing_required": "缺少必要依賴：{id}",
+    "disabled_provider": "已安裝但被停用：{id}",
+    "version_mismatch": "依賴版本不符：{id}",
+    "conflicting_provider": "衝突模組：{id}",
+    "duplicate_provider": "重複提供模組：{id}",
+    "enable": "啟用現有檔案",
+    "search": "搜尋相容資源"
+  },
+  "instanceHealth": {
+    "blocked": "無法啟動",
+    "missing_json": "缺少版本 JSON：{id}",
+    "invalid_json": "版本 JSON 無效：{id}",
+    "missing_parent": "缺少繼承版本：{id}",
+    "inheritance_cycle": "繼承鏈循環：{id}",
+    "invalid_inheritance": "繼承宣告無效：{id}",
+    "missing_jar": "缺少主 Jar：{id}",
+    "metadata_unknown": "版本中繼資料暫無法完整識別：{id}"
+  },
+  "javaRecovery": {
+    "missing": "找不到相容 Java",
+    "rescan": "重新掃描 Java",
+    "select": "手動選擇相容 Java",
+    "scanned": "掃描完成，請選擇相容 Java 或重試啟動",
+    "requiredMajor": "需要 Java {major} 或更新版本",
+    "unknownRequirement": "Java 版本要求尚未識別"
   }
 }

@@ -3,12 +3,17 @@ export type InstallPhase = 'install' | 'download' | 'done' | 'error'
  * 领域类型定义。
  * 由 types/api.ts 拆分而来，与后端 ECL/api/models.py 的 Pydantic 模型对齐。
  */
+import type { LocalModDependency, LocalModDiagnostic } from './mods'
 
 export interface JavaInstallation {
   path: string
   version: string
   major_version: number
   java_type: string
+  vendor?: string
+  runtime_kind?: 'JDK' | 'JRE'
+  executable_path?: string
+  architecture?: string
   arch: string
   sources: string[]
 }
@@ -106,6 +111,12 @@ export interface ScannedVersion {
   hasQuilt: boolean
   hasOptiFine?: boolean
   isBroken: boolean
+  installedComponents?: Array<{ name: string; version: string }>
+  health?: {
+    status: 'blocked' | 'warning' | 'healthy'
+    canLaunch: boolean
+    diagnostics: Array<{ code: string; versionId: string; severity: 'error' | 'warning' }>
+  }
   jsonPath: string
   sourceName?: string
   alias?: string
@@ -254,6 +265,11 @@ export interface GameResource {
   duplicateHash?: boolean
   duplicateProjectId?: boolean
   missingDependencies?: string[]
+  diagnostics?: LocalModDiagnostic[]
+  modId?: string
+  declaredModIds?: string[]
+  providedModIds?: string[]
+  dependencyDeclarations?: LocalModDependency[]
 }
 
 export type CrashConfidence = 'certain' | 'likely' | 'possible'

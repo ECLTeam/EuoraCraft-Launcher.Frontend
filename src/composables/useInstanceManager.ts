@@ -12,6 +12,7 @@ import {
 } from '@/config/game'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { LaunchProgress } from '@/types/system'
 import { normalizeGamePath } from '@/utils/path'
 import { useLauncherMessage } from './useLauncherMessage'
@@ -29,6 +30,9 @@ export interface InstanceManagerStateShape {
   currentGamePath: Ref<string>
   loading: Ref<boolean>
   launching: Ref<boolean>
+  javaRecoveryMessage: Ref<string>
+  isRescanningJava: Ref<boolean>
+  rescanJava: () => Promise<void>
   statusMsg: Ref<string>
   statusType: Ref<'info' | 'success' | 'error'>
   loadVersions: () => Promise<void>
@@ -49,6 +53,20 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
 
   const loading = ref(false)
   const launching = ref(false)
+  const javaRecoveryMessage = ref('')
+  const isRescanningJava = ref(false)
+  async function rescanJava() {
+    if (isRescanningJava.value) return
+    isRescanningJava.value = true
+    try {
+      await useSettingsStore().loadJavaInstallations(true)
+      message.success(t('javaRecovery.scanned'))
+    } catch (error) {
+      message.error(error instanceof Error ? error.message : t('game.status.scanFailed'))
+    } finally {
+      isRescanningJava.value = false
+    }
+  }
   const statusMsg = ref<string>('')
   const statusType = ref<'info' | 'success' | 'error'>('info')
 
@@ -91,6 +109,16 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
   async function launchGame(currentAccount: { id: string } | null) {
     // 防重入：启动进行中时忽略重复触发，避免并发 game_launch 与重复事件监听
     if (launching.value) return
+    javaRecoveryMessage.value = ''
+    const selected = instanceStore.scannedVersions.find(
+      (item) =>
+        item.versionId === selectedVersion.value &&
+        normalizeGamePath(item.path) === normalizeGamePath(currentGamePath.value)
+    )
+    if (selected?.isBroken) {
+      message.error(t('instanceHealth.blocked'))
+      return
+    }
     if (!selectedVersion.value) {
       showStatus(t('game.status.selectVersionFirst'), 'error')
       return
@@ -194,6 +222,12 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     launching.value = false
 
     if (!launchResult.success) {
+      if (['JAVA_NOT_FOUND', 'JAVA_VERSION_NOT_FOUND'].includes(launchResult.errorCode || '')) {
+        const requirement = selected?.requiredJava
+          ? t('javaRecovery.requiredMajor', { major: selected.requiredJava })
+          : t('javaRecovery.unknownRequirement')
+        javaRecoveryMessage.value = `${launchResult.message || t('javaRecovery.missing')} · ${requirement}`
+      }
       const isCanceled = launchResult.message === '启动已取消'
       if (isCanceled) {
         setLaunchProgress(0, 'error', '已取消')
@@ -237,6 +271,9 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     currentGamePath,
     loading,
     launching,
+    javaRecoveryMessage,
+    isRescanningJava,
+    rescanJava,
     statusMsg,
     statusType,
     loadVersions,

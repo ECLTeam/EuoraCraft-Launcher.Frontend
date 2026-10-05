@@ -28,14 +28,12 @@ export const useInstanceStore = defineStore('versions', () => {
 
   const loading = computed(() => loadingCount.value > 0)
   const versions = computed<VersionItem[]>(() =>
-    scannedVersions.value
-      .filter((version) => !version.isBroken)
-      .map((version) => ({
-        id: version.versionId,
-        type: version.primaryLoader,
-        versionType: version.versionType,
-        gamePath: version.path,
-      }))
+    scannedVersions.value.map((version) => ({
+      id: version.versionId,
+      type: version.primaryLoader,
+      versionType: version.versionType,
+      gamePath: version.path,
+    }))
   )
 
   function startWatching(): void {
@@ -113,7 +111,6 @@ export const useInstanceStore = defineStore('versions', () => {
       const seen = new Set<string>()
       const firstPath = paths[0] ?? ''
       const deduped = scanned
-        .filter((version) => !version.isBroken)
         .filter((version) => {
           const id = version.versionId || version.id
           const gamePath = getVersionGamePath(version, firstPath)

@@ -4,6 +4,7 @@ import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
+import { modApi } from '@/features/mods/api/modApi'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
@@ -79,6 +80,33 @@ async function toggle() {
 }
 
 describe('实例模组文件名与启用状态', () => {
+  it('来源未知时按名称搜索，不把加载器 ID 当作 Modrinth 项目', async () => {
+    vi.mocked(instanceWorkspaceApi.mods).mockResolvedValue([{ ...modItem(), project_id: 'loader-only-id' }])
+    const open = vi.spyOn(modApi, 'openUrl').mockResolvedValue(undefined)
+    await mountTab()
+    await wrapper.get('.btn-action:not(.btn-delete)').trigger('click')
+    await flushPromises()
+    expect(open).not.toHaveBeenCalled()
+    expect(wrapper.emitted('openOnlineSearch')).toEqual([[{ type: 'mod', worldId: null, query: 'Sample Mod' }]])
+  })
+
+  it('确认来源后使用平台项目 ID，并呈现禁用依赖诊断', async () => {
+    vi.mocked(instanceWorkspaceApi.mods).mockResolvedValue([
+      {
+        ...modItem(),
+        project_id: 'loader-id',
+        source: 'modrinth',
+        source_project_id: 'actual-project',
+        diagnostics: [{ code: 'disabled_provider', modId: 'api', severity: 'error', providers: ['api.jar.disabled'] }],
+      },
+    ])
+    const open = vi.spyOn(modApi, 'openUrl').mockResolvedValue(undefined)
+    await mountTab()
+    expect(wrapper.text()).toContain('已安装但被禁用：api')
+    await wrapper.get('.btn-action:not(.btn-delete)').trigger('click')
+    await flushPromises()
+    expect(open).toHaveBeenCalledWith('https://modrinth.com/mod/actual-project')
+  })
   beforeEach(() => {
     vi.clearAllMocks()
     vi.spyOn(instanceWorkspaceApi, 'mods').mockResolvedValue([modItem()])
@@ -111,7 +139,7 @@ describe('实例模组文件名与启用状态', () => {
       [target, 'sample.jar.disabled'],
       [target, 'sample.jar'],
     ])
-    expect(instanceWorkspaceApi.mods).toHaveBeenCalledTimes(1)
+    expect(instanceWorkspaceApi.mods).toHaveBeenCalledTimes(4)
   })
 
   it('启用初始禁用文件只去除末尾的后缀', async () => {

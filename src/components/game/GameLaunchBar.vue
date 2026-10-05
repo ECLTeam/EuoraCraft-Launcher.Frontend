@@ -1,14 +1,25 @@
 <template>
   <div class="game-launch-bar">
+    <div v-if="javaRecoveryMessage" role="alert" class="java-recovery">
+      <span>{{ javaRecoveryMessage }}</span>
+      <NButton size="small" :loading="isRescanningJava" @click="emit('rescanJava')">{{
+        t('javaRecovery.rescan')
+      }}</NButton>
+      <NButton size="small" @click="emit('selectJava')">{{ t('javaRecovery.select') }}</NButton>
+    </div>
     <PluginSlotHost slotId="plugin-slot-game-launch-before" class="plugin-slot-container" />
     <div class="launch-action-row">
       <!-- 分裂按钮：启动实例 + 最近实例切换 -->
       <div
         v-if="versionsCount > 0"
         class="split-launch-btn"
-        :class="{ disabled: launching || !selectedVersion || !hasAccount }"
+        :class="{ disabled: launching || !selectedVersion || !hasAccount || selectedIsBroken }"
       >
-        <button class="split-main" :disabled="launching || !selectedVersion || !hasAccount" @click="emit('launch')">
+        <button
+          class="split-main"
+          :disabled="launching || !selectedVersion || !hasAccount || selectedIsBroken"
+          @click="emit('launch')"
+        >
           <span class="split-main-icon"><UiIcon name="play" :size="16" /></span>
           <span class="launch-main-content">
             <span class="launch-main-label">{{ launching ? t('game.launching') : t('game.launch') }}</span>
@@ -139,6 +150,8 @@ const props = defineProps<{
   currentGamePath: string
   hasAccount: boolean
   recentInstances: RecentInstance[]
+  javaRecoveryMessage?: string
+  isRescanningJava?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -148,12 +161,17 @@ const emit = defineEmits<{
   selectVersion: [versionId: string, gamePath?: string]
   togglePin: [item: RecentInstance]
   removeRecent: [item: RecentInstance]
+  rescanJava: []
+  selectJava: []
 }>()
 
 const instanceStore = useInstanceStore()
 const settingsStore = useSettingsStore()
 const isRecentInstancesOpen = ref(false)
 
+const selectedIsBroken = computed(
+  () => matchedInstance(props.selectedVersion, props.currentGamePath)?.isBroken === true
+)
 const selectedInstanceName = computed(() => {
   const matched = matchedInstance(props.selectedVersion, props.currentGamePath)
   return matched ? instanceDisplayName(matched) : props.selectedVersion
@@ -207,6 +225,17 @@ const { t } = useI18n()
 </script>
 
 <style scoped>
+.java-recovery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  color: var(--warning);
+}
+.java-recovery span {
+  flex-basis: 100%;
+  font-size: 12px;
+}
 .game-launch-bar {
   display: flex;
   width: 100%;

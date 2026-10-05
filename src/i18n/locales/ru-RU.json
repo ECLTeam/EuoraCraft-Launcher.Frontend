@@ -2122,5 +2122,34 @@
     "gamma": "Яркость",
     "particles": "Частицы",
     "clouds": "Облака"
+  },
+  "modDiagnostics": {
+    "metadata_unknown": "Метаданные распознаны не полностью",
+    "constraint_unknown": "Условие не удалось проверить: {id}",
+    "missing_required": "Отсутствует обязательная зависимость: {id}",
+    "disabled_provider": "Установлено, но отключено: {id}",
+    "version_mismatch": "Версия зависимости не подходит: {id}",
+    "conflicting_provider": "Конфликтующий мод: {id}",
+    "duplicate_provider": "Дублирующий поставщик мода: {id}",
+    "enable": "Включить установленный файл",
+    "search": "Найти совместимые ресурсы"
+  },
+  "instanceHealth": {
+    "blocked": "Запуск невозможен",
+    "missing_json": "Отсутствует JSON версии: {id}",
+    "invalid_json": "Некорректный JSON версии: {id}",
+    "missing_parent": "Отсутствует родительская версия: {id}",
+    "inheritance_cycle": "Цикл наследования: {id}",
+    "invalid_inheritance": "Некорректное наследование: {id}",
+    "missing_jar": "Отсутствует основной Jar: {id}",
+    "metadata_unknown": "Метаданные версии распознаны частично: {id}"
+  },
+  "javaRecovery": {
+    "missing": "Совместимая Java не найдена",
+    "rescan": "Повторить поиск Java",
+    "select": "Выбрать совместимую Java",
+    "scanned": "Поиск завершён. Выберите совместимую Java или повторите запуск.",
+    "requiredMajor": "Требуется Java {major} или новее",
+    "unknownRequirement": "Требуемая версия Java неизвестна"
   }
 }

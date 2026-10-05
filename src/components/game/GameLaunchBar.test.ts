@@ -68,6 +68,16 @@ async function openRecentPopover(wrapper: ReturnType<typeof mountLaunchBar>) {
 }
 
 describe('GameLaunchBar', () => {
+  it('损坏实例保留选择但不能启动，Java 失败保留恢复入口', async () => {
+    const wrapper = mountLaunchBar(
+      { currentGamePath: 'C:/Games/.minecraft', javaRecoveryMessage: '未找到 Java 21', isRescanningJava: true },
+      [makeVersion({ isBroken: true })]
+    )
+    expect(wrapper.get('.split-main').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('[role="alert"]').text()).toContain('未找到 Java 21')
+    await wrapper.get('.java-recovery button:last-child').trigger('click')
+    expect(wrapper.emitted('selectJava')).toEqual([[]])
+  })
   it.each([
     { alias: '朋友生存服', displayName: '默认实例名称', expected: '朋友生存服' },
     { alias: '', displayName: '默认实例名称', expected: '默认实例名称' },
