@@ -3,6 +3,15 @@ import type { ApiResponse, CommandPayloadMap, CommandResponseMap } from '@/types
 import { getErrorMessage } from '@/utils/error'
 import { Logger, SILENT_COMMANDS, checkEnv, transport } from './state'
 
+type CommandResponseObserver = (command: string, payload: unknown, response: ApiResponse<unknown>) => void
+const responseObservers = new Set<CommandResponseObserver>()
+
+/** 应用宿主观察已提交操作；订阅者错误不得改变原 IPC 结果。 */
+export function onCommandResponse(observer: CommandResponseObserver): () => void {
+  responseObservers.add(observer)
+  return () => responseObservers.delete(observer)
+}
+
 /**
  * 为 IPC 调用附加超时，超时后拒绝并提示用户检查网络。
  * @param promise - 原始调用 Promise
@@ -61,6 +70,13 @@ async function call<T = unknown>(command: string, payload: unknown = {}, timeout
     // 高频轮询命令跳过成功日志，仅在失败时打印
     if (!SILENT_COMMANDS.has(command) || !response.success) {
       Logger.log(`${response.success ? 'OK' : 'ERR'} ${command} (${dur}ms)`)
+    }
+    for (const observer of responseObservers) {
+      try {
+        observer(command, payload, response)
+      } catch (error) {
+        console.warn('同步操作状态失败', error)
+      }
     }
     return response
   } catch (e) {

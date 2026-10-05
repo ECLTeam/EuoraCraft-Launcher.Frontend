@@ -1897,13 +1897,11 @@
     "title": "タスク"
   },
   "taskQueue": {
-    "title": "ダウンロードタスクセンター",
+    "title": "タスクセンター",
     "empty": "タスクはありません",
-    "emptyHint": "インスタンスのインストール時にタスクの進行状況がここに表示されます",
+    "emptyHint": "送信したバックグラウンドタスクの進捗と結果を表示します。",
     "currentStatus": "現在の状態：",
     "runningCount": "{count} 件のタスクが実行中",
-    "allDone": "すべて完了",
-    "clearCompleted": "完了済みを削除 ({count})",
     "files": "ファイル",
     "liveTitle": "リアルタイムダウンロード",
     "filesProgress": "{done} / {total} ファイル",
@@ -1911,7 +1909,16 @@
     "elapsedLabel": "経過時間",
     "remainingLabel": "予想残り時間",
     "chartWindow": "直近 {seconds} 秒",
-    "peakLabel": "ピーク"
+    "peakLabel": "ピーク",
+    "clearFinishedTasks": "終了したタスクを削除 ({count})",
+    "allFinished": "すべて終了",
+    "states": {
+      "pending": "待機中",
+      "running": "実行中",
+      "completed": "完了",
+      "error": "失敗",
+      "canceled": "キャンセル済み"
+    }
   },
   "terminal": {
     "close": "閉じる",
@@ -1978,5 +1985,26 @@
       "append": "公開とカスタム",
       "custom": "カスタムのみ"
     }
+  },
+  "operations": {
+    "unknown": "バックグラウンドタスク",
+    "custom_download": "カスタムダウンロード",
+    "instance_import": "インスタンスをインポート",
+    "instance_export": "インスタンスをエクスポート",
+    "modpack_online_install": "Modパックをインストール",
+    "resource_install": "リソースをインストール",
+    "resource_update": "リソースを更新",
+    "world_copy": "ワールドをコピー",
+    "world_export": "ワールドをエクスポート",
+    "world_import": "ワールドをインポート",
+    "world_backup": "ワールドをバックアップ",
+    "world_restore": "ワールドを復元",
+    "instance_clone": "インスタンスをコピー",
+    "instance_repair": "インスタンスを修復",
+    "queryFailed": "タスクの状態を確認できません。更新して再試行してください。",
+    "refresh": "状態を更新",
+    "submitted": "送信しました。タスク一覧で結果を確認できます。",
+    "retryOriginal": "前回のダウンロードを再試行",
+    "cancelRequested": "キャンセルを要求しました。停止を待っています。"
   }
 }

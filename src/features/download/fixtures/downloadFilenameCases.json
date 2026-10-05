@@ -1,0 +1,13 @@
+[
+  { "name": "archive.zip", "valid": true },
+  { "name": "精确名称", "valid": true },
+  { "name": "CONtext.txt", "valid": true },
+  { "name": "CON .txt", "valid": false },
+  { "name": "lpt² .zip", "valid": false },
+  { "name": "NUL", "valid": false },
+  { "name": "CONOUT$.txt", "valid": false },
+  { "name": "../file", "valid": false },
+  { "name": "file.", "valid": false },
+  { "name": "file ", "valid": false },
+  { "name": "a\u007fb", "valid": false }
+]

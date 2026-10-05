@@ -154,7 +154,6 @@ async function copyWorld(target: InstanceTargetPayload, worldId: string, newWorl
     { ...target, world_id: worldId, new_world_id: newWorldId },
     '复制存档'
   )
-  invalidateWorkspaceCache(target, 'worlds')
   return operation
 }
 
@@ -179,7 +178,6 @@ async function setWorldIcon(
 
 async function importWorld(target: InstanceTargetPayload, sourcePath: string): Promise<GameOperation> {
   const operation = await call<GameOperation>('game_world_import', { ...target, source_path: sourcePath }, '导入存档')
-  invalidateWorkspaceCache(target, 'worlds')
   return operation
 }
 

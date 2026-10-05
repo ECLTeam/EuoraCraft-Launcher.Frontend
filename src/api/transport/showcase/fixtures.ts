@@ -764,7 +764,7 @@ export interface DemoTaskDef {
   total?: number
   totalFiles?: number
   downloadedFiles?: number
-  speed?: number
+  speedBytesPerSecond?: number
 }
 
 /** Demo task definitions for showcase mode */
@@ -782,7 +782,7 @@ export const showcaseDemoTasks: DemoTaskDef[] = [
     total: 18.9 * 1024 * 1024,
     totalFiles: 128,
     downloadedFiles: 83,
-    speed: 3.2 * 1024 * 1024,
+    speedBytesPerSecond: 3.2 * 1024 * 1024,
     subtasks: [
       { id: 'sub1', name: '下载 JSON 索引', status: 'completed', message: '已完成' },
       { id: 'sub2', name: '下载 client.jar', status: 'running', message: '65%' },
@@ -863,7 +863,7 @@ export function loadShowcaseTasks(globalTaskQueue: {
         | 'total'
         | 'totalFiles'
         | 'downloadedFiles'
-        | 'speed'
+        | 'speedBytesPerSecond'
       >
     >
   ) => void
@@ -888,7 +888,7 @@ export function loadShowcaseTasks(globalTaskQueue: {
       total: def.total,
       totalFiles: def.totalFiles,
       downloadedFiles: def.downloadedFiles,
-      speed: def.speed,
+      speedBytesPerSecond: def.speedBytesPerSecond,
     })
     if (def.subtasks) {
       for (const sub of def.subtasks) {

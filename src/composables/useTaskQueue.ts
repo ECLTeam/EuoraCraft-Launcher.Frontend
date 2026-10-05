@@ -11,7 +11,10 @@ export interface Subtask {
 
 export interface TaskItem {
   id: string
-  type: 'install' | 'download'
+  type: 'install' | 'download' | 'operation'
+  operationId?: string
+  operationKind?: string
+  targetKey?: string
   name: string
   status: 'pending' | 'running' | 'completed' | 'error' | 'canceled'
   progress: number
@@ -32,7 +35,7 @@ export interface TaskItem {
   /** 已下载文件数 */
   downloadedFiles?: number
   /** 当前下载速度，字节/秒 */
-  speed?: number
+  speedBytesPerSecond?: number
 }
 
 /**
@@ -55,7 +58,14 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     preferredId?: string
   ): string {
     // 外部已确定任务 ID（如启动期由后端上报）时沿用，避免进度事件对不上任务。
-    const id = preferredId && !tasks.value.some((t) => t.id === preferredId) ? preferredId : generateTaskId()
+    const existing = preferredId && tasks.value.find((task) => task.id === preferredId)
+    if (existing) {
+      existing.operationId ??= task.operationId
+      existing.operationKind ??= task.operationKind
+      existing.targetKey ??= task.targetKey
+      return existing.id
+    }
+    const id = preferredId || generateTaskId()
     const item: TaskItem = {
       ...task,
       id,
@@ -84,13 +94,15 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
         | 'total'
         | 'totalFiles'
         | 'downloadedFiles'
-        | 'speed'
+        | 'speedBytesPerSecond'
       >
     >
   ) {
     const task = tasks.value.find((t) => t.id === taskId)
     if (!task) return
+    if (['completed', 'error', 'canceled'].includes(task.status)) return
     if (updates.status !== undefined) task.status = updates.status
+    if (updates.status === 'error') task.expanded = true
     if (updates.progress !== undefined) task.progress = Math.min(100, Math.max(0, updates.progress))
     if (updates.message !== undefined) task.message = updates.message
     if (updates.subtasks !== undefined) task.subtasks = updates.subtasks
@@ -99,7 +111,7 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     if (updates.total !== undefined) task.total = updates.total
     if (updates.totalFiles !== undefined) task.totalFiles = updates.totalFiles
     if (updates.downloadedFiles !== undefined) task.downloadedFiles = updates.downloadedFiles
-    if (updates.speed !== undefined) task.speed = updates.speed
+    if (updates.speedBytesPerSecond !== undefined) task.speedBytesPerSecond = updates.speedBytesPerSecond
   }
 
   function addSubtask(taskId: string, subtask: Subtask) {
@@ -119,7 +131,12 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     if (idx !== -1) tasks.value.splice(idx, 1)
   }
 
-  function clearCompleted() {
+  function toggleTaskExpansion(taskId: string): void {
+    const task = tasks.value.find((item) => item.id === taskId)
+    if (task) task.expanded = !task.expanded
+  }
+
+  function clearFinishedTasks() {
     tasks.value = tasks.value.filter((t) => t.status === 'running' || t.status === 'pending')
   }
 
@@ -147,7 +164,8 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     updateTask,
     addSubtask,
     removeTask,
-    clearCompleted,
+    toggleTaskExpansion,
+    clearFinishedTasks,
     togglePanel,
     openPanel,
     closePanel,
@@ -168,7 +186,8 @@ export function useTaskQueue() {
     updateTask: store.updateTask,
     addSubtask: store.addSubtask,
     removeTask: store.removeTask,
-    clearCompleted: store.clearCompleted,
+    toggleTaskExpansion: store.toggleTaskExpansion,
+    clearFinishedTasks: store.clearFinishedTasks,
     togglePanel: store.togglePanel,
     openPanel: store.openPanel,
     closePanel: store.closePanel,

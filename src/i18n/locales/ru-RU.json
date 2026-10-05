@@ -1894,13 +1894,11 @@
     "title": "Задача"
   },
   "taskQueue": {
-    "title": "Центр задач загрузки",
+    "title": "Центр задач",
     "empty": "Задач нет",
-    "emptyHint": "Прогресс задач появится здесь при установке экземпляров",
+    "emptyHint": "Здесь отображаются ход выполнения и результаты отправленных фоновых задач.",
     "currentStatus": "Текущий статус: ",
     "runningCount": "Выполняется задач: {count}",
-    "allDone": "Все выполнены",
-    "clearCompleted": "Очистить выполненные ({count})",
     "files": "файлов",
     "liveTitle": "Загрузка в реальном времени",
     "filesProgress": "Файлов: {done} / {total}",
@@ -1908,7 +1906,16 @@
     "elapsedLabel": "Прошло времени",
     "remainingLabel": "Осталось (примерно)",
     "chartWindow": "Последние {seconds} с",
-    "peakLabel": "Пик"
+    "peakLabel": "Пик",
+    "clearFinishedTasks": "Очистить завершённые ({count})",
+    "allFinished": "Все задачи завершены",
+    "states": {
+      "pending": "В ожидании",
+      "running": "Выполняется",
+      "completed": "Завершено",
+      "error": "Ошибка",
+      "canceled": "Отменено"
+    }
   },
   "terminal": {
     "close": "Закрыть",
@@ -1975,5 +1982,26 @@
       "append": "Общие и свои",
       "custom": "Только свои"
     }
+  },
+  "operations": {
+    "unknown": "Фоновая задача",
+    "custom_download": "Произвольная загрузка",
+    "instance_import": "Импорт экземпляра",
+    "instance_export": "Экспорт экземпляра",
+    "modpack_online_install": "Установка сборки",
+    "resource_install": "Установка ресурсов",
+    "resource_update": "Обновление ресурса",
+    "world_copy": "Копирование мира",
+    "world_export": "Экспорт мира",
+    "world_import": "Импорт мира",
+    "world_backup": "Резервная копия мира",
+    "world_restore": "Восстановление мира",
+    "instance_clone": "Копирование экземпляра",
+    "instance_repair": "Восстановление экземпляра",
+    "queryFailed": "Статус задачи временно недоступен. Обновите его.",
+    "refresh": "Обновить статус",
+    "submitted": "Задача отправлена. Результат появится в списке задач.",
+    "retryOriginal": "Повторить предыдущую загрузку",
+    "cancelRequested": "Отмена запрошена. Ожидание остановки задачи."
   }
 }

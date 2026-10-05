@@ -24,14 +24,22 @@
         <div class="tq-list">
           <div class="tq-toolbar">
             <span class="tq-status-text">
-              {{ activeCount > 0 ? t('taskQueue.runningCount', { count: activeCount }) : t('taskQueue.allDone') }}
+              {{ activeCount > 0 ? t('taskQueue.runningCount', { count: activeCount }) : t('taskQueue.allFinished') }}
             </span>
-            <button class="tq-clear-btn" :disabled="completedCount === 0" @click="clearCompleted">
-              {{ t('taskQueue.clearCompleted', { count: completedCount }) }}
+            <button class="tq-clear-btn" :disabled="finishedCount === 0" @click="clearFinishedTasks">
+              {{ t('taskQueue.clearFinishedTasks', { count: finishedCount }) }}
             </button>
           </div>
           <div v-for="task in tasks" :key="task.id" :class="['tq-task', `tq-task--${task.status}`]">
-            <div class="tq-task-header" @click="toggleExpand(task.id)">
+            <div
+              class="tq-task-header"
+              role="button"
+              tabindex="0"
+              :aria-expanded="task.expanded"
+              @click="toggleExpand(task.id)"
+              @keydown.enter.self="toggleExpand(task.id)"
+              @keydown.space.self.prevent="toggleExpand(task.id)"
+            >
               <div class="tq-task-main">
                 <div class="tq-task-icon">
                   <UiLoading v-if="task.status === 'running'" mode="inline" size="md" decorative />
@@ -45,8 +53,9 @@
                     {{ task.name }}
                   </div>
                   <div class="tq-task-meta">
-                    <span class="tq-task-type">{{ getLoaderLabel(task.loaderType) }}</span>
-                    <span class="tq-task-ver">{{ task.versionId }}</span>
+                    <span>{{ t(`taskQueue.states.${task.status}`) }}</span>
+                    <span v-if="task.loaderType" class="tq-task-type">{{ getLoaderLabel(task.loaderType) }}</span>
+                    <span v-if="task.versionId" class="tq-task-ver">{{ task.versionId }}</span>
                   </div>
                 </div>
               </div>
@@ -71,6 +80,30 @@
                 <UiIcon name="x-mark" :size="12" />
               </button>
             </div>
+            <div v-if="task.operationId" class="tq-task-stats">
+              <button
+                v-if="task.status === 'pending' || task.status === 'running'"
+                class="tq-clear-btn"
+                :disabled="
+                  operationStore.cancellingOperations.includes(task.operationId) ||
+                  operationStore.operations[task.operationId]?.canCancel === false ||
+                  operationStore.operations[task.operationId]?.cancellationRequested
+                "
+                @click="cancelOperation(task.operationId)"
+              >
+                {{
+                  operationStore.operations[task.operationId]?.cancellationRequested
+                    ? t('operations.cancelRequested')
+                    : t('common.cancel')
+                }}
+              </button>
+              <template v-if="operationStore.queryErrors[task.operationId]">
+                <span role="alert">{{ t('operations.queryFailed') }}</span>
+                <button class="tq-clear-btn" @click="operationStore.refresh(task.operationId)">
+                  {{ t('operations.refresh') }}
+                </button>
+              </template>
+            </div>
 
             <!-- 下载统计：文件数 / 字节进度 / 实时速度 -->
             <div v-if="showTaskStats(task)" class="tq-task-stats">
@@ -81,9 +114,9 @@
               <span v-if="task.progressType === 'bytes' && task.total" class="tq-stat tq-stat-bytes">
                 {{ formatBytes(task.done ?? 0) }} / {{ formatBytes(task.total) }}
               </span>
-              <span v-if="task.status === 'running' && task.speed" class="tq-stat tq-stat-speed">
+              <span v-if="task.status === 'running' && task.speedBytesPerSecond" class="tq-stat tq-stat-speed">
                 <UiIcon name="download" :size="12" />
-                {{ formatSpeed(task.speed) }}
+                {{ formatSpeed(task.speedBytesPerSecond) }}
               </span>
             </div>
 
@@ -138,7 +171,11 @@
             <!-- 实时网速曲线图 -->
             <div class="tq-live-chart">
               <span class="tq-live-chart-badge">
-                {{ activeDownload.speed && activeDownload.speed > 0 ? formatSpeed(activeDownload.speed) : '—' }}
+                {{
+                  activeDownload.speedBytesPerSecond && activeDownload.speedBytesPerSecond > 0
+                    ? formatSpeed(activeDownload.speedBytesPerSecond)
+                    : '—'
+                }}
               </span>
               <svg class="tq-live-chart-svg" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
                 <polygon v-if="chartArea" :points="chartArea" class="tq-live-chart-area" />
@@ -183,17 +220,22 @@ import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import UiProgress from '@/components/ui/Progress.vue'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 import { globalTaskQueue, type TaskItem } from '@/composables/useTaskQueue'
 import { getLoaderLabel } from '@/config/version'
+import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 
 defineOptions({ name: 'TaskQueuePanel' })
 
 const { t } = useI18n()
+const operationStore = useApplicationOperationStore()
+const { run } = useAsyncAction()
+const cancelOperation = (operationId: string) => run(() => operationStore.cancel(operationId))
 
-const { tasks, panelVisible, activeCount, removeTask, clearCompleted: queueClearCompleted } = globalTaskQueue
+const { tasks, panelVisible, activeCount, removeTask, clearFinishedTasks: queueClearFinishedTasks } = globalTaskQueue
 
-const completedCount = computed(
+const finishedCount = computed(
   () => tasks.value.filter((t) => t.status === 'completed' || t.status === 'error' || t.status === 'canceled').length
 )
 
@@ -201,7 +243,7 @@ const completedCount = computed(
 const activeDownload = computed(() => {
   const running = tasks.value.filter((t) => t.status === 'running')
   return (
-    running.find((t) => t.progressType === 'bytes' || (t.speed != null && t.speed > 0)) ??
+    running.find((t) => t.progressType === 'bytes' || (t.speedBytesPerSecond != null && t.speedBytesPerSecond > 0)) ??
     running.find((t) => t.totalFiles != null || t.downloadedFiles != null) ??
     null
   )
@@ -249,7 +291,7 @@ let liveTimer: ReturnType<typeof setInterval> | null = null
 function updateTick(): void {
   const task = activeDownload.value
   elapsed.value = task ? Math.floor((Date.now() - task.timestamp) / 1000) : 0
-  const speed = task?.speed != null && task.speed > 0 ? task.speed : 0
+  const speed = task?.speedBytesPerSecond != null && task.speedBytesPerSecond > 0 ? task.speedBytesPerSecond : 0
   speedSamples.value.push(speed)
   if (speedSamples.value.length > MAX_SAMPLES) speedSamples.value.shift()
 }
@@ -303,7 +345,7 @@ const chartArea = computed(() => {
 /** 字节进度依据实时速度估算剩余时间；文件/无量纲进度无剩余时间 */
 const remainingText = computed(() => {
   const task = activeDownload.value
-  const speed = task?.speed ?? 0
+  const speed = task?.speedBytesPerSecond ?? 0
   if (task?.progressType === 'bytes' && task.total && speed > 0) {
     return formatDuration((task.total - (task.done ?? 0)) / speed)
   }
@@ -314,22 +356,19 @@ function showTaskStats(task: TaskItem): boolean {
   return (
     task.totalFiles != null ||
     (task.progressType === 'bytes' && !!task.total) ||
-    (task.status === 'running' && !!task.speed)
+    (task.status === 'running' && !!task.speedBytesPerSecond)
   )
 }
 
-function clearCompleted() {
-  queueClearCompleted()
+function clearFinishedTasks() {
+  queueClearFinishedTasks()
   if (tasks.value.length === 0) {
     panelVisible.value = false
   }
 }
 
 function toggleExpand(taskId: string) {
-  const task = tasks.value.find((t) => t.id === taskId)
-  if (task) {
-    task.expanded = !task.expanded
-  }
+  globalTaskQueue.toggleTaskExpansion(taskId)
 }
 </script>
 

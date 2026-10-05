@@ -154,6 +154,7 @@ import UiIcon from '@/components/ui/Icon.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import SchematicPreviewModal from '@/features/instances/components/SchematicPreviewModal.vue'
+import { useTargetOperationRefresh } from '@/features/operations/composables/useTargetOperationRefresh'
 import type { GameResource, GameResourceType, ScannedVersion } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 import InstanceContentState from './InstanceContentState.vue'
@@ -205,6 +206,8 @@ const allFilteredSelected = computed(
   () => filtered.value.length > 0 && filtered.value.every((item) => selected.value.has(item.id))
 )
 const someFilteredSelected = computed(() => filtered.value.some((item) => selected.value.has(item.id)))
+useTargetOperationRefresh(target, load)
+
 async function load() {
   const requestId = ++loadRequestId
   if (resourceType.value === 'datapack' && !worldId.value) {
@@ -226,9 +229,6 @@ async function load() {
     if (requestId === loadRequestId) loading.value = false
   }
 }
-// 安装后的延迟刷新定时器：组件卸载时清理，避免卸载后仍触发请求
-let refreshTimer: number | null = null
-
 async function install(paths: string[]) {
   if (!paths.length) return
   try {
@@ -238,8 +238,6 @@ async function install(paths: string[]) {
     return
   }
   message.success('资源安装任务已创建')
-  if (refreshTimer) clearTimeout(refreshTimer)
-  refreshTimer = window.setTimeout(load, 500)
 }
 async function chooseAndInstall() {
   try {
@@ -383,10 +381,6 @@ async function handleConfirm() {
 onMounted(load)
 onBeforeUnmount(() => {
   loadRequestId += 1
-  if (refreshTimer) {
-    clearTimeout(refreshTimer)
-    refreshTimer = null
-  }
 })
 </script>
 

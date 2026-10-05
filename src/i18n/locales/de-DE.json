@@ -1897,13 +1897,11 @@
     "title": "Aufgaben"
   },
   "taskQueue": {
-    "title": "Download-Aufgabenzentrum",
+    "title": "Aufgabenzentrale",
     "empty": "Keine Aufgaben",
-    "emptyHint": "Bei der Installation von Instanzen erscheint hier der Aufgabenfortschritt",
+    "emptyHint": "Hier erscheinen Fortschritt und Ergebnisse übermittelter Hintergrundaufgaben.",
     "currentStatus": "Aktueller Status:",
     "runningCount": "{count} Aufgaben laufen",
-    "allDone": "Alles erledigt",
-    "clearCompleted": "Abgeschlossene löschen ({count})",
     "files": "Dateien",
     "liveTitle": "Download in Echtzeit",
     "filesProgress": "{done} / {total} Dateien",
@@ -1911,7 +1909,16 @@
     "elapsedLabel": "Vergangene Zeit",
     "remainingLabel": "Voraussichtlich übrig",
     "chartWindow": "Letzte {seconds} Sek.",
-    "peakLabel": "Spitze"
+    "peakLabel": "Spitze",
+    "clearFinishedTasks": "Beendete Aufgaben löschen ({count})",
+    "allFinished": "Alle Aufgaben beendet",
+    "states": {
+      "pending": "Ausstehend",
+      "running": "Wird ausgeführt",
+      "completed": "Abgeschlossen",
+      "error": "Fehlgeschlagen",
+      "canceled": "Abgebrochen"
+    }
   },
   "terminal": {
     "close": "Schließen",
@@ -1978,5 +1985,26 @@
       "append": "Öffentliche und eigene",
       "custom": "Nur eigene"
     }
+  },
+  "operations": {
+    "unknown": "Hintergrundaufgabe",
+    "custom_download": "Eigener Download",
+    "instance_import": "Instanz importieren",
+    "instance_export": "Instanz exportieren",
+    "modpack_online_install": "Modpack installieren",
+    "resource_install": "Ressourcen installieren",
+    "resource_update": "Ressource aktualisieren",
+    "world_copy": "Welt kopieren",
+    "world_export": "Welt exportieren",
+    "world_import": "Welt importieren",
+    "world_backup": "Welt sichern",
+    "world_restore": "Welt wiederherstellen",
+    "instance_clone": "Instanz kopieren",
+    "instance_repair": "Instanz reparieren",
+    "queryFailed": "Der Aufgabenstatus ist vorübergehend nicht verfügbar. Bitte aktualisieren.",
+    "refresh": "Status aktualisieren",
+    "submitted": "Übermittelt. Das Ergebnis steht in der Aufgabenliste.",
+    "retryOriginal": "Vorherigen Download wiederholen",
+    "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe."
   }
 }

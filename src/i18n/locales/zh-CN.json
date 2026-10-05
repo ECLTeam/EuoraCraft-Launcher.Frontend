@@ -1778,13 +1778,11 @@
     "title": "任务"
   },
   "taskQueue": {
-    "title": "下载任务中心",
+    "title": "任务中心",
     "empty": "暂无任务",
-    "emptyHint": "安装实例时会在此显示任务进度",
+    "emptyHint": "后台操作提交后，进度和结果会显示在这里",
     "currentStatus": "当前状态：",
     "runningCount": "{count} 个任务进行中",
-    "allDone": "全部完成",
-    "clearCompleted": "清除已完成 ({count})",
     "files": "文件",
     "liveTitle": "实时下载",
     "filesProgress": "{done} / {total} 个文件",
@@ -1792,7 +1790,16 @@
     "elapsedLabel": "已用时",
     "remainingLabel": "预计剩余",
     "chartWindow": "近 {seconds} 秒",
-    "peakLabel": "峰值"
+    "peakLabel": "峰值",
+    "clearFinishedTasks": "清理已结束 ({count})",
+    "allFinished": "全部已结束",
+    "states": {
+      "pending": "等待执行",
+      "running": "执行中",
+      "completed": "已完成",
+      "error": "失败",
+      "canceled": "已取消"
+    }
   },
   "terminal": {
     "close": "关闭",
@@ -1884,5 +1891,26 @@
     "downloadUaHeader": "请在 UA 字段中设置 User-Agent",
     "nodesEntry": "联机设置",
     "nodesPolicy": "节点策略"
+  },
+  "operations": {
+    "unknown": "后台任务",
+    "custom_download": "自定义下载",
+    "instance_import": "导入实例",
+    "instance_export": "导出实例",
+    "modpack_online_install": "安装整合包",
+    "resource_install": "安装资源",
+    "resource_update": "更新资源",
+    "world_copy": "复制存档",
+    "world_export": "导出存档",
+    "world_import": "导入存档",
+    "world_backup": "备份存档",
+    "world_restore": "恢复存档",
+    "instance_clone": "复制实例",
+    "instance_repair": "修复实例",
+    "queryFailed": "暂时无法确认任务状态，请刷新重试",
+    "refresh": "刷新状态",
+    "submitted": "已提交，可在任务列表查看结果",
+    "retryOriginal": "重试上次下载",
+    "cancelRequested": "已请求取消，等待任务停止"
   }
 }

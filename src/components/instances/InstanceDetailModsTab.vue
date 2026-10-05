@@ -144,6 +144,7 @@ import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { getLoaderName } from '@/config/version'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { modApi } from '@/features/mods/api/modApi'
+import { useTargetOperationRefresh } from '@/features/operations/composables/useTargetOperationRefresh'
 import type { ScannedVersion } from '@/types/instances'
 import type { ModItem } from '@/types/mods'
 import InstanceContentState from './InstanceContentState.vue'
@@ -196,6 +197,8 @@ const filteredMods = computed(() => {
 function getTarget() {
   return props.version ? workspaceTarget(props.version) : null
 }
+
+useTargetOperationRefresh(getTarget, loadMods)
 
 async function loadMods() {
   const isCurrent = modRequests.begin()

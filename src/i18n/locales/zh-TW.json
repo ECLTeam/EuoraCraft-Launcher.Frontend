@@ -1780,13 +1780,11 @@
     "title": "任務"
   },
   "taskQueue": {
-    "title": "下載任務中心",
+    "title": "工作中心",
     "empty": "暫無任務",
-    "emptyHint": "安裝實例時會在此顯示任務進度",
+    "emptyHint": "提交背景工作後，進度與結果會顯示在這裡",
     "currentStatus": "當前狀態：",
     "runningCount": "{count} 個任務進行中",
-    "allDone": "全部完成",
-    "clearCompleted": "清除已完成 ({count})",
     "files": "檔案",
     "liveTitle": "實時下載",
     "filesProgress": "{done} / {total} 個檔案",
@@ -1794,7 +1792,16 @@
     "elapsedLabel": "已用時",
     "remainingLabel": "預計剩餘",
     "chartWindow": "近 {seconds} 秒",
-    "peakLabel": "峰值"
+    "peakLabel": "峰值",
+    "clearFinishedTasks": "清除已結束 ({count})",
+    "allFinished": "全部已結束",
+    "states": {
+      "pending": "等待執行",
+      "running": "執行中",
+      "completed": "已完成",
+      "error": "失敗",
+      "canceled": "已取消"
+    }
   },
   "terminal": {
     "close": "關閉",
@@ -1861,5 +1868,26 @@
       "append": "公共與自訂",
       "custom": "僅自訂"
     }
+  },
+  "operations": {
+    "unknown": "背景工作",
+    "custom_download": "自訂下載",
+    "instance_import": "匯入實例",
+    "instance_export": "匯出實例",
+    "modpack_online_install": "安裝整合包",
+    "resource_install": "安裝資源",
+    "resource_update": "更新資源",
+    "world_copy": "複製存檔",
+    "world_export": "匯出存檔",
+    "world_import": "匯入存檔",
+    "world_backup": "備份存檔",
+    "world_restore": "還原存檔",
+    "instance_clone": "複製實例",
+    "instance_repair": "修復實例",
+    "queryFailed": "暫時無法確認工作狀態，請重新整理重試",
+    "refresh": "重新整理狀態",
+    "submitted": "已提交，可在工作清單查看結果",
+    "retryOriginal": "重試上次下載",
+    "cancelRequested": "已請求取消，等待工作停止"
   }
 }

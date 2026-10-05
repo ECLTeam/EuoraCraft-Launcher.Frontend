@@ -162,22 +162,8 @@ export interface InstanceTargetPayload {
   version_isolation?: boolean
 }
 
-export interface GameOperation {
-  name?: string
-  path?: string
-  done?: number
-  total?: number
-  speed?: number
-  progressType?: 'bytes' | 'files'
-  operationId: string
-  kind?: string
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
-  percent?: number
-  message?: string
-  result?: unknown
-  error?: string | null
-  errorCode?: string | null
-}
+/** 兼容旧游戏 IPC 类型；生产领域使用 ApplicationOperation。 */
+export type { ApplicationOperation as GameOperation } from '@/types/operations'
 
 export interface WorldEntry {
   id: string

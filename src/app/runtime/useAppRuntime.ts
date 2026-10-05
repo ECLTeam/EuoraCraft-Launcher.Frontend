@@ -1,13 +1,17 @@
 import { computed, readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
+import { onCommandResponse } from '@/api/client/commands'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
 import { clearAvatarCache } from '@/composables/useAvatarRenderer'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
+import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
+import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
+import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
@@ -167,7 +171,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         total,
         totalFiles: payload.total_files,
         downloadedFiles: payload.downloaded_files,
-        speed: 0,
+        speedBytesPerSecond: 0,
       })
     } else if (phase === 'error') {
       globalTaskQueue.updateTask(taskId, {
@@ -178,7 +182,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         total,
         totalFiles: payload.total_files,
         downloadedFiles: payload.downloaded_files,
-        speed: 0,
+        speedBytesPerSecond: 0,
       })
     } else {
       // 所有阶段按 done/total 线性计算真实进度，下载阶段使用字节/文件进度
@@ -192,7 +196,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         total,
         totalFiles: payload.total_files,
         downloadedFiles: payload.downloaded_files,
-        speed: payload.speed,
+        speedBytesPerSecond: payload.speed,
       })
     }
 
@@ -207,6 +211,65 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   }
 
   function registerBackendEvents(): void {
+    const operationStore = useApplicationOperationStore()
+    const finishedOperations = new Set<string>()
+    function refreshFinishedTargets(): void {
+      for (const operation of Object.values(operationStore.operations)) {
+        if (operation.status !== 'completed' || finishedOperations.has(operation.operationId)) continue
+        const target = operationStore.targets[operation.operationId]
+        if (!target) continue
+        finishedOperations.add(operation.operationId)
+        instanceWorkspaceApi.invalidateCache(target)
+        void useInstanceStore()
+          .scanPath(target.game_path, true)
+          .catch((error) => console.warn('刷新操作目标失败', error))
+      }
+    }
+    const operationCommands: Record<string, string> = {
+      custom_download_start: 'custom_download',
+      custom_download_retry: 'custom_download',
+      game_instance_import: 'instance_import',
+      game_instance_export: 'instance_export',
+      game_instance_clone: 'instance_clone',
+      game_instance_files_repair: 'instance_repair',
+      game_modpack_online_install: 'modpack_online_install',
+      game_resource_install: 'resource_install',
+      game_resource_update: 'resource_update',
+      game_world_copy: 'world_copy',
+      game_world_export: 'world_export',
+      game_world_import: 'world_import',
+      game_world_backup_create: 'world_backup',
+      game_world_backup_restore: 'world_restore',
+    }
+    cleanupCallbacks.push(
+      onCommandResponse((command, payload, response) => {
+        const kind = operationCommands[command]
+        const data = response.data
+        if (
+          !kind ||
+          !response.success ||
+          !data ||
+          typeof data !== 'object' ||
+          !('operationId' in data) ||
+          typeof data.operationId !== 'string'
+        )
+          return
+        if (payload && typeof payload === 'object' && 'game_path' in payload && typeof payload.game_path === 'string') {
+          const versionId =
+            'version_id' in payload ? payload.version_id : 'new_version_id' in payload ? payload.new_version_id : ''
+          operationStore.targets[data.operationId] = {
+            game_path: payload.game_path,
+            version_id: typeof versionId === 'string' ? versionId : '',
+            version_isolation: 'version_isolation' in payload && payload.version_isolation === true,
+          }
+        }
+        void operationStore
+          .track({ operationId: data.operationId, kind, status: 'pending' })
+          .then(refreshFinishedTargets)
+      })
+    )
+    cleanupCallbacks.push(operationStore.stop, () => useCustomDownloadStore().dispose())
+    cleanupCallbacks.push(operationStore.$subscribe(refreshFinishedTargets, { detached: true }))
     cleanupCallbacks.push(
       backend.on('accounts_changed', (snapshot) => {
         clearAvatarCache()
@@ -286,35 +349,8 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         styleElement.textContent = scopePluginCss(pluginName, payload.css || '')
       }),
       backend.on('game:operation_progress', (payload) => {
-        if (payload.kind !== 'custom_download') return
-        const taskId = payload.operationId
-        if (!globalTaskQueue.tasks.value.some((task) => task.id === taskId))
-          globalTaskQueue.addTask(
-            {
-              type: 'download',
-              name: payload.name || options.t('advanced.downloadTitle'),
-              versionId: '',
-              loaderType: '',
-            },
-            taskId
-          )
-        const status =
-          payload.status === 'completed'
-            ? 'completed'
-            : payload.status === 'failed'
-              ? 'error'
-              : payload.status === 'cancelled'
-                ? 'canceled'
-                : 'running'
-        globalTaskQueue.updateTask(taskId, {
-          status,
-          progress: payload.percent,
-          message: payload.message,
-          done: payload.done,
-          total: payload.total,
-          speed: ['completed', 'error', 'canceled'].includes(status) ? 0 : payload.speed,
-          progressType: payload.progressType,
-        })
+        if (!operationStore.operations[payload.operationId]) void operationStore.track(payload)
+        else operationStore.accept(payload)
       }),
       backend.on('game:install_progress', handleInstallProgress)
     )

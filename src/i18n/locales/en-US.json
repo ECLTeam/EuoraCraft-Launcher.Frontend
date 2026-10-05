@@ -1883,13 +1883,11 @@
     "title": "Task"
   },
   "taskQueue": {
-    "title": "Download Task Center",
+    "title": "Task center",
     "empty": "No tasks",
-    "emptyHint": "Task progress will be shown here when installing game instances",
+    "emptyHint": "Background task progress and results appear here after submission.",
     "currentStatus": "Current status: ",
     "runningCount": "{count} task(s) running",
-    "allDone": "All done",
-    "clearCompleted": "Clear completed ({count})",
     "files": "files",
     "liveTitle": "Live Download",
     "filesProgress": "{done} / {total} files",
@@ -1897,7 +1895,16 @@
     "elapsedLabel": "Elapsed",
     "remainingLabel": "Remaining",
     "chartWindow": "Last {seconds}s",
-    "peakLabel": "Peak"
+    "peakLabel": "Peak",
+    "clearFinishedTasks": "Clear finished ({count})",
+    "allFinished": "All tasks finished",
+    "states": {
+      "pending": "Pending",
+      "running": "Running",
+      "completed": "Completed",
+      "error": "Failed",
+      "canceled": "Cancelled"
+    }
   },
   "terminal": {
     "close": "Close",
@@ -1989,5 +1996,26 @@
     "downloadUaHeader": "Set User-Agent in the UA field",
     "nodesEntry": "Multiplayer settings",
     "nodesPolicy": "Node policy"
+  },
+  "operations": {
+    "unknown": "Background task",
+    "custom_download": "Custom download",
+    "instance_import": "Import instance",
+    "instance_export": "Export instance",
+    "modpack_online_install": "Install modpack",
+    "resource_install": "Install resources",
+    "resource_update": "Update resource",
+    "world_copy": "Copy world",
+    "world_export": "Export world",
+    "world_import": "Import world",
+    "world_backup": "Back up world",
+    "world_restore": "Restore world",
+    "instance_clone": "Copy instance",
+    "instance_repair": "Repair instance",
+    "queryFailed": "Task status is temporarily unavailable. Refresh to try again.",
+    "refresh": "Refresh status",
+    "submitted": "Submitted. View the result in the task list.",
+    "retryOriginal": "Retry previous download",
+    "cancelRequested": "Cancellation requested. Waiting for the task to stop."
   }
 }

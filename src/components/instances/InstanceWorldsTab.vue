@@ -181,6 +181,7 @@ import {
   type GameOptionEntry,
 } from '@/features/instances/api/instanceWorkspaceApi'
 import { normalizeWorldSeed } from '@/features/instances/worldSeeds'
+import { useTargetOperationRefresh } from '@/features/operations/composables/useTargetOperationRefresh'
 import type { ScannedVersion, WorldEntry, WorldPatch } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 import InstanceContentState from './InstanceContentState.vue'
@@ -220,6 +221,7 @@ const savingOptions = ref(false)
 const optionsEntries = ref<GameOptionEntry[]>([])
 const optionValues = reactive<Record<string, number | string | boolean>>({})
 const target = computed(() => workspaceTarget(props.version))
+useTargetOperationRefresh(target, load)
 const worldRequests = useRequestScope(() => instanceKey(props.version))
 const sortOptions = [
   { label: '名称', value: 'name' },
@@ -324,7 +326,7 @@ async function saveWorld() {
 }
 async function backup(world: WorldEntry) {
   await instanceWorkspaceApi.backupWorld(target.value, world.id)
-  message.success('备份已创建')
+  message.success('备份任务已提交，可在任务列表查看结果')
 }
 async function manageBackups(world: WorldEntry) {
   backupWorld.value = world

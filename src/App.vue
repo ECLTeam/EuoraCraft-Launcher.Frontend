@@ -410,7 +410,7 @@ function startShowcaseSpeedSimulation(): void {
   showcaseSpeedTimer = setInterval(() => {
     const task = globalTaskQueue.tasks.value.find((t) => t.status === 'running')
     if (task) {
-      globalTaskQueue.updateTask(task.id, { speed: randomSpeed() })
+      globalTaskQueue.updateTask(task.id, { speedBytesPerSecond: randomSpeed() })
     }
   }, 800)
 }

@@ -1,6 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
+import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import { i18n } from '@/i18n'
 import CustomDownloadCard from './CustomDownloadCard.vue'
 const mocks = vi.hoisted(() => ({ command: vi.fn() }))
@@ -8,20 +10,61 @@ vi.mock('@/api/client', () => ({ default: { command: mocks.command } }))
 
 describe('CustomDownloadCard', () => {
   beforeEach(() => {
+    useCustomDownloadStore().dispose()
+    useApplicationOperationStore().stop()
+    useApplicationOperationStore().operations = {}
+    globalTaskQueue.clearFinishedTasks()
     Object.assign(useCustomDownloadStore(), {
       url: '',
       downloadDirectory: '',
       namingMode: 'original',
       customName: '',
       userAgent: '',
-      headers: [],
+      headerRows: [],
       nextHeaderId: 0,
       overwrite: false,
       operationId: '',
-      operation: null,
+      error: '',
     })
     mocks.command.mockReset()
     i18n.global.locale.value = 'zh-CN'
+  })
+  afterEach(() => useApplicationOperationStore().stop())
+  it('提交回执等待期间切页再进入仍互斥，并接收原提交结果', async () => {
+    let finish!: (value: unknown) => void
+    mocks.command.mockImplementation((name: string) =>
+      name === 'custom_download_start'
+        ? new Promise((resolve) => {
+            finish = resolve
+          })
+        : Promise.resolve({
+            success: true,
+            data:
+              name === 'custom_download_defaults'
+                ? { downloadDirectory: 'D:/Downloads', userAgent: 'Default' }
+                : { operationId: 'pending-submit', status: 'completed', percent: 100 },
+          })
+    )
+    Object.assign(useCustomDownloadStore(), { url: 'https://host.test/file', downloadDirectory: 'D:/Downloads' })
+    const first = mount(CustomDownloadCard, { global: { plugins: [i18n], stubs: { UiIcon: true } } })
+    await first
+      .findAll('button')
+      .find((button) => button.text() === '开始下载')!
+      .trigger('click')
+    first.unmount()
+    const second = mount(CustomDownloadCard, { global: { plugins: [i18n], stubs: { UiIcon: true } } })
+    await flushPromises()
+    expect(
+      second
+        .findAll('button')
+        .find((button) => button.text() === '开始下载')!
+        .attributes('disabled')
+    ).toBeDefined()
+    finish({ success: true, data: { operationId: 'pending-submit', status: 'pending' } })
+    await flushPromises()
+    expect(second.get('[role="progressbar"]').attributes('aria-valuenow')).toBe('100')
+    expect(mocks.command.mock.calls.filter(([name]) => name === 'custom_download_start')).toHaveLength(1)
+    second.unmount()
   })
   it('uses the chosen folder and original naming without overwriting by default', async () => {
     mocks.command.mockImplementation(async (name: string) => ({
@@ -78,14 +121,15 @@ describe('CustomDownloadCard', () => {
     mocks.command.mockResolvedValue({ success: true, data: { downloadDirectory: 'D:/Default', userAgent: 'Default' } })
     Object.assign(useCustomDownloadStore(), {
       userAgent: 'Test-UA',
-      headers: [{ id: 0, name: 'X-Test', value: 'preserved' }],
+      headerRows: [{ id: 0, name: 'X-Test', value: 'preserved' }],
     })
     const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
     await flushPromises()
     expect((wrapper.get('#custom-download-ua').element as HTMLInputElement).value).toBe('Test-UA')
     expect(wrapper.get('details').attributes('open')).toBeUndefined()
     expect((wrapper.get('[aria-label="请求头值"]').element as HTMLInputElement).value).toBe('preserved')
-    useCustomDownloadStore().operation = { operationId: 'active', status: 'running', percent: 20, message: '下载中' }
+    useCustomDownloadStore().operationId = 'active'
+    useApplicationOperationStore().accept({ operationId: 'active', status: 'running', percent: 20, message: '下载中' })
     await wrapper.vm.$nextTick()
     for (const field of wrapper.findAll('input')) expect(field.attributes('disabled')).toBeDefined()
     expect(wrapper.get('input[type="radio"]').attributes('disabled')).toBeDefined()
@@ -166,8 +210,8 @@ describe('CustomDownloadCard', () => {
       .find((button) => button.text() === '取消')!
       .trigger('click')
     await flushPromises()
-    expect(mocks.command).toHaveBeenCalledWith('game_operation_cancel', { operation_id: 'active-download' })
-    expect(second.findAll('button').some((button) => button.text() === '重试')).toBe(true)
+    expect(mocks.command).toHaveBeenCalledWith('game_operation_cancel', { operation_id: 'active-download' }, 15000)
+    expect(second.findAll('button').some((button) => button.text() === '重试上次下载')).toBe(true)
     second.unmount()
   })
 
@@ -209,7 +253,7 @@ describe('CustomDownloadCard', () => {
       namingMode: 'custom',
       customName: '精确名称',
       userAgent: 'My-UA',
-      headers: [
+      headerRows: [
         { id: 0, name: 'Referer', value: 'https://example.com' },
         { id: 1, name: '', value: '' },
       ],
@@ -236,16 +280,17 @@ describe('CustomDownloadCard', () => {
   })
 
   it.each([
-    { customName: '../bad', namingMode: 'custom', headers: [] },
-    { customName: 'CON.zip', namingMode: 'custom', headers: [] },
+    { customName: '../bad', namingMode: 'custom', headerRows: [] },
+    { customName: 'CON.zip', namingMode: 'custom', headerRows: [] },
+    { customName: 'CON .zip', namingMode: 'custom', headerRows: [] },
     {
       namingMode: 'original',
-      headers: [
+      headerRows: [
         { id: 0, name: 'X-Test', value: 'a' },
         { id: 1, name: 'x-test', value: 'b' },
       ],
     },
-    { namingMode: 'original', headers: [{ id: 0, name: 'User-Agent', value: 'a' }] },
+    { namingMode: 'original', headerRows: [{ id: 0, name: 'User-Agent', value: 'a' }] },
   ])('blocks invalid filenames or conflicting headers: %j', async (options) => {
     mocks.command.mockResolvedValue({
       success: true,
@@ -275,14 +320,14 @@ describe('CustomDownloadCard', () => {
     await add().trigger('click')
     await add().trigger('click')
     const store = useCustomDownloadStore()
-    store.headers[1]!.name = 'Cookie'
-    store.headers[1]!.value = 'session=local'
+    store.headerRows[1]!.name = 'Cookie'
+    store.headerRows[1]!.value = 'session=local'
     await wrapper.vm.$nextTick()
     await wrapper
       .findAll('button')
       .find((button) => button.text() === '移除')!
       .trigger('click')
-    expect(store.headers).toEqual([{ id: 1, name: 'Cookie', value: 'session=local' }])
+    expect(store.headerRows).toEqual([{ id: 1, name: 'Cookie', value: 'session=local' }])
     wrapper.unmount()
   })
 })

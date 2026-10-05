@@ -46,7 +46,7 @@
       <NButton @click="store.close()">
         {{ t('common.cancel') }}
       </NButton>
-      <NButton type="primary" :loading="store.importing" :disabled="!store.canImport" @click="handleImport">
+      <NButton type="primary" :loading="store.isSubmittingImport" :disabled="!store.canImport" @click="handleImport">
         <template #icon><UiIcon name="upload" :size="15" /></template>
         {{ store.isOnline ? t('modpackImport.installPack') : t('modpackImport.import') }}
       </NButton>
@@ -76,7 +76,7 @@ async function selectSourceFile() {
 async function handleImport() {
   const result = await store.importPack()
   if (result.ok) {
-    message.success(t('modpackImport.success'))
+    message.success(t('operations.submitted'))
   } else if (result.error) {
     message.error(result.error)
   }

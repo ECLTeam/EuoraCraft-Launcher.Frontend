@@ -99,23 +99,33 @@
         </div>
       </details>
       <p v-if="error || validationError" class="custom-download-error" role="alert">{{ error || validationError }}</p>
+      <div v-if="queryError" class="custom-download-error" role="alert">
+        <p>{{ t('operations.queryFailed') }}</p>
+        <UiButton variant="secondary" @click="refresh">{{ t('operations.refresh') }}</UiButton>
+      </div>
       <div v-if="operation" class="custom-download-status" role="status">
-        <UiProgress :percentage="operation.percent" />
+        <UiProgress :percentage="operation.percent" :processing="isTaskRunning && (operation.percent ?? 0) <= 0" />
         <p>{{ operation.message }}</p>
+        <p v-if="isCancellationRequested && busy">{{ t('operations.cancelRequested') }}</p>
         <p v-if="operation.path" class="custom-download-target">{{ operation.path }}</p>
       </div>
       <div class="custom-download-footer">
         <div class="custom-download-actions">
-          <UiButton v-if="busy && operation" variant="secondary" size="lg" :disabled="cancelling" @click="cancel">{{
-            t('common.cancel')
-          }}</UiButton>
+          <UiButton
+            v-if="busy && operation"
+            variant="secondary"
+            size="lg"
+            :disabled="cancelling || isCancellationRequested"
+            @click="cancel"
+            >{{ t('common.cancel') }}</UiButton
+          >
           <UiButton
             v-if="operation && ['failed', 'cancelled'].includes(operation.status)"
             variant="secondary"
             size="lg"
             :disabled="starting"
             @click="retry"
-            >{{ t('common.retry') }}</UiButton
+            >{{ t('operations.retryOriginal') }}</UiButton
           >
           <UiButton
             size="lg"
@@ -136,13 +146,12 @@ import { NCheckbox, NRadioButton, NRadioGroup } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import backend from '@/api/client'
-import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiInput from '@/components/ui/Input.vue'
 import UiProgress from '@/components/ui/Progress.vue'
+import { customDownloadApi } from '@/features/download/api/customDownloadApi'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { getErrorMessage } from '@/utils/error'
 const { t } = useI18n()
@@ -170,6 +179,7 @@ const overwriteTheme = {
   checkMarkColor: 'var(--text-on-primary)',
   boxShadowFocus: 'var(--control-ring)',
 }
+const downloadStore = useCustomDownloadStore()
 const {
   url,
   downloadDirectory,
@@ -177,22 +187,22 @@ const {
   customName,
   userAgent,
   defaultUserAgent,
-  headers,
+  headerRows: headers,
   nextHeaderId,
   overwrite,
-  operationId,
   operation,
-} = storeToRefs(useCustomDownloadStore())
-const starting = ref(false)
-const cancelling = ref(false)
-const error = ref('')
+  isSubmittingDownload: starting,
+  isRequestingCancel: cancelling,
+  isCancellationRequested,
+  error,
+  queryError,
+  busy,
+  isTaskRunning,
+  validationKey,
+} = storeToRefs(downloadStore)
+const { start, cancel, retry, refresh } = downloadStore
 const downloadOptions = ref<HTMLDetailsElement | null>(null)
-let timer: ReturnType<typeof setTimeout> | undefined
 let active = true
-const busy = computed(
-  () => starting.value || (!!operation.value && ['pending', 'running'].includes(operation.value.status))
-)
-
 const estimatedName = computed(() => {
   try {
     return decodeURIComponent(new URL(url.value).pathname.split('/').pop() || 'download.bin')
@@ -201,34 +211,7 @@ const estimatedName = computed(() => {
   }
 })
 
-const validationError = computed(() => {
-  const name = customName.value
-  if (
-    namingMode.value === 'custom' &&
-    (!name ||
-      /[<>:"/\\|?*]/u.test(name) ||
-      Array.from(name).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127) ||
-      /[ .]$/.test(name) ||
-      /^(CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)/i.test(name) ||
-      new TextEncoder().encode(name).length > 255)
-  ) {
-    return t('advanced.downloadInvalidName')
-  }
-  if (userAgent.value.length > 4096 || hasInvalidHeaderCharacters(userAgent.value))
-    return t('advanced.downloadInvalidHeaders')
-  const seen = new Set<string>()
-  let size = 0
-  for (const header of headers.value) {
-    if (!header.name && !header.value) continue
-    const key = header.name.toLowerCase()
-    if (key === 'user-agent') return t('advanced.downloadUaHeader')
-    if (seen.has(key) || !/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(header.name) || hasInvalidHeaderCharacters(header.value))
-      return t('advanced.downloadInvalidHeaders')
-    seen.add(key)
-    size += header.name.length + header.value.length
-  }
-  return seen.size > 64 || size > 32768 ? t('advanced.downloadInvalidHeaders') : ''
-})
+const validationError = computed(() => (validationKey.value ? t(validationKey.value) : ''))
 
 watch(
   [validationError, downloadOptions],
@@ -238,10 +221,6 @@ watch(
   { immediate: true, flush: 'post' }
 )
 
-function hasInvalidHeaderCharacters(value: string) {
-  return Array.from(value).some((char) => char.charCodeAt(0) < 32 || char.charCodeAt(0) > 126)
-}
-
 function addHeader() {
   headers.value.push({ id: nextHeaderId.value++, name: '', value: '' })
 }
@@ -250,123 +229,18 @@ function removeHeader(id: number) {
   headers.value = headers.value.filter((header) => header.id !== id)
 }
 
-async function loadDefaults() {
-  try {
-    const defaults = unwrapResponse(await backend.command('custom_download_defaults'), t('advanced.downloadTitle'))
-    if (!active) return
-    if (!downloadDirectory.value) downloadDirectory.value = defaults.downloadDirectory
-    defaultUserAgent.value = defaults.userAgent
-  } catch (cause) {
-    if (active) error.value = getErrorMessage(cause)
-  }
-}
-
 async function browse() {
   try {
-    const result = unwrapResponse(
-      await backend.command('select_directory', {
-        purpose: 'custom-download',
-        default_directory: downloadDirectory.value || undefined,
-      }),
-      t('advanced.downloadFolder')
-    )
+    const result = await customDownloadApi.browse(downloadDirectory.value)
     if (active && result.path) downloadDirectory.value = result.path
-  } catch (cause) {
-    error.value = getErrorMessage(cause)
-  }
-}
-
-async function track(id: string) {
-  operationId.value = id
-  if (timer) clearTimeout(timer)
-  await poll()
-}
-
-async function poll() {
-  if (timer) {
-    clearTimeout(timer)
-    timer = undefined
-  }
-  if (!active || !operationId.value) return
-  try {
-    const current = unwrapResponse(
-      await backend.command('game_operation_get', { operation_id: operationId.value }),
-      t('advanced.downloadTitle')
-    )
-    if (!active) return
-    operation.value = current
-    if (['pending', 'running'].includes(current.status)) timer = setTimeout(() => void poll(), 700)
   } catch (cause) {
     if (active) error.value = getErrorMessage(cause)
   }
 }
 
-async function start() {
-  if (busy.value || validationError.value) return
-  starting.value = true
-  error.value = ''
-  try {
-    const result = unwrapResponse(
-      await backend.command('custom_download_start', {
-        url: url.value.trim(),
-        download_directory: downloadDirectory.value.trim(),
-        naming_mode: namingMode.value,
-        ...(namingMode.value === 'custom' ? { custom_name: customName.value } : {}),
-        user_agent: userAgent.value,
-        headers: Object.fromEntries(
-          headers.value.filter((header) => header.name || header.value).map((header) => [header.name, header.value])
-        ),
-        overwrite: overwrite.value,
-      }),
-      t('advanced.downloadTitle')
-    )
-    await track(result.operationId)
-  } catch (cause) {
-    error.value = getErrorMessage(cause)
-  } finally {
-    starting.value = false
-  }
-}
-
-async function cancel() {
-  cancelling.value = true
-  try {
-    unwrapResponse(
-      await backend.command('game_operation_cancel', { operation_id: operationId.value }),
-      t('common.cancel')
-    )
-    await poll()
-  } catch (cause) {
-    error.value = getErrorMessage(cause)
-  } finally {
-    cancelling.value = false
-  }
-}
-
-async function retry() {
-  starting.value = true
-  error.value = ''
-  try {
-    const result = unwrapResponse(
-      await backend.command('custom_download_retry', { operation_id: operationId.value }),
-      t('common.retry')
-    )
-    await track(result.operationId)
-  } catch (cause) {
-    error.value = getErrorMessage(cause)
-  } finally {
-    starting.value = false
-  }
-}
-
-onMounted(() => {
-  void loadDefaults()
-  if (operationId.value) void poll()
-})
-
+onMounted(() => void downloadStore.initialize())
 onBeforeUnmount(() => {
   active = false
-  if (timer) clearTimeout(timer)
 })
 </script>
 

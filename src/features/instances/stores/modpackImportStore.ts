@@ -46,7 +46,7 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
   const versionName = ref('')
   const gamePath = ref('')
   const gamePaths = ref<{ value: string; label: string }[]>([])
-  const importing = ref(false)
+  const isSubmittingImport = ref(false)
   const onlinePack = ref<OnlinePackTarget | null>(null)
 
   const isOnline = computed(() => Boolean(onlinePack.value))
@@ -77,20 +77,20 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
   }
 
   async function open(opts?: { sourcePath?: string }) {
+    if (isSubmittingImport.value) return
     onlinePack.value = null
     sourcePath.value = opts?.sourcePath || ''
     versionName.value = derivePackName(sourcePath.value)
-    importing.value = false
     gamePath.value = await loadGamePaths()
     visible.value = true
   }
 
   /** 打开在线整合包安装对话框：预填来源与文件，跳过本地文件选择。 */
   async function openOnline(target: OnlinePackTarget) {
+    if (isSubmittingImport.value) return
     onlinePack.value = { ...target }
     sourcePath.value = ''
     versionName.value = target.title
-    importing.value = false
     gamePath.value = await loadGamePaths()
     visible.value = true
   }
@@ -105,8 +105,8 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
   }
 
   async function importPack(): Promise<{ ok: boolean; error?: string }> {
-    if (!canImport.value || importing.value) return { ok: false }
-    importing.value = true
+    if (!canImport.value || isSubmittingImport.value) return { ok: false }
+    isSubmittingImport.value = true
     try {
       if (onlinePack.value) {
         const response = await backend.command('game_modpack_online_install', {
@@ -131,7 +131,7 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     } catch (reason) {
       return { ok: false, error: reason instanceof Error ? reason.message : '导入整合包失败' }
     } finally {
-      importing.value = false
+      isSubmittingImport.value = false
     }
   }
 
@@ -141,7 +141,7 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     versionName,
     gamePath,
     gamePaths,
-    importing,
+    isSubmittingImport,
     onlinePack,
     isOnline,
     onlineTitle,
