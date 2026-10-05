@@ -81,6 +81,7 @@
           <span>{{ t('versions.download.loaderVersion') }}</span>
           <NSelect
             :value="loaderVersion"
+            filterable
             :options="loaderVersionOptions"
             :loading="loaderVersionsLoading"
             @update:value="emit('update:loaderVersion', String($event || ''))"
@@ -91,6 +92,7 @@
           <span>{{ t('versions.download.fabricApiVersion') }}</span>
           <NSelect
             :value="fabricApiVersion"
+            filterable
             :options="fabricApiVersionOptions"
             :loading="fabricApiVersionsLoading"
             @update:value="emit('update:fabricApiVersion', String($event || ''))"
@@ -101,6 +103,7 @@
           <span>{{ t('versions.download.loaderVersion') }}</span>
           <NSelect
             :value="loaderVersion"
+            filterable
             :options="loaderVersionOptions"
             :loading="loaderVersionsLoading"
             @update:value="emit('update:loaderVersion', String($event || ''))"
@@ -113,9 +116,9 @@
       <NButton @click="emit('update:visible', false)">
         {{ t('versions.download.cancel') }}
       </NButton>
-      <NButton type="primary" :loading="isInstalling" :disabled="!mcVersion" @click="emit('install')">
+      <NButton type="primary" :loading="isSubmittingInstall" :disabled="!mcVersion" @click="emit('install')">
         <template #icon><UiIcon name="download" :size="15" /></template>
-        {{ isInstalling ? t('versions.download.installing') : t('versions.download.startInstall') }}
+        {{ isSubmittingInstall ? t('versions.download.installing') : t('versions.download.startInstall') }}
       </NButton>
     </template>
   </Modal>
@@ -152,7 +155,7 @@ const props = defineProps<{
   gamePath: string
   gamePaths: SelectOption[]
   loaders: InstallLoaderOption[]
-  isInstalling: boolean
+  isSubmittingInstall: boolean
 }>()
 
 const emit = defineEmits<{

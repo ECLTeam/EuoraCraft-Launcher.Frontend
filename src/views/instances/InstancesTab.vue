@@ -120,7 +120,7 @@
       :fabricApiVersionsLoading="fabricApiVersionsLoading"
       :gamePaths="gamePaths"
       :loaders="loaders"
-      :isInstalling="isInstalling"
+      :isSubmittingInstall="isSubmittingInstall"
       @selectLoader="selectLoader"
       @install="startInstall"
     />
@@ -166,8 +166,8 @@ const {
   loaderVersionsLoading,
   fabricApiVersions,
   fabricApiVersionsLoading,
-  installingVersionId: downloading,
-  isInstalling,
+  submittingVersionId: downloading,
+  isSubmittingInstall,
 } = storeToRefs(installStore)
 
 const searchQuery = ref('')
@@ -192,7 +192,7 @@ async function loadLoaderVersions(loaderType: string, gameVersion: string) {
   if (!['fabric', 'forge', 'neoforge', 'quilt'].includes(loaderType)) return
   try {
     const versions = await installStore.loadLoaderVersions(loaderType as InstallableLoader, gameVersion)
-    if (versions.length === 0) {
+    if (versions?.length === 0) {
       const loaderName = loaderType.charAt(0).toUpperCase() + loaderType.slice(1)
       launcherMessage.warning(t('versions.download.noLoaderVersions', { loader: loaderName }))
     }
@@ -231,6 +231,13 @@ const itemHeight = 56
 const bufferSize = 5
 
 const showInstallDialog = ref(false)
+watch(
+  showInstallDialog,
+  (visible) => {
+    if (!visible) installStore.clearLoaderVersions()
+  },
+  { flush: 'sync' }
+)
 
 const installForm = ref({
   mcVersion: '',
@@ -341,8 +348,7 @@ async function fetchLoaderVersions() {
   if (!mc) return
   switch (installForm.value.loader) {
     case 'fabric':
-      await loadFabricVersions(mc)
-      await loadFabricApiVersions(mc)
+      await Promise.all([loadFabricVersions(mc), loadFabricApiVersions(mc)])
       break
     case 'forge':
       await loadForgeVersions(mc)
@@ -447,6 +453,7 @@ async function doInstall() {
   const versionName = installForm.value.versionName?.trim() || defaultVersionName.value
   const loader = installForm.value.loader
   const loaderVersion = installForm.value.loaderVersion
+  const fabricApiVersion = installForm.value.fabricApiVersion
   const gamePath = installForm.value.gamePath || defaultGamePath.value
 
   if (!versionId) {
@@ -492,12 +499,16 @@ async function doInstall() {
     if (loader !== 'vanilla') {
       params.loader_type = loader as 'fabric' | 'forge' | 'neoforge' | 'quilt'
       params.loader_version = loaderVersion
-      if (loader === 'fabric' && installForm.value.fabricApiVersion) {
-        params.fabric_api_version = installForm.value.fabricApiVersion
+      if (loader === 'fabric' && fabricApiVersion) {
+        params.fabric_api_version = fabricApiVersion
       }
     }
 
-    await installStore.install(versionId, params)
+    const submitted = await installStore.install(versionId, params)
+    if (submitted.status !== 'success') {
+      globalTaskQueue.removeTask(taskId)
+      return
+    }
     launcherMessage.success(t('versions.download.installQueued', { version: versionId }))
     saveLastInstallPath(gamePath)
   } catch (e: unknown) {
@@ -571,7 +582,7 @@ onMounted(() => {
   })
 })
 
-onUnmounted(() => {})
+onUnmounted(() => installStore.clearLoaderVersions())
 </script>
 
 <style scoped src="@/styles/views/instances/InstancesTab.css"></style>

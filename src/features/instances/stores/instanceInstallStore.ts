@@ -2,8 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import { queryClient } from '@/app/queryClient'
 import { queryKeys } from '@/app/queryKeys'
+import type { ActionResult } from '@/composables/useAsyncAction'
 import { instanceInstallApi, type InstallableLoader } from '@/features/instances/api/instanceInstallApi'
 import type { CommandPayloadMap } from '@/types/api'
+import type { InstallVersionResult } from '@/types/instances'
 
 export const useInstanceInstallStore = defineStore('version-install', () => {
   const loaderVersions = reactive<Record<InstallableLoader, string[]>>({
@@ -14,56 +16,67 @@ export const useInstanceInstallStore = defineStore('version-install', () => {
   })
   const fabricApiVersions = ref<string[]>([])
   const fabricApiVersionsLoading = ref(false)
-  const loaderVersionsLoading = ref(false)
-  const installingVersionId = ref<string | null>(null)
-  let loaderRequestId = 0
+  const pendingLoaders = reactive(new Set<InstallableLoader>())
+  const loaderVersionsLoading = computed(() => pendingLoaders.size > 0)
+  const submittingVersionId = ref<string | null>(null)
+  const loaderRequestIds: Record<InstallableLoader, number> = { fabric: 0, forge: 0, neoforge: 0, quilt: 0 }
   let fabricApiRequestId = 0
 
-  const isInstalling = computed(() => installingVersionId.value !== null)
+  const isSubmittingInstall = computed(() => submittingVersionId.value !== null)
 
-  async function loadLoaderVersions(loader: InstallableLoader, gameVersion: string): Promise<string[]> {
+  async function loadLoaderVersions(loader: InstallableLoader, gameVersion: string): Promise<string[] | null> {
+    const requestId = ++loaderRequestIds[loader]
     if (!gameVersion) {
+      pendingLoaders.delete(loader)
       loaderVersions[loader] = []
       return []
     }
-    const requestId = ++loaderRequestId
-    loaderVersionsLoading.value = true
+    pendingLoaders.add(loader)
     try {
-      const result = (
-        await queryClient.fetchQuery({
-          queryKey: queryKeys.instanceInstall.loaderVersions(loader, gameVersion),
-          queryFn: () => instanceInstallApi.getLoaderVersions(loader, gameVersion),
-        })
-      ).slice(0, 20)
-      if (requestId === loaderRequestId) loaderVersions[loader] = result
+      const result = await queryClient.fetchQuery({
+        queryKey: queryKeys.instanceInstall.loaderVersions(loader, gameVersion),
+        queryFn: () => instanceInstallApi.getLoaderVersions(loader, gameVersion),
+      })
+      if (requestId !== loaderRequestIds[loader]) return null
+      loaderVersions[loader] = result
       return result
+    } catch (error) {
+      if (requestId !== loaderRequestIds[loader]) return null
+      throw error
     } finally {
-      if (requestId === loaderRequestId) loaderVersionsLoading.value = false
+      if (requestId === loaderRequestIds[loader]) pendingLoaders.delete(loader)
     }
   }
 
-  async function loadFabricApiVersions(gameVersion: string): Promise<string[]> {
+  async function loadFabricApiVersions(gameVersion: string): Promise<string[] | null> {
+    const requestId = ++fabricApiRequestId
     if (!gameVersion) {
+      fabricApiVersionsLoading.value = false
       fabricApiVersions.value = []
       return []
     }
-    const requestId = ++fabricApiRequestId
     fabricApiVersionsLoading.value = true
     try {
-      const result = (
-        await queryClient.fetchQuery({
-          queryKey: queryKeys.instanceInstall.fabricApiVersions(gameVersion),
-          queryFn: () => instanceInstallApi.getFabricApiVersions(gameVersion),
-        })
-      ).slice(0, 20)
-      if (requestId === fabricApiRequestId) fabricApiVersions.value = result
+      const result = await queryClient.fetchQuery({
+        queryKey: queryKeys.instanceInstall.fabricApiVersions(gameVersion),
+        queryFn: () => instanceInstallApi.getFabricApiVersions(gameVersion),
+      })
+      if (requestId !== fabricApiRequestId) return null
+      fabricApiVersions.value = result
       return result
+    } catch (error) {
+      if (requestId !== fabricApiRequestId) return null
+      throw error
     } finally {
       if (requestId === fabricApiRequestId) fabricApiVersionsLoading.value = false
     }
   }
 
   function clearLoaderVersions(): void {
+    for (const loader of Object.keys(loaderRequestIds) as InstallableLoader[]) loaderRequestIds[loader]++
+    fabricApiRequestId++
+    pendingLoaders.clear()
+    fabricApiVersionsLoading.value = false
     loaderVersions.fabric = []
     loaderVersions.forge = []
     loaderVersions.neoforge = []
@@ -75,12 +88,16 @@ export const useInstanceInstallStore = defineStore('version-install', () => {
     return instanceInstallApi.exists(`${gamePath}/versions/${versionName}`)
   }
 
-  async function install(versionId: string, params: CommandPayloadMap['game_install']): Promise<void> {
-    installingVersionId.value = versionId
+  async function install(
+    versionId: string,
+    params: CommandPayloadMap['game_install']
+  ): Promise<ActionResult<InstallVersionResult>> {
+    if (isSubmittingInstall.value) return { status: 'skipped' }
+    submittingVersionId.value = versionId
     try {
-      await instanceInstallApi.install(params)
+      return { status: 'success', value: await instanceInstallApi.install(params) }
     } finally {
-      installingVersionId.value = null
+      submittingVersionId.value = null
     }
   }
 
@@ -89,8 +106,8 @@ export const useInstanceInstallStore = defineStore('version-install', () => {
     fabricApiVersions,
     fabricApiVersionsLoading,
     loaderVersionsLoading,
-    installingVersionId,
-    isInstalling,
+    submittingVersionId,
+    isSubmittingInstall,
     loadLoaderVersions,
     loadFabricApiVersions,
     clearLoaderVersions,

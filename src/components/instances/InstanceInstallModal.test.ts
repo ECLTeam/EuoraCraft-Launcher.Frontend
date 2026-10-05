@@ -35,7 +35,7 @@ function mountModal(overrides: Record<string, unknown> = {}) {
       gamePath: 'D:/Minecraft',
       gamePaths: [{ value: 'D:/Minecraft', label: 'Minecraft' }],
       loaders,
-      isInstalling: false,
+      isSubmittingInstall: false,
       ...overrides,
     },
   })
