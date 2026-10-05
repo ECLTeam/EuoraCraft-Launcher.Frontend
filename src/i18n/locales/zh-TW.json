@@ -1,5 +1,9 @@
 {
-  "app": { "title": "EuoraCraft Launcher", "loading": "載入中...", "delete": "刪除" },
+  "app": {
+    "title": "EuoraCraft Launcher",
+    "loading": "載入中...",
+    "delete": "刪除"
+  },
   "sidebar": {
     "toggle": "切換側邊欄",
     "collapse": "收起側邊欄",
@@ -65,8 +69,16 @@
       "paste": "貼上",
       "action": "加入房間"
     },
-    "starting": { "title": "正在建立聯機房間", "description": "正在建立聯機網路，請稍候。", "failed": "建立房間失敗" },
-    "host": { "title": "房間已建立", "description": "將房間碼分享給其他玩家", "close": "關閉房間" },
+    "starting": {
+      "title": "正在建立聯機房間",
+      "description": "正在建立聯機網路，請稍候。",
+      "failed": "建立房間失敗"
+    },
+    "host": {
+      "title": "房間已建立",
+      "description": "將房間碼分享給其他玩家",
+      "close": "關閉房間"
+    },
     "guest": {
       "title": "已加入房間",
       "description": "複製伺服器地址，在遊戲中加入",
@@ -100,9 +112,21 @@
       "pasteFailed": "無法讀取剪貼簿",
       "copyFailed": "無法寫入剪貼簿"
     },
-    "side": { "title": "連線狀態", "hint": "服務與連線資訊", "service": "聯機元件", "availability": "服務狀態" },
-    "roomInfo": { "title": "房間資訊", "hint": "當前房間詳情", "game": "遊戲版本", "creator": "建立者" },
-    "roomActions": { "title": "房間操作" }
+    "side": {
+      "title": "連線狀態",
+      "hint": "服務與連線資訊",
+      "service": "聯機元件",
+      "availability": "服務狀態"
+    },
+    "roomInfo": {
+      "title": "房間資訊",
+      "hint": "當前房間詳情",
+      "game": "遊戲版本",
+      "creator": "建立者"
+    },
+    "roomActions": {
+      "title": "房間操作"
+    }
   },
   "game": {
     "title": "遊戲",
@@ -219,9 +243,16 @@
       "preparingHint": "正在取得授權資訊，請稍候。",
       "processingHint": "Microsoft 授權已完成，正在準備你的遊戲帳戶。",
       "openBrowser": "開啟授權頁面",
-      "steps": { "authorization": "授權確認", "profile": "讀取帳戶", "saving": "儲存帳戶" }
+      "steps": {
+        "authorization": "授權確認",
+        "profile": "讀取帳戶",
+        "saving": "儲存帳戶"
+      }
     },
-    "showcase": { "title": "演示模式", "description": "當前為演示模式，帳戶操作僅作介面展示，不會實際儲存或登入。" },
+    "showcase": {
+      "title": "演示模式",
+      "description": "當前為演示模式，帳戶操作僅作介面展示，不會實際儲存或登入。"
+    },
     "clientId": {
       "title": "未配置 Microsoft 登入",
       "description": "正版登入需要 Microsoft OAuth 客戶端 ID，需要自行從 Azure 申請。",
@@ -423,7 +454,11 @@
       "broken": "損壞",
       "isolated": "實例隔離",
       "isolatedDesc": "可繼承全域策略，或為目前實例強制指定隔離狀態",
-      "isolationModes": { "inherit": "跟隨預設策略", "enabled": "強制隔離", "disabled": "強制不隔離" },
+      "isolationModes": {
+        "inherit": "跟隨預設策略",
+        "enabled": "強制隔離",
+        "disabled": "強制不隔離"
+      },
       "customMemory": "自定義記憶體",
       "customMemoryDesc": "為此實例單獨設定記憶體大小",
       "memorySize": "記憶體大小",
@@ -721,7 +756,13 @@
         "label": "啟動器版本",
         "demoMode": "演示模式",
         "frontendLabel": "前端版本",
-        "types": { "dev": "開發版", "alpha": "開發版", "beta": "測試版", "rc": "正式版候選", "release": "正式版" }
+        "types": {
+          "dev": "開發版",
+          "alpha": "開發版",
+          "beta": "測試版",
+          "rc": "正式版候選",
+          "release": "正式版"
+        }
       },
       "update": {
         "check": "檢查更新",
@@ -991,7 +1032,12 @@
     "windowTitlePlaceholder": "{instance} - {account}",
     "launcherVisibility": "啟動時啟動器行為",
     "launcherVisibilityDesc": "遊戲啟動成功後對啟動器視窗的處理；選擇退出後本次執行不進行崩潰偵測與統計",
-    "visibilityOptions": { "inherit": "跟隨全域", "none": "不動作", "minimize": "最小化", "quit": "結束啟動器" },
+    "visibilityOptions": {
+      "inherit": "跟隨全域",
+      "none": "不動作",
+      "minimize": "最小化",
+      "quit": "結束啟動器"
+    },
     "preferHighPerformanceGpu": "要求 Java 使用高效能顯示卡",
     "preferHighPerformanceGpuDesc": "僅 Windows：為實際使用的 Java 寫入目前使用者的高效能 GPU 偏好",
     "useJavaExe": "使用 java.exe 而不是 javaw.exe",
@@ -1127,7 +1173,11 @@
       "suspectedMods": "可疑模組",
       "suggestions": "建議操作",
       "genericSuggestion": "匯出崩潰報告並結合完整日誌進一步排查。",
-      "confidence": { "certain": "高置信度", "likely": "較可能", "possible": "可能" },
+      "confidence": {
+        "certain": "高置信度",
+        "likely": "較可能",
+        "possible": "可能"
+      },
       "viewOutput": "檢視輸出",
       "hideOutput": "收起輸出",
       "output": "遊戲輸出",
@@ -1364,9 +1414,19 @@
     "pleaseAccept": "請先同意使用者協議以使用功能",
     "acceptRequired": "請先同意使用者協議"
   },
-  "modal": { "confirm": "確認", "cancel": "取消", "ok": "確定", "agree": "同意", "disagree": "不同意" },
-  "launch": { "title": "啟動實例" },
-  "launcherPopup": { "doNotShowAgain": "不再顯示" },
+  "modal": {
+    "confirm": "確認",
+    "cancel": "取消",
+    "ok": "確定",
+    "agree": "同意",
+    "disagree": "不同意"
+  },
+  "launch": {
+    "title": "啟動實例"
+  },
+  "launcherPopup": {
+    "doNotShowAgain": "不再顯示"
+  },
   "dev": {
     "title": "元件除錯工具",
     "desc": "點選下方按鈕測試各個元件",
@@ -1551,7 +1611,7 @@
     "searchSavedServer": "搜尋皮膚站連結...",
     "noSavedServers": "暫無已新增的連結",
     "serverUrlPlaceholder": "https://example.com/api/yggdrasil",
-    "serverUrlHint": "會記住此連結和登入名，密碼不��儲存；多角色帳戶可在登入後選擇角色",
+    "serverUrlHint": "會記住此連結和登入名，密碼不會儲存；多角色帳戶可在登入後選擇角色",
     "serverUrlRequired": "請輸入伺服器地址",
     "fieldRequired": "請填寫「{field}」",
     "emailRequired": "請輸入角色名或郵箱",
@@ -1653,7 +1713,11 @@
     "regions": "共 {count} 個區域"
   },
   "task": {
-    "subtask": { "downloadJson": "下載實例資訊", "downloadAssets": "下載資原始檔", "checkFiles": "校驗檔案" },
+    "subtask": {
+      "downloadJson": "下載實例資訊",
+      "downloadAssets": "下載資原始檔",
+      "checkFiles": "校驗檔案"
+    },
     "title": "任務"
   },
   "taskQueue": {
@@ -1694,7 +1758,8 @@
       "noStdin": "該實例未開啟標準輸入，僅可觀察輸出",
       "stopped": "已停止",
       "running": "執行中",
-      "gameType": "遊戲"
+      "gameType": "遊戲",
+      "awaitingSnapshot": "等待程序資訊"
     }
   },
   "modpackImport": {
@@ -1718,7 +1783,11 @@
     "nodesEntry": "連線設定",
     "nodesPolicy": "節點策略",
     "nodesAddresses": "自訂節點位址",
-    "nodesMode": { "automatic": "自動", "append": "公共與自訂", "custom": "僅自訂" }
+    "nodesMode": {
+      "automatic": "自動",
+      "append": "公共與自訂",
+      "custom": "僅自訂"
+    }
   },
   "operations": {
     "unknown": "背景工作",
@@ -1741,7 +1810,13 @@
     "retryOriginal": "重試上次下載",
     "cancelRequested": "已請求取消，等待工作停止"
   },
-  "more": { "nav": { "room": "連線", "plugins": "外掛", "tools": "工具" } },
+  "more": {
+    "nav": {
+      "room": "連線",
+      "plugins": "外掛",
+      "tools": "工具"
+    }
+  },
   "tools": {
     "natCardTitle": "NAT 類型偵測",
     "detecting": "正在偵測網路類型...",
@@ -1820,5 +1895,118 @@
       "overwrite": "允許覆寫現有檔案（失敗時保留原檔）",
       "start": "開始下載"
     }
+  },
+  "profile": {
+    "personalize": "個人化",
+    "alias": "實例別名",
+    "category": "分類",
+    "description": "描述",
+    "tags": "標籤（以逗號分隔）",
+    "tagsHint": "朋友服, 機械動力, 生存",
+    "source": "相容中繼資料來源",
+    "favorite": "收藏",
+    "pinned": "置頂",
+    "hidden": "隱藏",
+    "origins": "欄位來源與還原",
+    "restore": "還原自動",
+    "aliasLabel": "別名",
+    "tagsLabel": "標籤",
+    "icon": "圖示",
+    "diskDirectory": "磁碟目錄仍為 {directory}"
+  },
+  "servers": {
+    "search": "搜尋伺服器名稱、位址或 MOTD",
+    "refreshStatus": "重新整理狀態",
+    "add": "新增伺服器",
+    "empty": "伺服器清單為空",
+    "favorite": "已收藏",
+    "querying": "正在查詢狀態",
+    "notQueried": "尚未查詢狀態",
+    "online": "線上",
+    "offline": "離線",
+    "noMotd": "無 MOTD",
+    "connect": "啟動並連線",
+    "copyAddress": "複製位址",
+    "name": "伺服器名稱",
+    "address": "伺服器位址",
+    "fieldsRequired": "請填寫伺服器名稱與位址",
+    "addressCopied": "位址已複製",
+    "remove": "刪除伺服器",
+    "edit": "編輯伺服器",
+    "addressLabel": "位址",
+    "favoriteAction": "收藏伺服器",
+    "connecting": "正在連線 {name}",
+    "confirmRemove": "從 servers.dat 刪除「{name}」？",
+    "queryingShort": "查詢中",
+    "refreshList": "重新整理清單"
+  },
+  "worlds": {
+    "search": "搜尋世界名稱、目錄、種子或版本",
+    "gameSettings": "遊戲設定",
+    "openFolder": "開啟存檔目錄",
+    "import": "匯入存檔",
+    "empty": "找不到存檔",
+    "unknownMode": "未知模式",
+    "unknownDifficulty": "未知難度",
+    "unknownVersion": "未知版本",
+    "unknown": "未知",
+    "quickPlay": "快速進入",
+    "backup": "備份",
+    "settings": "世界設定",
+    "restore": "還原",
+    "copy": "複製",
+    "export": "匯出",
+    "gameMode": "遊戲模式",
+    "difficulty": "難度",
+    "spawnX": "出生點 X",
+    "spawnY": "出生點 Y",
+    "spawnZ": "出生點 Z",
+    "seed": "世界種子",
+    "seedHint": "完整整數種子",
+    "seedUnavailable": "無法讀取世界種子，保留原存檔",
+    "commands": "允許作弊",
+    "lockDifficulty": "鎖定難度",
+    "raining": "下雨",
+    "thundering": "雷暴",
+    "saveBackup": "儲存（自動備份）",
+    "backups": "存檔備份",
+    "autoBackup": "自動備份",
+    "manualBackup": "手動備份",
+    "unlock": "解除鎖定",
+    "lock": "鎖定",
+    "noOptions": "找不到可編輯的遊戲設定",
+    "saveOptions": "儲存設定",
+    "name": "名稱",
+    "modified": "修改時間",
+    "lastPlayed": "上次遊玩",
+    "created": "建立時間",
+    "survival": "生存",
+    "creative": "創造",
+    "adventure": "冒險",
+    "spectator": "旁觀",
+    "peaceful": "和平",
+    "easy": "簡單",
+    "normal": "普通",
+    "hard": "困難",
+    "seedSummary": "種子 {seed} · 上次遊玩 {time}",
+    "volume": "音量 · {category}",
+    "restoreWorld": "還原存檔",
+    "restoreConfirm": "還原前會驗證備份，成功後才替換目前存檔。",
+    "copyWorld": "複製存檔",
+    "copyConfirm": "將建立 {name}",
+    "deleteWorld": "刪除存檔",
+    "deleteConfirm": "刪除存檔「{name}」？無法復原。",
+    "zipFile": "ZIP 檔案",
+    "worldFolder": "存檔資料夾",
+    "language": "語言",
+    "fullscreen": "全螢幕",
+    "vsync": "垂直同步",
+    "renderDistance": "渲染距離",
+    "guiScale": "介面縮放",
+    "fov": "視野",
+    "sensitivity": "滑鼠靈敏度",
+    "gamma": "亮度",
+    "particles": "粒子效果",
+    "clouds": "雲層"
   }
 }

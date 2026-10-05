@@ -1,5 +1,9 @@
 {
-  "app": { "title": "EuoraCraft Launcher", "loading": "加载中...", "delete": "删除" },
+  "app": {
+    "title": "EuoraCraft Launcher",
+    "loading": "加载中...",
+    "delete": "删除"
+  },
   "sidebar": {
     "toggle": "切换侧边栏",
     "collapse": "收起侧边栏",
@@ -65,8 +69,16 @@
       "paste": "粘贴",
       "action": "加入房间"
     },
-    "starting": { "title": "正在创建联机房间", "description": "正在创建联机网络，请稍候。", "failed": "创建房间失败" },
-    "host": { "title": "房间已创建", "description": "将房间码分享给其他玩家", "close": "关闭房间" },
+    "starting": {
+      "title": "正在创建联机房间",
+      "description": "正在创建联机网络，请稍候。",
+      "failed": "创建房间失败"
+    },
+    "host": {
+      "title": "房间已创建",
+      "description": "将房间码分享给其他玩家",
+      "close": "关闭房间"
+    },
     "guest": {
       "title": "已加入房间",
       "description": "复制服务器地址，在游戏中加入",
@@ -100,9 +112,21 @@
       "pasteFailed": "无法读取剪贴板",
       "copyFailed": "无法写入剪贴板"
     },
-    "side": { "title": "连接状态", "hint": "服务与连接信息", "service": "联机组件", "availability": "服务状态" },
-    "roomInfo": { "title": "房间信息", "hint": "当前房间详情", "game": "游戏版本", "creator": "创建者" },
-    "roomActions": { "title": "房间操作" }
+    "side": {
+      "title": "连接状态",
+      "hint": "服务与连接信息",
+      "service": "联机组件",
+      "availability": "服务状态"
+    },
+    "roomInfo": {
+      "title": "房间信息",
+      "hint": "当前房间详情",
+      "game": "游戏版本",
+      "creator": "创建者"
+    },
+    "roomActions": {
+      "title": "房间操作"
+    }
   },
   "game": {
     "title": "游戏",
@@ -219,9 +243,16 @@
       "preparingHint": "正在获取授权信息，请稍后。",
       "processingHint": "微软授权已完成，正在准备你的游戏账户。",
       "openBrowser": "打开授权页面",
-      "steps": { "authorization": "授权确认", "profile": "读取账户", "saving": "保存账户" }
+      "steps": {
+        "authorization": "授权确认",
+        "profile": "读取账户",
+        "saving": "保存账户"
+      }
     },
-    "showcase": { "title": "演示模式", "description": "当前为演示模式，账户操作仅作界面展示，不会实际保存或登录。" },
+    "showcase": {
+      "title": "演示模式",
+      "description": "当前为演示模式，账户操作仅作界面展示，不会实际保存或登录。"
+    },
     "clientId": {
       "title": "未配置 Microsoft 登录",
       "description": "正版登录需要 Microsoft OAuth 客户端 ID，需要自行从 Azure 申请。",
@@ -423,7 +454,11 @@
       "broken": "损坏",
       "isolated": "实例隔离",
       "isolatedDesc": "可继承全局策略，或为当前实例强制指定隔离状态",
-      "isolationModes": { "inherit": "跟随默认策略", "enabled": "强制隔离", "disabled": "强制不隔离" },
+      "isolationModes": {
+        "inherit": "跟随默认策略",
+        "enabled": "强制隔离",
+        "disabled": "强制不隔离"
+      },
       "customMemory": "自定义内存",
       "customMemoryDesc": "为此实例单独设置内存大小",
       "memorySize": "内存大小",
@@ -721,7 +756,13 @@
         "label": "启动器版本",
         "demoMode": "演示模式",
         "frontendLabel": "前端版本",
-        "types": { "dev": "开发版", "alpha": "开发版", "beta": "测试版", "rc": "正式版候选", "release": "正式版" }
+        "types": {
+          "dev": "开发版",
+          "alpha": "开发版",
+          "beta": "测试版",
+          "rc": "正式版候选",
+          "release": "正式版"
+        }
       },
       "update": {
         "check": "检查更新",
@@ -991,7 +1032,12 @@
     "windowTitlePlaceholder": "{instance} - {account}",
     "launcherVisibility": "启动时启动器行为",
     "launcherVisibilityDesc": "游戏启动成功后对启动器窗口的处理；选择退出后本次运行不进行崩溃检测与统计",
-    "visibilityOptions": { "inherit": "跟随全局", "none": "无", "minimize": "最小化", "quit": "退出启动器" },
+    "visibilityOptions": {
+      "inherit": "跟随全局",
+      "none": "无",
+      "minimize": "最小化",
+      "quit": "退出启动器"
+    },
     "preferHighPerformanceGpu": "要求 Java 使用高性能显卡",
     "preferHighPerformanceGpuDesc": "仅 Windows：为实际使用的 Java 写入当前用户的高性能 GPU 偏好",
     "useJavaExe": "使用 java.exe 而不是 javaw.exe",
@@ -1127,7 +1173,11 @@
       "suspectedMods": "可疑模组",
       "suggestions": "建议操作",
       "genericSuggestion": "导出崩溃报告并结合完整日志进一步排查。",
-      "confidence": { "certain": "高置信度", "likely": "较可能", "possible": "可能" },
+      "confidence": {
+        "certain": "高置信度",
+        "likely": "较可能",
+        "possible": "可能"
+      },
       "viewOutput": "查看输出",
       "hideOutput": "收起输出",
       "output": "游戏输出",
@@ -1362,9 +1412,19 @@
     "pleaseAccept": "请先同意用户协议以使用功能",
     "acceptRequired": "请先同意用户协议"
   },
-  "modal": { "confirm": "确认", "cancel": "取消", "ok": "确定", "agree": "同意", "disagree": "不同意" },
-  "launch": { "title": "启动实例" },
-  "launcherPopup": { "doNotShowAgain": "不再显示" },
+  "modal": {
+    "confirm": "确认",
+    "cancel": "取消",
+    "ok": "确定",
+    "agree": "同意",
+    "disagree": "不同意"
+  },
+  "launch": {
+    "title": "启动实例"
+  },
+  "launcherPopup": {
+    "doNotShowAgain": "不再显示"
+  },
   "dev": {
     "title": "组件调试工具",
     "desc": "点击下方按钮测试各个组件",
@@ -1651,7 +1711,11 @@
     "regions": "{count} 个区域"
   },
   "task": {
-    "subtask": { "downloadJson": "下载实例信息", "downloadAssets": "下载资源文件", "checkFiles": "校验文件" },
+    "subtask": {
+      "downloadJson": "下载实例信息",
+      "downloadAssets": "下载资源文件",
+      "checkFiles": "校验文件"
+    },
     "title": "任务"
   },
   "taskQueue": {
@@ -1692,7 +1756,8 @@
       "noStdin": "该实例未开启标准输入，仅可观察输出",
       "stopped": "已停止",
       "running": "运行中",
-      "gameType": "游戏"
+      "gameType": "游戏",
+      "awaitingSnapshot": "等待进程信息"
     }
   },
   "modpackImport": {
@@ -1733,7 +1798,11 @@
   "advanced": {
     "nodesTitle": "联机",
     "nodesAddresses": "自定义节点地址",
-    "nodesMode": { "automatic": "自动", "append": "公共与自定义", "custom": "仅自定义" },
+    "nodesMode": {
+      "automatic": "自动",
+      "append": "公共与自定义",
+      "custom": "仅自定义"
+    },
     "shortcutTitle": "实例快捷方式",
     "shortcutHint": "使用当前实例图标创建快捷方式，双击直接启动此实例。",
     "shortcutDesktop": "创建桌面快捷方式",
@@ -1763,7 +1832,13 @@
     "retryOriginal": "重试上次下载",
     "cancelRequested": "已请求取消，等待任务停止"
   },
-  "more": { "nav": { "room": "联机", "plugins": "插件", "tools": "工具" } },
+  "more": {
+    "nav": {
+      "room": "联机",
+      "plugins": "插件",
+      "tools": "工具"
+    }
+  },
   "tools": {
     "natCardTitle": "NAT 类型检测",
     "detecting": "正在检测网络类型...",
@@ -1843,5 +1918,118 @@
       "invalidHeaders": "请求头格式无效、名称重复或超过大小限制",
       "uaHeader": "请在 UA 字段中设置 User-Agent"
     }
+  },
+  "profile": {
+    "personalize": "个性化",
+    "alias": "实例别名",
+    "category": "分类",
+    "description": "描述",
+    "tags": "标签（使用逗号分隔）",
+    "tagsHint": "朋友服, 机械动力, 生存",
+    "source": "兼容元数据来源",
+    "favorite": "收藏",
+    "pinned": "置顶",
+    "hidden": "隐藏",
+    "origins": "字段来源与恢复",
+    "restore": "恢复自动",
+    "aliasLabel": "别名",
+    "tagsLabel": "标签",
+    "icon": "图标",
+    "diskDirectory": "磁盘目录仍为 {directory}"
+  },
+  "servers": {
+    "search": "搜索服务器名称、地址或 MOTD",
+    "refreshStatus": "刷新状态",
+    "add": "添加服务器",
+    "empty": "服务器列表为空",
+    "favorite": "已收藏",
+    "querying": "正在查询状态",
+    "notQueried": "尚未查询状态",
+    "online": "在线",
+    "offline": "离线",
+    "noMotd": "无 MOTD",
+    "connect": "启动并连接",
+    "copyAddress": "复制地址",
+    "name": "服务器名称",
+    "address": "服务器地址",
+    "fieldsRequired": "请填写服务器名称和地址",
+    "addressCopied": "地址已复制",
+    "remove": "删除服务器",
+    "edit": "编辑服务器",
+    "addressLabel": "地址",
+    "favoriteAction": "收藏服务器",
+    "connecting": "正在连接 {name}",
+    "confirmRemove": "从 servers.dat 删除“{name}”？",
+    "queryingShort": "查询中",
+    "refreshList": "刷新列表"
+  },
+  "worlds": {
+    "search": "搜索世界名称、目录、种子或版本",
+    "gameSettings": "游戏设置",
+    "openFolder": "打开存档目录",
+    "import": "导入存档",
+    "empty": "没有找到存档",
+    "unknownMode": "未知模式",
+    "unknownDifficulty": "未知难度",
+    "unknownVersion": "未知版本",
+    "unknown": "未知",
+    "quickPlay": "快速进入",
+    "backup": "备份",
+    "settings": "世界设置",
+    "restore": "恢复",
+    "copy": "复制",
+    "export": "导出",
+    "gameMode": "游戏模式",
+    "difficulty": "难度",
+    "spawnX": "出生点 X",
+    "spawnY": "出生点 Y",
+    "spawnZ": "出生点 Z",
+    "seed": "世界种子",
+    "seedHint": "完整整数种子",
+    "seedUnavailable": "无法读取世界种子，保留原存档数据",
+    "commands": "允许作弊",
+    "lockDifficulty": "锁定难度",
+    "raining": "下雨",
+    "thundering": "雷暴",
+    "saveBackup": "保存（自动备份）",
+    "backups": "存档备份",
+    "autoBackup": "自动备份",
+    "manualBackup": "手动备份",
+    "unlock": "解锁",
+    "lock": "锁定",
+    "noOptions": "没有检测到可编辑的游戏设置",
+    "saveOptions": "保存设置",
+    "name": "名称",
+    "modified": "修改时间",
+    "lastPlayed": "上次游玩",
+    "created": "创建时间",
+    "survival": "生存",
+    "creative": "创造",
+    "adventure": "冒险",
+    "spectator": "旁观",
+    "peaceful": "和平",
+    "easy": "简单",
+    "normal": "普通",
+    "hard": "困难",
+    "seedSummary": "种子 {seed} · 上次游玩 {time}",
+    "volume": "音量 · {category}",
+    "restoreWorld": "恢复存档",
+    "restoreConfirm": "恢复前会完整验证备份，当前存档仅在验证成功后被替换。",
+    "copyWorld": "复制存档",
+    "copyConfirm": "将创建 {name}",
+    "deleteWorld": "删除存档",
+    "deleteConfirm": "删除存档“{name}”？该操作不可恢复。",
+    "zipFile": "ZIP 文件",
+    "worldFolder": "存档文件夹",
+    "language": "语言",
+    "fullscreen": "全屏",
+    "vsync": "垂直同步",
+    "renderDistance": "渲染距离",
+    "guiScale": "界面缩放",
+    "fov": "视野",
+    "sensitivity": "鼠标灵敏度",
+    "gamma": "亮度",
+    "particles": "粒子效果",
+    "clouds": "云层"
   }
 }

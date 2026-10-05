@@ -1,15 +1,21 @@
 <template>
   <div class="info-card profile-card">
-    <div class="info-card__header"><span>个性化</span></div>
+    <div class="info-card__header">
+      <span>{{ t('profile.personalize') }}</span>
+    </div>
     <div class="profile-form-grid">
       <label
-        ><span>实例别名</span><NInput v-model:value="profileForm.alias" maxlength="120" /><small
-          >磁盘目录仍为 {{ version?.versionId }}</small
-        ></label
+        ><span>{{ t('profile.alias') }}</span
+        ><NInput v-model:value="profileForm.alias" maxlength="120" /><small>{{
+          t('profile.diskDirectory', { directory: version?.versionId })
+        }}</small></label
       >
-      <label><span>分类</span><NSelect v-model:value="profileForm.categoryId" :options="categoryOptions" /></label>
+      <label
+        ><span>{{ t('profile.category') }}</span
+        ><NSelect v-model:value="profileForm.categoryId" :options="categoryOptions"
+      /></label>
       <label class="profile-form-wide"
-        ><span>描述</span
+        ><span>{{ t('profile.description') }}</span
         ><NInput
           v-model:value="profileForm.description"
           type="textarea"
@@ -17,22 +23,22 @@
           maxlength="1000"
       /></label>
       <label class="profile-form-wide"
-        ><span>标签（使用逗号分隔）</span
-        ><NInput v-model:value="profileForm.tagsText" placeholder="朋友服, 机械动力, 生存"
+        ><span>{{ t('profile.tags') }}</span
+        ><NInput v-model:value="profileForm.tagsText" :placeholder="t('profile.tagsHint')"
       /></label>
       <label
-        ><span>兼容元数据来源</span
+        ><span>{{ t('profile.source') }}</span
         ><NSelect v-model:value="profileForm.preferredExternalSource" :options="sourceOptions"
       /></label>
       <div class="profile-switches">
-        <span><NSwitch v-model:value="profileForm.favorite" />收藏</span>
-        <span><NSwitch v-model:value="profileForm.pinned" />置顶</span>
-        <span><NSwitch v-model:value="profileForm.hidden" />隐藏</span>
+        <span><NSwitch v-model:value="profileForm.favorite" />{{ t('profile.favorite') }}</span>
+        <span><NSwitch v-model:value="profileForm.pinned" />{{ t('profile.pinned') }}</span>
+        <span><NSwitch v-model:value="profileForm.hidden" />{{ t('profile.hidden') }}</span>
       </div>
     </div>
   </div>
   <div class="info-card">
-    <div class="info-card__header">字段来源与恢复</div>
+    <div class="info-card__header">{{ t('profile.origins') }}</div>
     <div class="field-source-list">
       <div v-for="field in profileFields" :key="field">
         <span>{{ profileFieldLabel(field) }}</span
@@ -42,7 +48,7 @@
           size="tiny"
           quaternary
           @click="resetProfileField(field)"
-          >恢复自动</NButton
+          >{{ t('profile.restore') }}</NButton
         >
       </div>
     </div>
@@ -204,14 +210,14 @@ async function resetProfileField(field: string) {
 function profileFieldLabel(field: string): string {
   return (
     {
-      alias: '别名',
-      description: '描述',
-      favorite: '收藏',
-      pinned: '置顶',
-      hidden: '隐藏',
-      categoryId: '分类',
-      tags: '标签',
-      icon: '图标',
+      alias: t('profile.aliasLabel'),
+      description: t('profile.description'),
+      favorite: t('profile.favorite'),
+      pinned: t('profile.pinned'),
+      hidden: t('profile.hidden'),
+      categoryId: t('profile.category'),
+      tags: t('profile.tagsLabel'),
+      icon: t('profile.icon'),
     }[field] || field
   )
 }

@@ -1,5 +1,9 @@
 {
-  "app": { "title": "EuoraCraft Launcher", "loading": "読み込み中...", "delete": "削除" },
+  "app": {
+    "title": "EuoraCraft Launcher",
+    "loading": "読み込み中...",
+    "delete": "削除"
+  },
   "sidebar": {
     "toggle": "サイドバーの切り替え",
     "collapse": "サイドバーを折りたたむ",
@@ -120,7 +124,9 @@
       "game": "ゲームバージョン",
       "creator": "作成者"
     },
-    "roomActions": { "title": "ルーム操作" }
+    "roomActions": {
+      "title": "ルーム操作"
+    }
   },
   "game": {
     "title": "ゲーム",
@@ -237,7 +243,11 @@
       "preparingHint": "認証情報を取得しています。しばらくお待ちください。",
       "processingHint": "Microsoft の認証が完了しました。ゲームアカウントを準備しています。",
       "openBrowser": "認証ページを開く",
-      "steps": { "authorization": "認証確認", "profile": "アカウント取得", "saving": "アカウント保存" }
+      "steps": {
+        "authorization": "認証確認",
+        "profile": "アカウント取得",
+        "saving": "アカウント保存"
+      }
     },
     "showcase": {
       "title": "デモモード",
@@ -746,7 +756,13 @@
         "label": "ランチャーバージョン",
         "demoMode": "デモモード",
         "frontendLabel": "フロントエンドバージョン",
-        "types": { "dev": "開発版", "alpha": "開発版", "beta": "ベータ版", "rc": "リリース候補", "release": "正式版" }
+        "types": {
+          "dev": "開発版",
+          "alpha": "開発版",
+          "beta": "ベータ版",
+          "rc": "リリース候補",
+          "release": "正式版"
+        }
       },
       "update": {
         "check": "更新を確認",
@@ -1157,14 +1173,18 @@
       "suspectedMods": "疑わしいMod",
       "suggestions": "推奨される対処",
       "genericSuggestion": "クラッシュレポートをエクスポートし、完全なログと併せてさらに調査してください。",
-      "confidence": { "certain": "高確度", "likely": "可能性が高い", "possible": "可能性あり" },
+      "confidence": {
+        "certain": "高確度",
+        "likely": "可能性が高い",
+        "possible": "可能性あり"
+      },
       "viewOutput": "出力を表示",
       "hideOutput": "出力を折りたたむ",
       "output": "ゲーム出力",
       "outputFailed": "ゲーム出力の読み取りに失敗しました",
       "exportReport": "クラッシュレポートをエクスポート",
       "exportFailed": "クラッシュレポートのエクスポートに失敗しました",
-      "exported": "クラッシュレポートのエクスポー��先：{path}",
+      "exported": "クラッシュレポートのエクスポート先：{path}",
       "reasons": {
         "jvm_invalid_arguments": {
           "title": "JVM 引数が無効です",
@@ -1511,9 +1531,19 @@
     "pleaseAccept": "機能を使用するには先に利用規約に同意してください",
     "acceptRequired": "先に利用規約に同意してください"
   },
-  "modal": { "confirm": "確認", "cancel": "キャンセル", "ok": "OK", "agree": "同意", "disagree": "同意しない" },
-  "launch": { "title": "インスタンスを起動" },
-  "launcherPopup": { "doNotShowAgain": "今後表示しない" },
+  "modal": {
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "agree": "同意",
+    "disagree": "同意しない"
+  },
+  "launch": {
+    "title": "インスタンスを起動"
+  },
+  "launcherPopup": {
+    "doNotShowAgain": "今後表示しない"
+  },
   "dev": {
     "title": "コンポーネントデバッグツール",
     "desc": "下のボタンをクリックして各コンポーネントをテスト",
@@ -1845,7 +1875,8 @@
       "noStdin": "このインスタンスは標準入力が無効のため、出力の閲覧のみ可能です",
       "stopped": "停止中",
       "running": "実行中",
-      "gameType": "ゲーム"
+      "gameType": "ゲーム",
+      "awaitingSnapshot": "プロセス情報を待機中"
     }
   },
   "modpackImport": {
@@ -1869,7 +1900,11 @@
     "nodesEntry": "マルチプレイ設定",
     "nodesPolicy": "ノードの選択方式",
     "nodesAddresses": "カスタムノードのアドレス",
-    "nodesMode": { "automatic": "自動", "append": "公開とカスタム", "custom": "カスタムのみ" }
+    "nodesMode": {
+      "automatic": "自動",
+      "append": "公開とカスタム",
+      "custom": "カスタムのみ"
+    }
   },
   "operations": {
     "unknown": "バックグラウンドタスク",
@@ -1892,7 +1927,13 @@
     "retryOriginal": "前回のダウンロードを再試行",
     "cancelRequested": "キャンセルを要求しました。停止を待っています。"
   },
-  "more": { "nav": { "room": "接続", "plugins": "プラグイン", "tools": "ツール" } },
+  "more": {
+    "nav": {
+      "room": "接続",
+      "plugins": "プラグイン",
+      "tools": "ツール"
+    }
+  },
   "tools": {
     "natCardTitle": "NAT タイプ診断",
     "detecting": "ネットワークタイプを診断中...",
@@ -1971,5 +2012,118 @@
       "overwrite": "既存のファイルを上書きする（失敗時は元のファイルを保持）",
       "start": "ダウンロード開始"
     }
+  },
+  "profile": {
+    "personalize": "個人設定",
+    "alias": "インスタンスの別名",
+    "category": "分類",
+    "description": "説明",
+    "tags": "タグ（カンマ区切り）",
+    "tagsHint": "友達, Create, サバイバル",
+    "source": "互換メタデータの取得元",
+    "favorite": "お気に入り",
+    "pinned": "固定",
+    "hidden": "非表示",
+    "origins": "項目の取得元とリセット",
+    "restore": "自動値に戻す",
+    "aliasLabel": "別名",
+    "tagsLabel": "タグ",
+    "icon": "アイコン",
+    "diskDirectory": "ディスク上のフォルダー: {directory}"
+  },
+  "servers": {
+    "search": "名前・アドレス・MOTDを検索",
+    "refreshStatus": "状態を更新",
+    "add": "サーバーを追加",
+    "empty": "サーバーがありません",
+    "favorite": "お気に入り",
+    "querying": "状態を確認中",
+    "notQueried": "状態未確認",
+    "online": "オンライン",
+    "offline": "オフライン",
+    "noMotd": "MOTDなし",
+    "connect": "起動して接続",
+    "copyAddress": "アドレスをコピー",
+    "name": "サーバー名",
+    "address": "サーバーアドレス",
+    "fieldsRequired": "サーバー名とアドレスを入力してください",
+    "addressCopied": "アドレスをコピーしました",
+    "remove": "サーバーを削除",
+    "edit": "サーバーを編集",
+    "addressLabel": "アドレス",
+    "favoriteAction": "お気に入りに登録",
+    "connecting": "{name} に接続中",
+    "confirmRemove": "servers.dat から {name} を削除しますか？",
+    "queryingShort": "確認中",
+    "refreshList": "一覧を更新"
+  },
+  "worlds": {
+    "search": "ワールド・フォルダー・シード・バージョンを検索",
+    "gameSettings": "ゲーム設定",
+    "openFolder": "ワールドフォルダーを開く",
+    "import": "ワールドをインポート",
+    "empty": "ワールドが見つかりません",
+    "unknownMode": "モード不明",
+    "unknownDifficulty": "難易度不明",
+    "unknownVersion": "バージョン不明",
+    "unknown": "不明",
+    "quickPlay": "すぐにプレイ",
+    "backup": "バックアップ",
+    "settings": "ワールド設定",
+    "restore": "復元",
+    "copy": "コピー",
+    "export": "エクスポート",
+    "gameMode": "ゲームモード",
+    "difficulty": "難易度",
+    "spawnX": "スポーン X",
+    "spawnY": "スポーン Y",
+    "spawnZ": "スポーン Z",
+    "seed": "ワールドシード",
+    "seedHint": "整数のシード",
+    "seedUnavailable": "シードを取得できません。元のデータを保持します",
+    "commands": "コマンドを許可",
+    "lockDifficulty": "難易度を固定",
+    "raining": "雨",
+    "thundering": "雷雨",
+    "saveBackup": "保存（自動バックアップ）",
+    "backups": "ワールドのバックアップ",
+    "autoBackup": "自動バックアップ",
+    "manualBackup": "手動バックアップ",
+    "unlock": "ロック解除",
+    "lock": "ロック",
+    "noOptions": "編集できるゲーム設定がありません",
+    "saveOptions": "設定を保存",
+    "name": "名前",
+    "modified": "更新日時",
+    "lastPlayed": "最終プレイ",
+    "created": "作成日時",
+    "survival": "サバイバル",
+    "creative": "クリエイティブ",
+    "adventure": "アドベンチャー",
+    "spectator": "スペクテイター",
+    "peaceful": "ピースフル",
+    "easy": "イージー",
+    "normal": "ノーマル",
+    "hard": "ハード",
+    "seedSummary": "シード {seed} · 最終プレイ {time}",
+    "volume": "音量 · {category}",
+    "restoreWorld": "ワールドを復元",
+    "restoreConfirm": "バックアップを検証してから現在のワールドを置き換えます。",
+    "copyWorld": "ワールドをコピー",
+    "copyConfirm": "{name} を作成します",
+    "deleteWorld": "ワールドを削除",
+    "deleteConfirm": "ワールド {name} を削除しますか？元に戻せません。",
+    "zipFile": "ZIPファイル",
+    "worldFolder": "ワールドフォルダー",
+    "language": "言語",
+    "fullscreen": "全画面",
+    "vsync": "垂直同期",
+    "renderDistance": "描画距離",
+    "guiScale": "GUIスケール",
+    "fov": "視野",
+    "sensitivity": "マウス感度",
+    "gamma": "明るさ",
+    "particles": "パーティクル",
+    "clouds": "雲"
   }
 }

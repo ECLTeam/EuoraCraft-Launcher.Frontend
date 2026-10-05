@@ -1,15 +1,15 @@
 <template>
   <section class="servers-panel">
     <header class="servers-toolbar">
-      <NInput v-model:value="query" clearable size="small" placeholder="搜索服务器名称、地址或 MOTD" />
+      <NInput v-model:value="query" clearable size="small" :placeholder="t('servers.search')" />
       <div class="toolbar-actions">
         <NButton
           quaternary
           circle
           size="small"
           :loading="loading"
-          title="刷新列表"
-          aria-label="刷新列表"
+          :title="t('servers.refreshList')"
+          :aria-label="t('servers.refreshList')"
           @click="reload"
         >
           <template #icon><UiIcon name="refresh" :size="16" /></template>
@@ -19,19 +19,19 @@
           circle
           size="small"
           :loading="statusLoading"
-          title="刷新状态"
-          aria-label="刷新状态"
+          :title="t('servers.refreshStatus')"
+          :aria-label="t('servers.refreshStatus')"
           @click="refreshStatus"
         >
           <template #icon><UiIcon name="wifi" :size="16" /></template>
         </NButton>
-        <NButton size="small" type="primary" class="toolbar-primary-btn" aria-label="添加服务器" @click="edit()">
+        <NButton size="small" type="primary" class="toolbar-primary-btn" :aria-label="t('servers.add')" @click="edit()">
           <template #icon><UiIcon name="plus" :size="13" /></template>
-          添加服务器
+          {{ t('servers.add') }}
         </NButton>
       </div>
     </header>
-    <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="服务器列表为空">
+    <InstanceContentState :loading="loading" :empty="filtered.length === 0" :emptyDescription="t('servers.empty')">
       <div class="servers-content">
         <div class="server-list">
           <article v-for="server in filtered" :key="server.id" class="server-row">
@@ -48,7 +48,13 @@
               <div class="server-info">
                 <div class="server-name-row">
                   <span class="server-name" :title="server.name">{{ server.name }}</span>
-                  <span v-if="server.favorite" class="server-fav" title="已收藏" aria-label="已收藏">★</span>
+                  <span
+                    v-if="server.favorite"
+                    class="server-fav"
+                    :title="t('servers.favorite')"
+                    :aria-label="t('servers.favorite')"
+                    >★</span
+                  >
                 </div>
                 <span class="server-address" :title="server.address">{{ server.address }}</span>
                 <p class="server-motd" :title="motdText(server)">{{ motdText(server) }}</p>
@@ -57,7 +63,13 @@
             <div class="server-status">
               <span :class="['server-status-label', statusClass(server)]" :title="statusLabel(server)">
                 <span :class="['status-dot', statusClass(server)]" />{{
-                  statusLoading ? '查询中' : statusOf(server) ? (statusOf(server)?.online ? '在线' : '离线') : '未查询'
+                  statusLoading
+                    ? t('servers.queryingShort')
+                    : statusOf(server)
+                      ? statusOf(server)?.online
+                        ? t('servers.online')
+                        : t('servers.offline')
+                      : t('servers.notQueried')
                 }}
               </span>
               <div v-if="!statusLoading && statuses[server.address]?.online" class="server-badges">
@@ -83,24 +95,31 @@
                 size="small"
                 type="primary"
                 class="server-connect"
-                title="启动并连接"
-                aria-label="启动并连接"
+                :title="t('servers.connect')"
+                :aria-label="t('servers.connect')"
                 @click="connect(server)"
               >
                 <template #icon><UiIcon name="player-play" :size="15" /></template
-                ><span class="server-connect-label">启动并连接</span>
+                ><span class="server-connect-label">{{ t('servers.connect') }}</span>
               </NButton>
               <NButton
                 quaternary
                 circle
                 size="small"
-                title="复制地址"
-                aria-label="复制地址"
+                :title="t('servers.copyAddress')"
+                :aria-label="t('servers.copyAddress')"
                 @click="copyAddress(server)"
               >
                 <template #icon><UiIcon name="copy" :size="15" /></template>
               </NButton>
-              <NButton quaternary circle size="small" title="编辑" aria-label="编辑" @click="edit(server)">
+              <NButton
+                quaternary
+                circle
+                size="small"
+                :title="t('common.edit')"
+                :aria-label="t('common.edit')"
+                @click="edit(server)"
+              >
                 <template #icon><UiIcon name="settings" :size="15" /></template>
               </NButton>
               <NButton
@@ -108,8 +127,8 @@
                 circle
                 size="small"
                 type="error"
-                title="删除"
-                aria-label="删除"
+                :title="t('common.delete')"
+                :aria-label="t('common.delete')"
                 @click="remove(server)"
               >
                 <template #icon><UiIcon name="trash" :size="15" /></template>
@@ -128,15 +147,17 @@
       :closeOnConfirm="false"
       @confirm="handleConfirm"
     />
-    <Modal v-model:visible="editorVisible" :title="form.id ? '编辑服务器' : '添加服务器'" width="480px"
+    <Modal v-model:visible="editorVisible" :title="form.id ? t('servers.edit') : t('servers.add')" width="480px"
       ><div class="server-form">
-        <label>名称<NInput v-model:value="form.name" /></label
-        ><label>地址<NInput v-model:value="form.address" placeholder="play.example.com:25565" /></label
-        ><label><NSwitch v-model:value="form.favorite" /> 收藏服务器</label>
+        <label>{{ t('worlds.name') }}<NInput v-model:value="form.name" /></label
+        ><label
+          >{{ t('servers.addressLabel')
+          }}<NInput v-model:value="form.address" placeholder="play.example.com:25565" /></label
+        ><label><NSwitch v-model:value="form.favorite" /> {{ t('servers.favoriteAction') }}</label>
       </div>
       <template #footer
-        ><NButton @click="editorVisible = false">取消</NButton
-        ><NButton type="primary" @click="save">保存</NButton></template
+        ><NButton @click="editorVisible = false">{{ t('common.cancel') }}</NButton
+        ><NButton type="primary" @click="save">{{ t('common.save') }}</NButton></template
       ></Modal
     >
   </section>
@@ -145,6 +166,7 @@
 <script setup lang="ts">
 import { NButton, NInput, NSwitch } from 'naive-ui'
 import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -156,6 +178,7 @@ import type { ScannedVersion, ServerEntry, ServerStatus } from '@/types/instance
 import { getErrorMessage } from '@/utils/error'
 import InstanceContentState from './InstanceContentState.vue'
 const props = defineProps<{ version: ScannedVersion }>()
+const { t } = useI18n()
 const message = useLauncherMessage()
 const servers = ref<ServerEntry[]>([])
 const statuses = reactive<Record<string, ServerStatus>>({})
@@ -199,17 +222,17 @@ function statusClass(server: ServerEntry): string {
   return 'offline'
 }
 function statusLabel(server: ServerEntry): string {
-  if (statusLoading.value) return '正在查询状态'
+  if (statusLoading.value) return t('servers.querying')
   const st = statusOf(server)
-  if (!st) return '尚未查询状态'
-  if (st.online) return '在线'
-  return st.error || '离线'
+  if (!st) return t('servers.notQueried')
+  if (st.online) return t('servers.online')
+  return st.error || t('servers.offline')
 }
 function motdText(server: ServerEntry): string {
-  if (statusLoading.value) return '正在查询状态'
+  if (statusLoading.value) return t('servers.querying')
   const st = statusOf(server)
-  if (!st) return '尚未查询状态'
-  return st.motd || st.error || '无 MOTD'
+  if (!st) return t('servers.notQueried')
+  return st.motd || st.error || t('servers.noMotd')
 }
 function latencyClass(server: ServerEntry): string {
   const ms = statusOf(server)?.latency ?? 0
@@ -259,23 +282,23 @@ function edit(server?: ServerEntry) {
   editorVisible.value = true
 }
 async function save() {
-  if (!form.name.trim() || !form.address.trim()) return message.warning('请填写服务器名称和地址')
+  if (!form.name.trim() || !form.address.trim()) return message.warning(t('servers.fieldsRequired'))
   await instanceWorkspaceApi.saveServer(target.value, { ...form })
   editorVisible.value = false
   await load()
 }
 async function connect(server: ServerEntry) {
   await instanceWorkspaceApi.launchServer(target.value, server.address)
-  message.success(`正在连接 ${server.name}`)
+  message.success(t('servers.connecting', { name: server.name }))
 }
 async function copyAddress(server: ServerEntry) {
   await navigator.clipboard.writeText(server.address)
-  message.success('地址已复制')
+  message.success(t('servers.addressCopied'))
 }
 function remove(server: ServerEntry) {
   openConfirm(
-    '删除服务器',
-    `从 servers.dat 删除“${server.name}”？`,
+    t('servers.remove'),
+    t('servers.confirmRemove', { name: server.name }),
     async () => {
       await instanceWorkspaceApi.deleteServer(target.value, server.id)
       await load()

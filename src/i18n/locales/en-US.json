@@ -1,5 +1,9 @@
 {
-  "app": { "title": "EuoraCraft Launcher", "loading": "Loading...", "delete": "Delete" },
+  "app": {
+    "title": "EuoraCraft Launcher",
+    "loading": "Loading...",
+    "delete": "Delete"
+  },
   "sidebar": {
     "toggle": "Toggle Sidebar",
     "collapse": "Collapse Sidebar",
@@ -70,7 +74,11 @@
       "description": "Setting up the multiplayer network, please wait.",
       "failed": "Failed to create the room"
     },
-    "host": { "title": "Room created", "description": "Share the room code with other players", "close": "Close room" },
+    "host": {
+      "title": "Room created",
+      "description": "Share the room code with other players",
+      "close": "Close room"
+    },
     "guest": {
       "title": "Room joined",
       "description": "Copy the server address to join in Minecraft",
@@ -110,8 +118,15 @@
       "service": "Connect Component",
       "availability": "Service Status"
     },
-    "roomInfo": { "title": "Room Info", "hint": "Current room details", "game": "Game Version", "creator": "Creator" },
-    "roomActions": { "title": "Room Actions" }
+    "roomInfo": {
+      "title": "Room Info",
+      "hint": "Current room details",
+      "game": "Game Version",
+      "creator": "Creator"
+    },
+    "roomActions": {
+      "title": "Room Actions"
+    }
   },
   "game": {
     "title": "Game",
@@ -228,7 +243,11 @@
       "preparingHint": "Getting authorization details. Please wait.",
       "processingHint": "Microsoft authorization is complete. Preparing your game account.",
       "openBrowser": "Open authorization page",
-      "steps": { "authorization": "Authorization", "profile": "Read account", "saving": "Save account" }
+      "steps": {
+        "authorization": "Authorization",
+        "profile": "Read account",
+        "saving": "Save account"
+      }
     },
     "showcase": {
       "title": "Showcase Mode",
@@ -737,7 +756,13 @@
         "label": "Launcher Version",
         "demoMode": "Demo Mode",
         "frontendLabel": "Frontend Version",
-        "types": { "dev": "Dev", "alpha": "Dev", "beta": "Beta", "rc": "Release Candidate", "release": "Release" }
+        "types": {
+          "dev": "Dev",
+          "alpha": "Dev",
+          "beta": "Beta",
+          "rc": "Release Candidate",
+          "release": "Release"
+        }
       },
       "update": {
         "check": "Check for Updates",
@@ -1148,7 +1173,11 @@
       "suspectedMods": "Suspected mods",
       "suggestions": "Recommended steps",
       "genericSuggestion": "Export the crash report and inspect the complete logs for more context.",
-      "confidence": { "certain": "High confidence", "likely": "Likely", "possible": "Possible" },
+      "confidence": {
+        "certain": "High confidence",
+        "likely": "Likely",
+        "possible": "Possible"
+      },
       "viewOutput": "View Output",
       "hideOutput": "Hide Output",
       "output": "Game Output",
@@ -1488,9 +1517,19 @@
     "pleaseAccept": "Please accept the User Agreement to access features",
     "acceptRequired": "Please accept the User Agreement first"
   },
-  "modal": { "confirm": "Confirm", "cancel": "Cancel", "ok": "OK", "agree": "Agree", "disagree": "Disagree" },
-  "launch": { "title": "Launch Game" },
-  "launcherPopup": { "doNotShowAgain": "Don't show again" },
+  "modal": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "agree": "Agree",
+    "disagree": "Disagree"
+  },
+  "launch": {
+    "title": "Launch Game"
+  },
+  "launcherPopup": {
+    "doNotShowAgain": "Don't show again"
+  },
   "dev": {
     "title": "Component Debug Tools",
     "desc": "Click buttons below to test components",
@@ -1822,7 +1861,8 @@
       "noStdin": "No standard input; output only",
       "stopped": "Stopped",
       "running": "Running",
-      "gameType": "Game"
+      "gameType": "Game",
+      "awaitingSnapshot": "Waiting for process details"
     }
   },
   "modpackImport": {
@@ -1863,7 +1903,11 @@
   "advanced": {
     "nodesTitle": "Multiplayer",
     "nodesAddresses": "Custom node addresses",
-    "nodesMode": { "automatic": "Automatic", "append": "Public and custom", "custom": "Custom only" },
+    "nodesMode": {
+      "automatic": "Automatic",
+      "append": "Public and custom",
+      "custom": "Custom only"
+    },
     "shortcutTitle": "Instance shortcuts",
     "shortcutHint": "Create a shortcut with the instance icon to launch this instance directly.",
     "shortcutDesktop": "Create desktop shortcut",
@@ -1893,7 +1937,13 @@
     "retryOriginal": "Retry previous download",
     "cancelRequested": "Cancellation requested. Waiting for the task to stop."
   },
-  "more": { "nav": { "room": "Connect", "plugins": "Plugins", "tools": "Tools" } },
+  "more": {
+    "nav": {
+      "room": "Connect",
+      "plugins": "Plugins",
+      "tools": "Tools"
+    }
+  },
   "tools": {
     "natCardTitle": "NAT Type Detection",
     "detecting": "Detecting network type...",
@@ -1973,5 +2023,118 @@
       "invalidHeaders": "Invalid, duplicate, or oversized HTTP headers",
       "uaHeader": "Set User-Agent in the UA field"
     }
+  },
+  "profile": {
+    "personalize": "Personalize",
+    "alias": "Instance alias",
+    "category": "Category",
+    "description": "Description",
+    "tags": "Tags (comma separated)",
+    "tagsHint": "Friends, Create, Survival",
+    "source": "Compatibility metadata source",
+    "favorite": "Favorite",
+    "pinned": "Pin",
+    "hidden": "Hide",
+    "origins": "Field origins and reset",
+    "restore": "Restore automatic value",
+    "aliasLabel": "Alias",
+    "tagsLabel": "Tags",
+    "icon": "Icon",
+    "diskDirectory": "Disk directory: {directory}"
+  },
+  "servers": {
+    "search": "Search name, address or MOTD",
+    "refreshStatus": "Refresh status",
+    "add": "Add server",
+    "empty": "No servers",
+    "favorite": "Favorited",
+    "querying": "Checking status",
+    "notQueried": "Status not checked",
+    "online": "Online",
+    "offline": "Offline",
+    "noMotd": "No MOTD",
+    "connect": "Launch and connect",
+    "copyAddress": "Copy address",
+    "name": "Server name",
+    "address": "Server address",
+    "fieldsRequired": "Enter a server name and address",
+    "addressCopied": "Address copied",
+    "remove": "Remove server",
+    "edit": "Edit server",
+    "addressLabel": "Address",
+    "favoriteAction": "Favorite server",
+    "connecting": "Connecting to {name}",
+    "confirmRemove": "Remove {name} from servers.dat?",
+    "queryingShort": "Checking",
+    "refreshList": "Refresh list"
+  },
+  "worlds": {
+    "search": "Search world, folder, seed or version",
+    "gameSettings": "Game settings",
+    "openFolder": "Open worlds folder",
+    "import": "Import world",
+    "empty": "No worlds found",
+    "unknownMode": "Unknown mode",
+    "unknownDifficulty": "Unknown difficulty",
+    "unknownVersion": "Unknown version",
+    "unknown": "Unknown",
+    "quickPlay": "Quick play",
+    "backup": "Back up",
+    "settings": "World settings",
+    "restore": "Restore",
+    "copy": "Copy",
+    "export": "Export",
+    "gameMode": "Game mode",
+    "difficulty": "Difficulty",
+    "spawnX": "Spawn X",
+    "spawnY": "Spawn Y",
+    "spawnZ": "Spawn Z",
+    "seed": "World seed",
+    "seedHint": "Full integer seed",
+    "seedUnavailable": "Cannot read the seed; original world data is preserved",
+    "commands": "Allow commands",
+    "lockDifficulty": "Lock difficulty",
+    "raining": "Rain",
+    "thundering": "Thunderstorm",
+    "saveBackup": "Save (automatic backup)",
+    "backups": "World backups",
+    "autoBackup": "Automatic backup",
+    "manualBackup": "Manual backup",
+    "unlock": "Unlock",
+    "lock": "Lock",
+    "noOptions": "No editable game settings found",
+    "saveOptions": "Save settings",
+    "name": "Name",
+    "modified": "Modified",
+    "lastPlayed": "Last played",
+    "created": "Created",
+    "survival": "Survival",
+    "creative": "Creative",
+    "adventure": "Adventure",
+    "spectator": "Spectator",
+    "peaceful": "Peaceful",
+    "easy": "Easy",
+    "normal": "Normal",
+    "hard": "Hard",
+    "seedSummary": "Seed {seed} · Last played {time}",
+    "volume": "Volume · {category}",
+    "restoreWorld": "Restore world",
+    "restoreConfirm": "The backup is validated before replacing the current world.",
+    "copyWorld": "Copy world",
+    "copyConfirm": "Create {name}",
+    "deleteWorld": "Delete world",
+    "deleteConfirm": "Delete world {name}? This cannot be undone.",
+    "zipFile": "ZIP file",
+    "worldFolder": "World folder",
+    "language": "Language",
+    "fullscreen": "Fullscreen",
+    "vsync": "VSync",
+    "renderDistance": "Render distance",
+    "guiScale": "UI scale",
+    "fov": "Field of view",
+    "sensitivity": "Mouse sensitivity",
+    "gamma": "Brightness",
+    "particles": "Particles",
+    "clouds": "Clouds"
   }
 }

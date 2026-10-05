@@ -1,5 +1,9 @@
 {
-  "app": { "title": "EuoraCraft Launcher", "loading": "Wird geladen...", "delete": "Löschen" },
+  "app": {
+    "title": "EuoraCraft Launcher",
+    "loading": "Wird geladen...",
+    "delete": "Löschen"
+  },
   "sidebar": {
     "toggle": "Seitenleiste umschalten",
     "collapse": "Seitenleiste einklappen",
@@ -120,7 +124,9 @@
       "game": "Spielversion",
       "creator": "Ersteller"
     },
-    "roomActions": { "title": "Raumaktionen" }
+    "roomActions": {
+      "title": "Raumaktionen"
+    }
   },
   "game": {
     "title": "Spiel",
@@ -237,7 +243,11 @@
       "preparingHint": "Autorisierungsdetails werden geladen. Bitte warten.",
       "processingHint": "Microsoft-Autorisierung abgeschlossen. Dein Spielkonto wird vorbereitet.",
       "openBrowser": "Autorisierungsseite öffnen",
-      "steps": { "authorization": "Autorisierung", "profile": "Konto laden", "saving": "Konto speichern" }
+      "steps": {
+        "authorization": "Autorisierung",
+        "profile": "Konto laden",
+        "saving": "Konto speichern"
+      }
     },
     "showcase": {
       "title": "Demomodus",
@@ -1163,7 +1173,11 @@
       "suspectedMods": "Verdächtige Mods",
       "suggestions": "Empfohlene Maßnahmen",
       "genericSuggestion": "Exportiere den Absturzbericht und untersuche zusammen mit den vollständigen Protokollen weitere Ursachen.",
-      "confidence": { "certain": "Hohe Sicherheit", "likely": "Wahrscheinlich", "possible": "Möglich" },
+      "confidence": {
+        "certain": "Hohe Sicherheit",
+        "likely": "Wahrscheinlich",
+        "possible": "Möglich"
+      },
       "viewOutput": "Ausgabe anzeigen",
       "hideOutput": "Ausgabe ausblenden",
       "output": "Spielausgabe",
@@ -1517,9 +1531,19 @@
     "pleaseAccept": "Bitte akzeptiere zuerst die Nutzungsvereinbarung, um Funktionen zu nutzen",
     "acceptRequired": "Bitte akzeptiere zuerst die Nutzungsvereinbarung"
   },
-  "modal": { "confirm": "Bestätigen", "cancel": "Abbrechen", "ok": "OK", "agree": "Zustimmen", "disagree": "Ablehnen" },
-  "launch": { "title": "Instanz starten" },
-  "launcherPopup": { "doNotShowAgain": "Nicht mehr anzeigen" },
+  "modal": {
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "agree": "Zustimmen",
+    "disagree": "Ablehnen"
+  },
+  "launch": {
+    "title": "Instanz starten"
+  },
+  "launcherPopup": {
+    "doNotShowAgain": "Nicht mehr anzeigen"
+  },
   "dev": {
     "title": "Komponenten-Debug-Werkzeuge",
     "desc": "Klicke auf die Schaltflächen unten, um die Komponenten zu testen",
@@ -1851,7 +1875,8 @@
       "noStdin": "Für diese Instanz ist keine Standardeingabe geöffnet; es kann nur die Ausgabe beobachtet werden",
       "stopped": "Gestoppt",
       "running": "Läuft",
-      "gameType": "Spiel"
+      "gameType": "Spiel",
+      "awaitingSnapshot": "Warte auf Prozessdaten"
     }
   },
   "modpackImport": {
@@ -1875,7 +1900,11 @@
     "nodesEntry": "Mehrspieler-Einstellungen",
     "nodesPolicy": "Knotenauswahl",
     "nodesAddresses": "Eigene Knotenadressen",
-    "nodesMode": { "automatic": "Automatisch", "append": "Öffentliche und eigene", "custom": "Nur eigene" }
+    "nodesMode": {
+      "automatic": "Automatisch",
+      "append": "Öffentliche und eigene",
+      "custom": "Nur eigene"
+    }
   },
   "operations": {
     "unknown": "Hintergrundaufgabe",
@@ -1898,7 +1927,13 @@
     "retryOriginal": "Vorherigen Download wiederholen",
     "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe."
   },
-  "more": { "nav": { "room": "Verbindung", "plugins": "Plugins", "tools": "Werkzeuge" } },
+  "more": {
+    "nav": {
+      "room": "Verbindung",
+      "plugins": "Plugins",
+      "tools": "Werkzeuge"
+    }
+  },
   "tools": {
     "natCardTitle": "NAT-Typ ermitteln",
     "detecting": "Netzwerktyp wird ermittelt...",
@@ -1977,5 +2012,118 @@
       "overwrite": "Vorhandene Dateien überschreiben (Original bei Fehler behalten)",
       "start": "Download starten"
     }
+  },
+  "profile": {
+    "personalize": "Personalisieren",
+    "alias": "Instanzalias",
+    "category": "Kategorie",
+    "description": "Beschreibung",
+    "tags": "Tags (kommagetrennt)",
+    "tagsHint": "Freunde, Create, Überleben",
+    "source": "Quelle der Kompatibilitätsdaten",
+    "favorite": "Favorit",
+    "pinned": "Anheften",
+    "hidden": "Ausblenden",
+    "origins": "Feldquellen und Zurücksetzen",
+    "restore": "Automatischen Wert wiederherstellen",
+    "aliasLabel": "Alias",
+    "tagsLabel": "Tags",
+    "icon": "Symbol",
+    "diskDirectory": "Ordner auf dem Datenträger: {directory}"
+  },
+  "servers": {
+    "search": "Name, Adresse oder MOTD suchen",
+    "refreshStatus": "Status aktualisieren",
+    "add": "Server hinzufügen",
+    "empty": "Keine Server",
+    "favorite": "Als Favorit markiert",
+    "querying": "Status wird geprüft",
+    "notQueried": "Status nicht geprüft",
+    "online": "Online",
+    "offline": "Offline",
+    "noMotd": "Keine MOTD",
+    "connect": "Starten und verbinden",
+    "copyAddress": "Adresse kopieren",
+    "name": "Servername",
+    "address": "Serveradresse",
+    "fieldsRequired": "Servernamen und Adresse eingeben",
+    "addressCopied": "Adresse kopiert",
+    "remove": "Server entfernen",
+    "edit": "Server bearbeiten",
+    "addressLabel": "Adresse",
+    "favoriteAction": "Server als Favorit markieren",
+    "connecting": "Verbindung mit {name}",
+    "confirmRemove": "{name} aus servers.dat entfernen?",
+    "queryingShort": "Wird geprüft",
+    "refreshList": "Liste aktualisieren"
+  },
+  "worlds": {
+    "search": "Welt, Ordner, Seed oder Version suchen",
+    "gameSettings": "Spieleinstellungen",
+    "openFolder": "Weltordner öffnen",
+    "import": "Welt importieren",
+    "empty": "Keine Welten gefunden",
+    "unknownMode": "Unbekannter Modus",
+    "unknownDifficulty": "Unbekannte Schwierigkeit",
+    "unknownVersion": "Unbekannte Version",
+    "unknown": "Unbekannt",
+    "quickPlay": "Schnell starten",
+    "backup": "Sichern",
+    "settings": "Welteinstellungen",
+    "restore": "Wiederherstellen",
+    "copy": "Kopieren",
+    "export": "Exportieren",
+    "gameMode": "Spielmodus",
+    "difficulty": "Schwierigkeit",
+    "spawnX": "Spawn X",
+    "spawnY": "Spawn Y",
+    "spawnZ": "Спавн Z",
+    "seed": "Weltseed",
+    "seedHint": "Vollständiger ganzzahliger Seed",
+    "seedUnavailable": "Seed nicht lesbar; Originaldaten bleiben erhalten",
+    "commands": "Befehle erlauben",
+    "lockDifficulty": "Schwierigkeit sperren",
+    "raining": "Regen",
+    "thundering": "Gewitter",
+    "saveBackup": "Speichern (automatische Sicherung)",
+    "backups": "Weltsicherungen",
+    "autoBackup": "Automatische Sicherung",
+    "manualBackup": "Manuelle Sicherung",
+    "unlock": "Entsperren",
+    "lock": "Sperren",
+    "noOptions": "Keine bearbeitbaren Spieleinstellungen",
+    "saveOptions": "Einstellungen speichern",
+    "name": "Name",
+    "modified": "Geändert",
+    "lastPlayed": "Zuletzt gespielt",
+    "created": "Erstellt",
+    "survival": "Überleben",
+    "creative": "Kreativ",
+    "adventure": "Abenteuer",
+    "spectator": "Zuschauer",
+    "peaceful": "Friedlich",
+    "easy": "Einfach",
+    "normal": "Normal",
+    "hard": "Schwer",
+    "seedSummary": "Seed {seed} · Zuletzt gespielt {time}",
+    "volume": "Lautstärke · {category}",
+    "restoreWorld": "Welt wiederherstellen",
+    "restoreConfirm": "Die Sicherung wird vor dem Ersetzen der Welt geprüft.",
+    "copyWorld": "Welt kopieren",
+    "copyConfirm": "{name} erstellen",
+    "deleteWorld": "Welt löschen",
+    "deleteConfirm": "Welt {name} löschen? Dies kann nicht rückgängig gemacht werden.",
+    "zipFile": "ZIP-Datei",
+    "worldFolder": "Weltordner",
+    "language": "Sprache",
+    "fullscreen": "Vollbild",
+    "vsync": "Vertikale Synchronisierung",
+    "renderDistance": "Sichtweite",
+    "guiScale": "Oberflächenskalierung",
+    "fov": "Sichtfeld",
+    "sensitivity": "Mausempfindlichkeit",
+    "gamma": "Helligkeit",
+    "particles": "Partikel",
+    "clouds": "Wolken"
   }
 }

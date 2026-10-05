@@ -1,27 +1,49 @@
 <template>
   <section class="worlds-panel">
     <header class="worlds-toolbar">
-      <NInput v-model:value="query" clearable size="small" placeholder="搜索世界名称、目录、种子或版本" />
+      <NInput v-model:value="query" clearable size="small" :placeholder="t('worlds.search')" />
       <NSelect v-model:value="sortKey" :options="sortOptions" size="small" class="sort-select" />
       <div class="worlds-toolbar-actions">
-        <NButton quaternary circle size="small" :loading="loading" title="刷新" aria-label="刷新" @click="load">
+        <NButton
+          quaternary
+          circle
+          size="small"
+          :loading="loading"
+          :title="t('common.refresh')"
+          :aria-label="t('common.refresh')"
+          @click="load"
+        >
           <template #icon><UiIcon name="refresh" :size="16" /></template>
         </NButton>
-        <NButton quaternary circle size="small" title="游戏设置" aria-label="游戏设置" @click="editOptions">
+        <NButton
+          quaternary
+          circle
+          size="small"
+          :title="t('worlds.gameSettings')"
+          :aria-label="t('worlds.gameSettings')"
+          @click="editOptions"
+        >
           <template #icon><UiIcon name="settings" :size="16" /></template>
         </NButton>
-        <NButton quaternary circle size="small" title="打开存档目录" aria-label="打开存档目录" @click="openFolder">
+        <NButton
+          quaternary
+          circle
+          size="small"
+          :title="t('worlds.openFolder')"
+          :aria-label="t('worlds.openFolder')"
+          @click="openFolder"
+        >
           <template #icon><UiIcon name="folder-open" :size="16" /></template>
         </NButton>
         <NDropdown trigger="click" :options="importOptions" @select="importWorld">
-          <NButton size="small" type="primary" class="worlds-toolbar-primary" aria-label="导入存档">
+          <NButton size="small" type="primary" class="worlds-toolbar-primary" :aria-label="t('worlds.import')">
             <template #icon><UiIcon name="upload" :size="13" /></template>
             导入
           </NButton>
         </NDropdown>
       </div>
     </header>
-    <InstanceContentState :loading="loading" :empty="filtered.length === 0" emptyDescription="没有找到存档">
+    <InstanceContentState :loading="loading" :empty="filtered.length === 0" :emptyDescription="t('worlds.empty')">
       <div class="world-grid">
         <article v-for="world in filtered" :key="world.id" class="world-card">
           <img v-if="world.iconPath" :src="iconUrls[world.id]" :alt="world.name" class="world-cover" />
@@ -30,35 +52,52 @@
             <strong>{{ world.name }}</strong
             ><small>{{ world.id }}</small>
             <div class="world-badges">
-              <span>{{ world.gameMode || '未知模式' }}</span
-              ><span>{{ world.difficulty || '未知难度' }}</span
-              ><span>{{ world.version || '未知版本' }}</span>
+              <span>{{
+                gameModeOptions.find((option) => option.value === world.gameModeId)?.label || t('worlds.unknownMode')
+              }}</span
+              ><span>{{
+                difficultyOptions.find((option) => option.value === world.difficultyId)?.label ||
+                t('worlds.unknownDifficulty')
+              }}</span
+              ><span>{{ world.version || t('worlds.unknownVersion') }}</span>
             </div>
             <p :title="world.seedError || undefined">
-              种子 {{ normalizeWorldSeed(world.seed) ?? '未知' }} · 上次游玩 {{ formatDate(world.lastPlayedAt) }}
+              {{
+                t('worlds.seedSummary', {
+                  seed: normalizeWorldSeed(world.seed) ?? t('worlds.unknown'),
+                  time: formatDate(world.lastPlayedAt),
+                })
+              }}
             </p>
             <p v-if="world.error" class="world-error">{{ world.error }}</p>
           </div>
           <div class="world-actions">
-            <NButton quaternary circle size="tiny" type="primary" title="快速进入" @click="quickPlay(world)">
+            <NButton
+              quaternary
+              circle
+              size="tiny"
+              type="primary"
+              :title="t('worlds.quickPlay')"
+              @click="quickPlay(world)"
+            >
               <template #icon><UiIcon name="player-play" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="备份" @click="backup(world)">
+            <NButton quaternary circle size="tiny" :title="t('worlds.backup')" @click="backup(world)">
               <template #icon><UiIcon name="archive" :size="14" /></template>
             </NButton>
             <NButton quaternary circle size="tiny" title="难度与作弊" @click="editWorld(world)">
               <template #icon><UiIcon name="settings" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="恢复" @click="manageBackups(world)">
+            <NButton quaternary circle size="tiny" :title="t('worlds.restore')" @click="manageBackups(world)">
               <template #icon><UiIcon name="rotate-2" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="图标" @click="setIcon(world)">
+            <NButton quaternary circle size="tiny" :title="t('profile.icon')" @click="setIcon(world)">
               <template #icon><UiIcon name="photo" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="复制" @click="copyWorld(world)">
+            <NButton quaternary circle size="tiny" :title="t('worlds.copy')" @click="copyWorld(world)">
               <template #icon><UiIcon name="copy" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" title="导出" @click="exportWorld(world)">
+            <NButton quaternary circle size="tiny" :title="t('worlds.export')" @click="exportWorld(world)">
               <template #icon><UiIcon name="file-download" :size="14" /></template>
             </NButton>
             <NButton
@@ -71,7 +110,7 @@
             >
               <template #icon><UiIcon name="external-link" :size="14" /></template>
             </NButton>
-            <NButton quaternary circle size="tiny" type="error" title="删除" @click="remove(world)">
+            <NButton quaternary circle size="tiny" type="error" :title="t('common.delete')" @click="remove(world)">
               <template #icon><UiIcon name="trash" :size="14" /></template>
             </NButton>
           </div>
@@ -87,48 +126,64 @@
       :closeOnConfirm="false"
       @confirm="handleConfirm"
     />
-    <Modal v-model:visible="editorVisible" title="世界设置" width="520px">
+    <Modal v-model:visible="editorVisible" :title="t('worlds.settings')" width="520px">
       <div class="world-editor">
-        <label>游戏模式<NSelect v-model:value="editor.gameMode" :options="gameModeOptions" /></label>
-        <label>难度<NSelect v-model:value="editor.difficulty" :options="difficultyOptions" /></label>
-        <label>出生点 X<NInputNumber v-model:value="editor.spawnX" :min="-30000000" :max="30000000" /></label>
-        <label>出生点 Y<NInputNumber v-model:value="editor.spawnY" :min="-30000000" :max="30000000" /></label>
-        <label>出生点 Z<NInputNumber v-model:value="editor.spawnZ" :min="-30000000" :max="30000000" /></label>
+        <label>{{ t('worlds.gameMode') }}<NSelect v-model:value="editor.gameMode" :options="gameModeOptions" /></label>
         <label
-          >世界种子<NInput v-model:value="editor.seed" :disabled="!seedCanEdit" placeholder="完整整数种子" />
-          <small v-if="!seedCanEdit">{{ editing?.seedError || '无法读取世界种子，保留原存档数据' }}</small>
+          >{{ t('worlds.difficulty') }}<NSelect v-model:value="editor.difficulty" :options="difficultyOptions"
+        /></label>
+        <label
+          >{{ t('worlds.spawnX') }}<NInputNumber v-model:value="editor.spawnX" :min="-30000000" :max="30000000"
+        /></label>
+        <label
+          >{{ t('worlds.spawnY') }}<NInputNumber v-model:value="editor.spawnY" :min="-30000000" :max="30000000"
+        /></label>
+        <label
+          >{{ t('worlds.spawnZ') }}<NInputNumber v-model:value="editor.spawnZ" :min="-30000000" :max="30000000"
+        /></label>
+        <label
+          >{{ t('worlds.seed')
+          }}<NInput v-model:value="editor.seed" :disabled="!seedCanEdit" :placeholder="t('worlds.seedHint')" />
+          <small v-if="!seedCanEdit">{{ editing?.seedError || t('worlds.seedUnavailable') }}</small>
         </label>
         <div class="world-editor-row">
-          <label><NSwitch v-model:value="editor.allowCommands" /> 允许作弊</label>
-          <label><NSwitch v-model:value="editor.difficultyLocked" /> 锁定难度</label>
-          <label><NSwitch v-model:value="editor.raining" /> 下雨</label>
-          <label><NSwitch v-model:value="editor.thundering" /> 雷暴</label>
+          <label><NSwitch v-model:value="editor.allowCommands" /> {{ t('worlds.commands') }}</label>
+          <label><NSwitch v-model:value="editor.difficultyLocked" /> {{ t('worlds.lockDifficulty') }}</label>
+          <label><NSwitch v-model:value="editor.raining" /> {{ t('worlds.raining') }}</label>
+          <label><NSwitch v-model:value="editor.thundering" /> {{ t('worlds.thundering') }}</label>
         </div>
       </div>
       <template #footer
-        ><NButton @click="editorVisible = false">取消</NButton
-        ><NButton type="primary" :loading="savingWorld" @click="saveWorld">保存（自动备份）</NButton></template
+        ><NButton @click="editorVisible = false">{{ t('common.cancel') }}</NButton
+        ><NButton type="primary" :loading="savingWorld" @click="saveWorld">{{
+          t('worlds.saveBackup')
+        }}</NButton></template
       >
     </Modal>
-    <Modal v-model:visible="backupsVisible" title="存档备份" width="660px">
+    <Modal v-model:visible="backupsVisible" :title="t('worlds.backups')" width="660px">
       <div class="backup-list">
         <div v-for="backupItem in backups" :key="backupItem.id">
           <span
             ><strong>{{ backupItem.createdAt || backupItem.id }}</strong
             ><small
-              >{{ backupItem.automatic ? '自动备份' : '手动备份' }} · {{ Math.ceil(backupItem.size / 1024) }} KiB</small
+              >{{ backupItem.automatic ? t('worlds.autoBackup') : t('worlds.manualBackup') }} ·
+              {{ Math.ceil(backupItem.size / 1024) }} KiB</small
             ></span
-          ><NButton size="tiny" @click="toggleBackupLock(backupItem)">{{ backupItem.locked ? '解锁' : '锁定' }}</NButton
-          ><NButton size="tiny" type="primary" @click="restoreBackup(backupItem)">恢复</NButton
-          ><NButton size="tiny" type="error" secondary @click="deleteBackup(backupItem)">删除</NButton>
+          ><NButton size="tiny" @click="toggleBackupLock(backupItem)">{{
+            backupItem.locked ? t('worlds.unlock') : t('worlds.lock')
+          }}</NButton
+          ><NButton size="tiny" type="primary" @click="restoreBackup(backupItem)">{{ t('worlds.restore') }}</NButton
+          ><NButton size="tiny" type="error" secondary @click="deleteBackup(backupItem)">{{
+            t('common.delete')
+          }}</NButton>
         </div>
       </div>
     </Modal>
-    <Modal v-model:visible="optionsVisible" title="游戏设置" width="560px">
+    <Modal v-model:visible="optionsVisible" :title="t('worlds.gameSettings')" width="560px">
       <InstanceContentState
         :loading="optionsLoading"
         :empty="optionsEntries.length === 0"
-        emptyDescription="没有检测到可编辑的游戏设置"
+        :emptyDescription="t('worlds.noOptions')"
       >
         <div class="options-editor">
           <div v-for="entry in optionsEntries" :key="entry.key" class="options-row">
@@ -155,10 +210,10 @@
         </div>
       </InstanceContentState>
       <template #footer
-        ><NButton @click="optionsVisible = false">取消</NButton
-        ><NButton type="primary" :loading="savingOptions" :disabled="!optionsEntries.length" @click="saveOptions"
-          >保存设置</NButton
-        ></template
+        ><NButton @click="optionsVisible = false">{{ t('common.cancel') }}</NButton
+        ><NButton type="primary" :loading="savingOptions" :disabled="!optionsEntries.length" @click="saveOptions">{{
+          t('worlds.saveOptions')
+        }}</NButton></template
       >
     </Modal>
   </section>
@@ -167,6 +222,7 @@
 <script setup lang="ts">
 import { NButton, NDropdown, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
@@ -188,6 +244,7 @@ import InstanceContentState from './InstanceContentState.vue'
 
 const props = defineProps<{ version: ScannedVersion }>()
 const emit = defineEmits<{ changed: [worlds: WorldEntry[]] }>()
+const { t, locale } = useI18n()
 const message = useLauncherMessage()
 const worlds = ref<WorldEntry[]>([])
 const loading = ref(false)
@@ -223,24 +280,24 @@ const optionValues = reactive<Record<string, number | string | boolean>>({})
 const target = computed(() => workspaceTarget(props.version))
 useTargetOperationRefresh(target, load)
 const worldRequests = useRequestScope(() => instanceKey(props.version))
-const sortOptions = [
-  { label: '名称', value: 'name' },
-  { label: '修改时间', value: 'modifiedAt' },
-  { label: '上次游玩', value: 'lastPlayedAt' },
-  { label: '创建时间', value: 'createdAt' },
-]
-const gameModeOptions = [
-  { label: '生存', value: 0 },
-  { label: '创造', value: 1 },
-  { label: '冒险', value: 2 },
-  { label: '旁观', value: 3 },
-]
-const difficultyOptions = [
-  { label: '和平', value: 0 },
-  { label: '简单', value: 1 },
-  { label: '普通', value: 2 },
-  { label: '困难', value: 3 },
-]
+const sortOptions = computed(() => [
+  { label: t('worlds.name'), value: 'name' },
+  { label: t('worlds.modified'), value: 'modifiedAt' },
+  { label: t('worlds.lastPlayed'), value: 'lastPlayedAt' },
+  { label: t('worlds.created'), value: 'createdAt' },
+])
+const gameModeOptions = computed(() => [
+  { label: t('worlds.survival'), value: 0 },
+  { label: t('worlds.creative'), value: 1 },
+  { label: t('worlds.adventure'), value: 2 },
+  { label: t('worlds.spectator'), value: 3 },
+])
+const difficultyOptions = computed(() => [
+  { label: t('worlds.peaceful'), value: 0 },
+  { label: t('worlds.easy'), value: 1 },
+  { label: t('worlds.normal'), value: 2 },
+  { label: t('worlds.hard'), value: 3 },
+])
 const filtered = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase()
   return [...worlds.value]
@@ -251,7 +308,7 @@ const filtered = computed(() => {
         : String(b[sortKey.value] || '').localeCompare(String(a[sortKey.value] || ''))
     )
 })
-const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleString() : '从未游玩')
+const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleString(locale.value) : '从未游玩')
 async function load() {
   const isCurrent = worldRequests.begin()
   const requestedTarget = target.value
@@ -326,7 +383,7 @@ async function saveWorld() {
 }
 async function backup(world: WorldEntry) {
   await instanceWorkspaceApi.backupWorld(target.value, world.id)
-  message.success('备份任务已提交，可在任务列表查看结果')
+  message.success(t('operations.submitted'))
 }
 async function manageBackups(world: WorldEntry) {
   backupWorld.value = world
@@ -350,7 +407,7 @@ async function saveOptions() {
   savingOptions.value = true
   try {
     await instanceWorkspaceApi.patchOptions(target.value, { ...optionValues })
-    message.success('游戏设置已保存')
+    message.success(t('common.saved'))
     optionsVisible.value = false
   } finally {
     savingOptions.value = false
@@ -358,20 +415,20 @@ async function saveOptions() {
 }
 function optionLabel(key: string) {
   const labels: Record<string, string> = {
-    language: '语言',
-    fullscreen: '全屏',
-    vsync: '垂直同步',
-    renderDistance: '渲染距离',
-    guiScale: '界面缩放',
-    fov: '视野',
-    sensitivity: '鼠标灵敏度',
-    mouseSensitivity: '鼠标灵敏度',
-    gamma: '亮度',
-    difficulty: '难度',
-    particles: '粒子效果',
-    clouds: '云层',
+    language: t('worlds.language'),
+    fullscreen: t('worlds.fullscreen'),
+    vsync: t('worlds.vsync'),
+    renderDistance: t('worlds.renderDistance'),
+    guiScale: t('worlds.guiScale'),
+    fov: t('worlds.fov'),
+    sensitivity: t('worlds.sensitivity'),
+    mouseSensitivity: t('worlds.sensitivity'),
+    gamma: t('worlds.gamma'),
+    difficulty: t('worlds.difficulty'),
+    particles: t('worlds.particles'),
+    clouds: t('worlds.clouds'),
   }
-  if (key.startsWith('soundCategory_')) return `音量·${key.slice('soundCategory_'.length)}`
+  if (key.startsWith('soundCategory_')) return t('worlds.volume', { category: key.slice('soundCategory_'.length) })
   return labels[key] ?? key
 }
 async function toggleBackupLock(item: { id: string; locked: boolean }) {
@@ -381,9 +438,9 @@ async function toggleBackupLock(item: { id: string; locked: boolean }) {
 }
 function restoreBackup(item: { id: string }) {
   if (!backupWorld.value) return
-  openConfirm('恢复存档', '恢复前会完整验证备份，当前存档仅在验证成功后被替换。', async () => {
+  openConfirm(t('worlds.restoreWorld'), t('worlds.restoreConfirm'), async () => {
     await instanceWorkspaceApi.restoreWorldBackup(target.value, backupWorld.value!.id, item.id)
-    message.success('恢复任务已创建')
+    message.success(t('operations.submitted'))
   })
 }
 async function deleteBackup(item: { id: string }) {
@@ -399,20 +456,20 @@ async function setIcon(world: WorldEntry) {
   }
 }
 function copyWorld(world: WorldEntry) {
-  openConfirm('复制存档', `将创建 ${world.id}-copy`, async () => {
+  openConfirm(t('worlds.copyWorld'), t('worlds.copyConfirm', { name: `${world.id}-copy` }), async () => {
     await instanceWorkspaceApi.copyWorld(target.value, world.id, `${world.id}-copy`)
-    message.success('复制任务已创建')
+    message.success(t('operations.submitted'))
   })
 }
-const importOptions = [
-  { label: 'ZIP 文件', key: 'world-import' },
-  { label: '存档文件夹', key: 'world-import-folder' },
-]
+const importOptions = computed(() => [
+  { label: t('worlds.zipFile'), key: 'world-import' },
+  { label: t('worlds.worldFolder'), key: 'world-import-folder' },
+])
 async function importWorld(purpose: 'world-import' | 'world-import-folder') {
   const selected = unwrapResponse(await backend.command('select_file', { purpose }), '选择存档')
   if (selected.path) {
     await instanceWorkspaceApi.importWorld(target.value, selected.path)
-    message.success('导入任务已创建')
+    message.success(t('operations.submitted'))
   }
 }
 async function exportWorld(world: WorldEntry) {
@@ -422,13 +479,13 @@ async function exportWorld(world: WorldEntry) {
   )
   if (selected.path) {
     await instanceWorkspaceApi.exportWorld(target.value, world.id, selected.path)
-    message.success('导出任务已创建')
+    message.success(t('operations.submitted'))
   }
 }
 function remove(world: WorldEntry) {
   openConfirm(
-    '删除存档',
-    `删除存档“${world.name}”？该操作不可恢复。`,
+    t('worlds.deleteWorld'),
+    t('worlds.deleteConfirm', { name: world.name }),
     async () => {
       await instanceWorkspaceApi.deleteWorld(target.value, world.id)
       await load()
