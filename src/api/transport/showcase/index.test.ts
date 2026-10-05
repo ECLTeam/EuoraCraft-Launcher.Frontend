@@ -55,7 +55,6 @@ describe('ShowcaseTransport', () => {
 
     expect(result.data?.locale).toBe('en-US')
     expect(result.data?.theme).toMatchObject({
-      sidebar_collapsed: true,
       background_opacity: 1,
     })
     expect(result.data).toMatchObject({

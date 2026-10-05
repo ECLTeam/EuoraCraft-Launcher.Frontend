@@ -566,7 +566,35 @@ export const useThemeStore = defineStore('theme', () => {
   const bgIndex = ref(0)
   let bgRotateTimer: ReturnType<typeof setInterval> | null = null
   const transparentBg = ref(false)
-  const sidebarCollapsed = ref(true)
+  const sidebarStorageKey = 'euoracraft-sidebar-collapsed'
+  let hasWarnedSidebarStorage = false
+
+  function warnSidebarStorage(): void {
+    if (hasWarnedSidebarStorage) return
+    hasWarnedSidebarStorage = true
+    console.warn('侧栏折叠状态无法本地保存，本次运行仍可正常切换')
+  }
+
+  function readSidebarState(): boolean | null {
+    try {
+      const stored = window.localStorage.getItem(sidebarStorageKey)
+      return stored === 'true' ? true : stored === 'false' ? false : null
+    } catch {
+      warnSidebarStorage()
+      return null
+    }
+  }
+
+  const sidebarCollapsed = ref(readSidebarState() ?? true)
+
+  function saveSidebarState(): void {
+    try {
+      window.localStorage.setItem(sidebarStorageKey, String(sidebarCollapsed.value))
+    } catch {
+      warnSidebarStorage()
+    }
+  }
+
   const navigationMode = ref<NavigationMode>('sidebar')
   const systemDark = ref(false)
   /** 用户级外观覆盖（圆角/字体/卡片透明度）。未设置的字段交由默认值决定。 */
@@ -1068,9 +1096,10 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function setSidebarCollapsed(val: boolean) {
+    if (sidebarCollapsed.value === val) return
     sidebarCollapsed.value = val
     updateTheme()
-    saveThemeConfig()
+    saveSidebarState()
   }
 
   function setTitlebarHidden(val: boolean) {
@@ -1102,7 +1131,6 @@ export const useThemeStore = defineStore('theme', () => {
             theme_id: themeId.value,
             primary_color: primaryColor.value,
             blur_amount: blurAmount.value,
-            sidebar_collapsed: sidebarCollapsed.value,
             navigation_mode: navigationMode.value,
             titlebar_hidden: titlebarHidden.value,
             transparent_bg: transparentBg.value,
@@ -1179,9 +1207,6 @@ export const useThemeStore = defineStore('theme', () => {
         }
         if (typeof themeData.transparent_bg === 'boolean') {
           transparentBg.value = themeData.transparent_bg
-        }
-        if (typeof themeData.sidebar_collapsed === 'boolean') {
-          sidebarCollapsed.value = themeData.sidebar_collapsed
         }
         navigationMode.value = resolveNavigationMode(themeData)
       }
