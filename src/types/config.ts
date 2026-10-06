@@ -215,6 +215,8 @@ export type NavigationMode = 'sidebar' | 'top'
 
 export interface DownloadConfig {
   mirror_source: 'official' | 'bmclapi'
+  /** 模组与资源平台来源：官方平台或 MCIM 国内镜像。 */
+  mod_source?: 'official' | 'mcim'
   /** 按资源类型记忆的「上一次安装实例」缓存：key 为资源类型(mod/resourcepack/shaderpack/datapack/world) */
   resourceInstallCache?: Record<string, { gamePath: string; versionId: string }>
   /** 按资源类型记忆的「另存为」目录。 */

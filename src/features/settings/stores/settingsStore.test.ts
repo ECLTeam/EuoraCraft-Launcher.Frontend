@@ -102,7 +102,7 @@ describe('settingsStore', () => {
         jvm_args: ['-XX:+UseG1GC'],
         memory_size: 6144,
       },
-      download: { mirror_source: 'bmclapi' },
+      download: { mirror_source: 'bmclapi', mod_source: 'mcim' },
       launcher: {},
       connector: { mode: 'automatic', nodes: [] },
     })
@@ -129,6 +129,7 @@ describe('settingsStore', () => {
     expect(store.game.disable_crash_analysis).toBe(false)
     expect(store.game.minecraft_paths).toEqual([{ name: '主目录', path: 'D:/Minecraft' }])
     expect(store.download.mirror_source).toBe('bmclapi')
+    expect(store.download.mod_source).toBe('mcim')
   })
 
   it('设置入口委托唯一 Java 清单，并支持强制刷新', async () => {

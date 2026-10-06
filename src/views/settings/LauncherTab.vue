@@ -12,12 +12,20 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.downloadSettings')">
-      <SettingRow :label="t('settings.downloadSource')" :description="t('settings.downloadSourceDesc')">
+      <SettingRow :label="t('settings.gameDownloadSource')" :description="t('settings.downloadSourceDesc')">
         <NSelect
           class="setting-select"
           :value="downloadSettings.mirror_source"
           :options="downloadSourceOptions"
           @update:value="handleDownloadSourceChange"
+        />
+      </SettingRow>
+      <SettingRow :label="t('settings.modSource')" :description="t('settings.modSourceDesc')">
+        <NSelect
+          class="setting-select"
+          :value="downloadSettings.mod_source ?? 'official'"
+          :options="modSourceOptions"
+          @update:value="handleModSourceChange"
         />
       </SettingRow>
     </SettingSection>
@@ -236,6 +244,11 @@ const downloadSourceOptions = computed(() => [
   { value: 'bmclapi', label: t('settings.downloadSourceBmclapiFirst') },
 ])
 
+const modSourceOptions = computed(() => [
+  { value: 'official', label: t('settings.modSourceOfficial') },
+  { value: 'mcim', label: t('settings.modSourceMcim') },
+])
+
 const logLevelOptions = computed(() => [
   { label: t('settings.logLevelDebug'), value: 'debug' },
   { label: t('settings.logLevelInfo'), value: 'info' },
@@ -254,6 +267,10 @@ function handleLanguageUpdate(languageCode: string): void {
 
 async function handleDownloadSourceChange(value: 'official' | 'bmclapi'): Promise<void> {
   await run(() => settingsStore.patchDownload({ mirror_source: value }))
+}
+
+async function handleModSourceChange(value: 'official' | 'mcim'): Promise<void> {
+  await run(() => settingsStore.patchDownload({ mod_source: value }))
 }
 
 async function handleDebugModeChange(value: boolean): Promise<void> {

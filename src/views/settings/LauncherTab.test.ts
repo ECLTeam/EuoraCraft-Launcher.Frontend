@@ -1,4 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { NSelect } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -119,5 +120,26 @@ describe('LauncherTab 联机设置定位', () => {
     await advanceFrames()
     expect(frames.size).toBe(0)
     expect(scroll).not.toHaveBeenCalled()
+  })
+
+  it('模组源下拉展示官方与 MCIM，切换后提交下载配置补丁', async () => {
+    const { wrapper } = await mountSettings()
+    const rows = wrapper.findAll('.setting-item')
+    const modSourceRow = rows.find((row) => row.text().includes(i18n.global.t('settings.modSource')))
+    expect(modSourceRow).toBeTruthy()
+
+    const store = useSettingsStore()
+    const patchDownload = vi.spyOn(store, 'patchDownload').mockResolvedValue(undefined)
+    await modSourceRow!.getComponent(NSelect).vm.$emit('update:value', 'mcim')
+    await flushPromises()
+
+    expect(patchDownload).toHaveBeenCalledWith({ mod_source: 'mcim' })
+  })
+
+  it('游戏下载源标签与模组源分开显示', async () => {
+    const { wrapper } = await mountSettings()
+    const text = wrapper.text()
+    expect(text).toContain(i18n.global.t('settings.gameDownloadSource'))
+    expect(text).toContain(i18n.global.t('settings.modSource'))
   })
 })

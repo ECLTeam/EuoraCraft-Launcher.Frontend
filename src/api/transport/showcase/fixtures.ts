@@ -42,6 +42,7 @@ export const showcaseConfig: Record<string, unknown> = {
   },
   download: {
     mirror_source: 'official',
+    mod_source: 'official',
   },
   version_settings: {},
   ui: {

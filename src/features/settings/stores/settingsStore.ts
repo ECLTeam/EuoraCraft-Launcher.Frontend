@@ -45,6 +45,7 @@ const DEFAULT_GAME_CONFIG: GameConfig = {
 
 const DEFAULT_DOWNLOAD_CONFIG: DownloadConfig = {
   mirror_source: 'official',
+  mod_source: 'official',
 }
 
 const DEFAULT_LAUNCHER_CONFIG: LauncherConfig = {
