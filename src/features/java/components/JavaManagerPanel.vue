@@ -18,150 +18,152 @@
       </div>
     </header>
 
-    <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{ error || store.error }}</NAlert>
-    <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
-    <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
-      >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
-      <NButton size="small" :disabled="isActing" @click="retryCleanup">{{
-        t('javaManager.retryCleanup')
-      }}</NButton></NAlert
-    >
+    <div class="java-manager-content">
+      <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{ error || store.error }}</NAlert>
+      <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
+      <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
+        >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
+        <NButton size="small" :disabled="isActing" @click="retryCleanup">{{
+          t('javaManager.retryCleanup')
+        }}</NButton></NAlert
+      >
 
-    <template v-if="view === 'installed'">
-      <NInput v-model:value="query" clearable :placeholder="t('javaManager.search')" />
-      <UiLoading v-if="store.isLoading && !store.runtimes.length" :label="t('javaManager.scanning')" />
-      <NEmpty v-else-if="!filteredRuntimes.length" :description="t('javaManager.empty')" />
-      <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
-        <div class="java-runtime-copy">
-          <strong
-            >Java {{ runtime.majorVersion || '?' }} · {{ runtime.vendor || t('javaManager.unknownVendor') }} ·
-            {{ runtime.runtimeKind }}</strong
-          >
-          <span
-            >{{ runtime.fullVersion }} · {{ runtime.architecture }} ·
-            {{ t(`javaManager.origins.${runtime.origin}`) }}</span
-          >
-          <small class="java-runtime-path" :title="runtime.executablePath">{{ runtime.executablePath }}</small>
-          <div class="java-runtime-tags">
-            <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
-              t(`javaManager.validation.${runtime.validationStatus}`)
-            }}</NTag>
-            <NTag v-if="!runtime.isEnabled" size="small" type="warning">{{ t('javaManager.disabled') }}</NTag>
-            <NTag v-if="runtime.isInUse" size="small" type="info">{{
-              t(runtime.usageUnknown ? 'javaManager.usageUnknown' : 'javaManager.inUse')
-            }}</NTag>
-            <span v-if="runtime.references?.length" class="java-runtime-references">{{
-              t('javaManager.referenced', { count: runtime.references.length })
-            }}</span>
+      <template v-if="view === 'installed'">
+        <NInput v-model:value="query" clearable :placeholder="t('javaManager.search')" />
+        <UiLoading v-if="store.isLoading && !store.runtimes.length" :label="t('javaManager.scanning')" />
+        <NEmpty v-else-if="!filteredRuntimes.length" :description="t('javaManager.empty')" />
+        <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
+          <div class="java-runtime-copy">
+            <strong
+              >Java {{ runtime.majorVersion || '?' }} · {{ runtime.vendor || t('javaManager.unknownVendor') }} ·
+              {{ runtime.runtimeKind }}</strong
+            >
+            <span
+              >{{ runtime.fullVersion }} · {{ runtime.architecture }} ·
+              {{ t(`javaManager.origins.${runtime.origin}`) }}</span
+            >
+            <small class="java-runtime-path" :title="runtime.executablePath">{{ runtime.executablePath }}</small>
+            <div class="java-runtime-tags">
+              <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
+                t(`javaManager.validation.${runtime.validationStatus}`)
+              }}</NTag>
+              <NTag v-if="!runtime.isEnabled" size="small" type="warning">{{ t('javaManager.disabled') }}</NTag>
+              <NTag v-if="runtime.isInUse" size="small" type="info">{{
+                t(runtime.usageUnknown ? 'javaManager.usageUnknown' : 'javaManager.inUse')
+              }}</NTag>
+              <span v-if="runtime.references?.length" class="java-runtime-references">{{
+                t('javaManager.referenced', { count: runtime.references.length })
+              }}</span>
+            </div>
           </div>
-        </div>
-        <div class="java-runtime-actions">
-          <NButton size="small" :disabled="!canUse(runtime) || isActing" @click="useRuntime(runtime)">{{
-            t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')
-          }}</NButton>
-          <NButton size="small" :disabled="isActing" @click="toggleRuntime(runtime)">{{
-            t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')
-          }}</NButton>
-          <NButton
-            v-if="runtime.validationStatus !== 'valid'"
-            size="small"
-            :disabled="isRegistering"
-            @click="register"
-            >{{ t('javaManager.relocate') }}</NButton
-          >
-          <NButton
-            v-if="updates[runtime.runtimeId]"
-            size="small"
-            :disabled="isActing"
-            @click="prepareInstall(updates[runtime.runtimeId]!)"
-            >{{ t('javaManager.update') }}</NButton
-          >
-          <NButton
-            size="small"
-            quaternary
-            :aria-label="t('javaManager.openFolder')"
-            :title="t('javaManager.openFolder')"
-            @click="openFolder(runtime)"
-            ><template #icon><UiIcon name="folder" :size="16" /></template
-          ></NButton>
-          <NButton
-            v-if="runtime.origin !== 'system'"
-            size="small"
-            type="error"
-            secondary
-            :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
-            @click="confirmRemoval(runtime)"
-            >{{ t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget') }}</NButton
-          >
-        </div>
-      </article>
-    </template>
+          <div class="java-runtime-actions">
+            <NButton size="small" :disabled="!canUse(runtime) || isActing" @click="useRuntime(runtime)">{{
+              t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')
+            }}</NButton>
+            <NButton size="small" :disabled="isActing" @click="toggleRuntime(runtime)">{{
+              t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')
+            }}</NButton>
+            <NButton
+              v-if="runtime.validationStatus !== 'valid'"
+              size="small"
+              :disabled="isRegistering"
+              @click="register"
+              >{{ t('javaManager.relocate') }}</NButton
+            >
+            <NButton
+              v-if="updates[runtime.runtimeId]"
+              size="small"
+              :disabled="isActing"
+              @click="prepareInstall(updates[runtime.runtimeId]!)"
+              >{{ t('javaManager.update') }}</NButton
+            >
+            <NButton
+              size="small"
+              quaternary
+              :aria-label="t('javaManager.openFolder')"
+              :title="t('javaManager.openFolder')"
+              @click="openFolder(runtime)"
+              ><template #icon><UiIcon name="folder" :size="16" /></template
+            ></NButton>
+            <NButton
+              v-if="runtime.origin !== 'system'"
+              size="small"
+              type="error"
+              secondary
+              :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
+              @click="confirmRemoval(runtime)"
+              >{{ t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget') }}</NButton
+            >
+          </div>
+        </article>
+      </template>
 
-    <template v-else>
-      <div class="java-catalog-controls">
-        <NSelect
-          v-model:value="selectedMajor"
-          :options="majorOptions"
-          :placeholder="t('javaManager.version')"
-          :aria-label="t('javaManager.version')"
+      <template v-else>
+        <div class="java-catalog-controls">
+          <NSelect
+            v-model:value="selectedMajor"
+            :options="majorOptions"
+            :placeholder="t('javaManager.version')"
+            :aria-label="t('javaManager.version')"
+          />
+          <NSelect
+            v-model:value="runtimeKind"
+            :options="[
+              { label: 'JRE', value: 'JRE' },
+              { label: 'JDK', value: 'JDK' },
+            ]"
+            :aria-label="t('javaManager.packageType')"
+          />
+          <NButton :loading="isLoadingCatalog" @click="loadCatalog(true)">{{ t('common.refresh') }}</NButton>
+        </div>
+        <small>{{ t('javaManager.catalogHint') }}</small>
+        <span v-if="catalog">{{ catalog.platform }} · {{ catalog.architecture }} · Eclipse Temurin</span>
+        <UiLoading v-if="isLoadingCatalog" :label="t('javaManager.loadingCatalog')" />
+        <NEmpty v-else-if="catalog && !catalog.packages.length" :description="t('javaManager.noPackage')" />
+        <article v-for="candidate in catalog?.packages || []" :key="candidate.packageId" class="java-package-row">
+          <div class="java-runtime-copy">
+            <strong>{{ candidate.releaseName }} · {{ candidate.runtimeKind }}</strong
+            ><span>{{ candidate.architecture }} · {{ size(candidate.downloadBytes) }}</span>
+          </div>
+          <NButton type="primary" :disabled="isActing" @click="prepareInstall(candidate)">{{
+            t('javaManager.install')
+          }}</NButton>
+        </article>
+      </template>
+
+      <div v-for="operation in javaOperations" :key="operation.operationId" class="java-operation-row" role="status">
+        <strong>{{
+          t(
+            operation.kind === 'java_remove'
+              ? 'javaManager.removeTask'
+              : operation.kind === 'java_cleanup'
+                ? 'javaManager.retryCleanup'
+                : 'javaManager.installTask'
+          )
+        }}</strong>
+        <NProgress
+          type="line"
+          :percentage="Math.round(operation.percent || 0)"
+          :status="operation.status === 'failed' ? 'error' : operation.status === 'completed' ? 'success' : 'default'"
         />
-        <NSelect
-          v-model:value="runtimeKind"
-          :options="[
-            { label: 'JRE', value: 'JRE' },
-            { label: 'JDK', value: 'JDK' },
-          ]"
-          :aria-label="t('javaManager.packageType')"
-        />
-        <NButton :loading="isLoadingCatalog" @click="loadCatalog(true)">{{ t('common.refresh') }}</NButton>
+        <span>{{ operation.message }}</span>
+        <span v-if="operations.queryErrors[operation.operationId]">{{
+          operations.queryErrors[operation.operationId]
+        }}</span>
+        <NButton
+          v-if="operations.queryErrors[operation.operationId]"
+          size="small"
+          @click="operations.refresh(operation.operationId)"
+          >{{ t('common.refresh') }}</NButton
+        >
+        <NButton
+          v-if="['pending', 'running'].includes(operation.status) && operation.canCancel !== false"
+          size="small"
+          :loading="operations.cancellingOperations.includes(operation.operationId)"
+          @click="operations.cancel(operation.operationId)"
+          >{{ t('common.cancel') }}</NButton
+        >
       </div>
-      <small>{{ t('javaManager.catalogHint') }}</small>
-      <span v-if="catalog">{{ catalog.platform }} · {{ catalog.architecture }} · Eclipse Temurin</span>
-      <UiLoading v-if="isLoadingCatalog" :label="t('javaManager.loadingCatalog')" />
-      <NEmpty v-else-if="catalog && !catalog.packages.length" :description="t('javaManager.noPackage')" />
-      <article v-for="candidate in catalog?.packages || []" :key="candidate.packageId" class="java-package-row">
-        <div class="java-runtime-copy">
-          <strong>{{ candidate.releaseName }} · {{ candidate.runtimeKind }}</strong
-          ><span>{{ candidate.architecture }} · {{ size(candidate.downloadBytes) }}</span>
-        </div>
-        <NButton type="primary" :disabled="isActing" @click="prepareInstall(candidate)">{{
-          t('javaManager.install')
-        }}</NButton>
-      </article>
-    </template>
-
-    <div v-for="operation in javaOperations" :key="operation.operationId" class="java-operation-row" role="status">
-      <strong>{{
-        t(
-          operation.kind === 'java_remove'
-            ? 'javaManager.removeTask'
-            : operation.kind === 'java_cleanup'
-              ? 'javaManager.retryCleanup'
-              : 'javaManager.installTask'
-        )
-      }}</strong>
-      <NProgress
-        type="line"
-        :percentage="Math.round(operation.percent || 0)"
-        :status="operation.status === 'failed' ? 'error' : operation.status === 'completed' ? 'success' : 'default'"
-      />
-      <span>{{ operation.message }}</span>
-      <span v-if="operations.queryErrors[operation.operationId]">{{
-        operations.queryErrors[operation.operationId]
-      }}</span>
-      <NButton
-        v-if="operations.queryErrors[operation.operationId]"
-        size="small"
-        @click="operations.refresh(operation.operationId)"
-        >{{ t('common.refresh') }}</NButton
-      >
-      <NButton
-        v-if="['pending', 'running'].includes(operation.status) && operation.canCancel !== false"
-        size="small"
-        :loading="operations.cancellingOperations.includes(operation.operationId)"
-        @click="operations.cancel(operation.operationId)"
-        >{{ t('common.cancel') }}</NButton
-      >
     </div>
 
     <ConfirmDialog
@@ -469,7 +471,8 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.java-manager {
+.java-manager,
+.java-manager-content {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -511,7 +514,7 @@ onBeforeUnmount(() => {
 }
 .java-runtime-copy span,
 .java-runtime-copy small,
-.java-manager > small {
+.java-manager-content > small {
   color: var(--text-secondary);
   font-size: 12px;
 }
