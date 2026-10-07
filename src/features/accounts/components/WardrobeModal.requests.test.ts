@@ -24,7 +24,7 @@ vi.mock('@/composables/useLauncherMessage', () => ({
 vi.mock('@/composables/useUiSkin', () => ({ useUiSkin: () => ({ isFolia: false }) }))
 const preview = defineComponent({
   name: 'SkinViewer3D',
-  props: { skinUrl: String, capeUrl: String },
+  props: { skinUrl: { type: String, default: '' }, capeUrl: { type: String, default: '' } },
   template: '<div :data-skin="skinUrl" :data-cape="capeUrl" />',
 })
 const wrappers: ReturnType<typeof mount>[] = []

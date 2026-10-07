@@ -1,3 +1,4 @@
+/* eslint-disable vue/one-component-per-file -- 测试挂载用辅助组件 */
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, onMounted } from 'vue'
