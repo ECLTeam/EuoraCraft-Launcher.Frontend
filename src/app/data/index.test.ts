@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/app/queryClient'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
+import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
 import { aboutApi } from '@/features/settings/api/aboutApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import {
@@ -8,13 +9,23 @@ import {
   configQuery,
   invalidateAccounts,
   invalidateConfig,
+  invalidatePluginRegistry,
   launcherInfoQuery,
+  pluginRegistryQuery,
   setAccountsSnapshot,
 } from './index'
 
 vi.mock('@/features/accounts/api/accountsApi', () => ({ accountsApi: { list: vi.fn() } }))
 vi.mock('@/features/settings/api/aboutApi', () => ({ aboutApi: { getLauncherInfo: vi.fn() } }))
 vi.mock('@/features/settings/api/settingsApi', () => ({ settingsApi: { load: vi.fn() } }))
+vi.mock('@/features/plugins/api/pluginHostApi', () => ({
+  pluginHostApi: {
+    getRoutes: vi.fn(),
+    getSlots: vi.fn(),
+    getVueSlots: vi.fn(),
+    getVueComponents: vi.fn(),
+  },
+}))
 
 const configSnapshot = {
   ui: {},
@@ -31,6 +42,10 @@ describe('统一启动数据层', () => {
     vi.mocked(settingsApi.load).mockResolvedValue(configSnapshot)
     vi.mocked(aboutApi.getLauncherInfo).mockResolvedValue(null)
     vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [], current: null })
+    vi.mocked(pluginHostApi.getRoutes).mockResolvedValue([])
+    vi.mocked(pluginHostApi.getSlots).mockResolvedValue({})
+    vi.mocked(pluginHostApi.getVueSlots).mockResolvedValue({})
+    vi.mocked(pluginHostApi.getVueComponents).mockResolvedValue({})
   })
 
   it('同一数据域的并发读取只触发一次底层请求', async () => {
@@ -70,5 +85,21 @@ describe('统一启动数据层', () => {
     await invalidateAccounts()
     await accountsQuery()
     expect(accountsApi.list).toHaveBeenCalledTimes(2)
+  })
+
+  it('插件注册表的四个子命令在同一次读取中只请求一轮', async () => {
+    const [first, second] = await Promise.all([pluginRegistryQuery(), pluginRegistryQuery()])
+    expect(first).toEqual(second)
+    expect(pluginHostApi.getRoutes).toHaveBeenCalledOnce()
+    expect(pluginHostApi.getSlots).toHaveBeenCalledOnce()
+    expect(pluginHostApi.getVueSlots).toHaveBeenCalledOnce()
+    expect(pluginHostApi.getVueComponents).toHaveBeenCalledOnce()
+  })
+
+  it('插件注册表失效后重新请求后端', async () => {
+    await pluginRegistryQuery()
+    await invalidatePluginRegistry()
+    await pluginRegistryQuery()
+    expect(pluginHostApi.getRoutes).toHaveBeenCalledTimes(2)
   })
 })

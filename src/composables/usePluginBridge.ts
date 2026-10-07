@@ -1,6 +1,7 @@
 /* eslint-disable vue/one-component-per-file -- 动态工厂按需 createApp 生成组件，单文件多组件属必要设计 */
 import DOMPurify from 'dompurify'
 import { compile, createApp, defineComponent, h, ref } from 'vue'
+import { invalidatePluginRegistry, pluginRegistryQuery } from '@/app/data'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
 import * as api from '@/plugin-sdk/api'
 import * as component from '@/plugin-sdk/component'
@@ -619,10 +620,16 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
       else entries[index] = entry
       pluginSlots.value[slot] = entries
       renderSlot(slot)
+      void invalidatePluginRegistry()
     })
   )
 
-  unlistenFns.push(pluginHostApi.subscribe('plugin:route_registered', () => refreshRoutes(router)))
+  unlistenFns.push(
+    pluginHostApi.subscribe('plugin:route_registered', () => {
+      void invalidatePluginRegistry()
+      void refreshRoutes(router)
+    })
+  )
 
   unlistenFns.push(
     pluginHostApi.subscribe('plugin:vue_route_registered', (payload) => {
@@ -632,7 +639,8 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
         script: payload.script,
         style: payload.style,
       }
-      refreshRoutes(router)
+      void invalidatePluginRegistry()
+      void refreshRoutes(router)
     })
   )
 
@@ -663,6 +671,7 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
       else entries[index] = newEntry
       pluginVueSlots.value[payload.slot] = entries
       renderVueSlot(payload.slot)
+      void invalidatePluginRegistry()
     })
   )
 
@@ -686,18 +695,14 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
   unlistenFns.push(
     pluginHostApi.subscribe('plugin:status_changed', (payload) => {
       if (payload.action === 'disabled' || payload.action === 'unloaded') {
+        void invalidatePluginRegistry()
         void fullCleanupPlugin(payload.name, router)
       }
     })
   )
 
-  Promise.all([
-    pluginHostApi.getRoutes(),
-    pluginHostApi.getSlots(),
-    pluginHostApi.getVueSlots(),
-    pluginHostApi.getVueComponents(),
-  ])
-    .then(([routes, slots, vueSlots, vueComponents]) => {
+  pluginRegistryQuery()
+    .then(({ routes, slots, vueSlots, vueComponents }) => {
       pluginRoutes.value = routes
       pluginSlots.value = slots
       pluginVueSlots.value = vueSlots

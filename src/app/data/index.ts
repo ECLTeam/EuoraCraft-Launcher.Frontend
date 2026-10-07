@@ -3,13 +3,23 @@
 import { queryClient } from '@/app/queryClient'
 import { queryKeys } from '@/app/queryKeys'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
+import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
 import { aboutApi } from '@/features/settings/api/aboutApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import type { AccountListData } from '@/types/accounts'
+import type { PluginRoute, PluginSlotItem, VueComponentDef, VueSlotItem } from '@/types/plugins'
 import type { LauncherInfo } from '@/types/system'
 
 // 挂载前读取窗口装饰信息时使用，避免后端无响应拖慢首屏渲染。
 const LAUNCHER_INFO_TIMEOUT_MS = 3000
+
+/** 插件注册表的完整快照，四个子命令必须来自同一次读取，避免渲染出不一致的中间状态。 */
+export interface PluginRegistry {
+  routes: PluginRoute[]
+  slots: Record<string, PluginSlotItem[]>
+  vueSlots: Record<string, VueSlotItem[]>
+  vueComponents: Record<string, VueComponentDef>
+}
 
 /**
  * 一次读取全部启动器配置分区，配置域的所有消费者共享同一次请求与缓存。
@@ -60,4 +70,29 @@ export function invalidateAccounts(): Promise<void> {
  */
 export function setAccountsSnapshot(data: AccountListData): void {
   queryClient.setQueryData(queryKeys.accounts, data)
+}
+
+/**
+ * 一次读取插件注册表的全部内容，插件桥接的初始装载只触发一轮 IPC。
+ */
+export function pluginRegistryQuery(): Promise<PluginRegistry> {
+  return queryClient.fetchQuery({
+    queryKey: queryKeys.pluginRegistry,
+    queryFn: async () => {
+      const [routes, slots, vueSlots, vueComponents] = await Promise.all([
+        pluginHostApi.getRoutes(),
+        pluginHostApi.getSlots(),
+        pluginHostApi.getVueSlots(),
+        pluginHostApi.getVueComponents(),
+      ])
+      return { routes, slots, vueSlots, vueComponents }
+    },
+  })
+}
+
+/**
+ * 插件注册表结构变化后失效缓存，后续读取会重新向后端确认。
+ */
+export function invalidatePluginRegistry(): Promise<void> {
+  return queryClient.invalidateQueries({ queryKey: queryKeys.pluginRegistry })
 }

@@ -5,6 +5,7 @@ export const queryKeys = {
   },
   launcherInfo: ['launcher-info'] as const,
   accounts: ['accounts'] as const,
+  pluginRegistry: ['plugin-registry'] as const,
   gameHome: {
     infoCard: ['game-home', 'info-card'] as const,
   },
