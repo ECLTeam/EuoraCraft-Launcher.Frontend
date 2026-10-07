@@ -1835,11 +1835,9 @@
     "submitted": "已提交，可在任务列表查看结果",
     "retryOriginal": "重试上次下载",
     "cancelRequested": "已请求取消，等待任务停止",
-    "kinds": {
-      "java_install": "安装 Java",
-      "java_remove": "移除 Java",
-      "java_cleanup": "重试清理"
-    }
+    "java_install": "安装 Java",
+    "java_remove": "移除 Java",
+    "java_cleanup": "重试清理"
   },
   "more": {
     "nav": {

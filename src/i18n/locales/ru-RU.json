@@ -1927,11 +1927,9 @@
     "submitted": "Задача отправлена. Результат появится в списке задач.",
     "retryOriginal": "Повторить предыдущую загрузку",
     "cancelRequested": "Отмена запрошена. Ожидание остановки задачи.",
-    "kinds": {
-      "java_install": "Установка Java",
-      "java_remove": "Удаление Java",
-      "java_cleanup": "Повторить очистку"
-    }
+    "java_install": "Установка Java",
+    "java_remove": "Удаление Java",
+    "java_cleanup": "Повторить очистку"
   },
   "more": {
     "nav": {

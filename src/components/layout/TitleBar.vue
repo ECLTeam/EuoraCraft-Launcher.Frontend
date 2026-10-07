@@ -82,7 +82,7 @@
       <TitleBarTray />
       <button class="titlebar-btn titlebar-btn-task" :title="t('task.title')" @click="toggleTaskPanel">
         <UiIcon name="download" :size="16" />
-        <span v-if="activeTaskCount > 0" class="task-badge">{{ activeTaskCount }}</span>
+        <span v-if="activeTaskCount > 0" class="task-badge">{{ activeTaskCount > 99 ? '99+' : activeTaskCount }}</span>
       </button>
       <button
         class="titlebar-btn"

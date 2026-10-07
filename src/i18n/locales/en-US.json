@@ -1940,11 +1940,9 @@
     "submitted": "Submitted. View the result in the task list.",
     "retryOriginal": "Retry previous download",
     "cancelRequested": "Cancellation requested. Waiting for the task to stop.",
-    "kinds": {
-      "java_install": "Install Java",
-      "java_remove": "Remove Java",
-      "java_cleanup": "Retry cleanup"
-    }
+    "java_install": "Install Java",
+    "java_remove": "Remove Java",
+    "java_cleanup": "Retry cleanup"
   },
   "more": {
     "nav": {

@@ -31,82 +31,87 @@
             </button>
           </div>
           <div v-for="task in tasks" :key="task.id" :class="['tq-task', `tq-task--${task.status}`]">
-            <div
-              class="tq-task-header"
-              role="button"
-              tabindex="0"
-              :aria-expanded="task.expanded"
-              @click="toggleExpand(task.id)"
-              @keydown.enter.self="toggleExpand(task.id)"
-              @keydown.space.self.prevent="toggleExpand(task.id)"
-            >
-              <div class="tq-task-main">
-                <div class="tq-task-icon">
-                  <UiLoading v-if="task.status === 'running'" mode="inline" size="md" decorative />
-                  <UiIcon v-else-if="task.status === 'completed'" name="check" :size="18" class="tq-icon-success" />
-                  <UiIcon v-else-if="task.status === 'error'" name="x-mark" :size="18" class="tq-icon-error" />
-                  <UiIcon v-else-if="task.status === 'canceled'" name="x-mark" :size="18" class="tq-icon-muted" />
-                  <UiIcon v-else name="package" :size="18" class="tq-icon-muted" />
-                </div>
-                <div class="tq-task-info">
-                  <div class="tq-task-name">
-                    {{ task.name }}
+            <div class="tq-task-top">
+              <div
+                class="tq-task-header"
+                role="button"
+                tabindex="0"
+                :aria-expanded="task.expanded"
+                @click="toggleExpand(task.id)"
+                @keydown.enter.self="toggleExpand(task.id)"
+                @keydown.space.self.prevent="toggleExpand(task.id)"
+              >
+                <div class="tq-task-main">
+                  <div class="tq-task-icon">
+                    <UiLoading v-if="task.status === 'running'" mode="inline" size="md" decorative />
+                    <UiIcon v-else-if="task.status === 'completed'" name="check" :size="18" class="tq-icon-success" />
+                    <UiIcon v-else-if="task.status === 'error'" name="x-mark" :size="18" class="tq-icon-error" />
+                    <UiIcon v-else-if="task.status === 'canceled'" name="x-mark" :size="18" class="tq-icon-muted" />
+                    <UiIcon v-else name="package" :size="18" class="tq-icon-muted" />
                   </div>
-                  <div class="tq-task-meta">
-                    <span>{{ t(`taskQueue.states.${task.status}`) }}</span>
-                    <span v-if="task.loaderType" class="tq-task-type">{{ getLoaderLabel(task.loaderType) }}</span>
-                    <span v-if="task.versionId" class="tq-task-ver">{{ task.versionId }}</span>
+                  <div class="tq-task-info">
+                    <div class="tq-task-name" :title="task.name">{{ task.name }}</div>
+                    <div class="tq-task-meta">
+                      <span class="tq-task-state">{{ t(`taskQueue.states.${task.status}`) }}</span>
+                      <span v-if="task.loaderType" class="tq-task-type">{{ getLoaderLabel(task.loaderType) }}</span>
+                      <span v-if="task.versionId" class="tq-task-ver">{{ task.versionId }}</span>
+                      <span
+                        v-if="task.status === 'running' || task.status === 'pending'"
+                        class="tq-task-phase"
+                        :title="task.message"
+                        >{{ task.message }}</span
+                      >
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <div class="tq-task-progress">
-                <UiProgress
-                  :percentage="task.progress"
-                  :processing="task.status === 'running' && task.progress <= 0"
-                  :height="4"
-                />
-                <span class="tq-progress-text">
-                  {{ task.status === 'completed' ? '100%' : task.progress > 0 ? task.progress + '%' : '...' }}
-                </span>
-              </div>
-
-              <button
-                v-if="task.status === 'completed' || task.status === 'error' || task.status === 'canceled'"
-                class="tq-remove-btn"
-                :title="t('common.remove')"
-                @click.stop="removeTask(task.id)"
-              >
-                <UiIcon name="x-mark" :size="12" />
-              </button>
-            </div>
-            <div v-if="task.operationId" class="tq-task-stats">
-              <button
-                v-if="task.status === 'pending' || task.status === 'running'"
-                class="tq-clear-btn"
-                :disabled="
-                  operationStore.cancellingOperations.includes(task.operationId) ||
-                  operationStore.operations[task.operationId]?.canCancel === false ||
-                  operationStore.operations[task.operationId]?.cancellationRequested
-                "
-                @click="cancelOperation(task.operationId)"
-              >
-                {{
-                  operationStore.operations[task.operationId]?.cancellationRequested
-                    ? t('operations.cancelRequested')
-                    : t('common.cancel')
-                }}
-              </button>
-              <template v-if="operationStore.queryErrors[task.operationId]">
-                <span role="alert">{{ t('operations.queryFailed') }}</span>
-                <button class="tq-clear-btn" @click="operationStore.refresh(task.operationId)">
+              <div class="tq-task-actions">
+                <button
+                  v-if="task.operationId && (task.status === 'pending' || task.status === 'running')"
+                  class="tq-clear-btn"
+                  :disabled="
+                    operationStore.cancellingOperations.includes(task.operationId) ||
+                    operationStore.operations[task.operationId]?.canCancel === false ||
+                    operationStore.operations[task.operationId]?.cancellationRequested
+                  "
+                  @click="cancelOperation(task.operationId)"
+                >
+                  {{
+                    operationStore.operations[task.operationId]?.cancellationRequested
+                      ? t('operations.cancelRequested')
+                      : t('common.cancel')
+                  }}
+                </button>
+                <button
+                  v-if="task.operationId && operationStore.queryErrors[task.operationId]"
+                  class="tq-clear-btn"
+                  @click="operationStore.refresh(task.operationId)"
+                >
                   {{ t('operations.refresh') }}
                 </button>
-              </template>
+                <button
+                  v-if="task.status === 'completed' || task.status === 'error' || task.status === 'canceled'"
+                  class="tq-remove-btn"
+                  :title="t('common.remove')"
+                  :aria-label="t('common.remove')"
+                  @click="removeTask(task.id)"
+                >
+                  <UiIcon name="x-mark" :size="14" />
+                </button>
+              </div>
             </div>
-
-            <!-- 下载统计：文件数 / 字节进度 / 实时速度 -->
-            <div v-if="showTaskStats(task)" class="tq-task-stats">
+            <div class="tq-task-progress">
+              <UiProgress
+                :percentage="taskProgress(task)"
+                :processing="(task.status === 'pending' || task.status === 'running') && taskProgress(task) <= 0"
+                :height="4"
+              />
+              <span class="tq-progress-text">{{ taskProgress(task) > 0 ? taskProgress(task) + '%' : '...' }}</span>
+            </div>
+            <div
+              v-if="showTaskStats(task) || (task.operationId && operationStore.queryErrors[task.operationId])"
+              class="tq-task-stats"
+            >
               <span v-if="task.totalFiles != null" class="tq-stat tq-stat-files">
                 <UiIcon name="file-text" :size="12" />
                 {{ task.downloadedFiles ?? 0 }} / {{ task.totalFiles }} {{ t('taskQueue.files') }}
@@ -118,6 +123,12 @@
                 <UiIcon name="download" :size="12" />
                 {{ formatSpeed(task.speedBytesPerSecond) }}
               </span>
+              <span
+                v-if="task.operationId && operationStore.queryErrors[task.operationId]"
+                class="tq-query-error"
+                role="alert"
+                >{{ t('operations.queryFailed') }}</span
+              >
             </div>
 
             <Transition name="tq-expand">
@@ -249,6 +260,14 @@ const activeDownload = computed(() => {
   )
 })
 
+function normalizeProgress(value: number): number {
+  return Number.isFinite(value) ? Math.round(Math.min(100, Math.max(0, value))) : 0
+}
+
+function taskProgress(task: TaskItem): number {
+  return task.status === 'completed' ? 100 : normalizeProgress(task.progress)
+}
+
 function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
   const units = ['B', 'KB', 'MB', 'GB']
@@ -274,12 +293,12 @@ const livePct = computed(() => {
   const task = activeDownload.value
   if (!task) return 0
   if (task.totalFiles != null && task.totalFiles > 0) {
-    return Math.round(((task.downloadedFiles ?? 0) / task.totalFiles) * 100)
+    return normalizeProgress(((task.downloadedFiles ?? 0) / task.totalFiles) * 100)
   }
   if (task.progressType === 'bytes' && task.total) {
-    return Math.round(((task.done ?? 0) / task.total) * 100)
+    return normalizeProgress(((task.done ?? 0) / task.total) * 100)
   }
-  return task.progress
+  return taskProgress(task)
 })
 
 /** 下载中实时刷新经过时间与网速采样（从任务创建时刻起） */

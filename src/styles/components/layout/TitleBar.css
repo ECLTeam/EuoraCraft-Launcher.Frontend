@@ -173,22 +173,27 @@
 }
 
 .titlebar-btn-task {
-  position: relative;
+  width: auto;
+  min-width: 32px;
+  gap: 5px;
+  padding: 0 6px;
+  flex-shrink: 0;
 }
 
 .task-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  min-width: 14px;
-  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
   padding: 0 4px;
-  border-radius: 7px;
+  border-radius: 9px;
   background: var(--primary);
   color: var(--text-on-primary);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  line-height: 14px;
+  line-height: 1;
   text-align: center;
   pointer-events: none;
 }

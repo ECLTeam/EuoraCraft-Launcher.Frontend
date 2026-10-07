@@ -1930,11 +1930,9 @@
     "submitted": "Übermittelt. Das Ergebnis steht in der Aufgabenliste.",
     "retryOriginal": "Vorherigen Download wiederholen",
     "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe.",
-    "kinds": {
-      "java_install": "Java installieren",
-      "java_remove": "Java entfernen",
-      "java_cleanup": "Bereinigung wiederholen"
-    }
+    "java_install": "Java installieren",
+    "java_remove": "Java entfernen",
+    "java_cleanup": "Bereinigung wiederholen"
   },
   "more": {
     "nav": {

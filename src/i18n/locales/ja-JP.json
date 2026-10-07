@@ -1930,11 +1930,9 @@
     "submitted": "送信しました。タスク一覧で結果を確認できます。",
     "retryOriginal": "前回のダウンロードを再試行",
     "cancelRequested": "キャンセルを要求しました。停止を待っています。",
-    "kinds": {
-      "java_install": "Javaをインストール",
-      "java_remove": "Javaを削除",
-      "java_cleanup": "整理を再試行"
-    }
+    "java_install": "Javaをインストール",
+    "java_remove": "Javaを削除",
+    "java_cleanup": "整理を再試行"
   },
   "more": {
     "nav": {
