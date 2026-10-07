@@ -29,7 +29,7 @@ describe('aboutApi', () => {
       version_type: 'alpha',
       debug: true,
     })
-    expect(backend.command).toHaveBeenCalledWith('launcher_info')
+    expect(backend.command).toHaveBeenCalledWith('launcher_info', undefined, undefined)
   })
 
   it('非桌面模式不会调用 IPC', async () => {

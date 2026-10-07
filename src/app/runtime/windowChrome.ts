@@ -1,5 +1,5 @@
 import { readonly, ref } from 'vue'
-import backend from '@/api/client'
+import { launcherInfoQuery } from '@/app/data'
 import { desktopWindow } from './desktopWindow'
 
 export type ActiveWindowChrome = 'custom' | 'system_shadow' | 'native'
@@ -15,11 +15,11 @@ export async function detectActiveWindowChrome(): Promise<void> {
   } catch {
     // 宿主窗口 API 不可用时仍尝试读取启动快照。
   }
-  const result = backend.runtime.isAvailable ? await backend.command('launcher_info', undefined, 3000) : null
-  systemShadowSupported.value = result?.success === true && result.data?.system_shadow_supported === true
+  const info = await launcherInfoQuery().catch(() => null)
+  systemShadowSupported.value = info?.system_shadow_supported === true
   activeWindowChrome.value = isDecorated
     ? 'native'
-    : result?.success && result.data?.active_window_chrome === 'system_shadow'
+    : info?.active_window_chrome === 'system_shadow'
       ? 'system_shadow'
       : 'custom'
   document.getElementById('app')?.setAttribute('data-window-chrome', activeWindowChrome.value)

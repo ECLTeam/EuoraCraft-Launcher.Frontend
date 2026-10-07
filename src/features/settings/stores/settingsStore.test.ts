@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { queryClient } from '@/app/queryClient'
 import { javaApi } from '@/features/java/api/javaApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import { javaInventory, javaRuntime } from '@/test/javaFixtures'
@@ -94,6 +95,8 @@ describe('settingsStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    // 数据层按 queryKey 缓存，跨用例共享会掩盖真实请求，需逐例清空。
+    queryClient.clear()
     vi.mocked(javaApi.inventory).mockReset().mockResolvedValue(javaInventory())
     vi.mocked(settingsApi.load).mockResolvedValue({
       ui: {},

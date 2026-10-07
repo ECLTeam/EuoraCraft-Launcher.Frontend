@@ -7,6 +7,7 @@
 import { darkTheme, type GlobalTheme, type GlobalThemeOverrides } from 'naive-ui'
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, readonly, ref } from 'vue'
+import { configQuery, invalidateConfig } from '@/app/data'
 import { pinia } from '@/app/stores'
 import {
   CARD_OPACITY_DEFAULT,
@@ -1119,7 +1120,7 @@ export const useThemeStore = defineStore('theme', () => {
     saveTimer = setTimeout(async () => {
       if (!settingsApi.isAvailable) return
       try {
-        const ui = await settingsApi.getUi()
+        const ui = (await configQuery()).ui
         const savedBackground = ui.background ?? {}
         const savedImage = readImageBackground(savedBackground)
         const savedVideo = readVideoBackground(savedBackground)
@@ -1157,6 +1158,7 @@ export const useThemeStore = defineStore('theme', () => {
             },
           },
         })
+        await invalidateConfig()
       } catch (error) {
         // 防抖回调里的失败没有调用方接住，静默丢失会造成未处理 rejection 且配置未保存
         console.warn('[useTheme] 主题配置保存失败:', error)

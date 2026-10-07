@@ -83,8 +83,15 @@ export async function resolveLocalImageUrl(path: string): Promise<string | null>
 }
 
 export const settingsApi = {
-  isAvailable: backend.runtime.isAvailable,
-  isShowcase: backend.runtime.isShowcase,
+  // 运行模式可能在运行期切换（如展示模式），必须惰性读取而非导入时快照；
+  // 同时避免模块加载阶段就依赖 API 客户端，保证被 i18n 间接导入时安全。
+  get isAvailable(): boolean {
+    return backend.runtime.isAvailable
+  },
+
+  get isShowcase(): boolean {
+    return backend.runtime.isShowcase
+  },
 
   async load() {
     const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher', 'connector'])

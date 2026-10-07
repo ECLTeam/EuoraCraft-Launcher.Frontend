@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { accountsQuery, invalidateAccounts, setAccountsSnapshot } from '@/app/data'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import type {
@@ -74,10 +75,14 @@ export const useAccountStore = defineStore('accounts', () => {
     error.value = ''
     const request = (async () => {
       try {
+        let firstAttempt = true
         do {
           reloadRequested = false
           try {
-            const result = await accountsApi.list()
+            // 首轮非强制读取复用启动数据层缓存，其余情况（强制刷新与变更后重读）必须绕过缓存。
+            if (!firstAttempt || force) await invalidateAccounts()
+            firstAttempt = false
+            const result = await accountsQuery()
             // 账户变更发生在旧请求途中时，丢弃旧快照并合并执行一次后续刷新。
             if (reloadRequested) continue
             const loadedAccounts = deduplicateAccounts(result.accounts ?? [], result.current?.id)
@@ -113,6 +118,7 @@ export const useAccountStore = defineStore('accounts', () => {
   function applySnapshot(result: { accounts: MinecraftAccount[]; current: MinecraftAccount | null }): void {
     accountsRevision += 1
     if (loadPromise) reloadRequested = true
+    setAccountsSnapshot(result)
     const snapshot = deduplicateAccounts(result.accounts ?? [], result.current?.id)
     accounts.value = snapshot
     currentAccount.value = result.current

@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
 import backend from '@/api/client'
-import type { UiConfig } from '@/types/config'
+import { configQuery, invalidateConfig } from '@/app/data'
 import deDE from './locales/de-DE.json'
 import enUS from './locales/en-US.json'
 import jaJP from './locales/ja-JP.json'
@@ -45,14 +45,12 @@ export const i18n = createI18n({
 export async function loadLocaleFromBackend(): Promise<LocaleCode> {
   try {
     if (backend.runtime.isAvailable) {
-      const result = await backend.config.get<UiConfig>('ui')
-      if (result.success && result.data?.locale) {
-        const locale = result.data.locale as LocaleCode
-        if (supportedLocales.some((l) => l.code === locale)) {
-          i18n.global.locale.value = locale
-          document.documentElement.setAttribute('lang', locale)
-          return locale
-        }
+      const config = await configQuery()
+      const locale = config.ui.locale as LocaleCode | undefined
+      if (locale && supportedLocales.some((l) => l.code === locale)) {
+        i18n.global.locale.value = locale
+        document.documentElement.setAttribute('lang', locale)
+        return locale
       }
     }
   } catch (error) {
@@ -71,8 +69,9 @@ export async function setLocale(locale: LocaleCode): Promise<void> {
 
   try {
     if (backend.runtime.isAvailable) {
-      const ui = (await backend.config.get<UiConfig>('ui')).data || {}
-      await backend.config.set('ui', { ...ui, locale })
+      const config = await configQuery()
+      await backend.config.set('ui', { ...config.ui, locale })
+      await invalidateConfig()
     }
   } catch (error) {
     console.warn('[i18n] 保存语言配置到后端失败:', error)

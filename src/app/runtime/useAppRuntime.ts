@@ -1,6 +1,7 @@
 import { computed, readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
 import { onCommandResponse } from '@/api/client/commands'
+import { configQuery, launcherInfoQuery } from '@/app/data'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
 import { clearAvatarCache } from '@/composables/useAvatarRenderer'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
@@ -401,25 +402,25 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   }
 
   async function loadInitialConfig(): Promise<void> {
-    const result = await backend.config.getMany(['launcher', 'game', 'download', 'ui'])
-    if (result.success && result.data) {
-      await applyConfig(result.data as unknown as BackendEvents['config:init'])
-    } else if (!result.success) {
+    try {
+      const config = await configQuery()
+      await applyConfig(config as unknown as BackendEvents['config:init'])
+    } catch (error) {
       notifyLauncherPopup({
         id: 'launcher-config-load-failed',
         title: '读取启动器配置失败',
-        content: result.message || '读取启动器配置失败，部分功能可能无法正常使用。',
+        content: getErrorMessage(error) || '读取启动器配置失败，部分功能可能无法正常使用。',
         level: 'warning',
       })
     }
   }
 
   async function loadRuntimeLauncherInfo(): Promise<void> {
-    const result = await backend.command('launcher_info')
-    if (!result.success || !result.data) return
+    const info = await launcherInfoQuery()
+    if (!info) return
 
-    launcherVersion.value = result.data.version || ''
-    const versionType = result.data.version_type
+    launcherVersion.value = info.version || ''
+    const versionType = info.version_type
     launcherVersionType.value =
       versionType === 'alpha' || versionType === 'beta' || versionType === 'rc' || versionType === 'release'
         ? versionType
@@ -432,8 +433,10 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
 
     // 必须在 registerBackendEvents 之前检查展示模式，
     // 否则 notifyFrontendReady 后后端发送的 config:init 事件会先于 swap 被处理
-    const launcherResult = await backend.config.get('launcher')
-    if (launcherResult.success && (launcherResult.data as Record<string, unknown>)?.showcase === true) {
+    const launcherConfig = await configQuery()
+      .then((config) => config.launcher)
+      .catch(() => null)
+    if (launcherConfig?.showcase === true) {
       backend.swapToShowcase()
     }
 

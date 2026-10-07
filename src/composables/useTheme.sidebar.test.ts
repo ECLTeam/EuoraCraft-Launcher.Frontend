@@ -11,6 +11,14 @@ vi.mock('@/features/settings/api/settingsApi', async (importOriginal) => {
     settingsApi: {
       ...actual.settingsApi,
       isAvailable: true,
+      // 主题保存改为经统一数据层读取整份配置，测试需提供可解析的配置快照。
+      load: vi.fn().mockResolvedValue({
+        ui: {},
+        game: {},
+        download: {},
+        launcher: {},
+        connector: { mode: 'automatic', nodes: [] },
+      }),
       getUi: vi.fn().mockResolvedValue({}),
       saveUi: vi.fn().mockResolvedValue(undefined),
     },

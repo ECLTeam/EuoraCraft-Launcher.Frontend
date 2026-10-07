@@ -1,15 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { queryClient } from '@/app/queryClient'
 import { desktopWindow } from './desktopWindow'
 import { detectActiveWindowChrome, useActiveWindowChrome, useSystemShadowSupported } from './windowChrome'
 
 const command = vi.hoisted(() => vi.fn())
-vi.mock('@/api/client', () => ({ default: { runtime: { isAvailable: true }, command } }))
+vi.mock('@/api/client', () => ({ default: { runtime: { isAvailable: true, isDesktop: true }, command } }))
 
 describe('detectActiveWindowChrome', () => {
   afterEach(() => {
     document.querySelector('#chrome-test-mount')?.remove()
     vi.restoreAllMocks()
     command.mockReset()
+    // 数据层按 queryKey 缓存启动器信息，逐例清空才能验证每次实际请求。
+    queryClient.clear()
   })
 
   it('按当前窗口实际装饰状态选择布局', async () => {

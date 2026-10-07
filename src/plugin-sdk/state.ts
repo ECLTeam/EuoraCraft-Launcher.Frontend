@@ -2,6 +2,7 @@
 
 import { ref, readonly, watch, type DeepReadonly, type Ref } from 'vue'
 import backend from '@/api/client'
+import { accountsQuery, configQuery, launcherInfoQuery } from '@/app/data'
 import type { AccountListData } from '@/types/accounts'
 import type { LauncherConfig } from '@/types/config'
 import type { LauncherInfo } from '@/types/system'
@@ -72,13 +73,13 @@ const themeSlice = createStateSlice<ThemeState>(
     backgroundImage: '',
     backgroundOpacity: 1,
   },
-  (state) => {
-    return backend.config
-      .get<ThemeConfigPayload>('ui')
-      .then((res) => {
-        if (res.success && res.data) syncTheme(state, res.data)
-      })
-      .catch(() => {})
+  async (state) => {
+    try {
+      // 传入原始 UI 分区对象，保持插件可见的主题同步字段解析方式不变。
+      syncTheme(state, (await configQuery()).ui as unknown as ThemeConfigPayload)
+    } catch {
+      /* 读取失败时保留默认主题状态 */
+    }
   }
 )
 
@@ -88,15 +89,14 @@ const launcherSlice = createStateSlice<LauncherState>(
     versionType: 'release',
     devMode: false,
   },
-  (state) => {
-    return Promise.all([backend.config.get<LauncherConfig>('launcher'), backend.command('launcher_info')])
-      .then(([configResult, launcherInfoResult]) => {
-        if (configResult.success && configResult.data) syncLauncher(state, configResult.data)
-        if (launcherInfoResult.success && launcherInfoResult.data) {
-          syncLauncherRuntimeMetadata(state, launcherInfoResult.data)
-        }
-      })
-      .catch(() => {})
+  async (state) => {
+    try {
+      const [config, launcherInfo] = await Promise.all([configQuery(), launcherInfoQuery()])
+      syncLauncher(state, config.launcher)
+      if (launcherInfo) syncLauncherRuntimeMetadata(state, launcherInfo)
+    } catch {
+      /* 读取失败时保留默认启动器状态 */
+    }
   }
 )
 
@@ -105,13 +105,12 @@ const accountSlice = createStateSlice<AccountState>(
     current: null,
     list: [],
   },
-  (state) => {
-    return backend
-      .command('accounts_list')
-      .then((res) => {
-        if (res.success && res.data) syncAccounts(state, res.data as AccountListData)
-      })
-      .catch(() => {})
+  async (state) => {
+    try {
+      syncAccounts(state, await accountsQuery())
+    } catch {
+      /* 读取失败时保留空账户状态 */
+    }
   }
 )
 

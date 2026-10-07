@@ -1,6 +1,7 @@
 import { createTestingPinia } from '@pinia/testing'
 import { setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { queryClient } from '@/app/queryClient'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import { useAccountStore } from './accountStore'
 
@@ -56,6 +57,8 @@ describe('accountStore', () => {
   beforeEach(() => {
     setActivePinia(createTestingPinia({ stubActions: false }))
     vi.clearAllMocks()
+    // 数据层按 queryKey 缓存，跨用例共享会掩盖真实请求，需逐例清空。
+    queryClient.clear()
     vi.mocked(accountsApi.list).mockResolvedValue({ accounts: [account], current: account })
   })
 

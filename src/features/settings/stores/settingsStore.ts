@@ -1,5 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
+import { configQuery, invalidateConfig } from '@/app/data'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { toJavaInstallations, useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
@@ -107,7 +108,8 @@ export const useSettingsStore = defineStore('settings', () => {
     error.value = ''
     const request: Promise<void> = (async () => {
       try {
-        const config = await settingsApi.load()
+        if (force) await invalidateConfig()
+        const config = await configQuery()
         // 读取期间若已有本地写入完成，旧快照不能覆盖新状态。
         if (loadId !== latestLoadId) return
         if (revisionAtStart !== configRevision) {

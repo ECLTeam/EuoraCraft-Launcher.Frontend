@@ -1,4 +1,10 @@
 export const queryKeys = {
+  config: {
+    root: ['config'] as const,
+    all: ['config', 'all'] as const,
+  },
+  launcherInfo: ['launcher-info'] as const,
+  accounts: ['accounts'] as const,
   gameHome: {
     infoCard: ['game-home', 'info-card'] as const,
   },
