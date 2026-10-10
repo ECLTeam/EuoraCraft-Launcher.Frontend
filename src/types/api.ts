@@ -31,7 +31,7 @@ import type {
   WindowBounds,
   WindowMetadata,
 } from '@/types/config'
-import type { ConnectorMatchResult, ConnectorStatus, EasyTierStatus, NatTypeResult } from '@/types/connect'
+import type { ConnectorStatus, NatTypeResult } from '@/types/connect'
 import type {
   CrashAnalysisResult,
   CrashCandidateFile,
@@ -245,9 +245,6 @@ export interface CommandPayloadMap {
   connector_join: { code: string }
   connector_leave: undefined
   connector_kick: { machine_id: string }
-  connector_match_instances: undefined
-  connector_easytier_status: undefined
-  connector_easytier_download: undefined
   connector_detect_ports: undefined
   connector_search_mc_port: { ports: number[] }
   connector_nat_type: undefined
@@ -729,9 +726,6 @@ export const COMMAND_NAMES = {
   connector_join: 'connector_join',
   connector_leave: 'connector_leave',
   connector_kick: 'connector_kick',
-  connector_match_instances: 'connector_match_instances',
-  connector_easytier_status: 'connector_easytier_status',
-  connector_easytier_download: 'connector_easytier_download',
   connector_detect_ports: 'connector_detect_ports',
   connector_search_mc_port: 'connector_search_mc_port',
   connector_nat_type: 'connector_nat_type',
@@ -992,9 +986,6 @@ export interface CommandResponseMap {
   connector_join: { mcHost: string; mcPort: number }
   connector_leave: { status: string }
   connector_kick: { status: string }
-  connector_match_instances: ConnectorMatchResult
-  connector_easytier_status: EasyTierStatus
-  connector_easytier_download: EasyTierStatus
   connector_detect_ports: { ports: number[] }
   connector_search_mc_port: { port: number | null }
   connector_nat_type: NatTypeResult

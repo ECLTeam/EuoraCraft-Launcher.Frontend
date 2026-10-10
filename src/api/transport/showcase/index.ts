@@ -1,6 +1,6 @@
 import type { MinecraftAccount, WardrobeItem } from '@/types/accounts'
 import type { ApiResponse, BackendEvents } from '@/types/api'
-import type { ConnectorMatchResult, ConnectorStatus, EasyTierStatus } from '@/types/connect'
+import type { ConnectorStatus } from '@/types/connect'
 import type { CrashAnalysisResult, GameInstance, GameResource, VersionRunStats } from '@/types/instances'
 import type { PluginInfo } from '@/types/plugins'
 import { loadShowcaseConfig, persistShowcaseConfig } from './configPersistence'
@@ -81,13 +81,6 @@ export function createShowcaseTransport(): BackendTransport {
     nodes: [],
     error: null,
   }
-  let easyTierStatus: EasyTierStatus = {
-    installed: true,
-    status: 'installed',
-    progress: 100,
-    speed: 0,
-    error: null,
-  }
   let portScanCount = 0
   let connectorStartTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -128,23 +121,6 @@ export function createShowcaseTransport(): BackendTransport {
       error: null,
     }
   }
-
-  const connectorMatches = (): ConnectorMatchResult => ({
-    mods: [
-      { source: 'modrinth', id: 'fabric-api', hash: '67a873fd8fb045aa', name: 'Fabric API' },
-      { source: 'curseforge', id: 'sodium', hash: 'af340d09e96544bd', name: 'Sodium' },
-    ],
-    instances: showcaseScannedVersions.slice(0, 3).map((instance, index) => ({
-      gamePath: instance.path,
-      versionId: instance.versionId,
-      name: instance.displayName || instance.versionId,
-      gameVersion: instance.vanillaName,
-      loader: instance.primaryLoader || null,
-      loaderVersion: instance.loaderVersion ?? null,
-      matched: index === 0,
-      modCount: index === 0 ? 2 : index + 2,
-    })),
-  })
   const showcaseCrashReport: CrashAnalysisResult = {
     reportId: '5c0a5eca5e0a4eaf8f465ad0f42d89b1',
     versionId: 'Showcase-1.21.5-Fabric',
@@ -331,13 +307,6 @@ export function createShowcaseTransport(): BackendTransport {
       case 'connector_kick':
         connectorStatus.players = connectorStatus.players.filter((player) => player.machineId !== payload.machine_id)
         return success({ status: 'ok' })
-      case 'connector_match_instances':
-        return success(connectorMatches())
-      case 'connector_easytier_status':
-        return success(structuredClone(easyTierStatus))
-      case 'connector_easytier_download':
-        easyTierStatus = { installed: true, status: 'installed', progress: 100, speed: 0, error: null }
-        return success(structuredClone(easyTierStatus))
       case 'connector_detect_ports':
         portScanCount += 1
         return success({ ports: portScanCount >= 2 ? [25565] : [] })

@@ -2,7 +2,7 @@ import { defineStore, storeToRefs } from 'pinia'
 import { ref, watch } from 'vue'
 import { pinia } from '@/app/stores'
 import { connectorApi } from '@/features/connect/api/connectorApi'
-import type { ConnectorPlayer, ConnectorStatus, EasyTierStatus } from '@/types/connect'
+import type { ConnectorPlayer, ConnectorStatus } from '@/types/connect'
 import type { InstanceTargetPayload } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 
@@ -31,7 +31,6 @@ const defineConnectorSession = defineStore('connectorSession', () => {
   const availability = ref<'checking' | 'available' | 'unavailable'>('checking')
   const unavailableReason = ref('')
   const status = ref<ConnectorStatus>(idleStatus())
-  const easyTier = ref<EasyTierStatus | null>(null)
   const busy = ref(false)
   const scanning = ref(false)
   const detectedPort = ref<number | null>(null)
@@ -101,16 +100,6 @@ const defineConnectorSession = defineStore('connectorSession', () => {
     return tracked
   }
 
-  async function refreshEasyTier(silent = true): Promise<void> {
-    const revision = sessionRevision
-    try {
-      const next = await connectorApi.easyTierStatus()
-      if (!isDisposed && revision === sessionRevision) easyTier.value = next
-    } catch (error) {
-      if (!isDisposed && revision === sessionRevision && !silent) report(error)
-    }
-  }
-
   function initialize(force = false): Promise<void> {
     if (initialization) return initialization
     if (isInitialized && !force && !isDisposed) return Promise.resolve()
@@ -119,7 +108,7 @@ const defineConnectorSession = defineStore('connectorSession', () => {
     const revision = ++sessionRevision
     availability.value = 'checking'
     const promise = (async () => {
-      if (await refreshStatus(true)) await refreshEasyTier()
+      await refreshStatus(true)
     })()
     const tracked = promise.finally(() => {
       if (initialization === tracked) initialization = null
@@ -260,14 +249,12 @@ const defineConnectorSession = defineStore('connectorSession', () => {
     availability,
     unavailableReason,
     status,
-    easyTier,
     busy,
     scanning,
     scanPhase,
     detectedPort,
     initialize,
     refreshStatus,
-    refreshEasyTier,
     retryAvailability,
     hostPort,
     hostInstance,
@@ -289,7 +276,6 @@ export function useConnector(options: UseConnectorOptions = {}) {
     ...storeToRefs(session),
     initialize: session.initialize,
     refreshStatus: session.refreshStatus,
-    refreshEasyTier: session.refreshEasyTier,
     retryAvailability: session.retryAvailability,
     hostPort: session.hostPort,
     hostInstance: session.hostInstance,

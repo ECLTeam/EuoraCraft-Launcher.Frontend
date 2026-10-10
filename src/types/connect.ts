@@ -30,14 +30,6 @@ export interface ConnectorStatus {
   error: string | null
 }
 
-export interface EasyTierStatus {
-  installed: boolean
-  status: 'idle' | 'resolving' | 'downloading' | 'extracting' | 'installed' | 'failed'
-  progress: number
-  speed: number
-  error: string | null
-}
-
 export interface NatTypeResult {
   type: 'cone' | 'symmetric' | 'blocked' | 'unknown'
   detailType:
@@ -55,27 +47,4 @@ export interface NatTypeResult {
   publicPort: number | null
   publicPortEnd: number | null
   supportsIpv6: boolean
-}
-
-export interface ConnectorModEntry {
-  source: string
-  id: string
-  hash: string
-  name: string
-}
-
-export interface ConnectorMatchedInstance {
-  gamePath: string
-  versionId: string
-  name: string
-  gameVersion: string
-  loader: string | null
-  loaderVersion: string | null
-  matched: boolean
-  modCount: number
-}
-
-export interface ConnectorMatchResult {
-  mods: ConnectorModEntry[]
-  instances: ConnectorMatchedInstance[]
 }

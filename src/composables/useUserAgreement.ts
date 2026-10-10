@@ -60,14 +60,3 @@ export function useUserAgreement() {
     rejectUserAgreement,
   }
 }
-
-// 兼容旧调用方式，建议统一从 useUserAgreement() 解构
-export const acceptUserAgreement = async (): Promise<boolean> => {
-  const { acceptUserAgreement: accept } = useUserAgreement()
-  return accept()
-}
-
-export const rejectUserAgreement = async (): Promise<void> => {
-  const { rejectUserAgreement: reject } = useUserAgreement()
-  return reject()
-}

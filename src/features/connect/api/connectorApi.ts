@@ -1,7 +1,7 @@
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import { COMMAND_NAMES } from '@/types/api'
-import type { ConnectorMatchResult, ConnectorStatus, EasyTierStatus, NatTypeResult } from '@/types/connect'
+import type { ConnectorStatus, NatTypeResult } from '@/types/connect'
 import type { InstanceTargetPayload } from '@/types/instances'
 
 export const connectorApi = {
@@ -37,24 +37,6 @@ export const connectorApi = {
     return backend
       .command(COMMAND_NAMES.connector_kick, { machine_id: machineId })
       .then((response) => unwrapResponse(response, '移出联机玩家'))
-  },
-
-  matchInstances(): Promise<ConnectorMatchResult> {
-    return backend
-      .command(COMMAND_NAMES.connector_match_instances)
-      .then((response) => unwrapResponse(response, '匹配联机实例'))
-  },
-
-  easyTierStatus(): Promise<EasyTierStatus> {
-    return backend
-      .command(COMMAND_NAMES.connector_easytier_status, undefined, 5000)
-      .then((response) => unwrapResponse(response, '读取 EasyTier 状态'))
-  },
-
-  downloadEasyTier(): Promise<EasyTierStatus> {
-    return backend
-      .command(COMMAND_NAMES.connector_easytier_download)
-      .then((response) => unwrapResponse(response, '下载 EasyTier'))
   },
 
   detectPorts(): Promise<{ ports: number[] }> {

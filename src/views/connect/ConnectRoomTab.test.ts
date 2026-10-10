@@ -9,7 +9,7 @@ import { provideConnector, type ConnectorContext } from '@/features/connect/conn
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
-import type { ConnectorStatus, EasyTierStatus } from '@/types/connect'
+import type { ConnectorStatus } from '@/types/connect'
 import type { GameInstance, ScannedVersion } from '@/types/instances'
 import ConnectRoomTab from './ConnectRoomTab.vue'
 
@@ -84,9 +84,6 @@ function connectorState(status: ConnectorStatus, available = true) {
     availability: ref(available ? 'available' : 'unavailable'),
     unavailableReason: ref(available ? '' : 'Unknown backend command: connector_status'),
     status: ref(status),
-    easyTier: ref<EasyTierStatus | null>(
-      available ? { installed: true, status: 'installed', progress: 100, speed: 0, error: null } : null
-    ),
     busy: ref(false),
     scanning: ref(false),
     scanPhase: ref<'detecting' | 'searching'>('detecting'),

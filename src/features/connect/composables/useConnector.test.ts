@@ -32,6 +32,12 @@ const Harness = defineComponent({
 })
 
 describe('useConnector polling lifecycle', () => {
+  it('状态查询成功即可就绪，不请求固定的 EasyTier 安装状态', async () => {
+    const session = useConnector()
+    await session.initialize()
+    expect(session.availability.value).toBe('available')
+    expect(api.easyTierStatus).not.toHaveBeenCalled()
+  })
   beforeEach(() => {
     useConnector().dispose()
     vi.clearAllMocks()
@@ -43,13 +49,6 @@ describe('useConnector polling lifecycle', () => {
       mcPort: 25565,
       gameInfo: null,
       players: [],
-      error: null,
-    })
-    api.easyTierStatus.mockResolvedValue({
-      installed: true,
-      status: 'installed',
-      progress: 100,
-      speed: 0,
       error: null,
     })
   })

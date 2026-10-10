@@ -414,7 +414,6 @@ const connector = useConnectorContext()
 const {
   availability,
   status,
-  easyTier,
   busy,
   scanning,
   scanPhase,
@@ -471,7 +470,7 @@ async function loadRunningInstances(): Promise<void> {
   }
 }
 
-const serviceReady = computed(() => availability.value === 'available' && Boolean(easyTier.value?.installed))
+const serviceReady = computed(() => availability.value === 'available')
 const createRoomDisabled = computed(() => !serviceReady.value || busy.value)
 const serverAddress = computed(
   () => `${displayStatus.value.mcHost || '127.0.0.1'}:${displayStatus.value.mcPort || 25565}`
