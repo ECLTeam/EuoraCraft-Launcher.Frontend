@@ -1,6 +1,12 @@
 <template>
   <Teleport to="body">
-    <Transition name="fullscreen-modal" @afterEnter="onAfterEnter" @afterLeave="onAfterLeave">
+    <Transition
+      name="fullscreen-modal"
+      @beforeEnter="markDisplayed"
+      @beforeLeave="captureLeave"
+      @afterEnter="onAfterEnter"
+      @afterLeave="onAfterLeave"
+    >
       <div
         v-show="isVisible"
         class="fullscreen-modal"
@@ -27,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref, useId, watch } from 'vue'
+import { computed, onBeforeMount, onUnmounted, ref, useId, watch } from 'vue'
 import { pinia } from '@/app/stores'
 import { useLayoutStore } from '@/app/stores/layoutStore'
 import { useFullscreenModal } from '@/composables/useFullscreenModal'
@@ -105,7 +111,17 @@ const onAfterEnter = () => {
   emit('opened')
 }
 
+const markDisplayed = () => globalModalStack.markDisplayed(modalId)
+let finishCurrentLeave = () => {}
+const captureLeave = () => {
+  finishCurrentLeave = globalModalStack.captureLeave(modalId)
+}
+onBeforeMount(() => {
+  if (isVisible.value) markDisplayed()
+})
+
 const onAfterLeave = () => {
+  finishCurrentLeave()
   if (!props.visible) restoreFocus()
   emit('closed')
 }
@@ -161,7 +177,7 @@ watch(
 )
 
 onUnmounted(() => {
-  fullscreenModal.unregister(modalId)
+  globalModalStack.detach(modalId)
   releasePageLockIfUnused()
   restoreFocus()
 })

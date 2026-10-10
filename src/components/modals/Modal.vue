@@ -1,6 +1,12 @@
 <template>
   <Teleport to="body">
-    <Transition :name="transitionName" @afterEnter="onAfterEnter" @afterLeave="onAfterLeave">
+    <Transition
+      :name="transitionName"
+      @beforeEnter="markDisplayed"
+      @beforeLeave="captureLeave"
+      @afterEnter="onAfterEnter"
+      @afterLeave="onAfterLeave"
+    >
       <div
         v-show="isVisible"
         class="modal-overlay"
@@ -91,7 +97,7 @@
 
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
-import { ref, computed, watch, onUnmounted, useId } from 'vue'
+import { ref, computed, watch, onBeforeMount, onUnmounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { pinia } from '@/app/stores'
 import { useLayoutStore } from '@/app/stores/layoutStore'
@@ -192,7 +198,6 @@ const modalRef = ref<HTMLElement | null>(null)
 const titleId = `modal-title-${useId()}`
 const modalId = `modal-${useId()}`
 const inheritedParentId = useModalParent(modalId)
-let registeredParentId: string | null = null
 const isVisible = computed(() => props.visible && globalModalStack.displayedModalIds.value.includes(modalId))
 const isInteractive = computed(() => isVisible.value && globalModalStack.interactiveModalId.value === modalId)
 
@@ -246,9 +251,18 @@ const onAfterEnter = () => {
   emit('opened')
 }
 
+const markDisplayed = () => globalModalStack.markDisplayed(modalId)
+let finishCurrentLeave = () => {}
+const captureLeave = () => {
+  finishCurrentLeave = globalModalStack.captureLeave(modalId)
+}
+onBeforeMount(() => {
+  if (isVisible.value) markDisplayed()
+})
+
 const onAfterLeave = () => {
+  finishCurrentLeave()
   if (!props.visible) {
-    globalModalStack.unregister(modalId)
     restoreFocus()
   }
   emit('closed')
@@ -258,7 +272,7 @@ watch(
   [() => props.visible, () => props.priority, () => props.title],
   ([visible, priority, title]) => {
     if (visible) {
-      registeredParentId = globalModalStack.register({
+      globalModalStack.register({
         id: modalId,
         title,
         priority,
@@ -267,12 +281,7 @@ watch(
         onRequestClose: requestClose,
       })
     } else {
-      if (registeredParentId && globalModalStack.displayedModalIds.value.includes(modalId)) {
-        globalModalStack.beginClose(modalId)
-      } else {
-        globalModalStack.unregister(modalId)
-        restoreFocus()
-      }
+      globalModalStack.unregister(modalId)
     }
   },
   { immediate: true }
@@ -287,7 +296,7 @@ watch(
 )
 
 onUnmounted(() => {
-  globalModalStack.unregister(modalId)
+  globalModalStack.detach(modalId)
   restoreFocus()
 })
 

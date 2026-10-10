@@ -48,36 +48,79 @@ function normalizePriority(priority: number | undefined): number {
  */
 export function createGlobalModalStack() {
   const entries = ref<GlobalModalEntry[]>([])
+  const displayedEntries = ref<GlobalModalEntry[]>([])
+  const leavingEntries = ref<GlobalModalEntry[]>([])
+  const renderedIds = new Set<string>()
   let nextSequence = 0
 
-  const activeEntry = computed<GlobalModalEntry | null>(() => {
-    if (entries.value.length === 0) return null
+  const requestedEntry = computed<GlobalModalEntry | null>(() => {
     return (
-      [...entries.value].sort((left, right) => {
-        if (right.priority !== left.priority) return right.priority - left.priority
-        return right.sequence - left.sequence
-      })[0] ?? null
+      entries.value
+        .filter((entry) => !entry.closing)
+        .sort((left, right) => {
+          if (right.priority !== left.priority) return right.priority - left.priority
+          return right.sequence - left.sequence
+        })[0] ?? null
     )
   })
-  const activeModalId = computed(() => (activeEntry.value?.kind === 'modal' ? activeEntry.value.id : null))
-  const hasActiveOverlay = computed(() => activeEntry.value !== null)
-  const interactiveModalId = computed(() => (activeEntry.value?.closing ? null : activeModalId.value))
-  const displayedEntries = computed(() => {
+  const activeModalId = computed(() => displayedEntries.value.at(-1)?.id ?? null)
+  const hasActiveOverlay = computed(() => requestedEntry.value !== null || leavingEntries.value.length > 0)
+  const interactiveModalId = computed(() => (leavingEntries.value.length > 0 ? null : activeModalId.value))
+  const requestedChain = computed(() => {
     const chain: GlobalModalEntry[] = []
-    let entry = activeEntry.value
+    let entry = requestedEntry.value
     while (entry?.kind === 'modal' && !chain.includes(entry)) {
       chain.unshift(entry)
       // 全屏切换全屏仍只展示当前一页，不叠加更早的全屏祖先。
       if (entry.isFullscreen) break
-      entry = entries.value.find((candidate) => candidate.id === entry?.parentId) ?? null
+      entry = entries.value.find((candidate) => candidate.id === entry?.parentId && !candidate.closing) ?? null
     }
     return chain
   })
   const displayedModalIds = computed(() => displayedEntries.value.map((entry) => entry.id))
+  const overlayEntries = computed(() => [...displayedEntries.value, ...leavingEntries.value])
   const currentFullscreenId = computed(() => displayedEntries.value.find((entry) => entry.isFullscreen)?.id ?? null)
-  const isScrollLocked = computed(() => displayedEntries.value.some((entry) => entry.lockScroll))
-  const isFullscreenActive = computed(() => currentFullscreenId.value !== null)
-  const activeTitle = computed(() => displayedEntries.value.find((entry) => entry.isFullscreen)?.title ?? '')
+  const isScrollLocked = computed(() => overlayEntries.value.some((entry) => entry.lockScroll))
+  const isFullscreenActive = computed(() => overlayEntries.value.some((entry) => entry.isFullscreen))
+  const activeTitle = computed(() => overlayEntries.value.find((entry) => entry.isFullscreen)?.title ?? '')
+
+  /** 新展示链只在实际渲染过的离开项全部退场后生效，共同父级继续留在背景。 */
+  function reconcileDisplay(): void {
+    const target = requestedChain.value
+    const targetIds = new Set(target.map((entry) => entry.id))
+    const leavingIds = new Set(leavingEntries.value.map((entry) => entry.id))
+    for (const entry of displayedEntries.value) {
+      if (!targetIds.has(entry.id) && renderedIds.has(entry.id) && !leavingIds.has(entry.id)) {
+        leavingEntries.value.push(entry)
+      }
+    }
+    displayedEntries.value =
+      leavingEntries.value.length > 0
+        ? target.filter((entry) => displayedEntries.value.some((displayed) => displayed.id === entry.id))
+        : target
+  }
+
+  /** 组件首次挂载或开始入场时确认实际渲染，未显示的等待项无需退场。 */
+  function markDisplayed(id: string): void {
+    if (displayedEntries.value.some((entry) => entry.id === id)) renderedIds.add(id)
+  }
+
+  /** 由 Vue afterLeave 确认退场；仍请求显示的项保留，重复完成信号无副作用。 */
+  function finishLeave(id: string): void {
+    if (!leavingEntries.value.some((entry) => entry.id === id)) return
+    renderedIds.delete(id)
+    leavingEntries.value = leavingEntries.value.filter((entry) => entry.id !== id)
+    entries.value = entries.value.filter((entry) => entry.id !== id || !entry.closing)
+    reconcileDisplay()
+  }
+
+  /** 绑定本次退场记录，卸载或重新注册后的旧动画回调不能完成新的交接。 */
+  function captureLeave(id: string): () => void {
+    const leaving = leavingEntries.value.find((entry) => entry.id === id)
+    return () => {
+      if (leaving && leavingEntries.value.includes(leaving)) finishLeave(id)
+    }
+  }
 
   function resolveParent(registration: GlobalModalRegistration): string | null {
     const parentId =
@@ -110,6 +153,7 @@ export function createGlobalModalStack() {
       onRequestClose: registration.onRequestClose,
     }
     entries.value = [...entries.value.filter((candidate) => candidate.id !== entry.id), entry]
+    reconcileDisplay()
     return entry.parentId
   }
 
@@ -131,6 +175,7 @@ export function createGlobalModalStack() {
   function removeEntries(ids: Set<string>, notifyIds: Set<string>): void {
     const removed = entries.value.filter((entry) => ids.has(entry.id))
     entries.value = entries.value.filter((entry) => !ids.has(entry.id))
+    reconcileDisplay()
     removed
       .filter((entry) => notifyIds.has(entry.id))
       .sort((left, right) => right.sequence - left.sequence)
@@ -142,7 +187,7 @@ export function createGlobalModalStack() {
     removeEntries(removedIds, new Set([...removedIds].filter((candidate) => candidate !== id)))
   }
 
-  /** 退场期间保留关系与滚动锁，组件 afterLeave 再移除自身。 */
+  /** 请求关闭并暂停交互，实际退场记录保留滚动锁直到组件 afterLeave。 */
   function beginClose(id: string): void {
     const target = entries.value.find((entry) => entry.id === id)
     if (!target || target.closing) return
@@ -150,6 +195,15 @@ export function createGlobalModalStack() {
     childIds.delete(id)
     removeEntries(childIds, childIds)
     entries.value = entries.value.map((entry) => (entry.id === id ? { ...entry, closing: true } : entry))
+    reconcileDisplay()
+  }
+
+  /** 卸载的组件不会再报告 afterLeave，立即释放其自身及实际后代的渲染记录。 */
+  function detach(id: string): void {
+    const ids = descendants(new Set([id]))
+    for (const removedId of ids) renderedIds.delete(removedId)
+    leavingEntries.value = leavingEntries.value.filter((entry) => !ids.has(entry.id))
+    unregister(id)
   }
 
   function unregisterFullscreen(id: string): void {
@@ -172,12 +226,13 @@ export function createGlobalModalStack() {
       closing: false,
     }
     entries.value = [...entries.value.filter((candidate) => candidate.id !== id), entry]
+    reconcileDisplay()
   }
 
   function closeActive(): void {
-    const entry = activeEntry.value
+    const entry = entries.value.find((candidate) => candidate.id === interactiveModalId.value)
     if (!entry || entry.kind !== 'modal' || entry.closing) return
-    unregister(entry.id)
+    beginClose(entry.id)
     entry.onRequestClose?.()
   }
 
@@ -187,6 +242,7 @@ export function createGlobalModalStack() {
       .sort((left, right) => right.sequence - left.sequence)
       .map((entry) => entry.onRequestClose)
     entries.value = []
+    reconcileDisplay()
     closers.forEach((close) => close?.())
   }
 
@@ -208,6 +264,10 @@ export function createGlobalModalStack() {
     unregister,
     unregisterFullscreen,
     beginClose,
+    markDisplayed,
+    finishLeave,
+    captureLeave,
+    detach,
     addBlocker,
     closeActive,
     reset,

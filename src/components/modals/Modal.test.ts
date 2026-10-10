@@ -16,6 +16,38 @@ describe('Modal', () => {
     document.body.innerHTML = ''
   })
 
+  it('更新已显示时，client_id 警告等待更新退场后才入场，且不关闭更新请求', async () => {
+    const updateVisible = ref(true)
+    const warningVisible = ref(false)
+    const host = createHost({
+      setup: () => ({ updateVisible, warningVisible }),
+      template: `
+        <Modal v-model:visible="updateVisible" :priority="60" title="有可用更新">新版本</Modal>
+        <Modal v-model:visible="warningVisible" :priority="75" title="Microsoft client_id 未配置">配置缺失</Modal>
+      `,
+    })
+    const wrapper = mount(host, { attachTo: document.body, global: { plugins: [i18n], stubs: { transition: false } } })
+    try {
+      await nextTick()
+      const [update, warning] = [...document.querySelectorAll<HTMLElement>('.modal-overlay')]
+      warningVisible.value = true
+      await nextTick()
+      expect(warning!.style.display).toBe('none')
+      expect(update!.hasAttribute('inert')).toBe(true)
+      expect(updateVisible.value).toBe(true)
+      await vi.waitFor(() => expect(warning!.style.display).not.toBe('none'))
+      expect(update!.style.display).toBe('none')
+      warningVisible.value = false
+      await nextTick()
+      expect(update!.style.display).toBe('none')
+      await vi.waitFor(() => expect(update!.style.display).not.toBe('none'))
+      expect(warning!.style.display).toBe('none')
+      expect(updateVisible.value).toBe(true)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('全局栈会先展示 CurseForge 警告，关闭后才展示低优先级更新提示', async () => {
     const warningVisible = ref(true)
     const updateVisible = ref(true)
@@ -26,7 +58,7 @@ describe('Modal', () => {
         <Modal :visible="updateVisible" :priority="60" title="检测到更新">新版本可用</Modal>
       `,
     })
-    const wrapper = mount(host, { attachTo: document.body, global: { plugins: [i18n] } })
+    const wrapper = mount(host, { attachTo: document.body, global: { plugins: [i18n], stubs: { transition: false } } })
 
     const visibleContent = () =>
       Array.from(document.body.querySelectorAll<HTMLElement>('.modal-overlay'))
@@ -38,7 +70,8 @@ describe('Modal', () => {
     warningVisible.value = false
     await nextTick()
 
-    expect(visibleContent()).toContain('检测到更新新版本可用')
+    expect(visibleContent()).not.toContain('检测到更新新版本可用')
+    await vi.waitFor(() => expect(visibleContent()).toContain('检测到更新新版本可用'))
     wrapper.unmount()
   })
 

@@ -33,7 +33,7 @@ describe('FullscreenModal', () => {
         </FullscreenModal>
       `,
     })
-    const wrapper = mount(host, { attachTo: document.body })
+    const wrapper = mount(host, { attachTo: document.body, global: { stubs: { transition: false } } })
     await nextTick()
 
     taskVisible.value = true
@@ -41,7 +41,8 @@ describe('FullscreenModal', () => {
 
     expect(accountVisible.value).toBe(true)
     expect(taskVisible.value).toBe(true)
-    expect(useFullscreenModal().title.value).toBe('任务列表')
+    expect(globalModalStack.interactiveModalId.value).toBeNull()
+    await vi.waitFor(() => expect(useFullscreenModal().title.value).toBe('任务列表'))
 
     const visibleModals = Array.from(document.body.querySelectorAll<HTMLElement>('.fullscreen-modal')).filter(
       (modal) => modal.style.display !== 'none'
@@ -53,7 +54,7 @@ describe('FullscreenModal', () => {
     await nextTick()
 
     expect(accountVisible.value).toBe(true)
-    expect(useFullscreenModal().title.value).toBe('账户管理')
+    await vi.waitFor(() => expect(useFullscreenModal().title.value).toBe('账户管理'))
 
     wrapper.unmount()
   })
