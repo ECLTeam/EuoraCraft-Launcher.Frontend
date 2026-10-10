@@ -1,32 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import {
-  createLocalizedInfoCard,
-  localizeAnnouncements,
-  normalizeInfoCard,
-  resolveInitialInfoCardView,
-} from './infoCard'
+import { createLocalizedInfoCard, localizeAnnouncements, resolveInitialInfoCardView } from './infoCard'
 
 describe('game home info card', () => {
-  it('补齐后端缺失的信息卡字段', () => {
-    expect(normalizeInfoCard({ tips: ['提示'] })).toEqual({
-      mode: 'auto',
-      tips: ['提示'],
-      announcements: [],
-      welcome: null,
-      interval: 8000,
-    })
-  })
+  it('无远程公告时仍使用当前语言的本地小贴士和欢迎语', () => {
+    const chinese = createLocalizedInfoCard([], (key) => `zh:${key}`)
+    const english = createLocalizedInfoCard([], (key) => `en:${key}`, 'en-US')
 
-  it('保留后端提供的信息卡标题', () => {
-    expect(
-      normalizeInfoCard({
-        tip_title: '后端提示标题',
-        announcement_title: '后端公告标题',
-      })
-    ).toMatchObject({
-      tip_title: '后端提示标题',
-      announcement_title: '后端公告标题',
-    })
+    expect(english.announcements).toEqual([])
+    expect(english.tips).toHaveLength(4)
+    expect(chinese.tip_title).toBe('zh:game.didYouKnow')
+    expect(english.tip_title).toBe('en:game.didYouKnow')
+    expect(english.welcome?.content).toBe('en:game.welcomeContent')
   })
 
   it('将前端翻译与远程公告组合为首页卡片', () => {

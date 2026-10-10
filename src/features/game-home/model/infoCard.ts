@@ -2,14 +2,6 @@ import type { InfoCardAnnouncement, InfoCardData, InfoCardMode } from '@/types/s
 
 export type InfoCardView = 'tip' | 'announce'
 
-export const EMPTY_INFO_CARD: InfoCardData = {
-  mode: 'auto',
-  tips: [],
-  announcements: [],
-  welcome: null,
-  interval: 8000,
-}
-
 /**
  * 组合首页卡片的本地文案与后端公告。
  *
@@ -48,20 +40,6 @@ export function localizeAnnouncements(announcements: InfoCardAnnouncement[], loc
     const translation = announcement.locales?.[locale] ?? announcement.locales?.['zh-CN']
     return translation ? { ...announcement, ...translation } : announcement
   })
-}
-
-export function normalizeInfoCard(data?: Partial<InfoCardData> | null): InfoCardData {
-  const normalized: InfoCardData = {
-    mode: data?.mode ?? EMPTY_INFO_CARD.mode,
-    tips: data?.tips ?? [],
-    announcements: data?.announcements ?? [],
-    welcome: data?.welcome ?? null,
-    interval: data?.interval ?? EMPTY_INFO_CARD.interval,
-  }
-
-  if (data?.tip_title) normalized.tip_title = data.tip_title
-  if (data?.announcement_title) normalized.announcement_title = data.announcement_title
-  return normalized
 }
 
 export function resolveInitialInfoCardView(

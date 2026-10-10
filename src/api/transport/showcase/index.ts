@@ -12,7 +12,7 @@ import {
   showcaseAuthlibServers,
   showcaseConfig,
   showcaseGameOptions,
-  showcaseInfoCard,
+  showcaseAnnouncements,
   showcaseLoaderVersions,
   showcaseMods,
   showcasePlugins,
@@ -606,8 +606,8 @@ export function createShowcaseTransport(): BackendTransport {
         }
         return success()
       }
-      case 'info_card_get':
-        return success(structuredClone(showcaseInfoCard))
+      case 'launcher_announcements_get':
+        return success(structuredClone(showcaseAnnouncements))
       case 'plugin_list':
         return success(structuredClone(plugins))
       case 'plugin_info':

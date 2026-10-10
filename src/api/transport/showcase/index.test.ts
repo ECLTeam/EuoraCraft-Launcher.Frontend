@@ -1,10 +1,22 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
 import type { ApiResponse } from '@/types/api'
+import type { InfoCardAnnouncement } from '@/types/system'
 import { SHOWCASE_CONFIG_STORAGE_KEY } from './configPersistence'
 import { createShowcaseTransport } from '.'
 
 describe('ShowcaseTransport', () => {
+  it('公告命令仅返回列表，每次读取提供独立副本', async () => {
+    const transport = createShowcaseTransport()
+    const first = (await transport.invoke('launcher_announcements_get', {})) as ApiResponse<InfoCardAnnouncement[]>
+    expect(first.success).toBe(true)
+    expect(first.data).toHaveLength(1)
+    first.data![0]!.title = '调用方修改'
+
+    const second = (await transport.invoke('launcher_announcements_get', {})) as ApiResponse<InfoCardAnnouncement[]>
+    expect(second.data?.[0]?.title).toBe('前端重构展示模式')
+  })
+
   beforeEach(() => {
     localStorage.removeItem(SHOWCASE_CONFIG_STORAGE_KEY)
   })

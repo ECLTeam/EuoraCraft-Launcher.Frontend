@@ -84,7 +84,7 @@ import type {
   FileContent,
   FsEntry,
   ImageSaveAsPayload,
-  InfoCardData,
+  InfoCardAnnouncement,
   LauncherErrorEvent,
   LauncherInfo,
   LauncherPopupEvent,
@@ -675,7 +675,7 @@ export interface CommandPayloadMap {
   launcher_update_status: undefined
   launcher_update_download: undefined
   launcher_update_apply: undefined
-  info_card_get: undefined
+  launcher_announcements_get: undefined
   debug_reset_launcher_data: undefined
   debug_clear_plugins: undefined
   debug_devtools_open: undefined
@@ -931,7 +931,7 @@ export const COMMAND_NAMES = {
   launcher_update_status: 'launcher_update_status',
   launcher_update_download: 'launcher_update_download',
   launcher_update_apply: 'launcher_update_apply',
-  info_card_get: 'info_card_get',
+  launcher_announcements_get: 'launcher_announcements_get',
   debug_reset_launcher_data: 'debug_reset_launcher_data',
   debug_clear_plugins: 'debug_clear_plugins',
   debug_devtools_open: 'debug_devtools_open',
@@ -1222,7 +1222,7 @@ export interface CommandResponseMap {
   launcher_update_status: UpdateStatus
   launcher_update_download: UpdateDownloadResult
   launcher_update_apply: UpdateApplyResult
-  info_card_get: InfoCardData
+  launcher_announcements_get: InfoCardAnnouncement[]
   debug_reset_launcher_data: DebugMaintenanceResult
   debug_clear_plugins: DebugMaintenanceResult
   debug_devtools_open: { open: boolean }

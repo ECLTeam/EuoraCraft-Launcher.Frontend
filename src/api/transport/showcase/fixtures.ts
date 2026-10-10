@@ -12,7 +12,7 @@ import type {
 } from '@/types/instances'
 import type { ModSearchItem } from '@/types/mods'
 import type { PluginInfo } from '@/types/plugins'
-import type { InfoCardData } from '@/types/system'
+import type { InfoCardAnnouncement } from '@/types/system'
 
 export const showcaseConfig: Record<string, unknown> = {
   launcher: {
@@ -312,30 +312,15 @@ export const showcaseMods: ModSearchItem[] = [
   },
 ]
 
-export const showcaseInfoCard: InfoCardData = {
-  mode: 'rotate',
-  tip_title: '你知道吗',
-  announcement_title: '公告',
-  tips: [
-    '展示模式设置会保存在当前浏览器中，不会写入后端配置。',
-    '可以在实例页体验搜索、筛选和安装流程。',
-    '插件页提供启用、禁用和重载交互示例。',
-  ],
-  announcements: [
-    {
-      id: 'showcase-frontend-refactor',
-      title: '前端重构展示模式',
-      date: '2026-07-23',
-      content:
-        '当前界面由独立的 **Showcase Transport** 提供数据，可脱离 PyTauri 运行。\n\n- 支持 Markdown 公告\n- 点击公告卡片可以查看完整内容',
-    },
-  ],
-  welcome: {
-    title: '欢迎进入 ECL 展示模式',
-    content: '这里可以安全查看和测试启动器的主要前端功能。',
+export const showcaseAnnouncements: InfoCardAnnouncement[] = [
+  {
+    id: 'showcase-frontend-refactor',
+    title: '前端重构展示模式',
+    date: '2026-07-23',
+    content:
+      '当前界面由独立的 **Showcase Transport** 提供数据，可脱离 PyTauri 运行。\n\n- 支持 Markdown 公告\n- 点击公告卡片可以查看完整内容',
   },
-  interval: 8000,
-}
+]
 
 export function createShowcaseAccount(
   alias: string,

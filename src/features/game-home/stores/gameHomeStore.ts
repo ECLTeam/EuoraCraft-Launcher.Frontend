@@ -4,13 +4,12 @@ import { queryClient } from '@/app/queryClient'
 import { queryKeys } from '@/app/queryKeys'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { gameHomeApi } from '@/features/game-home/api/gameHomeApi'
-import { EMPTY_INFO_CARD, normalizeInfoCard } from '@/features/game-home/model/infoCard'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
-import type { InfoCardData } from '@/types/system'
+import type { InfoCardAnnouncement } from '@/types/system'
 
 export const useGameHomeStore = defineStore('game-home', () => {
   const settingsStore = useSettingsStore()
-  const infoCard = ref<InfoCardData>({ ...EMPTY_INFO_CARD })
+  const announcements = ref<InfoCardAnnouncement[]>([])
   const { status } = useAsyncState()
   const error = ref('')
 
@@ -20,14 +19,14 @@ export const useGameHomeStore = defineStore('game-home', () => {
     status.value = 'loading'
     error.value = ''
     try {
-      const [card] = await Promise.all([
+      const [items] = await Promise.all([
         queryClient.fetchQuery({
-          queryKey: queryKeys.gameHome.infoCard,
-          queryFn: () => gameHomeApi.getInfoCard(),
+          queryKey: queryKeys.gameHome.announcements,
+          queryFn: () => gameHomeApi.getAnnouncements(),
         }),
         settingsStore.load(),
       ])
-      infoCard.value = normalizeInfoCard(card)
+      announcements.value = items
       status.value = 'ready'
     } catch (reason) {
       status.value = 'error'
@@ -39,11 +38,11 @@ export const useGameHomeStore = defineStore('game-home', () => {
   function cancelLaunch(): Promise<void> {
     return gameHomeApi
       .cancelLaunch()
-      .finally(() => queryClient.invalidateQueries({ queryKey: queryKeys.gameHome.infoCard }))
+      .finally(() => queryClient.invalidateQueries({ queryKey: queryKeys.gameHome.announcements }))
   }
 
   return {
-    infoCard,
+    announcements,
     status,
     error,
     hasGamePath,

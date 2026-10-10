@@ -1,11 +1,11 @@
 import backend from '@/api/client'
-import type { InfoCardData } from '@/types/system'
+import type { InfoCardAnnouncement } from '@/types/system'
 
 export const gameHomeApi = {
-  async getInfoCard(): Promise<InfoCardData> {
-    const result = await backend.command('info_card_get')
+  async getAnnouncements(): Promise<InfoCardAnnouncement[]> {
+    const result = await backend.command('launcher_announcements_get')
     if (!result.success || !result.data) {
-      throw new Error(result.message || '读取首页信息卡失败')
+      throw new Error(result.message || '读取启动器公告失败')
     }
     return result.data
   },

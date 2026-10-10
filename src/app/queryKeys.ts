@@ -7,7 +7,7 @@ export const queryKeys = {
   accounts: ['accounts'] as const,
   pluginRegistry: ['plugin-registry'] as const,
   gameHome: {
-    infoCard: ['game-home', 'info-card'] as const,
+    announcements: ['game-home', 'announcements'] as const,
   },
   instanceInstall: {
     loaderVersions: (loader: string, gameVersion: string) =>
