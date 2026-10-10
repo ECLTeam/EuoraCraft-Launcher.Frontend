@@ -5,7 +5,7 @@
 
 export const URLS = {
   /** 项目文档 */
-  docs: 'https://docs.eclteam.top',
+  docs: 'https://docs.euora.cn',
 
   /** 用户协议 */
   userAgreement: 'https://euoracraft.zient.top/guide/user-agreement/',
