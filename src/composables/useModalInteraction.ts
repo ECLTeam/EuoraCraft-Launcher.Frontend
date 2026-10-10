@@ -1,13 +1,13 @@
-import { inject, nextTick, onUnmounted, provide, watch, type InjectionKey, type Ref } from 'vue'
+import { computed, inject, nextTick, onUnmounted, provide, ref, watch, type InjectionKey, type Ref } from 'vue'
 import { useGlobalModalStack } from './useGlobalModalStack'
 
-const modalParentKey: InjectionKey<string> = Symbol('modal-parent')
+export const modalParentKey: InjectionKey<Readonly<Ref<string | null>>> = Symbol('modal-parent')
 
 /** Teleport 不改变组件祖先；模板并列的窗口通过 parentId 显式关联。 */
-export function useModalParent(modalId: string): string | null {
+export function useModalParent(modalId: string): Readonly<Ref<string | null>> {
   const parentId = inject(modalParentKey, null)
-  provide(modalParentKey, modalId)
-  return parentId
+  provide(modalParentKey, ref(modalId))
+  return computed(() => parentId?.value ?? null)
 }
 
 interface ModalInteractionOptions {

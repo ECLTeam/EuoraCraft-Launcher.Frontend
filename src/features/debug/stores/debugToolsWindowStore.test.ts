@@ -1,14 +1,50 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { useDebugToolsWindowStore } from './debugToolsWindowStore'
 
 beforeEach(() => {
+  useGlobalModalStack().reset()
   setActivePinia(createPinia())
   Object.defineProperty(window, 'innerWidth', { configurable: true, value: 960 })
   Object.defineProperty(window, 'innerHeight', { configurable: true, value: 600 })
 })
 
 describe('调试工具会话窗口', () => {
+  it('进入全屏后收起工具，不把焦点还给后台页面', () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const store = useDebugToolsWindowStore()
+    store.open()
+    const active = document.createElement('button')
+    document.body.append(active)
+    active.focus()
+    useGlobalModalStack().register({ id: 'active-fullscreen', isFullscreen: true })
+    store.minimize()
+    expect(store.restoreFocus()).toBe(false)
+    expect(document.activeElement).toBe(active)
+    opener.remove()
+    active.remove()
+    useGlobalModalStack().reset()
+  })
+
+  it('展开面板收敛到当前页面范围，收起不会覆盖保存的拖动位置', () => {
+    const store = useDebugToolsWindowStore()
+    store.setBounds({ left: 80, top: 72, right: 940, bottom: 580 })
+    store.open()
+    expect(store.layout.x).toBe(80)
+    expect(store.layout.y).toBe(72)
+    store.move(160, 120)
+    const layout = { ...store.layout }
+    store.minimize()
+    store.open()
+    expect(store.layout).toEqual(layout)
+    store.setBounds({ left: 20, top: 64, right: 500, bottom: 340 })
+    expect(store.layout.x + store.layout.width).toBeLessThanOrEqual(500)
+    expect(store.layout.y + store.layout.height).toBeLessThanOrEqual(340)
+  })
+
   it('启用自动常驻浮条，重复启用不改变展开状态，禁用才能完全隐藏', () => {
     const store = useDebugToolsWindowStore()
     store.activate()

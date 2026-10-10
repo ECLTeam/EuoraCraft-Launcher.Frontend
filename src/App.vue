@@ -38,11 +38,13 @@
           :class="{
             'content-disabled': !isAgreementAccepted && !agreementLoading,
             'content-managed-scroll': route.path.startsWith('/settings') || route.path.startsWith('/more'),
+            'has-debug-tools': canUseDebugTools && debugWindow.mode !== 'closed',
           }"
           tabindex="-1"
         >
           <!-- 插件：内容区顶部插槽 -->
           <PluginSlotHost slotId="plugin-slot-content-top" class="plugin-slot-container" />
+          <DebugToolsHost />
           <div v-if="isAgreementAccepted" class="page-container">
             <RouterView v-slot="{ Component, route: currentRoute }">
               <Transition name="page" mode="out-in">
@@ -177,6 +179,7 @@ import { useFullscreenModal } from '@/composables/useFullscreenModal'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { useUserAgreement } from '@/composables/useUserAgreement'
+import DebugToolsHost from '@/features/debug/components/DebugToolsHost.vue'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { useModpackImportStore, extractPackPath } from '@/features/instances/stores/modpackImportStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'

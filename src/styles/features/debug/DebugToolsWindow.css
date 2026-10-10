@@ -1,5 +1,5 @@
 .debug-tools-window {
-  position: fixed;
+  position: absolute;
   z-index: 90;
   display: flex;
   flex-direction: column;

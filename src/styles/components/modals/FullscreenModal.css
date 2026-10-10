@@ -41,3 +41,7 @@
   border-top: 1px solid var(--divider);
   background: transparent;
 }
+
+.fullscreen-modal-wrapper > :deep(.debug-tools-host.has-debug-tools) {
+  margin: var(--page-gutter) var(--page-gutter) 0;
+}

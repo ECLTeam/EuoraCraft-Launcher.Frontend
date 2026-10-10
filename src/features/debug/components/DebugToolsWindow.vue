@@ -1,6 +1,7 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="host ?? 'body'">
     <section
+      v-show="!isBlocked"
       ref="windowRef"
       class="debug-tools-window"
       :class="{ 'is-minimized': store.mode === 'minimized' }"
@@ -47,25 +48,75 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useId, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { modalParentKey } from '@/composables/useModalInteraction'
+import { debugToolsHosts } from '@/features/debug/model/debugToolsHosts'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import DevToolsPanel from './DevToolsPanel.vue'
 
 const { t } = useI18n()
 const store = useDebugToolsWindowStore()
 const stack = useGlobalModalStack()
+provide(
+  modalParentKey,
+  computed(() => stack.currentFullscreenId.value)
+)
 const windowRef = ref<HTMLElement | null>(null)
 const titleId = `debug-tools-${useId()}`
-const isBlocked = stack.hasActiveOverlay
+const host = computed(() => {
+  if (!stack.hasActiveOverlay.value) return debugToolsHosts.get('page') ?? null
+  const id = stack.currentFullscreenId.value
+  return id && stack.interactiveModalId.value === id ? (debugToolsHosts.get(id) ?? null) : null
+})
+const isBlocked = computed(() => host.value === null)
+const hostPosition = ref({ left: 0, top: 0, width: 260 })
 const windowStyle = computed(() => ({
-  left: `${store.layout.x}px`,
-  top: `${store.layout.y}px`,
-  width: `${store.mode === 'minimized' ? Math.min(260, store.layout.width) : store.layout.width}px`,
+  left: `${store.mode === 'minimized' ? 0 : store.layout.x - hostPosition.value.left}px`,
+  top: `${store.mode === 'minimized' ? 0 : store.layout.y - hostPosition.value.top}px`,
+  width: `${store.mode === 'minimized' ? Math.min(260, hostPosition.value.width) : store.layout.width}px`,
   height: store.mode === 'minimized' ? '44px' : `${store.layout.height}px`,
 }))
+
+let resizeObserver: ResizeObserver | null = null
+let measureFrame = 0
+let disposed = false
+function measureHost(): void {
+  const element = host.value
+  if (!element) return
+  const rect = element.getBoundingClientRect()
+  if (!rect.width) return
+  hostPosition.value = { left: rect.left, top: rect.top, width: rect.width }
+  const parent = element.parentElement?.getBoundingClientRect()
+  store.setBounds({
+    left: rect.left,
+    top: rect.top,
+    right: rect.right,
+    bottom: (parent?.bottom ?? window.innerHeight) - 16,
+  })
+}
+function scheduleMeasure(): void {
+  if (disposed || measureFrame) return
+  measureFrame = requestAnimationFrame(() => {
+    measureFrame = 0
+    measureHost()
+  })
+}
+function observeHost(): void {
+  stopGesture()
+  resizeObserver?.disconnect()
+  void nextTick(() => {
+    if (disposed) return
+    measureHost()
+    if (host.value && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(scheduleMeasure)
+      resizeObserver.observe(host.value)
+    }
+  })
+}
+watch(host, observeHost, { flush: 'post' })
 
 let gesture: {
   kind: 'move' | 'resize'
@@ -95,7 +146,7 @@ function stopGesture(): void {
 function startGesture(event: PointerEvent, kind: 'move' | 'resize'): void {
   if (isBlocked.value || event.button !== 0 || store.mode === 'closed') return
   if (kind === 'resize' && store.mode !== 'floating') return
-  if (kind === 'move' && (event.target as Element).closest('button')) return
+  if (kind === 'move' && (store.mode !== 'floating' || (event.target as Element).closest('button'))) return
   stopGesture()
   event.preventDefault()
   const element = event.currentTarget as HTMLElement
@@ -140,7 +191,10 @@ function minimize(): void {
   stopGesture()
   store.minimize()
   void nextTick(() => {
-    if (!isBlocked.value) store.restoreFocus()
+    if (isBlocked.value || store.restoreFocus()) return
+    const modal = windowRef.value?.closest<HTMLElement>('[data-modal-id]')
+    if (modal) modal.querySelector<HTMLElement>('.fullscreen-modal-wrapper')?.focus()
+    else windowRef.value?.querySelector<HTMLButtonElement>('button')?.focus()
   })
 }
 
@@ -171,15 +225,21 @@ watch(
   }
 )
 onMounted(() => {
+  observeHost()
   store.constrain()
-  window.addEventListener('resize', store.constrain)
+  window.addEventListener('resize', scheduleMeasure)
+  window.addEventListener('scroll', scheduleMeasure, true)
   void nextTick(() => {
     if (!isBlocked.value && store.mode === 'floating') windowRef.value?.focus()
   })
 })
 onUnmounted(() => {
+  disposed = true
   stopGesture()
-  window.removeEventListener('resize', store.constrain)
+  resizeObserver?.disconnect()
+  cancelAnimationFrame(measureFrame)
+  window.removeEventListener('resize', scheduleMeasure)
+  window.removeEventListener('scroll', scheduleMeasure, true)
 })
 </script>
 

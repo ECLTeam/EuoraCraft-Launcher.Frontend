@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { h, ref } from 'vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { debugToolsHosts } from '@/features/debug/model/debugToolsHosts'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { i18n } from '@/i18n'
 import DebugToolsWindow from './DebugToolsWindow.vue'
@@ -10,6 +11,10 @@ import DebugToolsWindow from './DebugToolsWindow.vue'
 enableAutoUnmount(afterEach)
 beforeEach(() => {
   setActivePinia(createPinia())
+  const host = document.createElement('div')
+  host.id = 'debug-page-host'
+  document.body.append(host)
+  debugToolsHosts.set('page', host)
   useGlobalModalStack().reset()
   i18n.global.locale.value = 'zh-CN'
   useDebugToolsWindowStore().open()
@@ -19,6 +24,8 @@ beforeEach(() => {
 })
 afterEach(() => {
   useGlobalModalStack().reset()
+  debugToolsHosts.clear()
+  document.getElementById('debug-page-host')?.remove()
   vi.restoreAllMocks()
 })
 
@@ -75,6 +82,7 @@ it('模态确认期间暂停浮层交互，关闭确认后恢复', async () => {
   stack.register({ id: 'test-confirm', title: '确认操作' })
   await flushPromises()
   expect(windowElement().attributes('inert')).toBeDefined()
+  expect(windowElement().element.style.display).toBe('none')
   await windowElement().get('[aria-label="收起调试工具"]').trigger('click')
   expect(useDebugToolsWindowStore().mode).toBe('floating')
   stack.unregister('test-confirm')
@@ -86,6 +94,59 @@ it('模态确认期间暂停浮层交互，关闭确认后恢复', async () => {
   stack.unregister('native-dialog')
   await flushPromises()
   expect(windowElement().attributes('inert')).toBeUndefined()
+})
+
+it('全屏宿主内可交互，子确认期间隐藏，切换宿主保留内容', async () => {
+  render()
+  await windowElement().get('input').setValue('保留全屏调试状态')
+  const host = document.createElement('div')
+  document.body.append(host)
+  debugToolsHosts.set('details', host)
+  const stack = useGlobalModalStack()
+  stack.register({ id: 'details', isFullscreen: true })
+  await flushPromises()
+  expect(host.contains(windowElement().element)).toBe(true)
+  expect(windowElement().attributes('inert')).toBeUndefined()
+  stack.register({ id: 'confirm', parentId: 'details' })
+  await flushPromises()
+  expect(windowElement().element.style.display).toBe('none')
+  stack.unregister('confirm')
+  await flushPromises()
+  expect(host.contains(windowElement().element)).toBe(true)
+  expect((windowElement().get('input').element as HTMLInputElement).value).toBe('保留全屏调试状态')
+  stack.unregister('details')
+  await flushPromises()
+  expect(debugToolsHosts.get('page')?.contains(windowElement().element)).toBe(true)
+  host.remove()
+})
+
+it('从页面移入全屏的展开工具收起时，将焦点交给当前全屏区域', async () => {
+  const opener = document.createElement('button')
+  document.body.append(opener)
+  opener.focus()
+  const store = useDebugToolsWindowStore()
+  store.close()
+  store.open()
+  render()
+  const root = document.createElement('div')
+  root.dataset.modalId = 'focus-fullscreen'
+  const wrapper = document.createElement('div')
+  wrapper.className = 'fullscreen-modal-wrapper'
+  wrapper.tabIndex = -1
+  const host = document.createElement('div')
+  wrapper.append(host)
+  root.append(wrapper)
+  document.body.append(root)
+  debugToolsHosts.set('focus-fullscreen', host)
+  useGlobalModalStack().register({ id: 'focus-fullscreen', isFullscreen: true })
+  await flushPromises()
+  windowElement().element.focus()
+  await windowElement().trigger('keydown', { key: 'Escape' })
+  await flushPromises()
+  expect(store.mode).toBe('minimized')
+  expect(document.activeElement).toBe(wrapper)
+  root.remove()
+  opener.remove()
 })
 
 it('拖动遇到弹窗或卸载时停止，后续指针事件不再改变布局', async () => {
@@ -108,7 +169,7 @@ it('拖动遇到弹窗或卸载时停止，后续指针事件不再改变布局'
   expect(store.layout).toEqual(stopped)
 })
 
-it('自动常驻时不抢焦点，收起浮条仍能拖动且设置恢复会聚焦工具', async () => {
+it('自动常驻时不抢焦点，收起条固定左上角且设置恢复会聚焦工具', async () => {
   const store = useDebugToolsWindowStore()
   store.close()
   store.activate()
@@ -123,7 +184,9 @@ it('自动常驻时不抢焦点，收起浮条仍能拖动且设置恢复会聚�
   const before = { ...store.layout }
   pointer('pointermove', 220, 120)
   pointer('pointerup', 220, 120)
-  expect(store.layout.y).toBe(before.y + 20)
+  expect(store.layout).toEqual(before)
+  expect(windowElement().element.style.left).toBe('0px')
+  expect(windowElement().element.style.top).toBe('0px')
   store.open()
   await flushPromises()
   expect(document.activeElement).toBe(windowElement().element)

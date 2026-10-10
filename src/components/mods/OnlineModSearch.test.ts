@@ -112,12 +112,13 @@ describe('双平台搜索页面', () => {
     globalCache.clear()
     vi.resetAllMocks()
     mocks.popular.mockResolvedValue(result('first'))
-    mocks.search.mockResolvedValue(result('second', 2))
+    mocks.search.mockResolvedValue(result('second', 2, { hasMore: false, totalExact: true }))
     mocks.info.mockResolvedValue({ id: 'first', title: 'first', loaders: [], gameVersions: [] })
     mocks.versions.mockResolvedValue([])
   })
 
-  it('使用会话逐页查询，返回第一页重新获取合并入口且不显示虚构总页数', async () => {
+  it('预加载会话后缓存切页，返回第一页仍保留合并来源且不显示虚构总页数', async () => {
+    mocks.popular.mockResolvedValueOnce(result('first', 1, { items: [row('first', 2)] }))
     const { wrapper } = await mountSearch()
     expect(wrapper.get('.mods-pagination-info').text()).toBe('第 1 页')
     expect(button(wrapper, '下十页')).toBeUndefined()
@@ -126,27 +127,29 @@ describe('双平台搜索页面', () => {
     expect(mocks.search).toHaveBeenLastCalledWith(
       expect.objectContaining({ source: 'all', page: 2, session_id: 'session-1', offset: 0 })
     )
-    mocks.search.mockResolvedValueOnce(result('first', 1, { items: [row('first', 2)] }))
+    const requestCount = mocks.search.mock.calls.length
     await button(wrapper, i18n.global.t('mods.prevPage')).trigger('click')
     await flushPromises()
-    expect(mocks.search).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, session_id: 'session-1' }))
+    expect(mocks.search).toHaveBeenCalledTimes(requestCount)
     expect(wrapper.get('.mod-meta-source').text()).toBe('Modrinth · CurseForge')
     wrapper.unmount()
   })
 
   it('会话过期只重新建立一次并回到第一页', async () => {
+    mocks.search.mockRejectedValueOnce(Object.assign(new Error('expired'), { code: 'SEARCH_SESSION_EXPIRED' }))
     const { wrapper } = await mountSearch()
     mocks.search.mockRejectedValueOnce(Object.assign(new Error('expired'), { code: 'SEARCH_SESSION_EXPIRED' }))
-    mocks.search.mockResolvedValueOnce(result('fresh', 1, { sessionId: 'new' }))
+    mocks.popular.mockResolvedValueOnce(result('fresh', 1, { sessionId: 'new', hasMore: false }))
     await button(wrapper, i18n.global.t('mods.nextPage')).trigger('click')
     await flushPromises()
     expect(mocks.search).toHaveBeenCalledTimes(2)
-    expect(mocks.search).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1, session_id: '', refresh: true }))
+    expect(mocks.popular).toHaveBeenLastCalledWith('mod', null, '', true)
     expect(wrapper.get('.mod-row-name').text()).toBe('fresh')
     wrapper.unmount()
   })
 
   it('失败保留原列表、显示重试，并结束加载', async () => {
+    mocks.search.mockRejectedValueOnce(new Error('后台读取失败'))
     const { wrapper } = await mountSearch()
     mocks.search.mockRejectedValueOnce(new Error('双平台失败'))
     await button(wrapper, i18n.global.t('mods.nextPage')).trigger('click')
@@ -192,6 +195,7 @@ describe('双平台搜索页面', () => {
   it('尚有候选但当前无项目时提供继续读取入口', async () => {
     mocks.popular.mockResolvedValueOnce(result('', 1, { items: [], total: 0, pageCount: 0 }))
     const { wrapper } = await mountSearch()
+    mocks.search.mockResolvedValueOnce(result('first', 1, { hasMore: false }))
     await button(wrapper, '继续读取').trigger('click')
     await flushPromises()
     expect(mocks.search).toHaveBeenLastCalledWith(

@@ -528,7 +528,7 @@
 
 <script setup lang="ts">
 import { NAlert, NButton, NEmpty, NInput, NScrollbar, NSelect, NTag } from 'naive-ui'
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import backend from '@/api/client'
@@ -550,6 +550,7 @@ import {
   getResourceSourceConfig,
   type DownloadResourceType,
 } from '@/features/download/model/downloadQueries'
+import { SearchPageCache } from '@/features/download/model/searchPageCache'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { useModpackImportStore } from '@/features/instances/stores/modpackImportStore'
@@ -814,12 +815,8 @@ function stateCacheKey(): string {
   return `mod-search-state:v2:${props.resourceType}`
 }
 
-const pageCache = new Map<
-  string,
-  { results: ModSearchItem[]; total: number; sources: Record<string, ModSourceStatus> }
->()
-/** pageCache 最大条目数，防止长会话大量搜索/翻页导致内存持续增长 */
-const PAGE_CACHE_MAX_ENTRIES = 60
+let searchPages: SearchPageCache | null = null
+let searchPagesCriteria = ''
 // 请求序号守卫：旧请求晚到时不得覆盖新请求的搜索结果与详情数据
 let searchRequestId = 0
 let sourceRequestId = 0
@@ -1359,6 +1356,18 @@ watch(
   }
 )
 
+watch(
+  () => pageCacheKey(0),
+  (criteria) => {
+    if (!searchPages || searchPagesCriteria === criteria) return
+    searchPages.dispose()
+    searchPages = null
+    searchPagesCriteria = ''
+    searchRequestId++
+    loading.value = false
+  }
+)
+
 async function fetchPage(targetPage: number, force = false) {
   const inst = instance.value
   const loader = props.resourceType === 'mod' ? loaderFilter.value || inst?.primaryLoader || '' : ''
@@ -1374,57 +1383,54 @@ async function fetchPage(targetPage: number, force = false) {
     !sortFilter.value &&
     source === (props.resourceType === 'world' ? 'curseforge' : 'all') &&
     !activeSession
-  const key = pageCacheKey(targetPage)
-  if (!force && !isDefaultPopular && !aggregated) {
-    const cached = pageCache.get(key)
-    if (cached) {
-      // 命中缓存同样要作废在途请求，避免慢响应稍后覆盖缓存结果
-      searchRequestId += 1
-      results.value = cached.results
-      total.value = cached.total
-      sourceStatuses.value = cached.sources
-      page.value = targetPage
-      loading.value = false
-      searchError.value = ''
-      return
-    }
-  }
   const requestId = ++searchRequestId
   loading.value = true
   searchError.value = ''
-  try {
+  if (!searchPages || force || searchPagesCriteria !== criteriaKey) {
+    searchPages?.dispose()
+    searchPagesCriteria = criteriaKey
+    const resourceType = props.resourceType
+    const targetKey = target.selectedKey.value
     const request = {
       query: query.value.trim(),
       source,
       game_version: versionFilter.value || inst?.vanillaName || '',
       loader_type: loader,
-      resource_type: props.resourceType,
+      resource_type: resourceType,
       limit: PAGE_SIZE,
-      offset: aggregated ? 0 : (targetPage - 1) * PAGE_SIZE,
       sort: sortFilter.value,
-      session_id: activeSession,
-      page: aggregated && !activeSession ? 1 : targetPage,
-      refresh: force,
     }
-    let response: ModSearchResult
+    searchPages = new SearchPageCache(
+      ({ page: requestedPage, sessionId: requestedSession, refresh }) =>
+        isDefaultPopular && requestedPage === 1 && !requestedSession
+          ? getPopularPage(resourceType, inst, targetKey, refresh)
+          : modApi.search({
+              ...request,
+              offset: aggregated ? 0 : (requestedPage - 1) * PAGE_SIZE,
+              session_id: requestedSession,
+              page: aggregated && !requestedSession ? 1 : requestedPage,
+              refresh,
+            }),
+      { sessionId: activeSession, refresh: force, pageSize: PAGE_SIZE }
+    )
+  }
+  const pages = searchPages
+  try {
+    let response: ModSearchResult | undefined
     try {
-      response = isDefaultPopular
-        ? await getPopularPage(props.resourceType, inst, target.selectedKey.value, force)
-        : await modApi.search(request)
+      response = await pages.read(targetPage)
     } catch (error) {
       if (aggregated && error instanceof Error && 'code' in error && error.code === 'SEARCH_SESSION_EXPIRED') {
         if (requestId !== searchRequestId) return
-        pageCache.clear()
-        response = await modApi.search({ ...request, session_id: '', page: 1, refresh: true })
-      } else throw error
+        await fetchPage(1, true)
+        return
+      }
+      throw error
     }
-    if (requestId !== searchRequestId) return
-    const items = response.items ?? []
-    const totalCount = response.total ?? items.length
-    const sources = response.sources ?? {}
-    results.value = items
-    total.value = totalCount
-    sourceStatuses.value = sources
+    if (!response || requestId !== searchRequestId) return
+    results.value = response.items ?? []
+    total.value = response.total ?? results.value.length
+    sourceStatuses.value = response.sources ?? {}
     page.value = response.page ?? targetPage
     sessionId.value = response.sessionId ?? ''
     sessionKey.value = criteriaKey
@@ -1432,18 +1438,19 @@ async function fetchPage(targetPage: number, force = false) {
     totalExact.value = response.totalExact ?? true
     truncated.value = response.truncated ?? false
     knownPageCount.value = response.pageCount ?? 0
-    if (!aggregated && pageCache.size >= PAGE_CACHE_MAX_ENTRIES) {
-      const oldestKey = pageCache.keys().next().value
-      if (oldestKey !== undefined) pageCache.delete(oldestKey)
-    }
-    if (!aggregated) pageCache.set(key, { results: items, total: totalCount, sources })
     saveState()
+    void pages.prefetch(page.value, response)
   } catch (error) {
     if (requestId === searchRequestId) searchError.value = getErrorMessage(error)
   } finally {
     if (requestId === searchRequestId) loading.value = false
   }
 }
+
+onUnmounted(() => {
+  searchRequestId++
+  searchPages?.dispose()
+})
 
 async function handleSearch(force = false) {
   const trimmed = query.value.trim()

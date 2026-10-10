@@ -1,7 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, nextTick, provide, ref } from 'vue'
 import { globalModalStack } from '@/composables/useGlobalModalStack'
+import { modalParentKey } from '@/composables/useModalInteraction'
 import { i18n } from '@/i18n'
 import FullscreenModal from './FullscreenModal.vue'
 import Modal from './Modal.vue'
@@ -11,6 +12,29 @@ function createHost(options: { template: string; setup: () => object }) {
 }
 
 describe('Modal', () => {
+  it('可移动工具打开子窗口时读取当前宿主，保留全屏父级', async () => {
+    const parent = ref<string | null>(null)
+    const visible = ref(false)
+    const host = createHost({
+      setup() {
+        provide(modalParentKey, parent)
+        return { visible }
+      },
+      template: '<Modal v-model:visible="visible" title="工具确认">确认内容</Modal>',
+    })
+    const wrapper = mount(host, { attachTo: document.body, global: { plugins: [i18n] } })
+    try {
+      globalModalStack.register({ id: 'current-fullscreen', isFullscreen: true })
+      parent.value = 'current-fullscreen'
+      visible.value = true
+      await nextTick()
+      expect(globalModalStack.currentFullscreenId.value).toBe('current-fullscreen')
+      expect(globalModalStack.displayedModalIds.value).toHaveLength(2)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   afterEach(() => {
     globalModalStack.reset()
     document.body.innerHTML = ''

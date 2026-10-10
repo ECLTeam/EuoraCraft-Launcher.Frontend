@@ -23,6 +23,7 @@
           tabindex="-1"
           @click.stop
         >
+          <DebugToolsHost :hostId="modalId" />
           <main class="fullscreen-modal-body">
             <slot />
           </main>
@@ -39,6 +40,7 @@ import { useLayoutStore } from '@/app/stores/layoutStore'
 import { useFullscreenModal } from '@/composables/useFullscreenModal'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { useModalInteraction, useModalParent } from '@/composables/useModalInteraction'
+import DebugToolsHost from '@/features/debug/components/DebugToolsHost.vue'
 
 defineOptions({ name: 'FullscreenModal' })
 

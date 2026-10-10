@@ -277,7 +277,7 @@ watch(
         title,
         priority,
         lockScroll: props.lockScroll,
-        parentId: props.parentId === undefined ? inheritedParentId : props.parentId,
+        parentId: props.parentId === undefined ? inheritedParentId.value : props.parentId,
         onRequestClose: requestClose,
       })
     } else {
