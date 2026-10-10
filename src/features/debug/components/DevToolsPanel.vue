@@ -1,18 +1,6 @@
 <template>
   <div class="dev-page">
-    <div class="dev-header">
-      <div>
-        <h1>{{ t('dev.title') }}</h1>
-        <p class="desc">
-          {{ t('dev.desc') }}
-        </p>
-      </div>
-      <div class="dev-actions">
-        <UiButton variant="primary" size="sm" @click="$router.push('/')">
-          {{ t('common.close') }}
-        </UiButton>
-      </div>
-    </div>
+    <p class="desc">{{ t('dev.desc') }}</p>
 
     <!-- 调试工具 -->
     <section class="section">
@@ -641,4 +629,4 @@ async function confirmDangerAction(): Promise<void> {
 }
 </script>
 
-<style scoped src="@/styles/views/DevTools.css"></style>
+<style scoped src="@/styles/features/debug/DevToolsPanel.css"></style>

@@ -1,0 +1,89 @@
+.debug-tools-window {
+  position: fixed;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ecl-border-strong);
+  border-radius: var(--ecl-radius-dialog);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: var(--ecl-shadow-pop);
+  backdrop-filter: var(--ecl-surface-backdrop);
+  overflow: hidden;
+  outline: none;
+}
+
+.debug-window-header {
+  display: flex;
+  flex-shrink: 0;
+  height: 43px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 14px;
+  border-bottom: 1px solid var(--ecl-border);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.debug-window-header > :first-child {
+  color: var(--primary);
+}
+.debug-window-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.debug-window-actions {
+  display: flex;
+  gap: 4px;
+}
+.debug-window-actions button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--ecl-radius-control);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.debug-window-actions button:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+.debug-window-actions button:focus-visible,
+.debug-window-resizer:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+.debug-window-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  container-type: inline-size;
+  container-name: debug-tools;
+}
+.debug-window-resizer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 4px 0 0;
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.is-minimized .debug-window-header {
+  border-bottom: 0;
+}

@@ -2,10 +2,10 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { pinia } from '@/app/stores'
 import { i18n } from '@/i18n'
-import DevTools from './DevTools.vue'
+import DevTools from './DevToolsPanel.vue'
 
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ path: '/dev', name: 'dev', query: {}, params: {} }),
+  useRoute: () => ({ path: '/settings/about', name: 'settings-about', query: {}, params: {} }),
 }))
 
 const mocks = vi.hoisted(() => ({

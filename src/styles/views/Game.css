@@ -93,7 +93,7 @@
 
 .running-instances-trigger.inactive:hover {
   border-color: var(--control-border-hover);
-  background: var(--control-bg-hover);
+  background: var(--control-bg);
   box-shadow: none;
   color: var(--text-secondary);
 }

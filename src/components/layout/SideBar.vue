@@ -95,32 +95,6 @@
 
     <!-- 插件：侧边栏底部插槽 -->
     <PluginSlotHost slotId="plugin-slot-sidebar-bottom" class="plugin-slot-container sidebar-plugin-slot" />
-
-    <!-- 底部 -->
-    <div class="sidebar-footer">
-      <button
-        v-if="isDevMode"
-        class="sidebar-item"
-        :class="{ active: route.path === '/dev' }"
-        :title="isCollapsed ? t('sidebar.debug') : t('sidebar.debugTitle')"
-        @click.prevent="handleItemClick({ path: '/dev' })"
-      >
-        <span class="sidebar-item-icon">
-          <UiIcon name="bug" :size="20" />
-        </span>
-        <span class="sidebar-item-text">{{ t('sidebar.debug') }}</span>
-      </button>
-      <button
-        class="sidebar-item"
-        :title="isCollapsed ? t('sidebar.help') : undefined"
-        @click.prevent="handleHelpClick"
-      >
-        <span class="sidebar-item-icon">
-          <UiIcon name="file-text" :size="20" />
-        </span>
-        <span class="sidebar-item-text">{{ t('sidebar.help') }}</span>
-      </button>
-    </div>
   </aside>
 
   <!-- 移动端遮罩 -->
@@ -128,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed, inject, type Ref } from 'vue'
+import { ref, watch, nextTick, onMounted, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -137,12 +111,10 @@ import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { pluginRoutes } from '@/composables/usePluginBridge'
 import { useTheme } from '@/composables/useTheme'
 import { useTopNav } from '@/composables/useTopNav'
-import { URLS } from '@/config/urls'
 import { MENU_ITEMS } from '@/constants/menu'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { setSidebarState } from '@/plugin-sdk/state'
-import { openExternalUrl } from '@/utils/openExternal'
 
 defineOptions({ name: 'SideBar', inheritAttrs: false })
 
@@ -167,8 +139,6 @@ const agreementAccepted = inject(
   'agreementAccepted',
   computed(() => true)
 )
-const injectedDevMode = inject<Readonly<Ref<boolean>>>('devMode')
-const isDevMode = computed(() => injectedDevMode?.value ?? false)
 
 watch(
   isCollapsed,
@@ -267,11 +237,6 @@ const canNavigate = () => {
 const handleSubItemClick = (path: string) => {
   if (!canNavigate()) return
   router.push(path)
-}
-
-const handleHelpClick = () => {
-  if (!canNavigate()) return
-  openExternalUrl(URLS.docs)
 }
 
 /** 通过实际 DOM 测量获取目标菜单项位置并更新指示器 */

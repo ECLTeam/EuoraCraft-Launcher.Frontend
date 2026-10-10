@@ -56,12 +56,6 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/dev',
-    name: 'dev',
-    component: withErrorBoundary(() => import('@/views/DevTools.vue')),
-    meta: { devOnly: true },
-  },
-  {
     path: '/:pathMatch(.*)*',
     redirect: '/',
   },

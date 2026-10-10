@@ -116,6 +116,9 @@
       <SettingRow :label="t('settings.debugMode')" :description="t('settings.debugModeDesc')">
         <NSwitch :value="debugMode" @update:value="handleDebugModeChange" />
       </SettingRow>
+      <SettingRow v-if="debugMode" :label="t('dev.title')" :description="t('dev.desc')">
+        <NButton @click="debugWindow.open()">{{ t('dev.window.open') }}</NButton>
+      </SettingRow>
       <SettingRow :label="t('settings.debugLogLevel')" :description="t('settings.debugLogLevelDesc')">
         <NSelect
           class="setting-select"
@@ -133,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
+import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { storeToRefs } from 'pinia'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -141,6 +144,7 @@ import { useRoute } from 'vue-router'
 import ConnectorNodeSettings from '@/components/connect/ConnectorNodeSettings.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useDebugMode } from '@/composables/useDebugMode'
+import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
@@ -204,6 +208,7 @@ watch(() => route.query.section, locateConnectorSection, { immediate: true, flus
 onBeforeUnmount(cancelLocation)
 const { run } = useAsyncAction({ showSuccess: false, showError: true, errorMessage: t('common.error') })
 const settingsStore = useSettingsStore()
+const debugWindow = useDebugToolsWindowStore()
 const { download: downloadSettings } = storeToRefs(settingsStore)
 const { debugMode, setDebugMode, debugLogLevel, setDebugLogLevel } = useDebugMode()
 

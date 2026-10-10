@@ -737,6 +737,7 @@
     "about": "About",
     "aboutTab": {
       "actions": {
+        "docs": "Documentation",
         "issue": "Report Issue",
         "github": "GitHub",
         "website": "Website",
@@ -1535,6 +1536,12 @@
     "doNotShowAgain": "Don't show again"
   },
   "dev": {
+    "window": {
+      "open": "Open debug tools",
+      "minimize": "Minimize debug tools",
+      "restore": "Restore debug tools",
+      "resize": "Resize debug window"
+    },
     "title": "Component Debug Tools",
     "desc": "Click buttons below to test components",
     "modal": "Modal",

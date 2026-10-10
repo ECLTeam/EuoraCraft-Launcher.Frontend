@@ -1,28 +1,12 @@
 .dev-page {
-  padding: 22px;
+  padding: 16px;
+  overflow-wrap: anywhere;
   max-width: 1080px;
-}
-
-.dev-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 22px;
-}
-
-.dev-actions {
-  display: flex;
-  gap: 11px;
-}
-
-h1 {
-  margin: 0 0 7px 0;
-  font-size: 22px;
 }
 
 .desc {
   color: var(--text-secondary);
-  margin: 0;
+  margin: 0 0 18px;
 }
 
 .section {
@@ -114,7 +98,7 @@ h1 {
   width: 180px;
 }
 
-@media (max-width: 560px) {
+@container debug-tools (max-width: 560px) {
   .debug-setting-row {
     align-items: flex-start;
     flex-direction: column;
@@ -190,7 +174,7 @@ h1 {
   line-height: 1.5;
 }
 
-@media (max-width: 720px) {
+@container debug-tools (max-width: 560px) {
   .danger-action-card {
     align-items: flex-start;
     flex-direction: column;
@@ -285,7 +269,7 @@ h1 {
   white-space: nowrap;
 }
 
-@media (max-width: 560px) {
+@container debug-tools (max-width: 560px) {
   .tool-row {
     align-items: flex-start;
     flex-direction: column;

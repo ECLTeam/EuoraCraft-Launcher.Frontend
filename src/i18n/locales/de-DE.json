@@ -737,6 +737,7 @@
     "about": "Über",
     "aboutTab": {
       "actions": {
+        "docs": "Dokumentation",
         "issue": "Problem melden",
         "github": "GitHub",
         "website": "Webseite",
@@ -1549,6 +1550,12 @@
     "doNotShowAgain": "Nicht mehr anzeigen"
   },
   "dev": {
+    "window": {
+      "open": "Debug-Werkzeuge öffnen",
+      "minimize": "Debug-Werkzeuge minimieren",
+      "restore": "Debug-Werkzeuge wiederherstellen",
+      "resize": "Debug-Fenstergröße ändern"
+    },
     "title": "Komponenten-Debug-Werkzeuge",
     "desc": "Klicke auf die Schaltflächen unten, um die Komponenten zu testen",
     "modal": "Dialogkomponente",

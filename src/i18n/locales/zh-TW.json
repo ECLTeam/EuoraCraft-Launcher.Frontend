@@ -737,6 +737,7 @@
     "about": "關於",
     "aboutTab": {
       "actions": {
+        "docs": "文件",
         "issue": "提交問題",
         "github": "GitHub",
         "website": "網站",
@@ -1432,6 +1433,12 @@
     "doNotShowAgain": "不再顯示"
   },
   "dev": {
+    "window": {
+      "open": "開啟除錯工具",
+      "minimize": "收起除錯工具",
+      "restore": "展開除錯工具",
+      "resize": "調整除錯視窗大小"
+    },
     "title": "元件除錯工具",
     "desc": "點選下方按鈕測試各個元件",
     "modal": "彈窗元件",

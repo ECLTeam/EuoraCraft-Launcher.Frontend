@@ -68,6 +68,8 @@
           <!-- 启动器日志悬浮窗（调试界面开关控制，默认隐藏） -->
           <FloatingLauncherLog />
 
+          <DebugToolsWindow v-if="canUseDebugTools && debugWindow.mode !== 'closed'" />
+
           <!-- 退出确认弹窗 -->
           <ConfirmDialog
             v-model:visible="showQuitConfirmModal"
@@ -143,7 +145,17 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, onUnmounted, provide, readonly, ref } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  onMounted,
+  onUnmounted,
+  provide,
+  readonly,
+  ref,
+  watch,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { loadShowcaseTasks } from '@/api/transport/showcase/fixtures'
@@ -165,6 +177,7 @@ import { useFullscreenModal } from '@/composables/useFullscreenModal'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { useUserAgreement } from '@/composables/useUserAgreement'
+import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { useModpackImportStore, extractPackPath } from '@/features/instances/stores/modpackImportStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import UpdateResultModal from '@/features/settings/components/UpdateResultModal.vue'
@@ -188,6 +201,8 @@ const {
 const fullscreenModal = useFullscreenModal()
 const message = useLauncherMessage()
 const modpackImport = useModpackImportStore()
+const debugWindow = useDebugToolsWindowStore()
+const DebugToolsWindow = defineAsyncComponent(() => import('@/features/debug/components/DebugToolsWindow.vue'))
 const { lastResult, updateDialogVisible } = useUpdateCheck()
 
 function rememberCurrentUpdate(): void {
@@ -350,6 +365,16 @@ const {
   popupVisible,
   dismissActivePopup,
 } = appRuntime
+
+const canUseDebugTools = computed(() => appRuntime.isDevMode.value && isAgreementAccepted.value)
+watch(
+  canUseDebugTools,
+  (available) => {
+    if (available) debugWindow.activate()
+    else debugWindow.close()
+  },
+  { immediate: true }
+)
 
 provide('devMode', appRuntime.isDevMode)
 provide('launcherVersion', appRuntime.launcherVersion)

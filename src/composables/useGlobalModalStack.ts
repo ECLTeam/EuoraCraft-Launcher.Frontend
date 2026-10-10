@@ -60,6 +60,7 @@ export function createGlobalModalStack() {
     )
   })
   const activeModalId = computed(() => (activeEntry.value?.kind === 'modal' ? activeEntry.value.id : null))
+  const hasActiveOverlay = computed(() => activeEntry.value !== null)
   const interactiveModalId = computed(() => (activeEntry.value?.closing ? null : activeModalId.value))
   const displayedEntries = computed(() => {
     const chain: GlobalModalEntry[] = []
@@ -195,6 +196,7 @@ export function createGlobalModalStack() {
   }
 
   return {
+    hasActiveOverlay,
     activeModalId,
     interactiveModalId,
     displayedModalIds,

@@ -26,6 +26,10 @@
             </div>
           </div>
           <div class="launcher-summary__action">
+            <a class="about-btn" :href="URLS.docs" @click.prevent="openExternalUrl(URLS.docs)">
+              <UiIcon name="file-text" :size="14" />
+              <span>{{ t('settings.aboutTab.actions.docs') }}</span>
+            </a>
             <a class="about-btn" href="#" :class="{ 'is-loading': checking }" @click.prevent="checkForUpdates">
               <UiIcon name="refresh" :size="14" :class="{ spin: checking }" />
               <span>{{ t('settings.aboutTab.update.check') }}</span>

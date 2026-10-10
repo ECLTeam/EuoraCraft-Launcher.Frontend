@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import type backend from '@/api/client'
+import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
 import LauncherTab from './LauncherTab.vue'
@@ -69,6 +70,24 @@ describe('LauncherTab 联机设置定位', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
+  })
+
+  it('仅调试模式显示工具按钮，点击展开常驻面板且不切换路由', async () => {
+    const { wrapper, router } = await mountSettings()
+    expect(wrapper.findAll('button').some((button) => button.text() === '打开调试工具')).toBe(false)
+    useSettingsStore().launcher.debug = true
+    const debugWindow = useDebugToolsWindowStore()
+    debugWindow.activate()
+    await flushPromises()
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '打开调试工具')!
+      .trigger('click')
+    expect(debugWindow.mode).toBe('floating')
+    expect(router.currentRoute.value.path).toBe('/settings/launcher')
+    useSettingsStore().launcher.debug = false
+    await flushPromises()
+    expect(wrapper.findAll('button').some((button) => button.text() === '打开调试工具')).toBe(false)
   })
 
   it('挂载联机表单，普通进入和未知参数不滚动', async () => {

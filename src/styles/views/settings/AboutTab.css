@@ -1,4 +1,6 @@
 .about-pane {
+  container-type: inline-size;
+  container-name: about-page;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -183,6 +185,18 @@
   align-items: center;
   gap: 7px;
   flex-wrap: wrap;
+}
+
+@container about-page (max-width: 640px) {
+  .launcher-summary {
+    grid-template-columns: 36px minmax(0, 1fr);
+    row-gap: 12px;
+  }
+
+  .launcher-summary__action {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
 }
 
 .about-btn {

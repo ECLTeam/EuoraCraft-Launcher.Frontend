@@ -18,56 +18,26 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useTopNav } from '@/composables/useTopNav'
-import { registerTrayItem, unregisterTrayItem, useTrayItems } from '@/composables/useTrayItems'
-import { URLS } from '@/config/urls'
+import { useTrayItems } from '@/composables/useTrayItems'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
-import { openExternalUrl } from '@/utils/openExternal'
 
 defineOptions({ name: 'TitleBarTray' })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const { topNavEnabled } = useTopNav()
 const { visibleItems } = useTrayItems()
-const router = useRouter()
-
 const showMenu = ref(false)
 const trayWrapperRef = ref<HTMLElement | null>(null)
-
-function registerTrayItems(): void {
-  // label 在注册时求值，语言切换后需要重新注册才能跟随 locale 更新
-  registerTrayItem({
-    id: 'debug',
-    icon: 'bug',
-    label: t('sidebar.debug'),
-    action: () => router.push('/dev'),
-    priority: 0,
-  })
-  registerTrayItem({
-    id: 'docs',
-    icon: 'file-text',
-    label: t('sidebar.help'),
-    action: () => openExternalUrl(URLS.docs),
-    priority: 1,
-  })
-}
-
-// Register items immediately (avoid chicken-and-egg)
-registerTrayItems()
-
-watch(locale, registerTrayItems)
 
 onMounted(() => {
   document.addEventListener('click', onDocClick)
 })
 
 onUnmounted(() => {
-  unregisterTrayItem('debug')
-  unregisterTrayItem('docs')
   document.removeEventListener('click', onDocClick)
 })
 
