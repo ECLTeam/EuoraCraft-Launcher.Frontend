@@ -110,13 +110,7 @@ export interface ScannedVersion {
   hasFabric: boolean
   hasQuilt: boolean
   hasOptiFine?: boolean
-  isBroken: boolean
   installedComponents?: Array<{ name: string; version: string }>
-  health?: {
-    status: 'blocked' | 'warning' | 'healthy'
-    canLaunch: boolean
-    diagnostics: Array<{ code: string; versionId: string; severity: 'error' | 'warning' }>
-  }
   jsonPath: string
   sourceName?: string
   alias?: string

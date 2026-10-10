@@ -34,7 +34,6 @@ const versions: ScannedVersion[] = [
     hasNeoForge: false,
     hasFabric: true,
     hasQuilt: false,
-    isBroken: false,
     jsonPath: 'C:\\Games\\.minecraft\\versions\\fabric.json',
   },
   {
@@ -49,7 +48,6 @@ const versions: ScannedVersion[] = [
     hasNeoForge: false,
     hasFabric: false,
     hasQuilt: false,
-    isBroken: false,
     jsonPath: 'C:\\Games\\.minecraft\\versions\\1.20.1.json',
   },
 ]
@@ -202,12 +200,14 @@ describe('InstalledInstanceList', () => {
     expect(wrapper.getComponent(NDropdown).props()).toMatchObject({ x: 200, y: 140, show: true })
   })
 
-  it('损坏实例保留详情和菜单但无法快捷启动', () => {
+  it('旧健康标记不隐藏实例启动入口，详情和菜单保持可用', async () => {
     const items = structuredClone(versions)
-    items[0]!.isBroken = true
+    Object.assign(items[0]!, { isBroken: true })
     const wrapper = mountVersionList('', items)
     const row = wrapper.get('.table-row')
-    expect(row.find('.quick-launch-button').exists()).toBe(false)
+    expect(row.find('.quick-launch-button').exists()).toBe(true)
+    await row.get('.quick-launch-button').trigger('click')
+    expect(wrapper.emitted('launch')?.[0]).toEqual([items[0]])
     expect(row.find('[title="详情与设置"]').exists()).toBe(true)
     expect(row.find('[title="更多操作"]').exists()).toBe(true)
   })

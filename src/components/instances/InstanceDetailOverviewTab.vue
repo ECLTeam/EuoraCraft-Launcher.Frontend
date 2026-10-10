@@ -1,11 +1,6 @@
 <template>
   <div class="info-card">
     <div class="info-card__header">{{ t('versions.detail.versionInfo') }}</div>
-    <div v-if="version?.health?.diagnostics.length" role="status">
-      <p v-for="(issue, index) in version.health.diagnostics" :key="index">
-        {{ t(`instanceHealth.${issue.code}`, { id: issue.versionId }) }}
-      </p>
-    </div>
     <div class="info-grid">
       <div class="info-item">
         <span class="info-label">{{ t('versions.detail.versionId') }}</span>
@@ -51,7 +46,7 @@
   <div class="actions-card">
     <div class="actions-card__header">{{ t('versions.detail.quickActions') }}</div>
     <div class="overview-actions">
-      <NButton type="primary" secondary :disabled="version?.isBroken" @click="emit('launch')">
+      <NButton type="primary" secondary @click="emit('launch')">
         <template #icon><UiIcon name="play" :size="15" /></template>
         {{ t('versions.detail.launch') }}
       </NButton>
@@ -63,7 +58,7 @@
         <template #icon><UiIcon name="alert-triangle" :size="15" /></template>
         {{ t('versions.detail.analyzeCrash') }}
       </NButton>
-      <NButton v-if="!version?.isBroken" secondary @click="emit('action', 'repair')">
+      <NButton secondary @click="emit('action', 'repair')">
         <template #icon><UiIcon name="check" :size="15" /></template>
         校验文件
       </NButton>

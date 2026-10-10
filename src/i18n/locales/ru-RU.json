@@ -2148,16 +2148,6 @@
     "enable": "Включить установленный файл",
     "search": "Найти совместимые ресурсы"
   },
-  "instanceHealth": {
-    "blocked": "Запуск невозможен",
-    "missing_json": "Отсутствует JSON версии: {id}",
-    "invalid_json": "Некорректный JSON версии: {id}",
-    "missing_parent": "Отсутствует родительская версия: {id}",
-    "inheritance_cycle": "Цикл наследования: {id}",
-    "invalid_inheritance": "Некорректное наследование: {id}",
-    "missing_jar": "Отсутствует основной Jar: {id}",
-    "metadata_unknown": "Метаданные версии распознаны частично: {id}"
-  },
   "javaRecovery": {
     "missing": "Совместимая Java не найдена",
     "rescan": "Повторить поиск Java",

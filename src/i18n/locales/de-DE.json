@@ -2151,16 +2151,6 @@
     "enable": "Vorhandene Datei aktivieren",
     "search": "Kompatible Ressourcen suchen"
   },
-  "instanceHealth": {
-    "blocked": "Start nicht möglich",
-    "missing_json": "Versions-JSON fehlt: {id}",
-    "invalid_json": "Versions-JSON ungültig: {id}",
-    "missing_parent": "Übergeordnete Version fehlt: {id}",
-    "inheritance_cycle": "Zyklische Vererbung: {id}",
-    "invalid_inheritance": "Ungültige Vererbung: {id}",
-    "missing_jar": "Haupt-Jar fehlt: {id}",
-    "metadata_unknown": "Versionsmetadaten teilweise erkannt: {id}"
-  },
   "javaRecovery": {
     "missing": "Kompatibles Java fehlt",
     "rescan": "Java erneut suchen",

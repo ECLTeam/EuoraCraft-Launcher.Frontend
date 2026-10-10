@@ -62,7 +62,6 @@ const scannedVersion: ScannedVersion = {
   hasNeoForge: false,
   hasFabric: true,
   hasQuilt: false,
-  isBroken: false,
   jsonPath: 'C:\\Games\\.minecraft\\versions\\Fabric 1.21.5\\Fabric 1.21.5.json',
 }
 

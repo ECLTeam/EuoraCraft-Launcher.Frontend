@@ -2162,16 +2162,6 @@
     "enable": "Enable installed file",
     "search": "Search compatible resources"
   },
-  "instanceHealth": {
-    "blocked": "Cannot launch",
-    "missing_json": "Version JSON missing: {id}",
-    "invalid_json": "Invalid version JSON: {id}",
-    "missing_parent": "Inherited version missing: {id}",
-    "inheritance_cycle": "Inheritance cycle: {id}",
-    "invalid_inheritance": "Invalid inheritance: {id}",
-    "missing_jar": "Main Jar missing: {id}",
-    "metadata_unknown": "Version metadata is only partially recognized: {id}"
-  },
   "javaRecovery": {
     "missing": "Compatible Java not found",
     "rescan": "Rescan Java",

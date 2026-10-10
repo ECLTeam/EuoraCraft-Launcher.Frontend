@@ -29,7 +29,6 @@ const version: ScannedVersion = {
   hasNeoForge: false,
   hasFabric: true,
   hasQuilt: false,
-  isBroken: false,
   jsonPath: 'D:/Games/.minecraft/versions/1.21.1/1.21.1.json',
 }
 const target = { game_path: version.path, version_id: version.versionId }

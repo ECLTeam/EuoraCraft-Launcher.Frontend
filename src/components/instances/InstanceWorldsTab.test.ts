@@ -31,7 +31,6 @@ const version: ScannedVersion = {
   hasNeoForge: false,
   hasFabric: false,
   hasQuilt: false,
-  isBroken: false,
   jsonPath: 'D:/Games/.minecraft/versions/1.21.1/1.21.1.json',
 }
 const target = workspaceTarget(version)

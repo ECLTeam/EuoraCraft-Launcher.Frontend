@@ -2151,16 +2151,6 @@
     "enable": "既存ファイルを有効化",
     "search": "互換リソースを検索"
   },
-  "instanceHealth": {
-    "blocked": "起動できません",
-    "missing_json": "バージョンJSONがありません：{id}",
-    "invalid_json": "無効なバージョンJSON：{id}",
-    "missing_parent": "継承元がありません：{id}",
-    "inheritance_cycle": "継承が循環しています：{id}",
-    "invalid_inheritance": "無効な継承宣言：{id}",
-    "missing_jar": "メインJarがありません：{id}",
-    "metadata_unknown": "バージョンメタデータの解析が不完全：{id}"
-  },
   "javaRecovery": {
     "missing": "互換性のあるJavaが見つかりません",
     "rescan": "Javaを再スキャン",

@@ -8,6 +8,12 @@ const versions = [
 ] as ScannedVersion[]
 
 describe('下载资源默认安装目标', () => {
+  it('已扫描实例不因旧健康标记被排除', () => {
+    const version = Object.assign({ ...versions[0], versionId: '26.4-snapshot-3' } as ScannedVersion, {
+      isBroken: true,
+    })
+    expect(resolveInitialResourceTarget([version], undefined, version.versionId, version.path)).toBe(version)
+  })
   it('优先使用资源分类保存的目标，其次使用全局选中实例', () => {
     expect(
       resolveInitialResourceTarget(versions, { gamePath: 'E:/Game', versionId: '1.20.1' }, '1.21.1', 'D:/Game')

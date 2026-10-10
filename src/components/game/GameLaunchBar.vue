@@ -14,13 +14,9 @@
       <div
         v-if="versionsCount > 0"
         class="split-launch-btn"
-        :class="{ disabled: launching || !selectedVersion || !hasAccount || selectedIsBroken }"
+        :class="{ disabled: launching || !selectedVersion || !hasAccount }"
       >
-        <button
-          class="split-main"
-          :disabled="launching || !selectedVersion || !hasAccount || selectedIsBroken"
-          @click="emit('launch')"
-        >
+        <button class="split-main" :disabled="launching || !selectedVersion || !hasAccount" @click="emit('launch')">
           <span class="split-main-icon"><UiIcon name="play" :size="16" /></span>
           <span class="launch-main-content">
             <span class="launch-main-label">{{ launching ? t('game.launching') : t('game.launch') }}</span>
@@ -171,9 +167,6 @@ const instanceStore = useInstanceStore()
 const settingsStore = useSettingsStore()
 const isRecentInstancesOpen = ref(false)
 
-const selectedIsBroken = computed(
-  () => matchedInstance(props.selectedVersion, props.currentGamePath)?.isBroken === true
-)
 const selectedInstanceName = computed(() => {
   const matched = matchedInstance(props.selectedVersion, props.currentGamePath)
   return matched ? instanceDisplayName(matched) : props.selectedVersion

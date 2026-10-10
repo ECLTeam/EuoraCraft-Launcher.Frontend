@@ -62,16 +62,8 @@
               </button>
             </div>
           </div>
-          <p v-if="version.health?.diagnostics.length" class="card-description" role="status">
-            {{
-              version.health.diagnostics
-                .map((issue) => t(`instanceHealth.${issue.code}`, { id: issue.versionId }))
-                .join(' · ')
-            }}
-          </p>
           <p v-if="version.description" class="card-description">{{ version.description }}</p>
           <div class="card-badges">
-            <span v-if="version.isBroken" class="badge">{{ t('instanceHealth.blocked') }}</span>
             <span :class="['badge', 'badge-' + getLoaderClass(version.primaryLoader)]">{{
               loaderDisplayName(version.primaryLoader)
             }}</span>
@@ -96,7 +88,7 @@
             <button title="更多操作" @click.stop="showActionMenu($event, version)">
               <UiIcon name="more" :size="14" />
             </button>
-            <button v-if="!version.isBroken" class="play-button" title="启动" @click.stop="emit('launch', version)">
+            <button class="play-button" title="启动" @click.stop="emit('launch', version)">
               <UiIcon name="play" :size="14" />
             </button>
             <button class="delete-button" title="删除" @click.stop="emit('remove', version)">
@@ -131,11 +123,6 @@
                 </span>
               </div>
               <span class="instance-meta" :title="instanceMetadata(version)">{{ instanceMetadata(version) }}</span>
-              <span v-if="version.health?.diagnostics.length" role="status" class="instance-meta">{{
-                version.health.diagnostics
-                  .map((issue) => t(`instanceHealth.${issue.code}`, { id: issue.versionId }))
-                  .join(' · ')
-              }}</span>
             </div>
             <div
               class="instance-labels"
@@ -151,7 +138,6 @@
             </div>
             <div class="list-actions">
               <UiButton
-                v-if="!version.isBroken"
                 variant="outline"
                 size="sm"
                 class="quick-launch-button"

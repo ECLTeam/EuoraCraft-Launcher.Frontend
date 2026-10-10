@@ -27,10 +27,9 @@ export function resolveInitialResourceTarget(
   currentGamePath: string,
   autoSelect = true
 ): ScannedVersion | null {
-  const installable = versions.filter((version) => !version.isBroken)
   if (cached) {
     if (!cached.gamePath || !cached.versionId) return null
-    const hit = installable.find(
+    const hit = versions.find(
       (version) =>
         gamePathIdentity(version.path) === gamePathIdentity(cached.gamePath) && version.versionId === cached.versionId
     )
@@ -38,11 +37,11 @@ export function resolveInitialResourceTarget(
   }
   if (!autoSelect) return null
   return (
-    installable.find(
+    versions.find(
       (version) =>
         version.versionId === selectedVersion && gamePathIdentity(version.path) === gamePathIdentity(currentGamePath)
     ) ??
-    installable[0] ??
+    versions[0] ??
     null
   )
 }
@@ -54,9 +53,7 @@ export function useResourceInstallTarget(resourceType: InstallTargetKey, autoSel
   // 兼容性筛选条件：由详情弹窗按所选模组的版本/加载器设置，空时不过滤
   const compatibleFilter = ref<{ gameVersions: string[]; loaders: string[] } | null>(null)
 
-  const installableInstances = computed<ScannedVersion[]>(() =>
-    instanceStore.scannedVersions.filter((version) => !version.isBroken)
-  )
+  const installableInstances = computed<ScannedVersion[]>(() => instanceStore.scannedVersions)
 
   const compatibleInstances = computed<ScannedVersion[]>(() => {
     const filter = compatibleFilter.value

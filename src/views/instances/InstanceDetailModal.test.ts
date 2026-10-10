@@ -87,7 +87,6 @@ const version: ScannedVersion = {
   hasFabric: false,
   hasQuilt: false,
   hasOptiFine: false,
-  isBroken: false,
   jsonPath: 'D:/Games/.minecraft/versions/1.21.5/1.21.5.json',
 }
 

@@ -2034,16 +2034,6 @@
     "enable": "啟用現有檔案",
     "search": "搜尋相容資源"
   },
-  "instanceHealth": {
-    "blocked": "無法啟動",
-    "missing_json": "缺少版本 JSON：{id}",
-    "invalid_json": "版本 JSON 無效：{id}",
-    "missing_parent": "缺少繼承版本：{id}",
-    "inheritance_cycle": "繼承鏈循環：{id}",
-    "invalid_inheritance": "繼承宣告無效：{id}",
-    "missing_jar": "缺少主 Jar：{id}",
-    "metadata_unknown": "版本中繼資料暫無法完整識別：{id}"
-  },
   "javaRecovery": {
     "missing": "找不到相容 Java",
     "rescan": "重新掃描 Java",

@@ -45,7 +45,6 @@ function makeVersion(patch: Partial<ScannedVersion> = {}): ScannedVersion {
     hasNeoForge: false,
     hasFabric: false,
     hasQuilt: false,
-    isBroken: false,
     jsonPath: 'C:/Games/.minecraft/versions/1.21.1/1.21.1.json',
     ...patch,
   }
@@ -68,12 +67,21 @@ async function openRecentPopover(wrapper: ReturnType<typeof mountLaunchBar>) {
 }
 
 describe('GameLaunchBar', () => {
-  it('损坏实例保留选择但不能启动，Java 失败保留恢复入口', async () => {
+  it('旧扫描快照的健康标记不阻断实例启动', async () => {
+    const version = Object.assign(makeVersion({ versionId: '26.4-snapshot-3' }), { isBroken: true })
+    const wrapper = mountLaunchBar({ selectedVersion: '26.4-snapshot-3', currentGamePath: 'C:/Games/.minecraft' }, [
+      version,
+    ])
+    expect(wrapper.get('.split-main').attributes('disabled')).toBeUndefined()
+    await wrapper.get('.split-main').trigger('click')
+    expect(wrapper.emitted('launch')).toEqual([[]])
+  })
+  it('实例启动不受健康预判限制，Java 失败保留恢复入口', async () => {
     const wrapper = mountLaunchBar(
       { currentGamePath: 'C:/Games/.minecraft', javaRecoveryMessage: '未找到 Java 21', isRescanningJava: true },
-      [makeVersion({ isBroken: true })]
+      [makeVersion()]
     )
-    expect(wrapper.get('.split-main').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.split-main').attributes('disabled')).toBeUndefined()
     expect(wrapper.get('[role="alert"]').text()).toContain('未找到 Java 21')
     await wrapper
       .findAll('.java-recovery button')

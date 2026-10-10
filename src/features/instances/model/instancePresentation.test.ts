@@ -15,7 +15,6 @@ function version(id: string, patch: Partial<ScannedVersion> = {}): ScannedVersio
     hasNeoForge: false,
     hasFabric: false,
     hasQuilt: false,
-    isBroken: false,
     jsonPath: `C:/Games/.minecraft/versions/${id}/${id}.json`,
     ...patch,
   }

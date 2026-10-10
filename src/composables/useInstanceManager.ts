@@ -115,10 +115,6 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
         item.versionId === selectedVersion.value &&
         normalizeGamePath(item.path) === normalizeGamePath(currentGamePath.value)
     )
-    if (selected?.isBroken) {
-      message.error(t('instanceHealth.blocked'))
-      return
-    }
     if (!selectedVersion.value) {
       showStatus(t('game.status.selectVersionFirst'), 'error')
       return

@@ -2057,16 +2057,6 @@
     "enable": "启用已有文件",
     "search": "搜索兼容资源"
   },
-  "instanceHealth": {
-    "blocked": "无法启动",
-    "missing_json": "缺少版本 JSON：{id}",
-    "invalid_json": "版本 JSON 无效：{id}",
-    "missing_parent": "缺少继承版本：{id}",
-    "inheritance_cycle": "继承链循环：{id}",
-    "invalid_inheritance": "继承声明无效：{id}",
-    "missing_jar": "缺少主 Jar：{id}",
-    "metadata_unknown": "版本元数据暂无法完整识别：{id}"
-  },
   "javaRecovery": {
     "missing": "未找到兼容 Java",
     "rescan": "重新扫描 Java",
