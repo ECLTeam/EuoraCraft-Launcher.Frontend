@@ -1,20 +1,34 @@
 <template>
   <section class="java-manager">
     <header class="java-manager-toolbar">
-      <div class="java-manager-tabs">
-        <NButton :type="view === 'installed' ? 'primary' : 'default'" secondary @click="view = 'installed'">{{
-          t('javaManager.installed')
-        }}</NButton>
-        <NButton :type="view === 'download' ? 'primary' : 'default'" secondary @click="view = 'download'">{{
-          t('javaManager.download')
-        }}</NButton>
+      <div class="java-manager-tabs" role="group" :aria-label="t('javaManager.title')">
+        <button
+          type="button"
+          :aria-label="t('javaManager.installed')"
+          :aria-pressed="view === 'installed'"
+          @click="view = 'installed'"
+        >
+          <UiIcon name="cube" :size="15" />{{ t('javaManager.installed') }}
+        </button>
+        <button
+          type="button"
+          :aria-label="t('javaManager.download')"
+          :aria-pressed="view === 'download'"
+          @click="view = 'download'"
+        >
+          <UiIcon name="download" :size="15" />{{ t('javaManager.download') }}
+        </button>
       </div>
       <div v-if="view === 'installed'" class="java-manager-actions">
-        <NButton size="small" :loading="store.isLoading" @click="load(true)">{{ t('javaManager.rescan') }}</NButton>
-        <NButton size="small" :loading="isCheckingUpdates" @click="checkUpdates">{{
+        <UiButton variant="ghost" icon="refresh" :loading="store.isLoading" @click="load(true)">{{
+          t('javaManager.rescan')
+        }}</UiButton>
+        <UiButton variant="ghost" icon="download" :loading="isCheckingUpdates" @click="checkUpdates">{{
           t('javaManager.checkUpdates')
-        }}</NButton>
-        <NButton size="small" :loading="isRegistering" @click="register">{{ t('javaManager.add') }}</NButton>
+        }}</UiButton>
+        <UiButton variant="secondary" icon="plus" :loading="isRegistering" @click="register">{{
+          t('javaManager.add')
+        }}</UiButton>
       </div>
     </header>
 
@@ -23,15 +37,35 @@
       <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
       <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
         >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
-        <NButton size="small" :disabled="isActing" @click="retryCleanup">{{
+        <UiButton variant="secondary" size="sm" :disabled="isActing" @click="retryCleanup">{{
           t('javaManager.retryCleanup')
-        }}</NButton></NAlert
+        }}</UiButton></NAlert
       >
 
       <template v-if="view === 'installed'">
-        <NInput v-model:value="query" clearable :placeholder="t('javaManager.search')" />
+        <NInput
+          v-model:value="query"
+          clearable
+          size="small"
+          :placeholder="t('javaManager.search')"
+          :aria-label="t('javaManager.search')"
+        >
+          <template #prefix><UiIcon name="search" :size="15" /></template>
+        </NInput>
         <UiLoading v-if="store.isLoading && !store.runtimes.length" :label="t('javaManager.scanning')" />
-        <NEmpty v-else-if="!filteredRuntimes.length" :description="t('javaManager.empty')" />
+        <UiEmptyState
+          v-else-if="!filteredRuntimes.length"
+          class="java-manager-empty"
+          :icon="query.trim() ? 'search' : 'cube'"
+          :title="t(query.trim() ? 'javaManager.noMatch' : 'javaManager.empty')"
+        >
+          <UiButton v-if="query.trim()" variant="secondary" @click="query = ''">{{
+            t('javaManager.clearSearch')
+          }}</UiButton>
+          <UiButton v-else variant="secondary" icon="download" @click="view = 'download'">{{
+            t('javaManager.downloadJava')
+          }}</UiButton>
+        </UiEmptyState>
         <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
           <div class="java-runtime-copy">
             <strong
@@ -57,42 +91,47 @@
             </div>
           </div>
           <div class="java-runtime-actions">
-            <NButton size="small" :disabled="!canUse(runtime) || isActing" @click="useRuntime(runtime)">{{
-              t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')
-            }}</NButton>
-            <NButton size="small" :disabled="isActing" @click="toggleRuntime(runtime)">{{
+            <UiButton
+              variant="secondary"
+              size="sm"
+              :disabled="!canUse(runtime) || isActing"
+              @click="useRuntime(runtime)"
+              >{{ t(selectable ? 'javaManager.use' : 'javaManager.useGlobal') }}</UiButton
+            >
+            <UiButton variant="ghost" size="sm" :disabled="isActing" @click="toggleRuntime(runtime)">{{
               t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')
-            }}</NButton>
-            <NButton
+            }}</UiButton>
+            <UiButton
               v-if="runtime.validationStatus !== 'valid'"
-              size="small"
+              variant="secondary"
+              size="sm"
               :disabled="isRegistering"
               @click="register"
-              >{{ t('javaManager.relocate') }}</NButton
+              >{{ t('javaManager.relocate') }}</UiButton
             >
-            <NButton
+            <UiButton
               v-if="updates[runtime.runtimeId]"
-              size="small"
+              variant="secondary"
+              size="sm"
               :disabled="isActing"
               @click="prepareInstall(updates[runtime.runtimeId]!)"
-              >{{ t('javaManager.update') }}</NButton
+              >{{ t('javaManager.update') }}</UiButton
             >
-            <NButton
-              size="small"
-              quaternary
+            <UiButton
+              size="sm"
+              variant="ghost"
+              icon="folder"
               :aria-label="t('javaManager.openFolder')"
               :title="t('javaManager.openFolder')"
               @click="openFolder(runtime)"
-              ><template #icon><UiIcon name="folder" :size="16" /></template
-            ></NButton>
-            <NButton
+            />
+            <UiButton
               v-if="runtime.origin !== 'system'"
-              size="small"
-              type="error"
-              secondary
+              size="sm"
+              variant="danger"
               :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
               @click="confirmRemoval(runtime)"
-              >{{ t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget') }}</NButton
+              >{{ t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget') }}</UiButton
             >
           </div>
         </article>
@@ -102,32 +141,41 @@
         <div class="java-catalog-controls">
           <NSelect
             v-model:value="selectedMajor"
+            size="small"
             :options="majorOptions"
             :placeholder="t('javaManager.version')"
             :aria-label="t('javaManager.version')"
           />
           <NSelect
             v-model:value="runtimeKind"
+            size="small"
             :options="[
               { label: 'JRE', value: 'JRE' },
               { label: 'JDK', value: 'JDK' },
             ]"
             :aria-label="t('javaManager.packageType')"
           />
-          <NButton :loading="isLoadingCatalog" @click="loadCatalog(true)">{{ t('common.refresh') }}</NButton>
+          <UiButton variant="ghost" icon="refresh" :loading="isLoadingCatalog" @click="loadCatalog(true)">{{
+            t('common.refresh')
+          }}</UiButton>
         </div>
         <small>{{ t('javaManager.catalogHint') }}</small>
         <span v-if="catalog">{{ catalog.platform }} · {{ catalog.architecture }} · Eclipse Temurin</span>
         <UiLoading v-if="isLoadingCatalog" :label="t('javaManager.loadingCatalog')" />
-        <NEmpty v-else-if="catalog && !catalog.packages.length" :description="t('javaManager.noPackage')" />
+        <UiEmptyState
+          v-else-if="catalog && !catalog.packages.length"
+          class="java-manager-empty"
+          icon="download"
+          :title="t('javaManager.noPackage')"
+        />
         <article v-for="candidate in catalog?.packages || []" :key="candidate.packageId" class="java-package-row">
           <div class="java-runtime-copy">
             <strong>{{ candidate.releaseName }} · {{ candidate.runtimeKind }}</strong
             ><span>{{ candidate.architecture }} · {{ size(candidate.downloadBytes) }}</span>
           </div>
-          <NButton type="primary" :disabled="isActing" @click="prepareInstall(candidate)">{{
+          <UiButton variant="primary" icon="download" :disabled="isActing" @click="prepareInstall(candidate)">{{
             t('javaManager.install')
-          }}</NButton>
+          }}</UiButton>
         </article>
       </template>
 
@@ -150,18 +198,20 @@
         <span v-if="operations.queryErrors[operation.operationId]">{{
           operations.queryErrors[operation.operationId]
         }}</span>
-        <NButton
+        <UiButton
           v-if="operations.queryErrors[operation.operationId]"
-          size="small"
+          variant="secondary"
+          size="sm"
           @click="operations.refresh(operation.operationId)"
-          >{{ t('common.refresh') }}</NButton
+          >{{ t('common.refresh') }}</UiButton
         >
-        <NButton
+        <UiButton
           v-if="['pending', 'running'].includes(operation.status) && operation.canCancel !== false"
-          size="small"
+          variant="ghost"
+          size="sm"
           :loading="operations.cancellingOperations.includes(operation.operationId)"
           @click="operations.cancel(operation.operationId)"
-          >{{ t('common.cancel') }}</NButton
+          >{{ t('common.cancel') }}</UiButton
         >
       </div>
     </div>
@@ -179,12 +229,14 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NButton, NEmpty, NInput, NProgress, NSelect, NTag } from 'naive-ui'
+import { NAlert, NInput, NProgress, NSelect, NTag } from 'naive-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
+import UiButton from '@/components/ui/Button.vue'
+import UiEmptyState from '@/components/ui/EmptyState.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -475,7 +527,7 @@ onBeforeUnmount(() => {
 .java-manager-content {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--s-lg);
   width: 100%;
   min-width: 0;
 }
@@ -488,10 +540,65 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-sm);
 }
 .java-manager-toolbar {
   justify-content: space-between;
+}
+.java-manager-tabs {
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-md);
+  background: var(--control-bg);
+}
+.java-manager-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-xs);
+  height: 29px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
+}
+.java-manager-tabs button:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+.java-manager-tabs button[aria-pressed='true'] {
+  background: var(--primary-alpha);
+  color: var(--primary);
+}
+.java-manager-tabs button:focus-visible {
+  outline: none;
+  box-shadow: var(--glow-focus);
+}
+.java-manager-empty,
+.java-manager-content > .ui-loading {
+  min-height: 180px;
+  justify-content: center;
+}
+.java-manager-empty :deep(.empty-icon svg) {
+  width: 32px;
+  height: 32px;
+}
+.java-manager-empty :deep(.empty-text) {
+  max-width: 420px;
+  line-height: 1.6;
+}
+.java-manager-empty :deep(.ui-btn) {
+  margin-top: var(--s-xs);
 }
 .java-runtime-row,
 .java-package-row {
@@ -499,11 +606,11 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 14px;
-  padding: 16px;
+  gap: var(--s-lg);
+  padding: var(--s-lg);
   background: var(--ecl-surface-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-md);
 }
 .java-runtime-copy {
   display: flex;
@@ -511,6 +618,12 @@ onBeforeUnmount(() => {
   gap: 5px;
   flex: 1;
   min-width: min(260px, 100%);
+}
+.java-runtime-copy strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .java-runtime-copy span,
 .java-runtime-copy small,
@@ -533,10 +646,12 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px;
+  padding: var(--s-md);
   background: var(--ecl-surface-bg);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-md);
   font-size: 12px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
 }
 @media (max-width: 680px) {
   .java-runtime-actions {

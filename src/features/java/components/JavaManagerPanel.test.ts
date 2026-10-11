@@ -36,6 +36,35 @@ async function render() {
 }
 
 describe('Java 管理与拥有权提示', () => {
+  it('空清单提供下载入口，只切换视图而不提交安装', async () => {
+    vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory())
+    vi.spyOn(javaApi, 'catalog').mockResolvedValue({
+      availableMajorVersions: [21],
+      recommendedMajorVersion: 21,
+      majorVersion: 21,
+      platform: 'windows',
+      architecture: 'x64',
+      packages: [],
+    })
+    const install = vi.spyOn(javaApi, 'install')
+    const wrapper = await render()
+    expect(wrapper.get('.ui-empty-state').text()).toContain('没有登记的 Java')
+    await wrapper.get('.ui-empty-state button').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.java-catalog-controls').exists()).toBe(true)
+    expect(wrapper.get('.java-manager-tabs button[aria-pressed="true"]').text()).toBe('下载')
+    expect(install).not.toHaveBeenCalled()
+  })
+
+  it('搜索无匹配时清除搜索恢复原有条目', async () => {
+    const wrapper = await render()
+    await wrapper.get('input').setValue('找不到这个版本')
+    expect(wrapper.get('.ui-empty-state').text()).toContain('没有匹配的 Java')
+    await wrapper.get('.ui-empty-state button').trigger('click')
+    expect(wrapper.find('.java-runtime-row').exists()).toBe(true)
+    expect(wrapper.get<HTMLInputElement>('input').element.value).toBe('')
+  })
+
   it('在用且被设置引用的运行时保留条目，并禁用物理移除', async () => {
     const wrapper = await render()
     expect(wrapper.text()).toContain('使用中')
