@@ -1724,7 +1724,15 @@
     "continueSearch": "検索を続ける",
     "searchTruncated": "検索件数の上限に達しました。条件を絞り込んでください。",
     "sourceUnavailable": "このプラットフォームは一時的に利用できません。他のプラットフォームを使用するか、再試行してください。",
-    "sourceNotConfigured": "このプラットフォームは未設定です。利用可能なプラットフォームを使用します。"
+    "sourceNotConfigured": "このプラットフォームは未設定です。利用可能なプラットフォームを使用します。",
+    "detailInstallTarget": "インストール先",
+    "detailNoInstance": "インスタンス未選択",
+    "detailSaveHint": "ファイルを選択して名前を付けて保存",
+    "detailGameVersion": "ゲームバージョン",
+    "detailLoader": "ローダー",
+    "detailVersions": "利用可能なバージョン",
+    "detailFileCount": "{count} 個のファイル",
+    "detailNoFiles": "現在の条件に一致するファイルはありません"
   },
   "auth": {
     "authlib": "Authlib インジェクション",

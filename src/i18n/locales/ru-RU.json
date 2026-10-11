@@ -1721,7 +1721,15 @@
     "continueSearch": "Продолжить поиск",
     "searchTruncated": "Достигнут лимит поиска. Уточните фильтры.",
     "sourceUnavailable": "Эта платформа временно недоступна. Используйте другую платформу или повторите попытку.",
-    "sourceNotConfigured": "Эта платформа не настроена. Используется доступная платформа."
+    "sourceNotConfigured": "Эта платформа не настроена. Используется доступная платформа.",
+    "detailInstallTarget": "Установить в",
+    "detailNoInstance": "Экземпляр не выбран",
+    "detailSaveHint": "Выберите файл для сохранения на диск",
+    "detailGameVersion": "Версия игры",
+    "detailLoader": "Загрузчик",
+    "detailVersions": "Доступные версии",
+    "detailFileCount": "Файлов: {count}",
+    "detailNoFiles": "Нет файлов, соответствующих текущим фильтрам"
   },
   "auth": {
     "authlib": "Инъекция authlib",

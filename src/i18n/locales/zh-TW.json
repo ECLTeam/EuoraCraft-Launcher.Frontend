@@ -1607,7 +1607,15 @@
     "continueSearch": "繼續讀取",
     "searchTruncated": "已達到本次搜尋數量上限，請縮小篩選範圍。",
     "sourceUnavailable": "此平台暫時無法使用，可使用另一平台或重試。",
-    "sourceNotConfigured": "此平台尚未設定，目前使用可用平台。"
+    "sourceNotConfigured": "此平台尚未設定，目前使用可用平台。",
+    "detailInstallTarget": "安裝到",
+    "detailNoInstance": "未選擇實例",
+    "detailSaveHint": "選擇檔案後可另存新檔",
+    "detailGameVersion": "遊戲版本",
+    "detailLoader": "載入器",
+    "detailVersions": "可用版本",
+    "detailFileCount": "{count} 個檔案",
+    "detailNoFiles": "目前條件下沒有可用檔案"
   },
   "auth": {
     "authlib": "Authlib 注入",

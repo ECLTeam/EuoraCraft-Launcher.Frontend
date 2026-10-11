@@ -404,21 +404,25 @@
 .mod-detail-content {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   width: 100%;
   max-width: 820px;
   margin: 0 auto;
 }
 
-/* --- 模组信息卡片：独占一行，标题行 + 简介 --- */
-.mod-intro-card {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 14px;
+/* 资源、安装上下文与文件列表共用表面，内层行不重复叠加底色。 */
+.mod-intro-card,
+.mod-filter-section,
+.mod-version-section {
+  min-width: 0;
   background: var(--ecl-surface);
   border: 1px solid var(--ecl-border);
   border-radius: var(--ecl-radius-card);
   box-shadow: var(--ecl-shadow-surface);
+}
+
+.mod-intro-card {
+  padding: 14px 16px;
 }
 
 .mod-intro-top {
@@ -429,11 +433,11 @@
 }
 
 .mod-intro-avatar {
-  flex-shrink: 0;
+  flex: 0 0 40px;
   width: 40px;
   height: 40px;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
 }
 
 .mod-intro-avatar img {
@@ -443,9 +447,8 @@
 }
 
 .mod-intro-avatar .icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   width: 100%;
   height: 100%;
   color: var(--ecl-text-tertiary);
@@ -459,51 +462,26 @@
 
 .mod-intro-title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
   min-width: 0;
 }
 
 .mod-intro-title-row h2 {
-  flex-shrink: 1;
   min-width: 0;
   overflow: hidden;
   margin: 0;
   color: var(--ecl-text);
-  font-size: 15px;
-  line-height: 1.3;
+  font-size: 16px;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .mod-intro-subtitle {
-  flex-shrink: 1;
-  min-width: 0;
   overflow: hidden;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mod-intro-tags {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-}
-
-.mod-intro-links {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-/* --- 简介：标题行下方简单一行 --- */
-.mod-intro-description {
-  overflow: hidden;
-  margin: 8px 0 0;
+  margin: 3px 0 0;
   color: var(--ecl-text-secondary);
   font-size: 12px;
   line-height: 1.5;
@@ -511,189 +489,234 @@
   white-space: nowrap;
 }
 
-/* --- 条件筛选区：兼容实例 + 游戏版本 + 加载器 + 版本类型 --- */
-/* 遵循下载页筛选栏样式：紧凑布局 + 小标签 + 窄下拉 */
-.mod-filter-section {
-  padding: 8px 12px;
-  background: var(--ecl-surface);
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card);
-  box-shadow: var(--ecl-shadow-surface);
-}
-
-.mod-filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-  align-items: center;
-}
-
-.mod-filter-row .filter-item {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-  max-width: none;
-}
-
-.mod-filter-row .filter-item .filter-title {
-  flex-shrink: 0;
-  color: var(--ecl-text-secondary);
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* 版本/加载器下拉：固定宽度，避免挤压标题图标（n-select 为子组件内部元素，需 :deep 命中） */
-.mod-filter-row .filter-item :deep(.n-select) {
-  flex: 0 0 auto;
-  width: 130px;
-  min-width: 0;
-  max-width: none;
-}
-
-/* 实例选择：占满筛选行剩余空间，下拉框伸展到行尾以完整展示实例信息 */
-.mod-filter-row .filter-item.mod-filter-instance {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.mod-filter-row .filter-item.mod-filter-instance :deep(.n-select) {
-  flex: 1 1 0;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-}
-
-.mod-filter-instance :deep(.resource-instance-select) {
-  flex: 1 1 0;
-  width: 100%;
-  min-width: 0;
-}
-
-.mod-filter-instance :deep(.n-button) {
-  flex: 0 0 auto;
-}
-
-.single-loader {
-  flex: 0 1 auto;
-  min-width: 60px;
-  padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ecl-text);
-  background: var(--ecl-surface);
-  border: 1px solid var(--ecl-border);
-  border-radius: 6px;
-}
-
-.filter-title {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--ecl-text);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* --- 版本列表区：不再使用卡片，直接平铺 --- */
-.mod-version-section {
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.mod-section-title {
+.mod-intro-tags,
+.mod-intro-links {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+}
+
+.mod-intro-tags:empty {
+  display: none;
+}
+
+.mod-intro-links {
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mod-intro-description {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 10px 0 0;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.mod-filter-section {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px;
+}
+
+.detail-target-field,
+.detail-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.detail-field-label {
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.detail-target-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.detail-target-controls :deep(.resource-instance-select) {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-target-controls :deep(.n-button) {
+  flex-shrink: 0;
+}
+
+.detail-target-controls :deep(.ris-option-label) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.detail-instance-menu) {
+  max-width: calc(100vw - 32px);
+}
+
+:global(.detail-instance-menu .ris-option-label) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.detail-target-hint {
+  margin: 0;
+  color: var(--ecl-text-tertiary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.detail-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: start;
+  gap: 12px;
+}
+
+.detail-filter-field :deep(.n-select) {
+  width: 100%;
+  min-width: 0;
+}
+
+.detail-fixed-value {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
   color: var(--ecl-text);
   font-size: 13px;
-  font-weight: 650;
+  line-height: 1.5;
 }
 
-.mod-version-section label {
-  display: block;
-  margin-bottom: 8px;
+.mod-version-section {
+  overflow: hidden;
+}
+
+.version-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ecl-border);
+}
+
+.mod-section-title {
+  margin: 0;
   color: var(--ecl-text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
+  line-height: 1.5;
 }
 
-.detail-source-select {
-  margin-bottom: 14px;
+.version-result-count,
+.version-group-count {
+  flex-shrink: 0;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
-/* --- 按 Minecraft 版本和加载器直接排列的可折叠分组 --- */
 .version-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .version-accordion-group {
-  flex: 0 0 auto;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--ecl-surface) 92%, var(--primary) 8%);
-  border: 1px solid var(--ecl-border);
-  border-radius: 9px;
-  transition:
-    border-color var(--duration-fast) var(--ease-emphasized),
-    background-color var(--duration-fast) var(--ease-emphasized);
+  min-width: 0;
 }
 
-.version-accordion-group:hover,
-.version-accordion-group.selected {
-  border-color: var(--primary);
+.version-accordion-group + .version-accordion-group {
+  border-top: 1px solid var(--ecl-border);
 }
 
 .version-group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   width: 100%;
   min-height: 44px;
-  padding: 11px 14px;
-  color: var(--ecl-text, #1d2433);
-  font-size: 13px;
-  font-weight: 650;
+  padding: 10px 16px;
+  color: var(--ecl-text);
   line-height: 20px;
   text-align: left;
   cursor: pointer;
-  visibility: visible;
-  opacity: 1;
-  background: color-mix(in srgb, var(--ecl-surface) 96%, transparent);
+  background: transparent;
   border: 0;
+  transition: background-color var(--duration-fast) var(--ease-emphasized);
+}
+
+.version-group-header:hover,
+.version-accordion-group.selected > .version-group-header {
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.version-group-header:focus-visible,
+.version-file-row:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -3px;
+}
+
+.version-group-summary,
+.version-group-tags,
+.version-group-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.version-group-summary {
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px 12px;
 }
 
 .version-group-title {
-  position: relative;
-  z-index: 1;
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  color: inherit;
-  font: inherit;
-  text-overflow: ellipsis;
+  color: var(--ecl-text);
+  font-size: 13px;
+  font-weight: 600;
   white-space: nowrap;
-  visibility: visible;
-  opacity: 1;
-  -webkit-text-fill-color: currentcolor;
+}
+
+.version-group-tags {
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.version-group-tag {
+  padding: 0 6px;
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 20px;
+  background: color-mix(in srgb, var(--ecl-text) 5%, transparent);
+  border-radius: var(--r-sm);
+}
+
+.version-group-tag.loader-tag {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+.version-group-meta,
+.version-group-chevron {
+  flex-shrink: 0;
 }
 
 .version-group-chevron {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  flex-shrink: 0;
-  color: var(--ecl-text-secondary, #5d6678);
-  visibility: visible;
-  opacity: 1;
+  color: var(--ecl-text-secondary);
   transition: transform var(--duration-fast) var(--ease-emphasized);
 }
 
@@ -704,13 +727,13 @@
 .version-group-files {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 0 8px 8px;
+  gap: 4px;
+  padding: 0 12px 10px;
 }
 
 .version-file-row {
   display: grid;
-  grid-template-columns: minmax(110px, auto) minmax(0, 1fr) 18px;
+  grid-template-columns: minmax(90px, auto) minmax(0, 1fr) 18px;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -718,36 +741,37 @@
   color: var(--ecl-text);
   text-align: left;
   cursor: pointer;
-  background: var(--ecl-surface);
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: var(--r-sm);
 }
 
 .version-file-row.direct-action {
-  grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
 }
 
 .version-file-row:hover,
 .version-file-row.selected {
-  border-color: color-mix(in srgb, var(--primary) 55%, var(--ecl-border));
-  background: color-mix(in srgb, var(--primary) 8%, var(--ecl-surface));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--ecl-border));
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
 }
 
 .version-number {
+  min-width: 0;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
-/* 测试版分组内区分不同快照的 [26w29a] 前缀徽标 */
 .version-test-prefix {
   display: inline-block;
   margin-right: 6px;
   padding: 1px 6px;
-  border-radius: 4px;
   color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  border-radius: var(--r-sm);
 }
 
 .version-filename {
@@ -761,9 +785,11 @@
 }
 
 .version-hint {
-  margin: 8px 0 0;
+  margin: 0;
+  padding: 20px 16px;
   color: var(--ecl-text-secondary);
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .version-check {
@@ -874,8 +900,13 @@
     margin: 8px 0 0;
   }
 
+  .mod-intro-top {
+    flex-wrap: wrap;
+  }
+
   .mod-intro-links {
-    display: none;
+    width: 100%;
+    padding-left: 52px;
   }
 
   .version-file-row {
@@ -884,5 +915,29 @@
 
   .version-file-row.direct-action {
     grid-template-columns: minmax(90px, auto) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .mod-detail-shell {
+    padding: 12px;
+  }
+
+  .detail-filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .version-group-header {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .version-group-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .version-group-meta {
+    gap: 6px;
   }
 }

@@ -3,11 +3,12 @@
     v-model:value="currentKey"
     :options="options"
     :renderLabel="renderLabel"
+    :inputProps="{ 'aria-label': ariaLabel || placeholder || t('mods.selectInstance') }"
     :placeholder="placeholder || t('mods.selectInstance')"
     filterable
     :disabled="!target.ready.value || options.length === 0"
     :consistentMenuWidth="false"
-    :menuProps="{ class: 'ris-select-menu' }"
+    :menuProps="{ class: ['ris-select-menu', menuClass].filter(Boolean).join(' ') }"
     class="resource-instance-select"
   />
 </template>
@@ -30,8 +31,19 @@ const props = withDefaults(
     showNoneOption?: boolean
     noneLabel?: string
     compatibleOnly?: boolean
+    showIcon?: boolean
+    ariaLabel?: string
+    menuClass?: string
   }>(),
-  { placeholder: '', showNoneOption: false, noneLabel: '', compatibleOnly: false }
+  {
+    placeholder: '',
+    showNoneOption: false,
+    noneLabel: '',
+    compatibleOnly: false,
+    showIcon: true,
+    ariaLabel: '',
+    menuClass: '',
+  }
 )
 
 const emit = defineEmits<{
@@ -81,8 +93,8 @@ const currentKey = computed({
 
 function renderLabel(option: { label: string; value: string }): VNode {
   return h('span', { class: 'ris-option' }, [
-    h(UiIcon, { name: 'game-controller', size: 14 }),
-    h('span', { class: 'ris-option-label' }, option.label),
+    props.showIcon ? h(UiIcon, { name: 'game-controller', size: 14 }) : null,
+    h('span', { class: 'ris-option-label', title: option.label }, option.label),
   ])
 }
 </script>

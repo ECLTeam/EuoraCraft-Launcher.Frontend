@@ -263,21 +263,10 @@
                 <div class="mod-intro-heading">
                   <div class="mod-intro-title-row">
                     <h2>{{ selectedMod.displayTitle }}</h2>
-                    <span class="mod-intro-subtitle">{{ selectedMod.title }} · {{ selectedMod.author }}</span>
                     <div class="mod-intro-tags">
                       <NTag v-if="resourceType !== 'mod'" size="small" :bordered="false" type="info">
                         {{ resourceTypeLabel }}
                       </NTag>
-                      <template v-if="resourceType === 'mod'">
-                        <NTag
-                          v-for="loader in selectedMod.loaders.slice(0, 2)"
-                          :key="`l:${loader}`"
-                          size="small"
-                          :bordered="false"
-                        >
-                          {{ loaderName(loader) }}
-                        </NTag>
-                      </template>
                       <NTag
                         v-for="category in selectedMod.categories.slice(0, 1)"
                         :key="`c:${category}`"
@@ -288,6 +277,7 @@
                       </NTag>
                     </div>
                   </div>
+                  <p v-if="detailByline" class="mod-intro-subtitle">{{ detailByline }}</p>
                 </div>
                 <div class="mod-intro-links">
                   <NButton v-if="activeSourceRef" size="small" secondary @click="openUrl(activeSourceRef.projectUrl)">
@@ -305,49 +295,20 @@
               </p>
             </section>
 
-            <!-- 条件筛选区：版本/加载器与实例选择同行，实例靠右 --- -->
+            <!-- 安装目标先于来源和兼容条件，空实例仍允许另存为。 -->
             <section class="mod-filter-section">
-              <div class="mod-filter-row">
-                <div class="filter-item">
-                  <div class="filter-title">
-                    <UiIcon name="cube" :size="15" />
-                    {{ t('mods.filterVersion') }}
-                  </div>
-                  <NSelect
-                    v-model:value="detailVersionFilter"
-                    :options="detailGameVersionOptions"
-                    :placeholder="t('mods.none')"
-                    size="small"
-                    clearable
-                    filterable
-                  />
-                </div>
-                <div class="filter-item">
-                  <div class="filter-title">
-                    <UiIcon name="layers" :size="15" />
-                    {{ t('mods.loaderType') }}
-                  </div>
-                  <span v-if="singleLoader" class="single-loader">{{ loaderName(singleLoader) }}</span>
-                  <NSelect
-                    v-else
-                    v-model:value="detailLoaderFilter"
-                    :options="detailLoaderOptions"
-                    :placeholder="t('mods.none')"
-                    size="small"
-                    clearable
-                  />
-                </div>
-                <div class="filter-item mod-filter-instance">
-                  <div class="filter-title">
-                    <UiIcon name="game-controller" :size="15" />
-                    {{ t('mods.selectCompatibleInstance') }}
-                  </div>
+              <div v-if="!isModpack" class="detail-target-field">
+                <span class="detail-field-label">{{ t('mods.detailInstallTarget') }}</span>
+                <div class="detail-target-controls">
                   <ResourceInstanceSelect
                     :target="target"
-                    :placeholder="t('mods.selectInstanceHint')"
+                    :placeholder="t('mods.detailNoInstance')"
+                    :ariaLabel="t('mods.detailInstallTarget')"
+                    :showIcon="false"
+                    menuClass="detail-instance-menu"
                     compatibleOnly
                     showNoneOption
-                    :noneLabel="t('mods.none')"
+                    :noneLabel="t('mods.detailNoInstance')"
                     @persist="onInstancePersist"
                   />
                   <NButton
@@ -356,28 +317,65 @@
                     size="small"
                     :loading="refreshingInstances"
                     :title="t('common.refresh')"
+                    :aria-label="t('common.refresh')"
                     @click="refreshCompatibleInstances"
                   >
                     <template #icon><UiIcon name="refresh" :size="15" /></template>
                   </NButton>
+                </div>
+                <p v-if="usesDirectVersionAction && !instance" class="detail-target-hint">
+                  {{ t('mods.detailSaveHint') }}
+                </p>
+              </div>
+              <div class="detail-filter-fields">
+                <div class="detail-filter-field detail-source-field">
+                  <span class="detail-field-label">{{ t('mods.downloadSource') }}</span>
+                  <NSelect
+                    v-if="selectedMod.alternatives.length > 1"
+                    v-model:value="selectedSourceKey"
+                    class="detail-source-select"
+                    size="small"
+                    :options="detailSourceOptions"
+                    :inputProps="{ 'aria-label': t('mods.downloadSource') }"
+                  />
+                  <span v-else class="detail-fixed-value">{{
+                    sourceLabel(activeSourceRef?.source || selectedMod.source)
+                  }}</span>
+                </div>
+                <div class="detail-filter-field detail-game-version-field">
+                  <span class="detail-field-label">{{ t('mods.detailGameVersion') }}</span>
+                  <NSelect
+                    v-model:value="detailVersionFilter"
+                    :options="detailGameVersionOptions"
+                    :placeholder="t('mods.allVersions')"
+                    :inputProps="{ 'aria-label': t('mods.detailGameVersion') }"
+                    size="small"
+                    clearable
+                    filterable
+                  />
+                </div>
+                <div v-if="resourceType === 'mod'" class="detail-filter-field detail-loader-field">
+                  <span class="detail-field-label">{{ t('mods.detailLoader') }}</span>
+                  <span v-if="singleLoader" class="detail-fixed-value">{{ loaderName(singleLoader) }}</span>
+                  <NSelect
+                    v-else
+                    v-model:value="detailLoaderFilter"
+                    :options="detailLoaderOptions"
+                    :placeholder="t('mods.allLoaders')"
+                    :inputProps="{ 'aria-label': t('mods.detailLoader') }"
+                    size="small"
+                    clearable
+                  />
                 </div>
               </div>
             </section>
 
             <!-- 下方：按 Minecraft 版本与加载器直接排列可折叠文件分组 -->
             <section class="mod-version-section">
-              <div class="mod-section-title">
-                <UiIcon name="layers" :size="15" />
-                {{ t('mods.chooseVersion') }}
+              <div class="version-section-heading">
+                <h3 class="mod-section-title">{{ t('mods.detailVersions') }}</h3>
+                <span class="version-result-count">{{ t('mods.detailFileCount', { count: availableFileCount }) }}</span>
               </div>
-              <template v-if="selectedMod.alternatives.length > 1">
-                <label>{{ t('mods.downloadSource') }}</label>
-                <NSelect
-                  v-model:value="selectedSourceKey"
-                  class="detail-source-select"
-                  :options="detailSourceOptions"
-                />
-              </template>
               <template v-if="filteredVersionGroups.length">
                 <div class="version-list">
                   <section
@@ -389,16 +387,32 @@
                     <button
                       type="button"
                       class="version-group-header"
+                      :aria-label="versionGroupLabel(group)"
                       :aria-expanded="isVersionGroupExpanded(group.key)"
                       @click="toggleVersionGroup(group)"
                     >
-                      <span class="version-group-title">{{ versionGroupLabel(group) }}</span>
-                      <UiIcon
-                        name="chevron-down"
-                        :size="16"
-                        class="version-group-chevron"
-                        :class="{ expanded: isVersionGroupExpanded(group.key) }"
-                      />
+                      <span class="version-group-summary">
+                        <span class="version-group-title">{{ group.gameVersion || t('mods.unknown') }}</span>
+                        <span class="version-group-tags">
+                          <span v-if="group.gameVersion" class="version-group-tag">{{
+                            versionTypeLabel(group.type)
+                          }}</span>
+                          <span v-if="resourceType === 'mod' && group.loader" class="version-group-tag loader-tag">{{
+                            loaderName(group.loader)
+                          }}</span>
+                        </span>
+                      </span>
+                      <span class="version-group-meta">
+                        <span class="version-group-count">{{
+                          t('mods.detailFileCount', { count: group.files.length })
+                        }}</span>
+                        <UiIcon
+                          name="chevron-down"
+                          :size="16"
+                          class="version-group-chevron"
+                          :class="{ expanded: isVersionGroupExpanded(group.key) }"
+                        />
+                      </span>
                     </button>
                     <div v-if="isVersionGroupExpanded(group.key)" class="version-group-files">
                       <RequiredModDependencies
@@ -425,7 +439,7 @@
                           </span>
                           {{ file.versionNumber }}
                         </span>
-                        <span class="version-filename">{{ file.filename }}</span>
+                        <span class="version-filename" :title="file.filename">{{ file.filename }}</span>
                         <UiIcon
                           v-if="
                             !usesDirectVersionAction && selectedFileId === file.id && selectedGroupKey === group.key
@@ -439,7 +453,7 @@
                   </section>
                 </div>
               </template>
-              <p v-else class="version-hint">{{ t('mods.noCompatibleVersion') }}</p>
+              <p v-else class="version-hint">{{ t('mods.detailNoFiles') }}</p>
             </section>
           </div>
         </UiLoading>
@@ -609,8 +623,8 @@ const router = useRouter()
 const loading = ref(false)
 const searchError = ref('')
 
-const target = useResourceInstallTarget(props.resourceType, true)
-const instance = target.selectedInstance
+const target = useResourceInstallTarget(props.resourceType, !isModpack.value)
+const instance = computed(() => (isModpack.value ? null : target.selectedInstance.value))
 
 const query = ref('')
 const searched = ref(false)
@@ -636,6 +650,10 @@ const refreshingInstances = ref(false)
 const installConfirmVisible = ref(false)
 const dependencyLoading = ref(false)
 const selectedMod = ref<ModSearchItem | null>(null)
+const detailByline = computed(() => {
+  const mod = selectedMod.value
+  return [mod?.title !== mod?.displayTitle ? mod?.title : '', mod?.author].filter(Boolean).join(' · ')
+})
 const detailInfo = ref<ModInfo | null>(null)
 const versions = ref<ModVersion[]>([])
 const requiredDependencies = ref<ModInfo[]>([])
@@ -645,9 +663,6 @@ const preferredDetailFilter = ref<{ gameVersion: string; loader: string } | null
 const versionGroups = computed(() => groupModVersions(versions.value, resolveVersionGroup))
 const selectedGroupKey = ref('')
 const expandedVersionGroupKeys = ref<string[]>([])
-const versionLoaderOptions = computed(() =>
-  Array.from(new Set(versions.value.flatMap((version) => version.loaders.map((loader) => loader.toLocaleLowerCase()))))
-)
 const detailVersionFilter = ref('')
 const detailLoaderFilter = ref('')
 
@@ -713,7 +728,7 @@ const detailGameVersionOptions = computed(() => {
   const options: Array<
     | { label: string; value: string }
     | { type: 'group'; label: string; children: Array<{ label: string; value: string }> }
-  > = [{ label: t('mods.none'), value: '' }]
+  > = [{ label: t('mods.allVersions'), value: '' }]
   const pushGroup = (label: string, values: string[]) => {
     if (values.length) {
       options.push({ type: 'group', label, children: values.map((id) => ({ label: id, value: id })) })
@@ -725,8 +740,10 @@ const detailGameVersionOptions = computed(() => {
   return options
 })
 const detailLoaderOptions = computed(() => [
-  { label: t('mods.none'), value: '' },
-  ...uniqueOptions(versions.value.flatMap((version) => version.loaders.map((loader) => loader.toLocaleLowerCase()))),
+  { label: t('mods.allLoaders'), value: '' },
+  ...uniqueOptions(
+    versions.value.flatMap((version) => version.loaders.map((loader) => loader.toLocaleLowerCase()))
+  ).map((option) => ({ ...option, label: loaderName(option.value) })),
 ])
 
 // 模组只支持一种加载器时直接展示该加载器，不可切换
@@ -770,6 +787,9 @@ const filteredVersionGroups = computed(() => {
     })
 })
 const selectedSourceKey = ref('')
+const availableFileCount = computed(
+  () => new Set(filteredVersionGroups.value.flatMap((group) => group.files.map((file) => file.id))).size
+)
 const selectedFileId = ref<string | null>(null)
 const selectedFile = computed(() => versions.value.find((file) => file.id === selectedFileId.value) ?? null)
 const installing = ref(false)
@@ -1096,7 +1116,7 @@ function updateVersionCompatibility(file: ModVersion | null): void {
 }
 
 function versionGroupLabel(group: ModVersionGroup): string {
-  const showLoader = props.resourceType === 'mod' && versionLoaderOptions.value.length > 1 && group.loader
+  const showLoader = props.resourceType === 'mod' && group.loader
   const gameVersion = group.gameVersion || t('mods.unknown')
   const typeLabel = group.gameVersion ? versionTypeLabel(group.type) : ''
   return `${gameVersion}${typeLabel ? ` ${typeLabel}` : ''}${showLoader ? ` ${loaderName(group.loader)}` : ''}`
@@ -1222,7 +1242,7 @@ function toggleVersionGroup(group: ModVersionGroup): void {
     : undefined
   const file = preferred ?? group.files[0]
   if (!file) return
-  if (usesDirectVersionAction.value) {
+  if (usesDirectVersionAction.value || isModpack.value) {
     if (props.resourceType === 'mod') {
       selectedVersionContext.value = { gameVersion: group.gameVersion, loader: group.loader }
       void loadRequiredDependencies(file, group.key)

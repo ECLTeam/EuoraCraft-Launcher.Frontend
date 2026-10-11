@@ -1710,7 +1710,15 @@
     "continueSearch": "Continue searching",
     "searchTruncated": "Search limit reached. Narrow your filters to find more projects.",
     "sourceUnavailable": "This platform is temporarily unavailable. Use the other platform or retry.",
-    "sourceNotConfigured": "This platform is not configured. Results use the available platform."
+    "sourceNotConfigured": "This platform is not configured. Results use the available platform.",
+    "detailInstallTarget": "Install to",
+    "detailNoInstance": "No instance selected",
+    "detailSaveHint": "Choose a file to save it locally",
+    "detailGameVersion": "Game version",
+    "detailLoader": "Loader",
+    "detailVersions": "Available versions",
+    "detailFileCount": "Files: {count}",
+    "detailNoFiles": "No files match the current filters"
   },
   "auth": {
     "authlib": "Authlib Injector",

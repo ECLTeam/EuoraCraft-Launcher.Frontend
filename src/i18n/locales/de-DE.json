@@ -1724,7 +1724,15 @@
     "continueSearch": "Suche fortsetzen",
     "searchTruncated": "Suchlimit erreicht. Grenze die Filter ein.",
     "sourceUnavailable": "Diese Plattform ist vorübergehend nicht verfügbar. Nutze die andere Plattform oder versuche es erneut.",
-    "sourceNotConfigured": "Diese Plattform ist nicht konfiguriert. Die verfügbare Plattform wird verwendet."
+    "sourceNotConfigured": "Diese Plattform ist nicht konfiguriert. Die verfügbare Plattform wird verwendet.",
+    "detailInstallTarget": "Installieren in",
+    "detailNoInstance": "Keine Instanz ausgewählt",
+    "detailSaveHint": "Eine Datei auswählen und lokal speichern",
+    "detailGameVersion": "Spielversion",
+    "detailLoader": "Modloader",
+    "detailVersions": "Verfügbare Versionen",
+    "detailFileCount": "Dateien: {count}",
+    "detailNoFiles": "Keine Dateien entsprechen den aktuellen Filtern"
   },
   "auth": {
     "authlib": "Authlib-Injektion",
