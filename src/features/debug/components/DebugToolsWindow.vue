@@ -74,8 +74,8 @@ const host = computed(() => {
 const isBlocked = computed(() => host.value === null)
 const hostPosition = ref({ left: 0, top: 0, width: 260 })
 const windowStyle = computed(() => ({
-  left: `${store.mode === 'minimized' ? 0 : store.layout.x - hostPosition.value.left}px`,
-  top: `${store.mode === 'minimized' ? 0 : store.layout.y - hostPosition.value.top}px`,
+  left: `${store.mode === 'minimized' ? store.minimizedPosition.x : store.layout.x - hostPosition.value.left}px`,
+  top: `${store.mode === 'minimized' ? store.minimizedPosition.y : store.layout.y - hostPosition.value.top}px`,
   width: `${store.mode === 'minimized' ? Math.min(260, hostPosition.value.width) : store.layout.width}px`,
   height: store.mode === 'minimized' ? '44px' : `${store.layout.height}px`,
 }))
@@ -146,7 +146,7 @@ function stopGesture(): void {
 function startGesture(event: PointerEvent, kind: 'move' | 'resize'): void {
   if (isBlocked.value || event.button !== 0 || store.mode === 'closed') return
   if (kind === 'resize' && store.mode !== 'floating') return
-  if (kind === 'move' && (store.mode !== 'floating' || (event.target as Element).closest('button'))) return
+  if (kind === 'move' && (event.target as Element).closest('button')) return
   stopGesture()
   event.preventDefault()
   const element = event.currentTarget as HTMLElement
@@ -157,6 +157,7 @@ function startGesture(event: PointerEvent, kind: 'move' | 'resize'): void {
     clientX: event.clientX,
     clientY: event.clientY,
     ...store.layout,
+    ...(store.mode === 'minimized' ? store.minimizedPosition : {}),
   }
   element.setPointerCapture(event.pointerId)
   element.addEventListener('lostpointercapture', stopGesture)

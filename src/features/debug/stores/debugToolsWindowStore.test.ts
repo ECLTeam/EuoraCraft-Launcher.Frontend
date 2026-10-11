@@ -11,6 +11,24 @@ beforeEach(() => {
 })
 
 describe('调试工具会话窗口', () => {
+  it('收起条和展开面板分别保存位置，宿主缩小时收敛收起条边界', () => {
+    const store = useDebugToolsWindowStore()
+    store.setBounds({ left: 80, top: 72, right: 940, bottom: 580 })
+    store.activate()
+    expect(store.minimizedPosition).toEqual({ x: 0, y: 0 })
+    store.move(180, 100)
+    store.open()
+    store.move(140, 120)
+    store.minimize()
+    expect(store.minimizedPosition).toEqual({ x: 180, y: 100 })
+    expect(store.layout.x).toBe(140)
+    expect(store.layout.y).toBe(120)
+    store.move(9000, 9000)
+    expect(store.minimizedPosition).toEqual({ x: 600, y: 464 })
+    store.setBounds({ left: 20, top: 64, right: 400, bottom: 300 })
+    expect(store.minimizedPosition).toEqual({ x: 120, y: 192 })
+  })
+
   it('进入全屏后收起工具，不把焦点还给后台页面', () => {
     const opener = document.createElement('button')
     document.body.append(opener)

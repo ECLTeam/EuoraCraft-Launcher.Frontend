@@ -169,7 +169,7 @@ it('拖动遇到弹窗或卸载时停止，后续指针事件不再改变布局'
   expect(store.layout).toEqual(stopped)
 })
 
-it('自动常驻时不抢焦点，收起条固定左上角且设置恢复会聚焦工具', async () => {
+it('自动常驻默认左上角，收起条可拖动并保留位置，展开独立保存位置', async () => {
   const store = useDebugToolsWindowStore()
   store.close()
   store.activate()
@@ -184,13 +184,16 @@ it('自动常驻时不抢焦点，收起条固定左上角且设置恢复会聚�
   const before = { ...store.layout }
   pointer('pointermove', 220, 120)
   pointer('pointerup', 220, 120)
+  await flushPromises()
   expect(store.layout).toEqual(before)
-  expect(windowElement().element.style.left).toBe('0px')
-  expect(windowElement().element.style.top).toBe('0px')
+  expect(store.minimizedPosition).toEqual({ x: 20, y: 20 })
+  expect(windowElement().element.style.left).toBe('20px')
+  expect(windowElement().element.style.top).toBe('20px')
   store.open()
   await flushPromises()
   expect(document.activeElement).toBe(windowElement().element)
   await windowElement().get('[aria-label="收起调试工具"]').trigger('click')
+  expect(store.minimizedPosition).toEqual({ x: 20, y: 20 })
   expect(document.activeElement).toBe(opener)
   opener.remove()
 })

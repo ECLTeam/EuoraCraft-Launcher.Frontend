@@ -14,6 +14,7 @@ export interface DebugToolsBounds {
 export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   const mode = ref<DebugToolsWindowMode>('closed')
   const layout = reactive({ x: 16, y: 64, width: 640, height: 440 })
+  const minimizedPosition = reactive({ x: 0, y: 0 })
   let hasPosition = false
   let bounds: DebugToolsBounds | null = null
   let returnFocusTarget: HTMLElement | null = null
@@ -25,6 +26,8 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
     const bottom = bounds?.bottom ?? window.innerHeight - 16
     const maxWidth = Math.max(0, right - left)
     const maxHeight = Math.max(0, bottom - top)
+    minimizedPosition.x = Math.min(Math.max(0, minimizedPosition.x), Math.max(0, maxWidth - Math.min(260, maxWidth)))
+    minimizedPosition.y = Math.min(Math.max(0, minimizedPosition.y), Math.max(0, maxHeight - 44))
     layout.width = Math.min(maxWidth, Math.max(Math.min(420, maxWidth), layout.width))
     layout.height = Math.min(maxHeight, Math.max(Math.min(280, maxHeight), layout.height))
     layout.x = Math.min(Math.max(left, layout.x), Math.max(left, right - layout.width))
@@ -65,8 +68,13 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   }
 
   function move(x: number, y: number): void {
-    layout.x = x
-    layout.y = y
+    if (mode.value === 'minimized') {
+      minimizedPosition.x = x
+      minimizedPosition.y = y
+    } else {
+      layout.x = x
+      layout.y = y
+    }
     constrain()
   }
 
@@ -87,5 +95,18 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
     return document.activeElement === target
   }
 
-  return { mode, layout, activate, open, close, minimize, move, resize, constrain, setBounds, restoreFocus }
+  return {
+    mode,
+    layout,
+    minimizedPosition,
+    activate,
+    open,
+    close,
+    minimize,
+    move,
+    resize,
+    constrain,
+    setBounds,
+    restoreFocus,
+  }
 })
