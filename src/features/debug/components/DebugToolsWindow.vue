@@ -48,12 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, provide, ref, useId, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { modalParentKey } from '@/composables/useModalInteraction'
-import { debugToolsHosts } from '@/features/debug/model/debugToolsHosts'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import DevToolsPanel from './DevToolsPanel.vue'
 
@@ -66,16 +65,26 @@ provide(
 )
 const windowRef = ref<HTMLElement | null>(null)
 const titleId = `debug-tools-${useId()}`
-const host = computed(() => {
-  if (!stack.hasActiveOverlay.value) return debugToolsHosts.get('page') ?? null
-  const id = stack.currentFullscreenId.value
-  return id && stack.interactiveModalId.value === id ? (debugToolsHosts.get(id) ?? null) : null
-})
+const host = shallowRef<HTMLElement | null>(null)
+function resolveHost(): void {
+  if (!stack.hasActiveOverlay.value) host.value = document.querySelector<HTMLElement>('#main-content')
+  else {
+    const id = stack.currentFullscreenId.value
+    const modal =
+      id && stack.interactiveModalId.value === id
+        ? [...document.querySelectorAll<HTMLElement>('[data-modal-id]')].find(
+            (element) => element.dataset.modalId === id
+          )
+        : null
+    host.value = modal?.querySelector<HTMLElement>('.fullscreen-modal-wrapper') ?? null
+  }
+}
+watch([stack.hasActiveOverlay, stack.currentFullscreenId, stack.interactiveModalId], resolveHost, { flush: 'post' })
 const isBlocked = computed(() => host.value === null)
-const hostPosition = ref({ left: 0, top: 0, width: 260 })
+const hostPosition = ref({ left: 0, top: 0, width: 260, insetX: 0, insetY: 0, scrollX: 0, scrollY: 0 })
 const windowStyle = computed(() => ({
-  left: `${store.mode === 'minimized' ? store.minimizedPosition.x : store.layout.x - hostPosition.value.left}px`,
-  top: `${store.mode === 'minimized' ? store.minimizedPosition.y : store.layout.y - hostPosition.value.top}px`,
+  left: `${(store.mode === 'minimized' ? hostPosition.value.insetX + store.minimizedPosition.x : store.layout.x - hostPosition.value.left) + hostPosition.value.scrollX}px`,
+  top: `${(store.mode === 'minimized' ? hostPosition.value.insetY + store.minimizedPosition.y : store.layout.y - hostPosition.value.top) + hostPosition.value.scrollY}px`,
   width: `${store.mode === 'minimized' ? Math.min(260, hostPosition.value.width) : store.layout.width}px`,
   height: store.mode === 'minimized' ? '44px' : `${store.layout.height}px`,
 }))
@@ -88,13 +97,24 @@ function measureHost(): void {
   if (!element) return
   const rect = element.getBoundingClientRect()
   if (!rect.width) return
-  hostPosition.value = { left: rect.left, top: rect.top, width: rect.width }
-  const parent = element.parentElement?.getBoundingClientRect()
-  store.setBounds({
+  const style = getComputedStyle(element)
+  const gutter = Number.parseFloat(style.getPropertyValue('--page-gutter')) || 16
+  const insetX = Number.parseFloat(style.paddingLeft) || gutter
+  const insetY = Number.parseFloat(style.paddingTop) || gutter
+  hostPosition.value = {
     left: rect.left,
     top: rect.top,
-    right: rect.right,
-    bottom: (parent?.bottom ?? window.innerHeight) - 16,
+    width: rect.width - 2 * insetX,
+    insetX,
+    insetY,
+    scrollX: element.scrollLeft,
+    scrollY: element.scrollTop,
+  }
+  store.setBounds({
+    left: rect.left + insetX,
+    top: rect.top + insetY,
+    right: rect.right - insetX,
+    bottom: rect.bottom - insetY,
   })
 }
 function scheduleMeasure(): void {
@@ -226,7 +246,7 @@ watch(
   }
 )
 onMounted(() => {
-  observeHost()
+  resolveHost()
   store.constrain()
   window.addEventListener('resize', scheduleMeasure)
   window.addEventListener('scroll', scheduleMeasure, true)

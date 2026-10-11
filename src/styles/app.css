@@ -253,7 +253,3 @@ body:has(#app[data-window-chrome='custom']) {
 .global-drop-overlay__box .icon {
   color: var(--primary);
 }
-
-.main-content.has-debug-tools > .page-container {
-  height: calc(100% - 60px);
-}

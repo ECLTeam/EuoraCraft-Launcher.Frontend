@@ -3,7 +3,6 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { h, ref } from 'vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
-import { debugToolsHosts } from '@/features/debug/model/debugToolsHosts'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { i18n } from '@/i18n'
 import DebugToolsWindow from './DebugToolsWindow.vue'
@@ -12,9 +11,8 @@ enableAutoUnmount(afterEach)
 beforeEach(() => {
   setActivePinia(createPinia())
   const host = document.createElement('div')
-  host.id = 'debug-page-host'
+  host.id = 'main-content'
   document.body.append(host)
-  debugToolsHosts.set('page', host)
   useGlobalModalStack().reset()
   i18n.global.locale.value = 'zh-CN'
   useDebugToolsWindowStore().open()
@@ -24,8 +22,7 @@ beforeEach(() => {
 })
 afterEach(() => {
   useGlobalModalStack().reset()
-  debugToolsHosts.clear()
-  document.getElementById('debug-page-host')?.remove()
+  document.getElementById('main-content')?.remove()
   vi.restoreAllMocks()
 })
 
@@ -65,6 +62,22 @@ function pointer(type: string, x: number, y: number, target: EventTarget = windo
   target.dispatchEvent(event)
 }
 
+it('复用页面容器时补偿滚动，悬浮条不随内容滚走', async () => {
+  const page = document.getElementById('main-content')!
+  page.style.padding = '20px'
+  vi.spyOn(page, 'getBoundingClientRect').mockReturnValue(new DOMRect(56, 48, 904, 552))
+  const store = useDebugToolsWindowStore()
+  store.close()
+  store.activate()
+  render()
+  await flushPromises()
+  expect(windowElement().element.style.top).toBe('20px')
+  page.scrollTop = 100
+  page.dispatchEvent(new Event('scroll'))
+  await vi.waitFor(() => expect(windowElement().element.style.top).toBe('120px'))
+  expect(Number.parseFloat(windowElement().element.style.top) - page.scrollTop).toBe(20)
+})
+
 it('收起恢复保留内部输入，Esc 回到常驻浮条', async () => {
   render()
   await windowElement().get('input').setValue('保留当前调试内容')
@@ -100,8 +113,11 @@ it('全屏宿主内可交互，子确认期间隐藏，切换宿主保留内容'
   render()
   await windowElement().get('input').setValue('保留全屏调试状态')
   const host = document.createElement('div')
-  document.body.append(host)
-  debugToolsHosts.set('details', host)
+  host.className = 'fullscreen-modal-wrapper'
+  const root = document.createElement('div')
+  root.dataset.modalId = 'details'
+  root.append(host)
+  document.body.append(root)
   const stack = useGlobalModalStack()
   stack.register({ id: 'details', isFullscreen: true })
   await flushPromises()
@@ -116,8 +132,8 @@ it('全屏宿主内可交互，子确认期间隐藏，切换宿主保留内容'
   expect((windowElement().get('input').element as HTMLInputElement).value).toBe('保留全屏调试状态')
   stack.unregister('details')
   await flushPromises()
-  expect(debugToolsHosts.get('page')?.contains(windowElement().element)).toBe(true)
-  host.remove()
+  expect(document.getElementById('main-content')?.contains(windowElement().element)).toBe(true)
+  root.remove()
 })
 
 it('从页面移入全屏的展开工具收起时，将焦点交给当前全屏区域', async () => {
@@ -137,7 +153,6 @@ it('从页面移入全屏的展开工具收起时，将焦点交给当前全屏�
   wrapper.append(host)
   root.append(wrapper)
   document.body.append(root)
-  debugToolsHosts.set('focus-fullscreen', host)
   useGlobalModalStack().register({ id: 'focus-fullscreen', isFullscreen: true })
   await flushPromises()
   windowElement().element.focus()
