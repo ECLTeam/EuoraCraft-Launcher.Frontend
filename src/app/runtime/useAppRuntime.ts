@@ -3,7 +3,7 @@ import backend from '@/api/client'
 import { onCommandResponse } from '@/api/client/commands'
 import { configQuery, launcherInfoQuery } from '@/app/data'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
-import { clearAvatarCache } from '@/composables/useAvatarRenderer'
+import { reconcileAvatarAccounts } from '@/composables/useAvatarRenderer'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
@@ -291,7 +291,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     cleanupCallbacks.push(operationStore.$subscribe(refreshFinishedTargets, { detached: true }))
     cleanupCallbacks.push(
       backend.on('accounts_changed', (snapshot) => {
-        clearAvatarCache()
+        reconcileAvatarAccounts(snapshot)
         useAccountStore().applySnapshot(snapshot)
       }),
       backend.on('launcher:notify', (payload) => {

@@ -228,7 +228,7 @@ export function createShowcaseTransport(): BackendTransport {
       if (account.isCurrent) current = account
     })
     accounts.current = current
-    emit('accounts_changed', structuredClone(accounts))
+    emit('accounts_changed', { ...structuredClone(accounts), textureInvalidatedAccountIds: [] })
   }
 
   const updatePluginStatus = (name: string, status: string) => {
@@ -431,6 +431,10 @@ export function createShowcaseTransport(): BackendTransport {
         return success()
       }
       case 'accounts_refresh_profile':
+        emit('accounts_changed', {
+          ...structuredClone(accounts),
+          textureInvalidatedAccountIds: [String(payload.account_id)],
+        })
         return success()
       case 'accounts_texture_urls': {
         const account = accounts.accounts.find((item) => item.id === payload.account_id)
@@ -500,6 +504,10 @@ export function createShowcaseTransport(): BackendTransport {
       case 'microsoft_reset_skin':
       case 'microsoft_set_cape':
       case 'microsoft_reset_cape':
+        emit('accounts_changed', {
+          ...structuredClone(accounts),
+          textureInvalidatedAccountIds: [String(payload.account_id)],
+        })
         return success(structuredClone(accounts.accounts.find((item) => item.id === payload.account_id)))
       case 'accounts_start_microsoft_login': {
         const stages = ['authorization_confirmed', 'minecraft_token', 'profile', 'saving'] as const
@@ -1125,7 +1133,13 @@ export function createShowcaseTransport(): BackendTransport {
         return success()
       case 'accounts_set_favorite':
       case 'accounts_set_pinned':
+        emit('accounts_changed', { ...structuredClone(accounts), textureInvalidatedAccountIds: [] })
+        return success(structuredClone(accounts))
       case 'accounts_set_offline_skin':
+        emit('accounts_changed', {
+          ...structuredClone(accounts),
+          textureInvalidatedAccountIds: [String(payload.account_id)],
+        })
         return success(structuredClone(accounts))
       case 'open_url':
       case 'open_folder':

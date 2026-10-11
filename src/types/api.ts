@@ -1,5 +1,6 @@
 import type {
   AccountListData,
+  AccountChangedEvent,
   AccountTextures,
   AuthlibLoginConfigData,
   AuthlibServer,
@@ -150,7 +151,7 @@ export interface BackendEvents {
   'game:versions_changed': { gamePath: string }
   'game:instances_changed': GameInstancesChangedEvent
   'mods:install_progress': { phase: 'resolving' | 'downloading'; projectId?: string; filename?: string }
-  accounts_changed: AccountListData
+  accounts_changed: AccountChangedEvent
   accounts_microsoft_login_status: MicrosoftLoginStatusEvent
   'plugin:status_changed': { name: string; action: string; result: string }
   'plugin:installed': { name: string }
@@ -345,7 +346,7 @@ export interface CommandPayloadMap {
   user_agreement_save: { accepted: boolean; uuid: string }
   user_agreement_clear: undefined
   // 文件 / 图片
-  image_fetch_data_url: { url: string }
+  image_fetch_data_url: { url: string; refresh?: boolean }
   image_save_url: { url: string }
   image_save_as: ImageSaveAsPayload
   skin_avatar_export: { data_url: string; size: 64 | 128 | 256 | 512; source_path: string }

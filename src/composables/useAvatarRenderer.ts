@@ -1,9 +1,11 @@
-import { readonly, ref } from 'vue'
+import { readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
+import type { AccountChangedEvent, AccountTextures, MinecraftAccount } from '@/types/accounts'
 
 const CACHE_TTL = 30 * 60 * 1000
 const MAX_CACHE_ENTRIES = 100
 const AVATAR_RENDER_VERSION = 5
+const RETRY_TTL = 30 * 1000
 
 const DEFAULT_SKINS = {
   steve:
@@ -12,15 +14,61 @@ const DEFAULT_SKINS = {
 }
 
 interface CacheEntry {
-  url: string
-  timestamp: number
+  url: string | null
+  expiresAt: number
+  accountId?: string
+}
+
+interface AccountState {
+  revision: Ref<number>
+  identity: string
+  shouldRefresh: boolean
+  preparedUrls: Set<string>
+  urls: Set<string>
+}
+
+interface MetadataEntry {
+  textures: AccountTextures
+  expiresAt: number
 }
 
 const avatarCache = new Map<string, CacheEntry>()
 const textureCache = new Map<string, CacheEntry>()
 const pendingTextures = new Map<string, Promise<string | null>>()
-const pendingAvatars = new Map<string, Promise<string | null>>()
+const pendingAvatars = new Map<string, { accountId?: string; promise: Promise<string | null> }>()
+const accountStates = new Map<string, AccountState>()
+const metadataCache = new Map<string, MetadataEntry>()
+const pendingMetadata = new Map<string, Promise<AccountTextures>>()
+const refreshUrls = new Set<string>()
 const cacheRevision = ref(0)
+
+function accountState(accountId: string): AccountState {
+  let state = accountStates.get(accountId)
+  if (!state) {
+    state = { revision: ref(0), identity: '', shouldRefresh: false, preparedUrls: new Set(), urls: new Set() }
+    accountStates.set(accountId, state)
+  }
+  return state
+}
+
+function currentAccountRequest(accountId: string): () => boolean {
+  const globalRevision = cacheRevision.value
+  const state = accountId ? accountState(accountId) : null
+  const revision = state?.revision.value
+  return () =>
+    globalRevision === cacheRevision.value &&
+    (!state || (accountStates.get(accountId) === state && state.revision.value === revision))
+}
+
+export function getAvatarRevision(accountId: string): string {
+  return `${cacheRevision.value}:${accountId ? accountState(accountId).revision.value : 0}`
+}
+
+function limitCache<T>(cache: Map<string, T>, key: string, value: T): void {
+  cache.delete(key)
+  cache.set(key, value)
+  if (cache.size > MAX_CACHE_ENTRIES) cache.delete(cache.keys().next().value!)
+}
 
 function hashCode(value: string): number {
   let hash = 0
@@ -28,19 +76,78 @@ function hashCode(value: string): number {
   return hash
 }
 
-function setCached(cache: Map<string, CacheEntry>, key: string, url: string): void {
-  if (cache.size >= MAX_CACHE_ENTRIES) {
-    const oldest = [...cache.entries()].sort((left, right) => left[1].timestamp - right[1].timestamp)[0]
-    if (oldest) cache.delete(oldest[0])
-  }
-  cache.set(key, { url, timestamp: Date.now() })
+function setCached(
+  cache: Map<string, CacheEntry>,
+  key: string,
+  url: string | null,
+  ttl = CACHE_TTL,
+  accountId?: string
+): void {
+  limitCache(cache, key, { url, expiresAt: Date.now() + ttl, accountId })
 }
 
-function getCached(cache: Map<string, CacheEntry>, key: string): string | null {
+function getCached(cache: Map<string, CacheEntry>, key: string): CacheEntry | undefined {
   const entry = cache.get(key)
-  if (entry && Date.now() - entry.timestamp < CACHE_TTL) return entry.url
+  if (entry && Date.now() < entry.expiresAt) {
+    cache.delete(key)
+    cache.set(key, entry)
+    return entry
+  }
   cache.delete(key)
-  return null
+  return undefined
+}
+
+function markTextureRefresh(url: string, restart = false): void {
+  if (!url || url.startsWith('data:') || url.startsWith('blob:') || (refreshUrls.has(url) && !restart)) return
+  refreshUrls.add(url)
+  textureCache.delete(url)
+  pendingTextures.delete(url)
+}
+
+function invalidateAccount(accountId: string, shouldRefresh: boolean): void {
+  const state = accountState(accountId)
+  state.revision.value += 1
+  state.shouldRefresh = shouldRefresh
+  state.preparedUrls.clear()
+  metadataCache.delete(accountId)
+  pendingMetadata.delete(accountId)
+  for (const [key, entry] of avatarCache) if (entry.accountId === accountId) avatarCache.delete(key)
+  for (const [key, entry] of pendingAvatars) if (entry.accountId === accountId) pendingAvatars.delete(key)
+  if (shouldRefresh) for (const url of state.urls) markTextureRefresh(url, true)
+}
+
+function accountIdentity(account: MinecraftAccount): string {
+  return JSON.stringify([
+    account.type,
+    account.uuid || account.alias,
+    account.auth_server,
+    account.provider,
+    account.skinUrl,
+    account.skinId,
+  ])
+}
+
+export function reconcileAvatarAccounts(snapshot: AccountChangedEvent): void {
+  const accounts = new Map(snapshot.accounts.map((account) => [account.id, account]))
+  const invalidated = new Set(snapshot.textureInvalidatedAccountIds)
+  for (const [accountId, state] of accountStates) {
+    if (!accounts.has(accountId)) {
+      invalidateAccount(accountId, false)
+      accountStates.delete(accountId)
+      continue
+    }
+    const identity = accountIdentity(accounts.get(accountId)!)
+    if (invalidated.has(accountId) || (state.identity && state.identity !== identity))
+      invalidateAccount(accountId, invalidated.has(accountId))
+    state.identity = identity
+  }
+  for (const [accountId, account] of accounts) {
+    if (!accountStates.has(accountId)) {
+      const state = accountState(accountId)
+      state.identity = accountIdentity(account)
+      state.shouldRefresh = invalidated.has(accountId)
+    }
+  }
 }
 
 export function clearAvatarCache(): void {
@@ -49,6 +156,10 @@ export function clearAvatarCache(): void {
   textureCache.clear()
   pendingTextures.clear()
   pendingAvatars.clear()
+  metadataCache.clear()
+  pendingMetadata.clear()
+  accountStates.clear()
+  refreshUrls.clear()
 }
 
 export function loadAvatarImage(url: string): Promise<HTMLImageElement | null> {
@@ -61,27 +172,85 @@ export function loadAvatarImage(url: string): Promise<HTMLImageElement | null> {
   })
 }
 
-export async function fetchTextureDataUrl(url: string): Promise<string | null> {
+export async function fetchTextureDataUrl(url: string, shouldRefresh = false): Promise<string | null> {
+  url = url.trim()
   if (!url) return null
   if (url.startsWith('data:') || url.startsWith('blob:')) return url
+  if (shouldRefresh) markTextureRefresh(url)
   const cached = getCached(textureCache, url)
-  if (cached) return cached
+  if (cached) return cached.url
   if (!backend.runtime.isAvailable) return url
   const pending = pendingTextures.get(url)
   if (pending) return pending
   const revision = cacheRevision.value
-  const request = (async () => {
-    const response = await backend.command('image_fetch_data_url', { url })
-    const dataUrl = response.success ? response.data?.dataUrl : null
-    if (dataUrl && revision === cacheRevision.value) setCached(textureCache, url, dataUrl)
-    return dataUrl || null
-  })()
+  const request = Promise.resolve().then(async () => {
+    try {
+      const response = await backend.command(
+        'image_fetch_data_url',
+        refreshUrls.has(url) ? { url, refresh: true } : { url }
+      )
+      const dataUrl = (response.success ? response.data?.dataUrl : null) || null
+      if (revision === cacheRevision.value && pendingTextures.get(url) === request) {
+        const isStale = !!response.data?.stale
+        setCached(textureCache, url, dataUrl, !dataUrl || isStale ? RETRY_TTL : CACHE_TTL)
+        if (dataUrl && !isStale) refreshUrls.delete(url)
+      }
+      return dataUrl
+    } catch (reason) {
+      if (revision === cacheRevision.value && pendingTextures.get(url) === request)
+        setCached(textureCache, url, null, RETRY_TTL)
+      console.warn('[Avatar] 皮肤图片读取失败，稍后重试:', reason)
+      return null
+    }
+  })
   pendingTextures.set(url, request)
   try {
     return await request
   } finally {
     if (pendingTextures.get(url) === request) pendingTextures.delete(url)
   }
+}
+
+export async function fetchAccountTextures(accountId: string): Promise<AccountTextures> {
+  if (!accountId) return {}
+  const cached = metadataCache.get(accountId)
+  if (cached && cached.expiresAt > Date.now()) return cached.textures
+  const pending = pendingMetadata.get(accountId)
+  if (pending) return pending
+  const isCurrent = currentAccountRequest(accountId)
+  const request = Promise.resolve().then(async () => {
+    let textures: AccountTextures = {}
+    try {
+      const response = await backend.command('accounts_texture_urls', { account_id: accountId })
+      if (response.success && response.data) textures = response.data
+    } catch (reason) {
+      console.warn('[Avatar] 账户材质读取失败，稍后重试:', reason)
+    }
+    if (isCurrent() && pendingMetadata.get(accountId) === request) {
+      limitCache(metadataCache, accountId, {
+        textures,
+        expiresAt: Date.now() + (textures.skinUrl ? CACHE_TTL : RETRY_TTL),
+      })
+    }
+    return textures
+  })
+  pendingMetadata.set(accountId, request)
+  try {
+    return await request
+  } finally {
+    if (pendingMetadata.get(accountId) === request) pendingMetadata.delete(accountId)
+  }
+}
+
+export function fetchAccountTextureDataUrl(accountId: string, url: string): Promise<string | null> {
+  const state = accountState(accountId)
+  url = url.trim()
+  if (url) state.urls.add(url)
+  if (state.shouldRefresh && !state.preparedUrls.has(url)) {
+    markTextureRefresh(url)
+    state.preparedUrls.add(url)
+  }
+  return fetchTextureDataUrl(url)
 }
 
 export async function renderSkinAvatar(skinUrl: string, size: number): Promise<string | null> {
@@ -118,17 +287,6 @@ function defaultSkin(identifier: string): string {
   return Math.abs(hashCode(identifier)) % 2 === 0 ? DEFAULT_SKINS.steve : DEFAULT_SKINS.alex
 }
 
-async function resolveAuthlibSkinUrl(accountId: string): Promise<string | null> {
-  try {
-    const response = await backend.command('accounts_texture_urls', { account_id: accountId })
-    const skinUrl = response.success ? response.data?.skinUrl : null
-    return typeof skinUrl === 'string' && skinUrl.trim() ? skinUrl : null
-  } catch (reason) {
-    console.warn('[Avatar] 外置登录皮肤读取失败，使用默认皮肤:', reason)
-    return null
-  }
-}
-
 export function useAvatarRenderer() {
   const loading = ref(false)
   const error = ref(false)
@@ -144,33 +302,41 @@ export function useAvatarRenderer() {
     loading.value = true
     error.value = false
     const identifier = uuid?.trim() || username?.trim() || 'Player'
-    const key = `${AVATAR_RENDER_VERSION}:${accountId || identifier}:${skinUrl || ''}:${size}`
+    const key = JSON.stringify([AVATAR_RENDER_VERSION, accountId, accountType, identifier, skinUrl?.trim(), size])
     try {
       const cached = getCached(avatarCache, key)
-      if (cached) return cached
+      if (cached) return cached.url
       const pending = pendingAvatars.get(key)
-      if (pending) return await pending
-      const revision = cacheRevision.value
+      if (pending) return await pending.promise
+      const isCurrent = currentAccountRequest(accountId || '')
       const request = (async () => {
         let texture = skinUrl?.trim()
         if (!texture && accountId && accountType === 'authlib') {
-          texture = (await resolveAuthlibSkinUrl(accountId)) || undefined
+          texture = (await fetchAccountTextures(accountId)).skinUrl?.trim()
         }
-        const resolved = texture || defaultSkin(identifier)
-        const avatar = await renderSkinAvatar(resolved, size)
-        if (avatar) {
-          if (revision === cacheRevision.value) setCached(avatarCache, key, avatar)
-          return avatar
-        }
-        return renderSkinAvatar(defaultSkin(identifier), size)
+        if (!isCurrent()) return null
+        const resolved = texture
+          ? await (accountId ? fetchAccountTextureDataUrl(accountId, texture) : fetchTextureDataUrl(texture))
+          : defaultSkin(identifier)
+        if (!isCurrent()) return null
+        const avatar = resolved ? await renderSkinAvatar(resolved, size) : null
+        const fallback = avatar || (await renderSkinAvatar(defaultSkin(identifier), size))
+        if (!isCurrent()) return null
+        const textureExpiry = texture ? getCached(textureCache, texture)?.expiresAt : undefined
+        const isRetry =
+          !avatar ||
+          (!texture && accountType === 'authlib') ||
+          (textureExpiry !== undefined && textureExpiry <= Date.now() + RETRY_TTL)
+        if (fallback) setCached(avatarCache, key, fallback, isRetry ? RETRY_TTL : CACHE_TTL, accountId)
+        return fallback
       })()
-      pendingAvatars.set(key, request)
+      pendingAvatars.set(key, { accountId, promise: request })
       try {
         const avatar = await request
         if (!avatar) error.value = true
         return avatar
       } finally {
-        if (pendingAvatars.get(key) === request) pendingAvatars.delete(key)
+        if (pendingAvatars.get(key)?.promise === request) pendingAvatars.delete(key)
       }
     } catch (reason) {
       console.warn('[Avatar] 前端头像渲染失败，使用默认皮肤:', reason)

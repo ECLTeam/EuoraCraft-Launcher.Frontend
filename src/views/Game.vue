@@ -582,13 +582,13 @@ import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAccountManager } from '@/composables/useAccountManager'
+import { fetchAccountTextures } from '@/composables/useAvatarRenderer'
 import { useInstanceManager } from '@/composables/useInstanceManager'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalLaunchProgress } from '@/composables/useLaunchProgress'
 import { useRecentInstances, type RecentInstance } from '@/composables/useRecentInstances'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
-import { accountsApi } from '@/features/accounts/api/accountsApi'
 import MicrosoftLoginModal from '@/features/accounts/components/MicrosoftLoginModal.vue'
 import WardrobeModal from '@/features/accounts/components/WardrobeModal.vue'
 import { useGameInfoCard } from '@/features/game-home/composables/useGameInfoCard'
@@ -748,7 +748,8 @@ async function openAccountDetails(account: MinecraftAccount): Promise<void> {
   detailTextures.value = null
   showAccountDetailsModal.value = true
   try {
-    detailTextures.value = await accountsApi.textureUrls(account.id)
+    const textures = await fetchAccountTextures(account.id)
+    if (showAccountDetailsModal.value && detailAccount.value?.id === account.id) detailTextures.value = textures
   } catch {
     // 材质读取失败时仍可查看基础账户信息
   }

@@ -314,7 +314,12 @@ import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
-import { clearAvatarCache, fetchTextureDataUrl } from '@/composables/useAvatarRenderer'
+import {
+  fetchAccountTextures,
+  fetchAccountTextureDataUrl,
+  fetchTextureDataUrl,
+  getAvatarRevision,
+} from '@/composables/useAvatarRenderer'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { useUiSkin } from '@/composables/useUiSkin'
@@ -370,7 +375,10 @@ const refreshingCapes = ref(false)
 const showEditModal = ref(false)
 const showUploadModal = ref(false)
 const showOptionsModal = ref(false)
-const accountTextureRequests = useRequestScope(() => `${props.visible}\0${targetAccountId.value}`)
+const targetTextureRevision = computed(() => getAvatarRevision(targetAccountId.value || ''))
+const accountTextureRequests = useRequestScope(
+  () => `${props.visible}\0${targetAccountId.value}\0${targetTextureRevision.value}`
+)
 const localTextureRequests = useRequestScope(() => `${props.visible}\0${targetAccountId.value}`)
 const wardrobeRequests = useRequestScope(() => String(props.visible))
 
@@ -439,15 +447,15 @@ async function loadTargetTextures(): Promise<void> {
   officialCapeUrls.value = {}
   if (!accountId) return
   try {
-    const textures = await accountsApi.textureUrls(accountId)
+    const textures = await fetchAccountTextures(accountId)
     if (!isCurrent()) return
-    const capeUrl = (await fetchTextureDataUrl(textures.capeUrl || '')) || ''
+    const capeUrl = (await fetchAccountTextureDataUrl(accountId, textures.capeUrl || '')) || ''
     if (!isCurrent()) return
     const capeEntries = await Promise.all(
       officialCapes.value.map(async (cape) => [cape.id, (await fetchTextureDataUrl(cape.url)) || ''] as const)
     )
     if (!isCurrent()) return
-    const skinUrl = (await fetchTextureDataUrl(textures.skinUrl || '')) || ''
+    const skinUrl = (await fetchAccountTextureDataUrl(accountId, textures.skinUrl || '')) || ''
     if (!isCurrent()) return
     accountModel.value = textures.skinModel ?? 'classic'
     accountCapeUrl.value = capeUrl
@@ -597,7 +605,6 @@ async function applySkin(): Promise<void> {
   applying.value = true
   try {
     await accountsApi.applyWardrobeSkin(selectedLocal.value.id, targetAccountId.value)
-    clearAvatarCache()
     emit('accountsChanged')
     await loadTargetTextures()
     showUploadModal.value = false
@@ -615,7 +622,6 @@ async function resetSkin(): Promise<void> {
   try {
     await accountsApi.resetMicrosoftSkin(targetAccountId.value)
     selectedSkinUrl.value = ''
-    clearAvatarCache()
     emit('accountsChanged')
     await loadTargetTextures()
     showOptionsModal.value = false
@@ -702,7 +708,7 @@ watch(
   }
 )
 
-watch(targetAccountId, loadTargetTextures)
+watch([targetAccountId, targetTextureRevision], loadTargetTextures)
 
 async function downloadSkin(): Promise<void> {
   if (!targetAccountId.value || !canDownloadSkin.value) return

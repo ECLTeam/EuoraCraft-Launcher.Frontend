@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { accountsQuery, invalidateAccounts, setAccountsSnapshot } from '@/app/data'
 import { useAsyncState } from '@/composables/useAsyncState'
+import { reconcileAvatarAccounts } from '@/composables/useAvatarRenderer'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import type {
   AuthProvider,
@@ -86,6 +87,7 @@ export const useAccountStore = defineStore('accounts', () => {
             // 账户变更发生在旧请求途中时，丢弃旧快照并合并执行一次后续刷新。
             if (reloadRequested) continue
             const loadedAccounts = deduplicateAccounts(result.accounts ?? [], result.current?.id)
+            reconcileAvatarAccounts({ ...result, accounts: loadedAccounts, textureInvalidatedAccountIds: [] })
             accounts.value = loadedAccounts
             currentAccount.value = result.current
               ? (loadedAccounts.find((account) => account.id === result.current?.id) ?? result.current)
@@ -120,6 +122,7 @@ export const useAccountStore = defineStore('accounts', () => {
     if (loadPromise) reloadRequested = true
     setAccountsSnapshot(result)
     const snapshot = deduplicateAccounts(result.accounts ?? [], result.current?.id)
+    reconcileAvatarAccounts({ ...result, accounts: snapshot, textureInvalidatedAccountIds: [] })
     accounts.value = snapshot
     currentAccount.value = result.current
       ? (snapshot.find((account) => account.id === result.current?.id) ?? result.current)

@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, type CSSProperties } from 'vue'
-import { useAvatarRenderer } from '@/composables/useAvatarRenderer'
+import { getAvatarRevision, useAvatarRenderer } from '@/composables/useAvatarRenderer'
 
 defineOptions({ name: 'AvatarRenderer' })
 
@@ -38,7 +38,8 @@ interface Props {
 }
 
 const avatarUrl = ref<string>('')
-const { loading, error, renderAvatar, cacheRevision } = useAvatarRenderer()
+const { loading, error, renderAvatar } = useAvatarRenderer()
+const cacheRevision = computed(() => getAvatarRevision(props.accountId))
 let renderRequest = 0
 
 const containerStyle = computed<CSSProperties>(() => ({

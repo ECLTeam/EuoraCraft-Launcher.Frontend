@@ -7,6 +7,56 @@ import { clearAvatarCache, fetchTextureDataUrl, renderSkinAvatar, useAvatarRende
 vi.mock('@/api/client', () => ({ default: { command: vi.fn(), runtime: { isAvailable: true } } }))
 
 describe('renderSkinAvatar', () => {
+  it('同一远程皮肤的不同尺寸头像共用缓存接口，不直接加载远程 URL', async () => {
+    const loaded: string[] = []
+    class MockImage {
+      naturalWidth = 64
+      naturalHeight = 64
+      onload: (() => void) | null = null
+      set src(value: string) {
+        loaded.push(value)
+        queueMicrotask(() => this.onload?.())
+      }
+    }
+    vi.stubGlobal('Image', MockImage)
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D)
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,avatar')
+    vi.mocked(backend.command).mockResolvedValue({ success: true, data: { dataUrl: 'data:image/png;base64,skin' } })
+    const renderer = useAvatarRenderer()
+    await Promise.all(
+      [32, 64].map((size) =>
+        renderer.renderAvatar('uuid', 'Player', size, 'https://example.com/skin.png', 'account', 'microsoft')
+      )
+    )
+    expect(backend.command).toHaveBeenCalledTimes(1)
+    expect(backend.command).toHaveBeenCalledWith('image_fetch_data_url', { url: 'https://example.com/skin.png' })
+    expect(loaded).toEqual(['data:image/png;base64,skin', 'data:image/png;base64,skin'])
+  })
+
+  it('同一外置账户的不同尺寸并发只查询一次材质元数据', async () => {
+    class MockImage {
+      naturalWidth = 64
+      naturalHeight = 64
+      onload: (() => void) | null = null
+      set src(_value: string) {
+        queueMicrotask(() => this.onload?.())
+      }
+    }
+    vi.stubGlobal('Image', MockImage)
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      drawImage: vi.fn(),
+    } as unknown as CanvasRenderingContext2D)
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,avatar')
+    vi.mocked(backend.command).mockResolvedValue({ success: true, data: { skinUrl: 'data:image/png;base64,skin' } })
+    const renderer = useAvatarRenderer()
+    await Promise.all(
+      [32, 64].map((size) => renderer.renderAvatar('uuid', 'Player', size, undefined, 'auth', 'authlib'))
+    )
+    expect(backend.command).toHaveBeenCalledTimes(1)
+  })
+
   it('相同账户属性未变化时，清理缓存也会自动重绘已显示头像', async () => {
     class MockImage {
       naturalWidth = 64
@@ -40,6 +90,7 @@ describe('renderSkinAvatar', () => {
         })
     )
     const old = fetchTextureDataUrl('https://example.com/skin.png')
+    await flushPromises()
     clearAvatarCache()
     vi.mocked(backend.command).mockImplementationOnce(
       () =>
@@ -48,6 +99,7 @@ describe('renderSkinAvatar', () => {
         })
     )
     const fresh = fetchTextureDataUrl('https://example.com/skin.png')
+    await flushPromises()
     finishOld({ success: true, data: { dataUrl: 'data:image/png;base64,old' } })
     await old
     const same = fetchTextureDataUrl('https://example.com/skin.png')

@@ -91,6 +91,10 @@ export interface AccountListData {
   current: MinecraftAccount | null
 }
 
+export interface AccountChangedEvent extends AccountListData {
+  textureInvalidatedAccountIds: string[]
+}
+
 export type MicrosoftLoginStage =
   'waiting_authorization' | 'authorization_confirmed' | 'minecraft_token' | 'profile' | 'saving' | 'completed'
 
@@ -159,6 +163,8 @@ export interface ImageSelection {
 export interface ImageDataUrl {
   dataUrl?: string
   base64?: string
+  cached?: boolean
+  stale?: boolean
 }
 
 export interface ImageSaveUrlResult {

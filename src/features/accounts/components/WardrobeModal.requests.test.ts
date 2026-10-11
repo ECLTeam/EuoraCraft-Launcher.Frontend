@@ -16,7 +16,9 @@ vi.mock('@/features/accounts/api/accountsApi', () => ({ accountsApi: mocks }))
 vi.mock('@/features/accounts/stores/accountStore', () => ({ useAccountStore: () => ({}) }))
 vi.mock('@/composables/useAvatarRenderer', () => ({
   fetchTextureDataUrl: mocks.fetchTexture,
-  clearAvatarCache: vi.fn(),
+  fetchAccountTextures: mocks.textureUrls,
+  getAvatarRevision: () => '0',
+  fetchAccountTextureDataUrl: (_accountId: string, url: string) => mocks.fetchTexture(url),
 }))
 vi.mock('@/composables/useLauncherMessage', () => ({
   useLauncherMessage: () => ({ warning: mocks.warning, error: mocks.warning }),
