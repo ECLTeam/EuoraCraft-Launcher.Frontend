@@ -45,7 +45,7 @@ describe('Java 管理页卡片承托', () => {
     expect(wrapper.findAll('[data-theme-component="card"]')).toHaveLength(1)
     expect(card.find('.java-manager-toolbar').exists()).toBe(true)
     expect(card.find('input').exists()).toBe(true)
-    expect(card.find('.n-empty').exists()).toBe(true)
+    expect(card.find('.ui-empty-state').exists()).toBe(true)
   })
 
   it('切换下载视图后筛选、来源和无包提示仍在同一卡片内', async () => {
@@ -60,13 +60,13 @@ describe('Java 管理页卡片承托', () => {
     const content = wrapper.get('[data-theme-component="card"]')
     expect(content.find('.java-catalog-controls').exists()).toBe(true)
     expect(content.text()).toContain('Eclipse Temurin')
-    expect(content.find('.n-empty').exists()).toBe(true)
+    expect(content.find('.ui-empty-state').exists()).toBe(true)
   })
 
   it('供弹窗复用的管理组件自身不增加卡片', async () => {
     const wrapper = await render(JavaManagerPanel)
     expect(wrapper.find('[data-theme-component="card"]').exists()).toBe(false)
     expect(wrapper.find('.java-manager-toolbar').exists()).toBe(true)
-    expect(wrapper.find('.n-empty').exists()).toBe(true)
+    expect(wrapper.find('.ui-empty-state').exists()).toBe(true)
   })
 })

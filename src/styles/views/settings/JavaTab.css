@@ -24,8 +24,8 @@
   padding: var(--s-lg);
 }
 
-.java-settings :deep(.java-manager-content > .n-empty),
+.java-settings :deep(.java-manager-content > .java-manager-empty),
 .java-settings :deep(.java-manager-content > .ui-loading) {
-  min-height: 200px;
+  min-height: 180px;
   justify-content: center;
 }
