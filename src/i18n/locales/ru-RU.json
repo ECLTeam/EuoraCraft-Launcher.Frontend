@@ -1728,6 +1728,7 @@
     "detailGameVersion": "Версия игры",
     "detailLoader": "Загрузчик",
     "detailVersions": "Доступные версии",
+    "detailLoadingVersions": "Загрузка версий…",
     "detailFileCount": "Файлов: {count}",
     "detailNoFiles": "Нет файлов, соответствующих текущим фильтрам"
   },

@@ -1614,6 +1614,7 @@
     "detailGameVersion": "遊戲版本",
     "detailLoader": "載入器",
     "detailVersions": "可用版本",
+    "detailLoadingVersions": "正在載入版本…",
     "detailFileCount": "{count} 個檔案",
     "detailNoFiles": "目前條件下沒有可用檔案"
   },

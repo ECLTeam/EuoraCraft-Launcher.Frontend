@@ -7,10 +7,11 @@ import backend from '@/api/client'
 import { globalCache } from '@/cache'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import ResourceInstanceSelect from '@/components/resources/ResourceInstanceSelect.vue'
+import UiLoading from '@/components/ui/Loading.vue'
 import type { DownloadResourceType } from '@/features/download/model/downloadQueries'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
-import type { ModSearchItem, ModSearchResult } from '@/types/mods'
+import type { ModSearchItem, ModSearchResult, ModVersion } from '@/types/mods'
 import OnlineModSearch from './OnlineModSearch.vue'
 
 const mocks = vi.hoisted(() => ({
@@ -21,6 +22,7 @@ const mocks = vi.hoisted(() => ({
   ready: null as Ref<boolean> | null,
   instance: null as Ref<ScannedVersion | null> | null,
   openOnline: vi.fn(),
+  error: vi.fn(),
 }))
 vi.mock('@/composables/useResourceInstallTarget', async (original) => ({
   ...(await original<object>()),
@@ -56,7 +58,7 @@ vi.mock('@/features/download/model/downloadQueries', () => ({
   getResourceSourceConfig: async () => ({ curseforge: { available: true } }),
 }))
 vi.mock('@/composables/useLauncherMessage', () => ({
-  useLauncherMessage: () => ({ error: vi.fn(), warning: vi.fn(), success: vi.fn() }),
+  useLauncherMessage: () => ({ error: mocks.error, warning: vi.fn(), success: vi.fn() }),
 }))
 
 function row(name: string, alternatives = 1): ModSearchItem {
@@ -97,6 +99,19 @@ function result(name: string, page = 1, extra: Partial<ModSearchResult> = {}): M
     ...extra,
   }
 }
+function version(id = 'file'): ModVersion {
+  return {
+    id,
+    projectId: 'first',
+    name: id,
+    versionNumber: '3.0',
+    gameVersions: ['1.21.8'],
+    loaders: ['fabric', 'neoforge'],
+    filename: `${id}.jar`,
+    downloads: 1,
+    releaseType: 'release',
+  }
+}
 async function mountSearch(resourceType: DownloadResourceType = 'mod') {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -110,7 +125,7 @@ async function mountSearch(resourceType: DownloadResourceType = 'mod') {
       stubs: {
         Button: { props: ['disabled'], template: '<button :disabled="disabled"><slot /></button>' },
         Scrollbar: { template: '<div><slot /></div>' },
-        UiLoading: { props: ['show'], template: '<div :data-loading="show"><slot /></div>' },
+        UiLoading: false,
         Alert: { template: '<div class="test-alert"><slot /></div>' },
         FullscreenModal: {
           props: ['visible'],
@@ -179,7 +194,7 @@ describe('双平台搜索页面', () => {
     expect(wrapper.text()).toContain('双平台失败')
     expect(button(wrapper, '重试').exists()).toBe(true)
     expect(wrapper.get('.mod-row-name').text()).toBe('first')
-    expect(wrapper.get('[data-loading]').attributes('data-loading')).toBe('false')
+    expect(wrapper.findComponent(UiLoading).props('show')).toBe(false)
     wrapper.unmount()
   })
 
@@ -205,12 +220,12 @@ describe('双平台搜索页面', () => {
     await flushPromises()
     finishOld(result('old'))
     await flushPromises()
-    expect(wrapper.get('[data-loading]').attributes('data-loading')).toBe('true')
+    expect(wrapper.findComponent(UiLoading).props('show')).toBe(true)
     expect(wrapper.get('.mod-row-name').text()).toBe('first')
     finishNew(result('new'))
     await flushPromises()
     expect(wrapper.get('.mod-row-name').text()).toBe('new')
-    expect(wrapper.get('[data-loading]').attributes('data-loading')).toBe('false')
+    expect(wrapper.findComponent(UiLoading).props('show')).toBe(false)
     wrapper.unmount()
   })
 
@@ -223,6 +238,167 @@ describe('双平台搜索页面', () => {
     expect(mocks.search).toHaveBeenLastCalledWith(
       expect.objectContaining({ source: 'all', page: 1, session_id: 'session-1' })
     )
+    wrapper.unmount()
+  })
+
+  it.each(['mod', 'resourcepack', 'shaderpack', 'datapack', 'modpack', 'world'] as const)(
+    '%s 详情只在版本区加载，响应为空前不显示文件数量或空提示',
+    async (resourceType) => {
+      let finish!: (files: ModVersion[]) => void
+      mocks.versions.mockImplementationOnce(
+        () =>
+          new Promise<ModVersion[]>((resolve) => {
+            finish = resolve
+          })
+      )
+      mocks.popular.mockResolvedValue(result('first', 1, { items: [row('first', 2)] }))
+      mocks.search.mockResolvedValue(result('first', 1, { items: [row('first', 2)] }))
+      const { wrapper } = await mountSearch(resourceType)
+      await wrapper.get('.mod-row').trigger('click')
+      await flushPromises()
+      const detail = wrapper.get('.test-details')
+      expect(detail.get('.mod-intro-heading').text()).toContain('first')
+      expect(detail.find('.mod-filter-section').exists()).toBe(true)
+      expect(detail.find('.ui-loading--overlay').exists()).toBe(false)
+      expect(detail.get('.mod-version-section .ui-loading--block').text()).toBe('正在加载版本…')
+      expect(detail.get('[role="status"]').attributes('aria-label')).toBe('正在加载版本…')
+      expect(detail.find('.version-result-count, .version-hint, .version-list').exists()).toBe(false)
+      const selects = wrapper.findAllComponents(NSelect)
+      expect(
+        selects.find((component) => component.element.closest('.detail-game-version-field'))!.props('disabled')
+      ).toBe(true)
+      expect(
+        selects.find((component) => component.classes().includes('detail-source-select'))!.props('disabled')
+      ).toBeFalsy()
+      if (resourceType === 'mod') {
+        expect(selects.find((component) => component.element.closest('.detail-loader-field'))!.props('disabled')).toBe(
+          true
+        )
+      }
+      finish([])
+      await flushPromises()
+      expect(detail.find('.ui-loading--block').exists()).toBe(false)
+      expect(detail.get('.version-result-count').text()).toBe('0 个文件')
+      expect(detail.get('.version-hint').text()).toBe('当前条件下没有可用文件')
+      expect(
+        selects.find((component) => component.element.closest('.detail-game-version-field'))!.props('disabled')
+      ).toBe(false)
+      wrapper.unmount()
+    }
+  )
+
+  it('版本已返回但项目信息仍在读取时保持局部加载', async () => {
+    let finishInfo!: (info: { id: string; title: string; loaders: string[]; gameVersions: string[] }) => void
+    mocks.info.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finishInfo = resolve
+        })
+    )
+    mocks.versions.mockResolvedValueOnce([version()])
+    const { wrapper } = await mountSearch()
+    await wrapper.get('.mod-row').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(true)
+    expect(wrapper.find('.test-details .version-list, .version-hint, .version-result-count').exists()).toBe(false)
+    finishInfo({ id: 'first', title: 'first', loaders: [], gameVersions: [] })
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(false)
+    expect(wrapper.get('.version-result-count').text()).toBe('1 个文件')
+    expect(wrapper.find('.version-list').exists()).toBe(true)
+    expect(wrapper.find('.version-hint').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('加载中切换来源，旧响应不能覆盖新数据或提前结束局部加载', async () => {
+    let finishOld!: (files: ModVersion[]) => void
+    let finishNew!: (files: ModVersion[]) => void
+    mocks.popular.mockResolvedValue(result('first', 1, { items: [row('first', 2)] }))
+    mocks.versions
+      .mockImplementationOnce(
+        () =>
+          new Promise<ModVersion[]>((resolve) => {
+            finishOld = resolve
+          })
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise<ModVersion[]>((resolve) => {
+            finishNew = resolve
+          })
+      )
+    const { wrapper } = await mountSearch()
+    await wrapper.get('.mod-row').trigger('click')
+    await flushPromises()
+    const source = wrapper
+      .findAllComponents(NSelect)
+      .find((component) => component.classes().includes('detail-source-select'))!
+    source.vm.$emit('update:value', 'curseforge:123')
+    await flushPromises()
+    finishOld([version('old')])
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(true)
+    expect(wrapper.find('.test-details .version-list, .version-hint, .version-result-count').exists()).toBe(false)
+    finishNew([version('new')])
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(false)
+    expect(wrapper.get('.version-result-count').text()).toBe('1 个文件')
+    await wrapper.get('.version-group-header').trigger('click')
+    expect(wrapper.get('.version-file-row').text()).toContain('new.jar')
+    expect(wrapper.text()).not.toContain('old.jar')
+    wrapper.unmount()
+  })
+
+  it('加载中选择实例，返回后按当前实例恢复版本和加载器筛选', async () => {
+    let finish!: (files: ModVersion[]) => void
+    mocks.versions.mockImplementationOnce(
+      () =>
+        new Promise<ModVersion[]>((resolve) => {
+          finish = resolve
+        })
+    )
+    const { wrapper } = await mountSearch()
+    await wrapper.get('.mod-row').trigger('click')
+    await flushPromises()
+    mocks.instance!.value = {
+      path: 'D:/Fixture',
+      versionId: 'fixture',
+      vanillaName: '1.21.8',
+      primaryLoader: 'neoforge',
+      displayName: 'Fixture',
+    } as ScannedVersion
+    await flushPromises()
+    finish([version()])
+    await flushPromises()
+    const selects = wrapper.findAllComponents(NSelect)
+    expect(selects.find((component) => component.element.closest('.detail-game-version-field'))!.props('value')).toBe(
+      '1.21.8'
+    )
+    const loader = selects.find((component) => component.element.closest('.detail-loader-field'))!
+    expect(loader.props('value')).toBe('neoforge')
+    expect(loader.props('disabled')).toBe(false)
+    expect(wrapper.findAll('.version-group-header')).toHaveLength(1)
+    expect(wrapper.find('.detail-target-hint').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('详情请求失败后结束局部加载并保留原错误反馈', async () => {
+    let fail!: (reason: Error) => void
+    mocks.versions.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          fail = reject
+        })
+    )
+    const { wrapper } = await mountSearch()
+    await wrapper.get('.mod-row').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(true)
+    fail(new Error('读取版本失败'))
+    await flushPromises()
+    expect(wrapper.find('.mod-version-section .ui-loading--block').exists()).toBe(false)
+    expect(mocks.error).toHaveBeenCalledWith('读取版本失败')
+    expect(wrapper.get('.version-hint').text()).toBe('当前条件下没有可用文件')
     wrapper.unmount()
   })
 

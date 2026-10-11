@@ -601,6 +601,12 @@
   overflow: hidden;
 }
 
+.detail-versions-loading {
+  height: auto;
+  min-height: 120px;
+  padding: 20px 16px;
+}
+
 .version-section-heading {
   display: flex;
   align-items: center;

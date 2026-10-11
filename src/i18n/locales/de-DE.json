@@ -1731,6 +1731,7 @@
     "detailGameVersion": "Spielversion",
     "detailLoader": "Modloader",
     "detailVersions": "Verfügbare Versionen",
+    "detailLoadingVersions": "Versionen werden geladen…",
     "detailFileCount": "Dateien: {count}",
     "detailNoFiles": "Keine Dateien entsprechen den aktuellen Filtern"
   },

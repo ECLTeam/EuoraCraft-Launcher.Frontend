@@ -1731,6 +1731,7 @@
     "detailGameVersion": "ゲームバージョン",
     "detailLoader": "ローダー",
     "detailVersions": "利用可能なバージョン",
+    "detailLoadingVersions": "バージョンを読み込み中…",
     "detailFileCount": "{count} 個のファイル",
     "detailNoFiles": "現在の条件に一致するファイルはありません"
   },

@@ -1717,6 +1717,7 @@
     "detailGameVersion": "Game version",
     "detailLoader": "Loader",
     "detailVersions": "Available versions",
+    "detailLoadingVersions": "Loading versions…",
     "detailFileCount": "Files: {count}",
     "detailNoFiles": "No files match the current filters"
   },
