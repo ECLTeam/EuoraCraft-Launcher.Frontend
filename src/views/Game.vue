@@ -481,6 +481,10 @@
                 <span class="account-detail-label">UUID</span>
                 <span class="account-detail-value account-detail-mono">{{ detailAccount.uuid }}</span>
               </div>
+              <div class="account-detail-item">
+                <span class="account-detail-label">{{ t('accountLocator.label') }}</span>
+                <AccountLocatorColor :uuid="detailAccount.uuid" />
+              </div>
               <div v-if="detailAccount.auth_server" class="account-detail-item">
                 <span class="account-detail-label">{{ t('game.authServer') }}</span>
                 <span class="account-detail-value">{{ detailAccount.auth_server }}</span>
@@ -589,6 +593,7 @@ import { globalLaunchProgress } from '@/composables/useLaunchProgress'
 import { useRecentInstances, type RecentInstance } from '@/composables/useRecentInstances'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
+import AccountLocatorColor from '@/features/accounts/components/AccountLocatorColor.vue'
 import MicrosoftLoginModal from '@/features/accounts/components/MicrosoftLoginModal.vue'
 import WardrobeModal from '@/features/accounts/components/WardrobeModal.vue'
 import { useGameInfoCard } from '@/features/game-home/composables/useGameInfoCard'

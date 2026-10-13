@@ -4,6 +4,14 @@
     "loading": "Loading...",
     "delete": "Delete"
   },
+  "accountLocator": {
+    "label": "Default locator color",
+    "copy": "Copy",
+    "copyLabel": "Copy locator color {color}",
+    "copied": "Locator color copied",
+    "copyFailed": "Could not copy. Select and copy the color value manually.",
+    "unavailable": "No valid UUID available"
+  },
   "sidebar": {
     "toggle": "Toggle Sidebar",
     "collapse": "Collapse Sidebar",

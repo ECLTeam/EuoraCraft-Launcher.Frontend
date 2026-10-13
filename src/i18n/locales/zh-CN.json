@@ -4,6 +4,14 @@
     "loading": "加载中...",
     "delete": "删除"
   },
+  "accountLocator": {
+    "label": "定位栏默认颜色",
+    "copy": "复制",
+    "copyLabel": "复制定位栏颜色 {color}",
+    "copied": "已复制定位栏颜色",
+    "copyFailed": "复制失败，请手动选择并复制色值",
+    "unavailable": "暂无可用 UUID"
+  },
   "sidebar": {
     "toggle": "切换侧边栏",
     "collapse": "收起侧边栏",
