@@ -1,13 +1,15 @@
 import { flushPromises, shallowMount, type VueWrapper } from '@vue/test-utils'
 import { NSelect } from 'naive-ui'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref, type Ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import backend from '@/api/client'
+import { pinia } from '@/app/stores'
 import { globalCache } from '@/cache'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import ResourceInstanceSelect from '@/components/resources/ResourceInstanceSelect.vue'
 import UiLoading from '@/components/ui/Loading.vue'
+import { globalModalStack } from '@/composables/useGlobalModalStack'
 import type { DownloadResourceType } from '@/features/download/model/downloadQueries'
 import { i18n } from '@/i18n'
 import type { ScannedVersion } from '@/types/instances'
@@ -23,6 +25,7 @@ const mocks = vi.hoisted(() => ({
   instance: null as Ref<ScannedVersion | null> | null,
   openOnline: vi.fn(),
   error: vi.fn(),
+  downloadToPath: vi.fn(),
 }))
 vi.mock('@/composables/useResourceInstallTarget', async (original) => ({
   ...(await original<object>()),
@@ -48,7 +51,7 @@ vi.mock('@/cache/composable', () => ({
   useAutoRefreshCache: () => ({ data: ref(null), fetchData: vi.fn() }),
 }))
 vi.mock('@/features/mods/api/modApi', () => ({
-  modApi: { search: mocks.search, info: mocks.info, versions: mocks.versions },
+  modApi: { search: mocks.search, info: mocks.info, versions: mocks.versions, downloadToPath: mocks.downloadToPath },
 }))
 vi.mock('@/features/instances/stores/modpackImportStore', () => ({
   useModpackImportStore: () => ({ openOnline: mocks.openOnline }),
@@ -112,25 +115,33 @@ function version(id = 'file'): ModVersion {
     releaseType: 'release',
   }
 }
-async function mountSearch(resourceType: DownloadResourceType = 'mod') {
+async function mountSearch(resourceType: DownloadResourceType = 'mod', realModals = false) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }],
   })
   await router.push('/')
   const wrapper = shallowMount(OnlineModSearch, {
+    attachTo: realModals ? document.body : undefined,
     props: { resourceType },
     global: {
-      plugins: [router, i18n],
+      plugins: [router, i18n, pinia],
       stubs: {
         Button: { props: ['disabled'], template: '<button :disabled="disabled"><slot /></button>' },
         Scrollbar: { template: '<div><slot /></div>' },
         UiLoading: false,
         Alert: { template: '<div class="test-alert"><slot /></div>' },
-        FullscreenModal: {
-          props: ['visible'],
-          template: '<div v-if="visible" class="test-details"><slot /><slot name="footer" /></div>',
-        },
+        FullscreenModal: realModals
+          ? false
+          : {
+              props: ['visible'],
+              template: '<div v-if="visible" class="test-details"><slot /><slot name="footer" /></div>',
+            },
+        ConfirmDialog: realModals ? false : true,
+        Modal: realModals ? false : true,
+        PluginSlotHost: true,
+        transition: !realModals,
+        Teleport: realModals ? false : true,
       },
     },
   })
@@ -143,6 +154,7 @@ function button(wrapper: VueWrapper, label: string) {
 }
 
 describe('双平台搜索页面', () => {
+  afterEach(() => globalModalStack.reset())
   beforeEach(() => {
     globalCache.clear()
     vi.resetAllMocks()
@@ -152,6 +164,53 @@ describe('双平台搜索页面', () => {
     mocks.versions.mockResolvedValue([])
     vi.spyOn(backend, 'command').mockResolvedValue({ success: true, data: { path: null } })
     vi.spyOn(backend.config, 'get').mockResolvedValue({ success: true, data: {} })
+  })
+
+  it('真实安装确认和另存为取消期间详情保持显示，Esc 只关闭确认框', async () => {
+    mocks.versions.mockResolvedValue([version()])
+    const { wrapper } = await mountSearch('mod', true)
+    try {
+      await wrapper.get('.mod-row').trigger('click')
+      await flushPromises()
+      mocks.instance!.value = {
+        path: 'D:/Fixture',
+        versionId: 'fixture',
+        vanillaName: '1.21.8',
+        primaryLoader: 'fabric',
+        displayName: 'Fixture',
+      } as ScannedVersion
+      await flushPromises()
+      const parent = document
+        .querySelector<HTMLElement>('.mod-detail-fullscreen')!
+        .closest<HTMLElement>('.fullscreen-modal')!
+      document.querySelector<HTMLButtonElement>('.version-group-header')!.click()
+      await flushPromises()
+      const trigger = document.querySelector<HTMLButtonElement>('.version-file-row')!
+      trigger.focus()
+      trigger.click()
+      await flushPromises()
+      expect(parent.style.display).not.toBe('none')
+      expect(parent.hasAttribute('inert')).toBe(true)
+      expect(globalModalStack.displayedModalIds.value).toHaveLength(2)
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      await flushPromises()
+      await vi.waitFor(() => expect(parent.hasAttribute('inert')).toBe(false))
+      expect(parent.style.display).not.toBe('none')
+      expect(document.activeElement).toBe(trigger)
+      trigger.click()
+      await flushPromises()
+      const save = [...document.querySelectorAll<HTMLButtonElement>('.modal-footer button')].find((entry) =>
+        entry.textContent?.includes('另存为')
+      )!
+      save.click()
+      await flushPromises()
+      expect(backend.command).toHaveBeenCalledWith('select_save_file', expect.anything())
+      expect(mocks.downloadToPath).not.toHaveBeenCalled()
+      expect(parent.style.display).not.toBe('none')
+      await vi.waitFor(() => expect(parent.hasAttribute('inert')).toBe(false))
+    } finally {
+      wrapper.unmount()
+    }
   })
 
   it('预加载会话后缓存切页，返回第一页仍保留合并来源且不显示虚构总页数', async () => {

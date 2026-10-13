@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import { pinia } from '@/app/stores'
+import { globalModalStack } from '@/composables/useGlobalModalStack'
 import { i18n } from '@/i18n'
 import DevTools from './DevToolsPanel.vue'
 
@@ -47,6 +48,32 @@ function mountDevTools() {
 }
 
 describe('DevTools danger actions', () => {
+  it('真实调试嵌套窗口保留父全屏，关闭父级同时清理子窗口', async () => {
+    const wrapper = mountDevTools()
+    try {
+      const fullscreenButton = wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('dev.fullscreenModal'))!
+      await fullscreenButton.trigger('click')
+      await flushPromises()
+      const parent = document.querySelector<HTMLElement>('.fullscreen-modal')!
+      const trigger = [...parent.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
+        button.textContent?.includes(i18n.global.t('dev.openNested'))
+      )!
+      trigger.click()
+      await flushPromises()
+      expect(parent.style.display).not.toBe('none')
+      expect(parent.hasAttribute('inert')).toBe(true)
+      expect(globalModalStack.displayedModalIds.value).toHaveLength(2)
+      const parentComponent = wrapper.findComponent({ name: 'FullscreenModal' })
+      parentComponent.vm.$emit('update:visible', false)
+      await flushPromises()
+      expect(globalModalStack.hasActiveOverlay.value).toBe(false)
+    } finally {
+      wrapper.unmount()
+      globalModalStack.reset()
+    }
+  })
   it('二次确认后安排还原启动器数据', async () => {
     mocks.resetLauncherData.mockResolvedValue({
       action: 'reset_launcher_data',

@@ -119,6 +119,7 @@
     </InstanceContentState>
     <ConfirmDialog
       v-model:visible="confirmVisible"
+      :parentId="confirmParentId"
       :title="confirmTitle"
       :content="confirmContent"
       :loading="confirmLoading"
@@ -160,7 +161,7 @@
         }}</NButton></template
       >
     </Modal>
-    <Modal v-model:visible="backupsVisible" :title="t('worlds.backups')" width="660px">
+    <Modal ref="backupsModalRef" v-model:visible="backupsVisible" :title="t('worlds.backups')" width="660px">
       <div class="backup-list">
         <div v-for="backupItem in backups" :key="backupItem.id">
           <span
@@ -270,6 +271,7 @@ const editor = reactive({
   spawnZ: 0,
 })
 const backupsVisible = ref(false)
+const backupsModalRef = ref<InstanceType<typeof Modal> | null>(null)
 const backupWorld = ref<WorldEntry | null>(null)
 const backups = ref<Array<{ id: string; createdAt?: string; locked: boolean; automatic: boolean; size: number }>>([])
 const optionsVisible = ref(false)
@@ -437,11 +439,19 @@ async function toggleBackupLock(item: { id: string; locked: boolean }) {
   await manageBackups(backupWorld.value)
 }
 function restoreBackup(item: { id: string }) {
-  if (!backupWorld.value) return
-  openConfirm(t('worlds.restoreWorld'), t('worlds.restoreConfirm'), async () => {
-    await instanceWorkspaceApi.restoreWorldBackup(target.value, backupWorld.value!.id, item.id)
-    message.success(t('operations.submitted'))
-  })
+  const world = backupWorld.value
+  const requestedTarget = target.value
+  if (!world) return
+  openConfirm(
+    t('worlds.restoreWorld'),
+    t('worlds.restoreConfirm'),
+    async () => {
+      await instanceWorkspaceApi.restoreWorldBackup(requestedTarget, world.id, item.id)
+      message.success(t('operations.submitted'))
+    },
+    false,
+    backupsModalRef.value?.modalId
+  )
 }
 async function deleteBackup(item: { id: string }) {
   if (!backupWorld.value) return
@@ -501,13 +511,15 @@ async function chunkbase(world: WorldEntry) {
 }
 
 const confirmVisible = ref(false)
+const confirmParentId = ref<string | undefined>(undefined)
 const confirmTitle = ref('')
 const confirmContent = ref('')
 const confirmDanger = ref(false)
 const confirmLoading = ref(false)
 let confirmAction: (() => Promise<void>) | null = null
 
-function openConfirm(title: string, content: string, action: () => Promise<void>, danger = false) {
+function openConfirm(title: string, content: string, action: () => Promise<void>, danger = false, parentId?: string) {
+  confirmParentId.value = parentId
   confirmTitle.value = title
   confirmContent.value = content
   confirmDanger.value = danger
@@ -534,6 +546,9 @@ watch(
     worlds.value = []
     for (const key of Object.keys(iconUrls)) delete iconUrls[key]
     editorVisible.value = backupsVisible.value = optionsVisible.value = false
+    confirmVisible.value = false
+    confirmAction = null
+    confirmParentId.value = undefined
     void load()
   },
   { immediate: true }

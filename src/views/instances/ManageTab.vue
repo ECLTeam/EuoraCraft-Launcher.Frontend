@@ -42,6 +42,7 @@
     <!-- 确认弹窗 -->
     <ConfirmDialog
       v-model:visible="showConfirmModal"
+      :parentId="confirmParentId"
       :title="confirmTitle"
       :content="confirmContent"
       :loading="confirmLoading"
@@ -114,13 +115,14 @@
 
     <!-- 版本详情全屏弹窗 -->
     <InstanceDetailModal
+      ref="detailModalRef"
       v-model:visible="showDetailModal"
       :version="detailVersion"
       :initialTab="detailInitialTab"
       @launch="handleDetailLaunch"
       @delete="handleDetailDelete"
       @updated="handleProfileChanged"
-      @action="handleInstanceAction"
+      @action="handleDetailAction"
     />
   </div>
 </template>
@@ -186,6 +188,15 @@ const showConfirmModal = ref(false)
 const confirmLoading = ref(false)
 const showDetailModal = ref(false)
 const detailVersion = ref<ScannedVersion | null>(null)
+const detailModalRef = ref<InstanceType<typeof InstanceDetailModal> | null>(null)
+const confirmParentId = ref<string | null>(null)
+const detailRequests = useRequestScope(
+  () => `${showDetailModal.value}\0${detailVersion.value?.path ?? ''}\0${detailVersion.value?.versionId ?? ''}`
+)
+interface DetailModalOrigin {
+  parentId: string
+  isCurrent: () => boolean
+}
 type DetailTab =
   | 'overview'
   | 'mods'
@@ -218,7 +229,13 @@ const rememberSelectedPath = (path: string) => {
   return rememberPathQueue
 }
 
-const openConfirm = (title: string, content: string, action: () => void | Promise<void>) => {
+const openConfirm = (
+  title: string,
+  content: string,
+  action: () => void | Promise<void>,
+  parentId: string | null = null
+) => {
+  confirmParentId.value = parentId
   confirmTitle.value = title
   confirmContent.value = content
   confirmAction.value = action
@@ -628,24 +645,37 @@ const handleDetailLaunch = (version: ScannedVersion) => {
 }
 
 const handleDetailDelete = (version: ScannedVersion) => {
-  handleDelete(version)
+  const origin = detailOperationOrigin()
+  if (origin) handleDelete(version, origin)
 }
 
-const handleDelete = async (version: ScannedVersion) => {
+function detailOperationOrigin(): DetailModalOrigin | null {
+  const parentId = detailModalRef.value?.modalId
+  if (!showDetailModal.value || !parentId) return null
+  return { parentId, isCurrent: detailRequests.begin() }
+}
+
+function handleDetailAction(action: string, version: ScannedVersion) {
+  const origin = detailOperationOrigin()
+  if (origin) return handleInstanceAction(action, version, origin)
+}
+
+const handleDelete = async (version: ScannedVersion, origin?: DetailModalOrigin) => {
   if (!currentPath.value) return
-  openConfirm(t('common.confirm'), t('versions.manage.confirmDeleteVersion', { name: version.versionId }), async () => {
-    try {
+  openConfirm(
+    t('common.confirm'),
+    t('versions.manage.confirmDeleteVersion', { name: version.versionId }),
+    async () => {
       await instanceWorkspaceApi.deleteInstance(workspaceTarget(version))
       message.success(t('versions.manage.versionDeleted', { name: version.versionId }))
+      if (origin?.isCurrent()) showDetailModal.value = false
       await scanCurrentPath(true)
-    } catch (e) {
-      console.error('删除失败:', e)
-      message.error(t('versions.manage.deleteFailed'))
-    }
-  })
+    },
+    origin?.parentId ?? null
+  )
 }
 
-async function handleInstanceAction(action: string, version: ScannedVersion) {
+async function handleInstanceAction(action: string, version: ScannedVersion, origin?: DetailModalOrigin) {
   if (action === 'launch') return handleLaunch(version)
   if (
     [
@@ -669,13 +699,14 @@ async function handleInstanceAction(action: string, version: ScannedVersion) {
     )
     return
   }
-  if (action === 'delete') return handleDelete(version)
+  if (action === 'delete') return handleDelete(version, origin)
   if (action === 'repair') {
     const report = (await instanceWorkspaceApi.checkFiles(workspaceTarget(version))) as {
       issues: unknown[]
       downloadBytes: number
       canRepair: boolean
     }
+    if (origin && !origin.isCurrent()) return
     if (!report.issues.length) return message.success('实例文件完整')
     openConfirm(
       '补全实例文件',
@@ -683,20 +714,26 @@ async function handleInstanceAction(action: string, version: ScannedVersion) {
       async () => {
         await instanceWorkspaceApi.repairFiles(workspaceTarget(version))
         message.success('文件补全任务已创建')
-      }
+      },
+      origin?.parentId ?? null
     )
     return
   }
   if (action === 'clone') {
     const newId = `${version.versionId}-copy`
-    openConfirm('复制实例', `将实例复制为 ${newId}。复制后会重置收藏、隐藏、置顶和运行统计。`, async () => {
-      const response = await backend.command('game_instance_clone', {
-        ...workspaceTarget(version),
-        new_version_id: newId,
-      })
-      if (!response.success) throw new Error(response.message)
-      message.success('实例复制任务已创建')
-    })
+    openConfirm(
+      '复制实例',
+      `将实例复制为 ${newId}。复制后会重置收藏、隐藏、置顶和运行统计。`,
+      async () => {
+        const response = await backend.command('game_instance_clone', {
+          ...workspaceTarget(version),
+          new_version_id: newId,
+        })
+        if (!response.success) throw new Error(response.message)
+        message.success('实例复制任务已创建')
+      },
+      origin?.parentId ?? null
+    )
     return
   }
   if (action === 'export') {

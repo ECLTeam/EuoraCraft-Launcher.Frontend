@@ -2,6 +2,9 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { NDropdown } from 'naive-ui'
 import { createPinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { defineComponent } from 'vue'
+import FullscreenModal from '@/components/modals/FullscreenModal.vue'
+import { globalModalStack } from '@/composables/useGlobalModalStack'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
 import { i18n } from '@/i18n'
 import type { BackendMockState } from '@/test/mockBackend'
@@ -60,6 +63,54 @@ describe('InstanceWorldsTab exact seeds', () => {
     const label = wrapper.findAll('.world-editor label').find((label) => label.text().includes('世界种子'))!
     return { wrapper, input: label.get('input') }
   }
+
+  it('恢复确认保留真实备份列表及实例全屏，关闭父列表级联关闭确认', async () => {
+    vi.spyOn(instanceWorkspaceApi, 'worldBackups').mockResolvedValue([
+      { id: 'backup', createdAt: '2026-10-12', locked: false, automatic: false, size: 1024 },
+    ])
+    const host = defineComponent({
+      components: { FullscreenModal, InstanceWorldsTab },
+      setup: () => ({ version }),
+      template:
+        '<FullscreenModal :visible="true" title="实例详情"><InstanceWorldsTab :version="version" /></FullscreenModal>',
+    })
+    const wrapper = mount(host, {
+      attachTo: document.body,
+      global: { plugins: [createPinia(), i18n], stubs: { transition: false } },
+    })
+    try {
+      await flushPromises()
+      document.querySelector<HTMLButtonElement>(`button[title="${i18n.global.t('worlds.restore')}"]`)!.click()
+      await flushPromises()
+      const list = document.querySelector<HTMLElement>('.backup-list')!.closest<HTMLElement>('.modal-overlay')!
+      await vi.waitFor(() => expect(globalModalStack.displayedModalIds.value).toHaveLength(2))
+      const trigger = [...list.querySelectorAll<HTMLButtonElement>('button')].find((entry) =>
+        entry.textContent?.includes('恢复')
+      )!
+      trigger.click()
+      await flushPromises()
+      await vi.waitFor(() => expect(globalModalStack.displayedModalIds.value).toHaveLength(3))
+      expect(list.style.display).not.toBe('none')
+      expect(list.hasAttribute('inert')).toBe(true)
+      expect(document.querySelector<HTMLElement>('.fullscreen-modal')!.style.display).not.toBe('none')
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      await flushPromises()
+      await vi.waitFor(() => expect(list.hasAttribute('inert')).toBe(false))
+      expect(list.style.display).not.toBe('none')
+      trigger.click()
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'Modal' })
+        .find((entry) => entry.props('title') === i18n.global.t('worlds.backups'))!
+        .vm.$emit('update:visible', false)
+      await flushPromises()
+      await vi.waitFor(() => expect(globalModalStack.displayedModalIds.value).toHaveLength(1))
+    } finally {
+      wrapper.unmount()
+      globalModalStack.reset()
+      vi.restoreAllMocks()
+    }
+  }, 15000)
 
   it('长种子编辑文本保留全部数位，保存其他字段不会提交种子', async () => {
     const { wrapper, input } = await openEditor()

@@ -336,7 +336,11 @@
     </Modal>
 
     <!-- 全屏弹窗 -->
-    <FullscreenModal v-model:visible="showFullscreenModal" :title="t('dev.fullscreenModalTest')">
+    <FullscreenModal
+      ref="fullscreenModalRef"
+      v-model:visible="showFullscreenModal"
+      :title="t('dev.fullscreenModalTest')"
+    >
       <div class="fullscreen-content">
         <p>{{ t('dev.fullscreenModalDesc') }}</p>
         <UiButton @click="showNestedModal = true">
@@ -351,7 +355,7 @@
     </FullscreenModal>
 
     <!-- 嵌套弹窗 -->
-    <Modal v-model:visible="showNestedModal" :title="t('dev.nestedModal')">
+    <Modal v-model:visible="showNestedModal" :parentId="fullscreenModalRef?.modalId" :title="t('dev.nestedModal')">
       <p>{{ t('dev.nestedModalDesc') }}</p>
       <template #footer>
         <UiButton @click="showNestedModal = false">
@@ -413,6 +417,7 @@ const devMode = import.meta.env.DEV
 
 const showNormalModal = ref(false)
 const showFullscreenModal = ref(false)
+const fullscreenModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 const showNestedModal = ref(false)
 const inputValue = ref('')
 const showDangerConfirm = ref(false)

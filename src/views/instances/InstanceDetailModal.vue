@@ -206,6 +206,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const detailModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
+defineExpose({ modalId: computed(() => detailModalRef.value?.modalId ?? null) })
 const message = useLauncherMessage()
 const router = useRouter()
 
@@ -363,7 +364,6 @@ function handleOpenFolder() {
 function handleDelete() {
   if (props.version) {
     emit('delete', props.version)
-    visible.value = false
   }
 }
 

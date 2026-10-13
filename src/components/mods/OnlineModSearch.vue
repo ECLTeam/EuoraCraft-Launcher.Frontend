@@ -240,6 +240,7 @@
     </div>
 
     <FullscreenModal
+      ref="detailModalRef"
       v-model:visible="detailsVisible"
       :title="selectedMod?.displayTitle || t('mods.details')"
       wrapperClass="mod-detail-fullscreen"
@@ -496,6 +497,7 @@
 
     <ConfirmDialog
       v-model:visible="installConfirmVisible"
+      :parentId="detailModalRef?.modalId"
       :title="t('mods.installResourceTitle', { resource: resourceTypeLabel })"
       :confirmText="t('mods.install')"
       :cancelText="t('common.saveAs')"
@@ -618,6 +620,7 @@ const modpackImportStore = useModpackImportStore()
 const usesDirectVersionAction = computed(() =>
   ['mod', 'resourcepack', 'shaderpack', 'datapack', 'world'].includes(props.resourceType)
 )
+const detailModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 const message = useLauncherMessage()
 const route = useRoute()
 const router = useRouter()

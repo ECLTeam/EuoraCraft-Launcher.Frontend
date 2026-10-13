@@ -111,6 +111,14 @@ function mountModal(
 }
 
 describe('InstanceDetailModal', () => {
+  it('请求删除先等待外层确认，详情保持打开', async () => {
+    const wrapper = mountModal('overview')
+    await flushPromises()
+    const overview = wrapper.findComponent({ name: 'InstanceDetailOverviewTab' })
+    overview.vm.$emit('delete')
+    expect(wrapper.emitted('delete')).toContainEqual([version])
+    expect(wrapper.emitted('update:visible')).toBeUndefined()
+  })
   afterEach(async () => {
     wrappers.splice(0).forEach((wrapper) => wrapper.unmount())
     vi.useRealTimers()
