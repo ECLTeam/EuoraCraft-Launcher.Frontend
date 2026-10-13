@@ -1,5 +1,6 @@
 import { nonEmpty, object, optional, picklist, pipe, string } from 'valibot'
 import backend from '@/api/client'
+import { resourceCache } from '@/app/data/resourceCache'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { assertParams } from '@/app/validation'
 import type { SelectResult } from '@/types/accounts'
@@ -10,17 +11,18 @@ import { gamePathIdentity, normalizeGamePath, registerGamePathIdentity } from '@
 export type InstallableLoader = 'fabric' | 'forge' | 'neoforge' | 'quilt'
 export type VersionsChangedHandler = (payload: { gamePath: string }) => void
 
-const scanCache = new Map<string, ScannedVersion[]>()
+const scanCache = resourceCache<ScannedVersion[]>(['instances', 'scan'])
 const scanGenerations = new Map<string, number>()
-const pendingScans = new Map<string, { generation: number; promise: Promise<void> }>()
+const pendingScans = new Map<string, { generation: number; promise: Promise<void>; force: boolean }>()
 let catalogRequest: Promise<MinecraftVersionCatalog> | null = null
 const versionsChangedHandlers = new Set<VersionsChangedHandler>()
 let isListeningForVersionChanges = false
+let stopVersionChanges: (() => void) | null = null
 let scanRequestCounter = 0
 const latestRequestByRootKey = new Map<string, number>()
 
 function cloneVersions(versions: ScannedVersion[]): ScannedVersion[] {
-  return versions.map((version) => ({ ...version }))
+  return structuredClone(versions)
 }
 
 function invalidateScanCache(path?: string): void {
@@ -40,13 +42,19 @@ function invalidateScanCache(path?: string): void {
 function ensureVersionChangeListener(): void {
   if (isListeningForVersionChanges) return
   isListeningForVersionChanges = true
-  backend.on('game:versions_changed', (payload) => {
+  stopVersionChanges = backend.on('game:versions_changed', (payload) => {
     invalidateScanCache(payload.gamePath)
     versionsChangedHandlers.forEach((handler) => handler(payload))
   })
 }
 
 export const instanceInstallApi = {
+  disposeChangeListeners(): void {
+    stopVersionChanges?.()
+    stopVersionChanges = null
+    isListeningForVersionChanges = false
+    versionsChangedHandlers.clear()
+  },
   getCatalog(options: { silent?: boolean } = {}): Promise<MinecraftVersionCatalog> {
     if (catalogRequest) return catalogRequest
     const request = backend
@@ -97,7 +105,12 @@ export const instanceInstallApi = {
   async scan(paths: string[], options: { force?: boolean } = {}): Promise<ScannedVersion[]> {
     ensureVersionChangeListener()
     const requestedPaths = [...new Set(paths.filter((path) => path.trim()))]
-    if (options.force) requestedPaths.forEach((path) => invalidateScanCache(path))
+    if (options.force)
+      requestedPaths.forEach((path) => {
+        const key = normalizeGamePath(path)
+        const pending = pendingScans.get(key)
+        if (!pending?.force || pending.generation !== (scanGenerations.get(key) ?? 0)) invalidateScanCache(path)
+      })
 
     const waiting: Promise<void>[] = []
     const supersededRootByPath = new Map<string, string>()
@@ -178,7 +191,8 @@ export const instanceInstallApi = {
           if ((scanGenerations.get(key) ?? 0) === generations.get(key)) scanCache.set(key, snapshot)
         }
       })()
-      for (const [key, generation] of generations) pendingScans.set(key, { generation, promise: request })
+      for (const [key, generation] of generations)
+        pendingScans.set(key, { generation, promise: request, force: options.force === true })
       const cleanup = () => {
         for (const key of generations.keys()) if (pendingScans.get(key)?.promise === request) pendingScans.delete(key)
       }

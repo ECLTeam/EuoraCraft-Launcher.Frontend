@@ -549,6 +549,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import backend from '@/api/client'
+import { configQuery } from '@/app/data'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import { globalCache, CACHE_GROUPS, CACHE_KEYS } from '@/cache'
 import { useAutoRefreshCache } from '@/cache/composable'
@@ -1135,7 +1136,6 @@ function testVersionPrefix(file: ModVersion): string {
   return testVersions.length ? `[${testVersions.join('/')}]` : ''
 }
 
-const DEPENDENCY_CACHE_TTL = 30 * 60 * 1000
 let dependencyRequestId = 0
 
 async function loadProjectInfo(
@@ -1143,12 +1143,7 @@ async function loadProjectInfo(
   projectId: string,
   resourceType: GameResourceType | 'world' | 'modpack' = props.resourceType
 ): Promise<ModInfo> {
-  const cacheKey = `mod-project-info:${source}:${resourceType}:${projectId}`
-  const cached = globalCache.get<ModInfo>(cacheKey)
-  if (cached) return cached
-  const info = await modApi.info({ mod_id: projectId, source, resource_type: resourceType })
-  globalCache.set(cacheKey, info, { ttl: DEPENDENCY_CACHE_TTL, group: CACHE_GROUPS.API })
-  return info
+  return modApi.info({ mod_id: projectId, source, resource_type: resourceType })
 }
 
 async function loadRequiredDependencies(file: ModVersion, groupKey: string): Promise<void> {
@@ -1778,7 +1773,7 @@ function lastLaunchedResourceDirectory(): string {
 }
 
 async function readDownloadConfig(): Promise<DownloadConfig> {
-  return (unwrapResponse(await backend.config.get('download'), '读取下载设置') ?? {}) as DownloadConfig
+  return (await configQuery()).download
 }
 
 async function persistSaveDirectory(path: string): Promise<void> {

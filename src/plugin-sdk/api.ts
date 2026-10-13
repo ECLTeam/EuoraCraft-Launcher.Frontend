@@ -1,4 +1,6 @@
 import backend from '@/api/client'
+import { accountsQuery, configQuery, pluginRegistryQuery } from '@/app/data'
+import { confirmConfigWrite, serializeConfigWrite } from '@/app/data/configQueries'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
@@ -9,12 +11,6 @@ import type { ConfigSection } from '@/types/config'
 import type { InstallVersionResult, JavaInstallation, MinecraftVersion, ScannedVersion } from '@/types/instances'
 import type { PluginInfo, PluginRoute, PluginSettingsData } from '@/types/plugins'
 import type { FileContent, FsEntry, PathInfo } from '@/types/system'
-// plugin-sdk API 封装
-//
-// 与主 API 重复的命令调用统一委托给 feature API 模块（accountsApi /
-// instanceInstallApi / pluginHostApi / pluginManagementApi），这些模块最终都
-// 走 src/api/client.ts 的 backend 统一入口，避免命令名与参数结构多处重复声明。
-// 委托结果统一包装回 ApiResponse 形状，保持插件侧调用契约不变。
 import { getErrorMessage } from '@/utils/error'
 
 /** 将 feature API 的已解包结果包装回 ApiResponse，保持插件侧返回契约。 */
@@ -64,7 +60,8 @@ export function updatePluginSetting(pluginName: string, key: string, value: unkn
  * @param pluginId - 可选的插件 ID 过滤（后端当前忽略该参数，返回全部路由）
  */
 export function getPluginRoutes(pluginId?: string): Promise<ApiResponse<PluginRoute[]>> {
-  return toApiResponse(pluginHostApi.getRoutes(pluginId))
+  void pluginId
+  return toApiResponse(pluginRegistryQuery().then((snapshot) => snapshot.routes))
 }
 
 // ── 启动器配置 ──
@@ -73,8 +70,18 @@ export function getPluginRoutes(pluginId?: string): Promise<ApiResponse<PluginRo
  * 获取启动器配置节。
  * @param section - 配置节名称
  */
-export function getLauncherConfig<T = JsonDict>(section: ConfigSection): Promise<ApiResponse<T>> {
-  return backend.config.get<T>(section)
+export function getLauncherConfig<T = JsonDict>(section: ConfigSection): Promise<ApiResponse<T>>
+export async function getLauncherConfig(section: ConfigSection): Promise<ApiResponse<unknown>> {
+  if (
+    section === 'ui' ||
+    section === 'game' ||
+    section === 'launcher' ||
+    section === 'download' ||
+    section === 'connector'
+  ) {
+    return toApiResponse(configQuery().then((config) => config[section]))
+  }
+  return backend.config.get(section)
 }
 
 /**
@@ -83,7 +90,11 @@ export function getLauncherConfig<T = JsonDict>(section: ConfigSection): Promise
  * @param data - 配置数据
  */
 export function setLauncherConfig(section: ConfigSection, data: JsonDict): Promise<ApiResponse<void>> {
-  return backend.config.set(section, data)
+  return serializeConfigWrite(section, async () => {
+    const response = await backend.config.set(section, data)
+    if (response.success) confirmConfigWrite(response.data)
+    return { ...response, data: undefined }
+  })
 }
 
 // ── 版本 ──
@@ -150,7 +161,7 @@ export function getAccountList(): Promise<ApiResponse<AccountListData>> {
  * 获取当前选中的账户。
  */
 export function getCurrentAccount(): Promise<ApiResponse<MinecraftAccount | null>> {
-  return toApiResponse(accountsApi.current())
+  return toApiResponse(accountsQuery().then((snapshot) => snapshot.current))
 }
 
 // ── 文件系统 ──

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { queryClient } from '@/app/queryClient'
 import type { BackendMockState } from '@/test/mockBackend'
 import { instanceSettingsApi } from './instanceSettingsApi'
 
@@ -13,10 +14,24 @@ const { mocks } = mock.state!
 
 describe('instanceSettingsApi', () => {
   beforeEach(() => {
+    queryClient.clear()
     vi.clearAllMocks()
     mocks.get.mockResolvedValue({ success: true, data: {} })
     mocks.set.mockResolvedValue({ success: true })
     mocks.command.mockResolvedValue({ success: true, data: {} })
+  })
+
+  it('保存独立设置后，迟到的有效设置读取必须重新取得最新结果', async () => {
+    const target = { versionId: 'fixture', path: 'C:/Minecraft' }
+    let finish!: (value: unknown) => void
+    mocks.command.mockImplementationOnce(() => new Promise((resolve) => (finish = resolve)))
+    const reading = instanceSettingsApi.effective(target)
+    mocks.command.mockResolvedValueOnce({ success: true, data: {} })
+    await instanceSettingsApi.save(target, { memory: 6144 })
+    mocks.command.mockResolvedValueOnce({ success: true, data: { memory: 6144 } })
+    finish({ success: true, data: { memory: 4096 } })
+    expect(await reading).toEqual({ memory: 6144 })
+    expect(mocks.command).toHaveBeenCalledTimes(3)
   })
 
   it('将独立设置保存到版本自己的设置文件', async () => {

@@ -4,6 +4,10 @@
     "loading": "Wird geladen...",
     "delete": "Löschen"
   },
+  "dataSync": {
+    "invalid": "Ungültige Daten. Aktualisieren und erneut versuchen.",
+    "changing": "Die Daten ändern sich weiterhin. Bitte später erneut aktualisieren."
+  },
   "sidebar": {
     "toggle": "Seitenleiste umschalten",
     "collapse": "Seitenleiste einklappen",

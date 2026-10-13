@@ -1,6 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import backend from '@/api/client'
-import { configQuery, invalidateConfig } from '@/app/data'
+import { configQuery } from '@/app/data'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import deDE from './locales/de-DE.json'
 import enUS from './locales/en-US.json'
 import jaJP from './locales/ja-JP.json'
@@ -69,9 +70,7 @@ export async function setLocale(locale: LocaleCode): Promise<void> {
 
   try {
     if (backend.runtime.isAvailable) {
-      const config = await configQuery()
-      await backend.config.set('ui', { ...config.ui, locale })
-      await invalidateConfig()
+      await useSettingsStore().updateUi((ui) => ({ ...ui, locale }))
     }
   } catch (error) {
     console.warn('[i18n] 保存语言配置到后端失败:', error)

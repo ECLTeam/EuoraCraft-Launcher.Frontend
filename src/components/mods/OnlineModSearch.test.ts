@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref, type Ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import backend from '@/api/client'
+import { queryClient } from '@/app/queryClient'
 import { pinia } from '@/app/stores'
 import { globalCache } from '@/cache'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
@@ -157,6 +158,7 @@ describe('双平台搜索页面', () => {
   afterEach(() => globalModalStack.reset())
   beforeEach(() => {
     globalCache.clear()
+    queryClient.clear()
     vi.resetAllMocks()
     mocks.popular.mockResolvedValue(result('first'))
     mocks.search.mockResolvedValue(result('second', 2, { hasMore: false, totalExact: true }))
@@ -164,6 +166,16 @@ describe('双平台搜索页面', () => {
     mocks.versions.mockResolvedValue([])
     vi.spyOn(backend, 'command').mockResolvedValue({ success: true, data: { path: null } })
     vi.spyOn(backend.config, 'get').mockResolvedValue({ success: true, data: {} })
+    vi.spyOn(backend.config, 'getMany').mockResolvedValue({
+      success: true,
+      data: {
+        ui: {},
+        game: { minecraft_paths: [] },
+        download: { mirror_source: 'official' },
+        launcher: {},
+        connector: { mode: 'automatic', nodes: [] },
+      },
+    })
   })
 
   it('真实安装确认和另存为取消期间详情保持显示，Esc 只关闭确认框', async () => {

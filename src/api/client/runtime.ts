@@ -1,8 +1,10 @@
 import { readonly } from 'vue'
+import { queryClient } from '@/app/queryClient'
 import { createShowcaseTransport } from '../transport/showcase'
 import { isShowcaseRuntime, replaceTransport, runtimeMode, showcaseActive, transport } from './state'
 
 function swapToShowcase(): void {
+  queryClient.clear()
   const showcase = createShowcaseTransport()
   // 保持 desktop 模式，确保窗口控制按钮正常显示
   replaceTransport({ ...showcase, mode: 'desktop' })

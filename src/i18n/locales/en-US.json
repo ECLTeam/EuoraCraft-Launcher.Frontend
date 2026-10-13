@@ -12,6 +12,10 @@
     "copyFailed": "Could not copy. Select and copy the color value manually.",
     "unavailable": "No valid UUID available"
   },
+  "dataSync": {
+    "invalid": "Invalid data. Refresh and try again.",
+    "changing": "Data keeps changing. Refresh and try again shortly."
+  },
   "sidebar": {
     "toggle": "Toggle Sidebar",
     "collapse": "Collapse Sidebar",

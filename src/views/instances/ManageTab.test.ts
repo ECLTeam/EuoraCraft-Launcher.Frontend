@@ -7,6 +7,7 @@ import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import { globalModalStack } from '@/composables/useGlobalModalStack'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
 import { i18n } from '@/i18n'
+import type { CommandResponseMap } from '@/types/api'
 import type { ScannedVersion } from '@/types/instances'
 import ManageTab from './ManageTab.vue'
 
@@ -122,7 +123,7 @@ it('详情复制确认保留真实父窗口，随后列表操作不残留详情�
 })
 
 it('详情修复检查返回前关闭再打开时丢弃旧结果', async () => {
-  let finish!: (value: { issues: unknown[]; downloadBytes: number; canRepair: boolean }) => void
+  let finish!: (value: CommandResponseMap['game_instance_files_check']) => void
   const check = vi.spyOn(instanceWorkspaceApi, 'checkFiles').mockImplementation(
     () =>
       new Promise((resolve) => {
@@ -137,7 +138,7 @@ it('详情修复检查返回前关闭再打开时丢弃旧结果', async () => {
     await flushPromises()
     list.vm.$emit('detail', fixture)
     await flushPromises()
-    finish({ issues: ['missing'], downloadBytes: 1, canRepair: true })
+    finish({ issues: [{ kind: 'missing', path: 'missing.jar' }], downloadBytes: 1, canRepair: true })
     await flushPromises()
     expect(wrapper.findComponent(ConfirmDialog).props('visible')).toBe(false)
   } finally {

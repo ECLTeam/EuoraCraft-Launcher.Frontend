@@ -1,6 +1,5 @@
 import { computed, onMounted, ref } from 'vue'
-import backend from '@/api/client'
-import { unwrapResponse } from '@/app/runtime/errorPresentation'
+import { configQuery } from '@/app/data'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { ScannedVersion } from '@/types/instances'
@@ -72,8 +71,7 @@ export function useResourceInstallTarget(resourceType: InstallTargetKey, autoSel
 
   async function loadCache(): Promise<void> {
     await instanceStore.loadAll()
-    const config = unwrapResponse(await backend.config.get('download'), '读取下载设置')
-    const cfg = config as { resourceInstallCache?: Record<string, { gamePath: string; versionId: string }> }
+    const cfg = (await configQuery()).download
     const chosen = resolveInitialResourceTarget(
       installableInstances.value,
       cfg?.resourceInstallCache?.[resourceType],

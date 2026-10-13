@@ -24,6 +24,7 @@ import type {
 } from '@/types/accounts'
 import type {
   ConfigSection,
+  ConfigSectionSnapshot,
   DownloadConfig,
   GameConfig,
   LauncherConfig,
@@ -166,7 +167,8 @@ export interface BackendEvents {
     priority?: number
     contextKey?: string
   }
-  'config:updated': { section: string; data: unknown }
+  'config:updated': { section: string; data: unknown; effective?: boolean }
+  'game:instance_categories_changed': { categories: unknown }
   'plugin:route_registered': { plugin: string; path: string; title: string; icon?: string }
   'plugin:vue_route_registered': {
     plugin: string
@@ -447,7 +449,7 @@ export interface CommandPayloadMap {
       gameMode?: number
       raining?: boolean
       thundering?: boolean
-      seed?: number
+      seed?: string
       spawn?: { x: number; y: number; z: number }
     }
   }
@@ -965,7 +967,7 @@ export interface CommandResponseMap {
   launcher_errors_ack: { removed: number }
 
   settings_get: unknown
-  settings_set: void
+  settings_set: ConfigSectionSnapshot
   settings_download_patch: DownloadConfig
 
   window_list: WindowMetadata[]
@@ -1123,7 +1125,13 @@ export interface CommandResponseMap {
   game_world_backup_delete: void
   game_options_read: {
     path: string
-    options: Array<{ key: string; value: number | string | boolean; type: string; min?: number; max?: number }>
+    options: Array<{
+      key: string
+      value: number | string | boolean
+      type: 'string' | 'int' | 'float' | 'bool'
+      min?: number
+      max?: number
+    }>
     ignoredCount: number
   }
   game_options_patch: { path: string; updated: number }

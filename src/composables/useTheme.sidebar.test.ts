@@ -1,34 +1,27 @@
 import { createPinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { waitForConfigWrites } from '@/app/data/configQueries'
+import { queryClient } from '@/app/queryClient'
 import { useThemeStore } from '@/composables/useTheme'
 import { settingsApi } from '@/features/settings/api/settingsApi'
-import type * as SettingsModule from '@/features/settings/api/settingsApi'
 
-vi.mock('@/features/settings/api/settingsApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof SettingsModule>()
-  return {
-    ...actual,
-    settingsApi: {
-      ...actual.settingsApi,
-      isAvailable: true,
-      // 主题保存改为经统一数据层读取整份配置，测试需提供可解析的配置快照。
-      load: vi.fn().mockResolvedValue({
-        ui: {},
-        game: {},
-        download: {},
-        launcher: {},
-        connector: { mode: 'automatic', nodes: [] },
-      }),
-      getUi: vi.fn().mockResolvedValue({}),
-      saveUi: vi.fn().mockResolvedValue(undefined),
-    },
-  }
-})
+vi.mock('@/api/client', async () => (await import('@/test/mockBackend')).createMockBackend().backend)
 
 const storageKey = 'euoracraft-sidebar-collapsed'
 
 describe('侧栏折叠状态本地保存', () => {
   beforeEach(() => {
+    queryClient.clear()
+    vi.spyOn(settingsApi, 'isAvailable', 'get').mockReturnValue(true)
+    vi.spyOn(settingsApi, 'load').mockResolvedValue({
+      ui: {},
+      game: { minecraft_paths: [] },
+      download: { mirror_source: 'official' },
+      launcher: {},
+      connector: { mode: 'automatic', nodes: [] },
+    })
+    vi.spyOn(settingsApi, 'getUi').mockResolvedValue({})
+    vi.spyOn(settingsApi, 'saveUi').mockResolvedValue(undefined)
     vi.useFakeTimers()
     localStorage.clear()
   })
@@ -120,6 +113,7 @@ describe('侧栏折叠状态本地保存', () => {
     store.setSidebarCollapsed(false)
     store.setAppearance({ radius_card: 20 })
     await vi.advanceTimersByTimeAsync(100)
+    await waitForConfigWrites()
 
     expect(settingsApi.saveUi).toHaveBeenCalledOnce()
     const saved = vi.mocked(settingsApi.saveUi).mock.calls[0]![0]

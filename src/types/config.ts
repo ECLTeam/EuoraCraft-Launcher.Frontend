@@ -243,6 +243,13 @@ export interface UiConfig {
 
 export type ConfigSection = 'launcher' | 'game' | 'download' | 'ui' | 'locale' | 'background' | string
 
+/** IPC 边界载荷，data 在进入业务数据层前按配置分区校验。 */
+export interface ConfigSectionSnapshot {
+  section: string
+  data: unknown
+  effective: true
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  Java
 // ═══════════════════════════════════════════════════════════════════

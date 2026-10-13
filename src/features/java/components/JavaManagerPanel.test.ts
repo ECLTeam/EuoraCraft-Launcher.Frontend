@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { queryClient } from '@/app/queryClient'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { javaApi } from '@/features/java/api/javaApi'
 import { i18n } from '@/i18n'
@@ -14,6 +15,7 @@ vi.mock('@/composables/useLauncherMessage', () => ({
 let wrappers: ReturnType<typeof mount>[] = []
 
 beforeEach(() => {
+  queryClient.clear()
   setActivePinia(createPinia())
   i18n.global.locale.value = 'zh-CN'
   vi.spyOn(javaApi, 'inventory').mockResolvedValue(

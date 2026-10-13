@@ -1,5 +1,7 @@
 import backend from '@/api/client'
+import { confirmConfigWrite, setConfigSectionSnapshot } from '@/app/data/configQueries'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
+import { parseSettingsSnapshot } from '@/features/settings/model/settingsSnapshot'
 import type { ImageSaveUrlResult } from '@/types/accounts'
 import type {
   ConnectorConfig,
@@ -95,42 +97,46 @@ export const settingsApi = {
 
   async load() {
     const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher', 'connector'])
-    const data = assertSuccess(result, '读取设置')
-    return {
-      ui: (data.ui ?? {}) as UiConfig,
-      game: (data.game ?? {}) as GameConfig,
-      download: (data.download ?? {}) as DownloadConfig,
-      launcher: (data.launcher ?? {}) as LauncherConfig,
-      connector: (data.connector ?? { mode: 'automatic', nodes: [] }) as ConnectorConfig,
-    }
+    return parseSettingsSnapshot(assertSuccess(result, '读取设置'))
   },
 
   async getUi(): Promise<UiConfig> {
     return assertSuccess(await backend.config.get<UiConfig>('ui'), '读取界面设置') ?? {}
   },
 
-  async saveUi(config: UiConfig): Promise<void> {
-    assertSuccess(await backend.config.set('ui', config), '保存界面设置')
+  async saveUi(config: UiConfig): Promise<UiConfig | void> {
+    const response = await backend.config.set('ui', config)
+    assertSuccess(response, '保存界面设置')
+    return confirmConfigWrite(response.data)?.ui
   },
 
   async getLauncher(): Promise<LauncherConfig> {
     return assertSuccess(await backend.config.get<LauncherConfig>('launcher'), '读取启动器设置') ?? {}
   },
 
-  async saveLauncher(config: LauncherConfig): Promise<void> {
-    assertSuccess(await backend.config.set('launcher', config), '保存启动器设置')
+  async saveLauncher(config: LauncherConfig): Promise<LauncherConfig | void> {
+    const response = await backend.config.set('launcher', config)
+    assertSuccess(response, '保存启动器设置')
+    return confirmConfigWrite(response.data)?.launcher
   },
 
-  async saveGame(config: GameConfig): Promise<void> {
-    assertSuccess(await backend.config.set('game', config), '保存设置')
+  async saveGame(config: GameConfig): Promise<GameConfig | void> {
+    const response = await backend.config.set('game', config)
+    assertSuccess(response, '保存设置')
+    return confirmConfigWrite(response.data)?.game
   },
 
   async patchDownload(patch: Partial<DownloadConfig>): Promise<DownloadConfig> {
-    return assertSuccess(await backend.command('settings_download_patch', patch), '保存下载设置')
+    const data = assertSuccess(await backend.command('settings_download_patch', patch), '保存下载设置')
+    const download = parseSettingsSnapshot({ download: data }).download
+    setConfigSectionSnapshot('download', download)
+    return download
   },
 
-  async saveConnector(config: ConnectorConfig): Promise<void> {
-    assertSuccess(await backend.config.set('connector', config), '保存联机设置')
+  async saveConnector(config: ConnectorConfig): Promise<ConnectorConfig | void> {
+    const response = await backend.config.set('connector', config)
+    assertSuccess(response, '保存联机设置')
+    return confirmConfigWrite(response.data)?.connector
   },
 
   async getSystemMemory(): Promise<SystemMemoryInfo> {

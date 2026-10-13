@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 import SideBar from '@/components/layout/SideBar.vue'
 import { useTheme } from '@/composables/useTheme'
+import type * as VueI18nModule from 'vue-i18n'
 
 const mocks = vi.hoisted(() => ({
   notifySidebarState: vi.fn().mockResolvedValue(undefined),
@@ -16,7 +17,10 @@ vi.mock('@/composables/usePluginBridge', async () => {
   return { pluginRoutes: ref([]) }
 })
 vi.mock('@/composables/useLauncherMessage', () => ({ useLauncherMessage: () => ({ warning: vi.fn() }) }))
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))
+vi.mock('vue-i18n', async (importOriginal) => ({
+  ...(await importOriginal<typeof VueI18nModule>()),
+  useI18n: () => ({ t: (key: string) => key }),
+}))
 vi.mock('vue-router', () => ({
   useRoute: () => ({ path: '/' }),
   useRouter: () => ({ push: vi.fn().mockResolvedValue(undefined) }),

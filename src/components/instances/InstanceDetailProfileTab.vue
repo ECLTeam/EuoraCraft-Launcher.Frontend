@@ -62,6 +62,8 @@
 import { NButton, NInput, NSelect, NSwitch } from 'naive-ui'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useResourceSnapshot } from '@/app/data/useResourceSnapshot'
+import { queryKeys } from '@/app/queryKeys'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { instanceProfileApi, targetFromVersion } from '@/features/instances/api/instanceProfileApi'
@@ -82,7 +84,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const message = useLauncherMessage()
 
-const categories = ref<InstanceCategory[]>([])
+const categories = useResourceSnapshot<InstanceCategory[]>(queryKeys.instanceCategories, [])
 const profileSaving = ref(false)
 const profileForm = reactive<InstanceProfileForm>({
   alias: '',

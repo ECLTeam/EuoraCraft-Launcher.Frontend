@@ -191,6 +191,8 @@ import { NDropdown, type DropdownOption } from 'naive-ui'
 import { computed, h, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
+import { useResourceSnapshot } from '@/app/data/useResourceSnapshot'
+import { queryKeys } from '@/app/queryKeys'
 import InstanceCategoryManager from '@/components/instances/InstanceCategoryManager.vue'
 import InstanceIcon from '@/components/instances/InstanceIcon.vue'
 import InstanceListToolbar from '@/components/instances/InstanceListToolbar.vue'
@@ -232,7 +234,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const settingsStore = useSettingsStore()
-const categories = ref<InstanceCategory[]>([])
+const categories = useResourceSnapshot<InstanceCategory[]>(queryKeys.instanceCategories, [])
 const categoryFilter = ref('')
 const favoritesOnly = ref(false)
 const pinnedOnly = ref(false)

@@ -39,9 +39,21 @@ export const useInstanceStore = defineStore('versions', () => {
   function startWatching(): void {
     if (stopWatching) return
     stopWatching = instanceInstallApi.onVersionsChanged(({ gamePath }) => {
-      void loadAll(true).catch((error) => {
-        console.warn('[instanceStore] 同步实例变更失败:', gamePath, error)
-      })
+      const known = settingsStore.game.minecraft_paths
+        .map((entry) => (typeof entry === 'string' ? entry : entry.path))
+        .find((path) => gamePathIdentity(path) === gamePathIdentity(gamePath))
+      if (!known) return
+      const revision = selectionRevision
+      void scanPath(known)
+        .then((scanned) => {
+          if (revision !== selectionRevision || gamePathIdentity(currentGamePath.value) !== gamePathIdentity(known))
+            return
+          if (!scanned.some((version) => version.versionId === selectedVersion.value))
+            selectVersion(scanned[0]?.versionId ?? '', known)
+        })
+        .catch((error) => {
+          console.warn('[instanceStore] 同步实例变更失败:', gamePath, error)
+        })
     })
   }
 
@@ -258,6 +270,10 @@ export const useInstanceStore = defineStore('versions', () => {
   }
 
   return {
+    dispose(): void {
+      stopWatching?.()
+      stopWatching = null
+    },
     scannedVersions,
     versions,
     selectedVersion,

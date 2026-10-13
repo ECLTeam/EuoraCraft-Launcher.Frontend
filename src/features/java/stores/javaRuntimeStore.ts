@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { invalidateResource, setResourceSnapshot } from '@/app/data/refreshCoordinator'
+import { queryClient } from '@/app/queryClient'
+import { queryKeys } from '@/app/queryKeys'
 import { javaApi } from '@/features/java/api/javaApi'
 import type { JavaInstallation } from '@/types/instances'
 import type { JavaInventory, JavaRuntime } from '@/types/java'
@@ -32,7 +35,14 @@ export const useJavaRuntimeStore = defineStore('javaRuntimes', () => {
   let pending: { force: boolean; request: Promise<JavaInventory> } | null = null
 
   async function load(force = false): Promise<JavaInventory> {
-    if (!force && status.value === 'ready' && inventory.value) return inventory.value
+    const cached = queryClient.getQueryState(queryKeys.javaInventory)?.isInvalidated
+      ? undefined
+      : queryClient.getQueryData<JavaInventory>(queryKeys.javaInventory)
+    if (!force && cached) {
+      inventory.value = structuredClone(cached)
+      status.value = 'ready'
+      return structuredClone(cached)
+    }
     if (pending && (!force || pending.force)) return pending.request
     const revision = ++generation
     status.value = 'loading'
@@ -40,6 +50,7 @@ export const useJavaRuntimeStore = defineStore('javaRuntimes', () => {
     const request = javaApi.inventory(force).then(
       (value) => {
         if (revision === generation) {
+          setResourceSnapshot(queryKeys.javaInventory, value)
           inventory.value = value
           status.value = 'ready'
         }
@@ -69,6 +80,7 @@ export const useJavaRuntimeStore = defineStore('javaRuntimes', () => {
     generation++
     pending = null
     status.value = 'idle'
+    void invalidateResource(queryKeys.javaInventory)
   }
 
   async function refreshAfterChange() {

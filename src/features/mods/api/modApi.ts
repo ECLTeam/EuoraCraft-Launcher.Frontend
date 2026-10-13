@@ -1,4 +1,9 @@
 import backend from '@/api/client'
+import type { SettingsSnapshot } from '@/app/data/configQueries'
+import { readResource } from '@/app/data/refreshCoordinator'
+import { queryClient } from '@/app/queryClient'
+import { queryKeys } from '@/app/queryKeys'
+import { getCurrentLocale } from '@/i18n'
 import type { CommandPayloadMap } from '@/types/api'
 import type { ModInfo, ModInstallResult, ModSearchResult, ModSourceConfig, ModVersion } from '@/types/mods'
 
@@ -13,19 +18,35 @@ function requireData<T>(
 
 export const modApi = {
   async search(payload: CommandPayloadMap['search_mods']): Promise<ModSearchResult> {
-    return requireData(await backend.command('search_mods', payload), '搜索模组')
+    return readResource({
+      queryKey: resourceKey('search', payload),
+      staleTime: 0,
+      load: async () => requireData(await backend.command('search_mods', payload), '搜索模组'),
+    })
   },
 
   async sourceConfig(): Promise<ModSourceConfig> {
-    return requireData(await backend.command('mod_source_config'), '读取资源来源配置')
+    return readResource({
+      queryKey: resourceKey('sources', {}),
+      staleTime: 0,
+      load: async () => requireData(await backend.command('mod_source_config'), '读取资源来源配置'),
+    })
   },
 
   async info(payload: CommandPayloadMap['get_mod_info']): Promise<ModInfo> {
-    return requireData(await backend.command('get_mod_info', payload), '获取模组信息')
+    return readResource({
+      queryKey: resourceKey('info', payload),
+      staleTime: 0,
+      load: async () => requireData(await backend.command('get_mod_info', payload), '获取模组信息'),
+    })
   },
 
   async versions(payload: CommandPayloadMap['get_mod_versions']): Promise<ModVersion[]> {
-    return requireData(await backend.command('get_mod_versions', payload), '获取模组版本')
+    return readResource({
+      queryKey: resourceKey('versions', payload),
+      staleTime: 0,
+      load: async () => requireData(await backend.command('get_mod_versions', payload), '获取模组版本'),
+    })
   },
 
   async install(payload: CommandPayloadMap['download_mod']): Promise<ModInstallResult> {
@@ -40,4 +61,15 @@ export const modApi = {
     const response = await backend.command('open_url', { url })
     if (!response.success) throw new Error(response.message || '打开链接失败')
   },
+}
+
+function resourceKey(kind: string, payload: object) {
+  const configuration = queryClient.getQueryData<SettingsSnapshot>(queryKeys.config.all)
+  return [
+    'online-resources',
+    configuration?.download.mod_source ?? 'official',
+    getCurrentLocale(),
+    kind,
+    payload,
+  ] as const
 }

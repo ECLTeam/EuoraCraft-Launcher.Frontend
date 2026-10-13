@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/api'
-import type { ConfigSection } from '@/types/config'
+import type { ConfigSection, ConfigSectionSnapshot } from '@/types/config'
 import { call } from './commands'
 
 export function createConfig() {
@@ -8,7 +8,7 @@ export function createConfig() {
       return call<T>('settings_get', { section })
     },
     set(section: ConfigSection, data: unknown) {
-      return call<void>('settings_set', { section, data })
+      return call<ConfigSectionSnapshot>('settings_set', { section, data })
     },
     async list(): Promise<ApiResponse<string[]>> {
       const response = await call<Record<string, unknown>>('settings_get')

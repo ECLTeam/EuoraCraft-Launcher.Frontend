@@ -7,7 +7,6 @@
 import { darkTheme, type GlobalTheme, type GlobalThemeOverrides } from 'naive-ui'
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, readonly, ref } from 'vue'
-import { configQuery, invalidateConfig } from '@/app/data'
 import { pinia } from '@/app/stores'
 import {
   CARD_OPACITY_DEFAULT,
@@ -25,6 +24,7 @@ import {
   type BackgroundMode,
 } from '@/features/settings/model/backgroundMode'
 import { resolveNavigationMode } from '@/features/settings/model/navigation'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type {
   BackgroundConfig,
   BackgroundImageConfig,
@@ -1120,45 +1120,45 @@ export const useThemeStore = defineStore('theme', () => {
     saveTimer = setTimeout(async () => {
       if (!settingsApi.isAvailable) return
       try {
-        const ui = (await configQuery()).ui
-        const savedBackground = ui.background ?? {}
-        const savedImage = readImageBackground(savedBackground)
-        const savedVideo = readVideoBackground(savedBackground)
-        await settingsApi.saveUi({
-          ...ui,
-          theme: {
-            window_chrome: ui.theme?.window_chrome,
-            mode: themeMode.value,
-            theme_id: themeId.value,
-            primary_color: primaryColor.value,
-            blur_amount: blurAmount.value,
-            navigation_mode: navigationMode.value,
-            titlebar_hidden: titlebarHidden.value,
-            transparent_bg: transparentBg.value,
-            background_opacity: backgroundOpacity.value,
-            appearance: appearance.value,
-            schedule: schedule.value,
-          },
-          background: {
-            ...savedBackground,
-            opacity: backgroundOpacity.value,
-            media_type: backgroundMediaType.value,
-            image: {
-              ...savedImage,
-              type: backgroundImagePath.value ? 'custom' : 'none',
-              path: isCarouselMode(bgMode.value) ? bgFolderPath.value : backgroundImagePath.value,
-              mode: bgMode.value,
-              interval: clampBackgroundInterval(bgInterval.value),
+        await useSettingsStore().updateUi((ui) => {
+          const savedBackground = ui.background ?? {}
+          const savedImage = readImageBackground(savedBackground)
+          const savedVideo = readVideoBackground(savedBackground)
+          return {
+            ...ui,
+            theme: {
+              window_chrome: ui.theme?.window_chrome,
+              mode: themeMode.value,
+              theme_id: themeId.value,
+              primary_color: primaryColor.value,
+              blur_amount: blurAmount.value,
+              navigation_mode: navigationMode.value,
+              titlebar_hidden: titlebarHidden.value,
+              transparent_bg: transparentBg.value,
+              background_opacity: backgroundOpacity.value,
+              appearance: appearance.value,
+              schedule: schedule.value,
             },
-            video: {
-              ...savedVideo,
-              path: backgroundVideoPath.value,
-              poster_path: backgroundVideoPosterPath.value,
-              options: backgroundVideo.value,
+            background: {
+              ...savedBackground,
+              opacity: backgroundOpacity.value,
+              media_type: backgroundMediaType.value,
+              image: {
+                ...savedImage,
+                type: backgroundImagePath.value ? 'custom' : 'none',
+                path: isCarouselMode(bgMode.value) ? bgFolderPath.value : backgroundImagePath.value,
+                mode: bgMode.value,
+                interval: clampBackgroundInterval(bgInterval.value),
+              },
+              video: {
+                ...savedVideo,
+                path: backgroundVideoPath.value,
+                poster_path: backgroundVideoPosterPath.value,
+                options: backgroundVideo.value,
+              },
             },
-          },
+          }
         })
-        await invalidateConfig()
       } catch (error) {
         // 防抖回调里的失败没有调用方接住，静默丢失会造成未处理 rejection 且配置未保存
         console.warn('[useTheme] 主题配置保存失败:', error)

@@ -2,6 +2,7 @@ import { minLength, nonEmpty, object, pipe, string } from 'valibot'
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { assertParams } from '@/app/validation'
+import { parseAccountList, parseAccountSnapshot } from '@/features/accounts/model/accountSnapshot'
 import type {
   AccountListData,
   AccountTextures,
@@ -23,11 +24,12 @@ import type {
 
 export const accountsApi = {
   async list(): Promise<AccountListData> {
-    return assertSuccess(await backend.command('accounts_list'), '读取账户列表')
+    return parseAccountList(assertSuccess(await backend.command('accounts_list'), '读取账户列表'))
   },
 
   async current(): Promise<MinecraftAccount | null> {
-    return assertSuccess(await backend.command('accounts_current'), '读取当前账户') ?? null
+    const account = assertSuccess(await backend.command('accounts_current'), '读取当前账户')
+    return account ? parseAccountSnapshot(account) : null
   },
 
   async listAuthProviders(): Promise<AuthProvider[]> {

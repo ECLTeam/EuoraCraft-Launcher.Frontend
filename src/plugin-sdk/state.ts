@@ -140,7 +140,12 @@ export function initPluginState(): () => void {
     }
   })
 
-  unlistenFns.push(unlistenConfig, unlistenAccount)
+  const unlistenUpdates = backend.on('config:updated', (payload) => {
+    if (payload.section === 'ui') void themeSlice.refresh()
+    if (payload.section === 'launcher') void launcherSlice.refresh()
+  })
+
+  unlistenFns.push(unlistenConfig, unlistenAccount, unlistenUpdates)
 
   accountSlice.refresh()
 

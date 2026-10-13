@@ -128,7 +128,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import backend from '@/api/client'
@@ -352,12 +352,29 @@ const handleRefresh = async () => {
 }
 
 const handleProfileChanged = async () => {
-  await scanCurrentPath(true)
+  await scanCurrentPath()
   if (detailVersion.value) {
     detailVersion.value =
       currentPathVersions.value.find((version) => version.versionId === detailVersion.value?.versionId) ?? null
   }
 }
+
+watch(
+  () => instanceStore.scannedVersions,
+  () => {
+    const current = detailVersion.value
+    if (!showDetailModal.value || !current) return
+    const replacement = instanceStore.scannedVersions.find(
+      (version) =>
+        version.versionId === current.versionId && gamePathIdentity(version.path) === gamePathIdentity(current.path)
+    )
+    if (replacement) detailVersion.value = replacement
+    else {
+      showDetailModal.value = false
+      detailVersion.value = null
+    }
+  }
+)
 
 const selectPath = async (index: number) => {
   const path = gamePaths.value[index]
@@ -669,7 +686,7 @@ const handleDelete = async (version: ScannedVersion, origin?: DetailModalOrigin)
       await instanceWorkspaceApi.deleteInstance(workspaceTarget(version))
       message.success(t('versions.manage.versionDeleted', { name: version.versionId }))
       if (origin?.isCurrent()) showDetailModal.value = false
-      await scanCurrentPath(true)
+      await scanCurrentPath()
     },
     origin?.parentId ?? null
   )
@@ -701,11 +718,7 @@ async function handleInstanceAction(action: string, version: ScannedVersion, ori
   }
   if (action === 'delete') return handleDelete(version, origin)
   if (action === 'repair') {
-    const report = (await instanceWorkspaceApi.checkFiles(workspaceTarget(version))) as {
-      issues: unknown[]
-      downloadBytes: number
-      canRepair: boolean
-    }
+    const report = await instanceWorkspaceApi.checkFiles(workspaceTarget(version))
     if (origin && !origin.isCurrent()) return
     if (!report.issues.length) return message.success('实例文件完整')
     openConfirm(

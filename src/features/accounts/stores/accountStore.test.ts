@@ -40,8 +40,8 @@ const account = {
 describe('accountStore', () => {
   it('后台账户通知同步列表，并防止旧的当前账户查询覆盖通知', async () => {
     const store = useAccountStore()
-    let finish!: (value: null) => void
-    vi.mocked(accountsApi.current).mockImplementationOnce(
+    let finish!: (value: { accounts: (typeof account)[]; current: null }) => void
+    vi.mocked(accountsApi.list).mockImplementationOnce(
       () =>
         new Promise((resolve) => {
           finish = resolve
@@ -49,7 +49,7 @@ describe('accountStore', () => {
     )
     const loading = store.loadCurrent()
     store.applySnapshot({ accounts: [account], current: account })
-    finish(null)
+    finish({ accounts: [], current: null })
     await loading
     expect(store.accounts).toEqual([account])
     expect(store.currentAccount).toEqual(account)

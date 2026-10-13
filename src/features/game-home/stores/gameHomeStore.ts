@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { queryClient } from '@/app/queryClient'
+import { readResource, invalidateResource } from '@/app/data/refreshCoordinator'
 import { queryKeys } from '@/app/queryKeys'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { gameHomeApi } from '@/features/game-home/api/gameHomeApi'
@@ -20,9 +20,9 @@ export const useGameHomeStore = defineStore('game-home', () => {
     error.value = ''
     try {
       const [items] = await Promise.all([
-        queryClient.fetchQuery({
+        readResource({
           queryKey: queryKeys.gameHome.announcements,
-          queryFn: () => gameHomeApi.getAnnouncements(),
+          load: () => gameHomeApi.getAnnouncements(),
         }),
         settingsStore.load(),
       ])
@@ -36,9 +36,7 @@ export const useGameHomeStore = defineStore('game-home', () => {
   }
 
   function cancelLaunch(): Promise<void> {
-    return gameHomeApi
-      .cancelLaunch()
-      .finally(() => queryClient.invalidateQueries({ queryKey: queryKeys.gameHome.announcements }))
+    return gameHomeApi.cancelLaunch().finally(() => invalidateResource(queryKeys.gameHome.announcements))
   }
 
   return {

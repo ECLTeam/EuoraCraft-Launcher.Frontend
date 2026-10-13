@@ -2,6 +2,7 @@ import { computed, readonly, ref, type Ref } from 'vue'
 import backend from '@/api/client'
 import { onCommandResponse } from '@/api/client/commands'
 import { configQuery, launcherInfoQuery } from '@/app/data'
+import { acceptConfigSnapshot, invalidateConfig } from '@/app/data/configQueries'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
 import { reconcileAvatarAccounts } from '@/composables/useAvatarRenderer'
 import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
@@ -11,6 +12,8 @@ import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import { useConnector } from '@/features/connect/composables/useConnector'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
+import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
+import { instanceProfileApi } from '@/features/instances/api/instanceProfileApi'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
@@ -84,28 +87,41 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   let notifySeq = 0
   let settingsRefreshTimer: ReturnType<typeof setTimeout> | null = null
   const changedSettings = new Set<string>()
+  let settingsSyncPromise: Promise<void> | null = null
 
   async function syncChangedSettings(): Promise<void> {
-    const sections = new Set(changedSettings)
-    changedSettings.clear()
-    const store = useSettingsStore()
-    const previousBackground = JSON.stringify(store.ui.background)
-    const previousPaths = JSON.stringify(store.game.minecraft_paths)
-    await store.refreshAfterWrites()
-    if (!started) return
-    if (sections.has('ui')) {
-      await applyConfig({
-        ui: {
-          ...store.ui,
-          background: JSON.stringify(store.ui.background) === previousBackground ? undefined : store.ui.background,
-        },
-      })
+    if (settingsSyncPromise) return settingsSyncPromise
+    const syncing = (async () => {
+      while (changedSettings.size && started) {
+        const sections = new Set(changedSettings)
+        changedSettings.clear()
+        const store = useSettingsStore()
+        const previousBackground = JSON.stringify(store.ui.background)
+        const previousPaths = JSON.stringify(gameConfig.value?.minecraft_paths ?? store.game.minecraft_paths)
+        await store.refreshAfterWrites()
+        if (!started) return
+        if (sections.has('ui')) {
+          await applyConfig({
+            ui: {
+              ...store.ui,
+              background: JSON.stringify(store.ui.background) === previousBackground ? undefined : store.ui.background,
+            },
+          })
+        }
+        if (sections.has('game')) {
+          gameConfig.value = store.game
+          if (JSON.stringify(store.game.minecraft_paths) !== previousPaths) await useInstanceStore().loadAll(true)
+        }
+        if (sections.has('download')) downloadConfig.value = store.download
+        if (sections.has('launcher')) isDevMode.value = store.launcher.debug === true
+      }
+    })()
+    settingsSyncPromise = syncing
+    try {
+      await syncing
+    } finally {
+      if (settingsSyncPromise === syncing) settingsSyncPromise = null
     }
-    if (sections.has('game')) {
-      gameConfig.value = store.game
-      if (JSON.stringify(store.game.minecraft_paths) !== previousPaths) await useInstanceStore().loadAll(true)
-    }
-    if (sections.has('download')) downloadConfig.value = store.download
   }
 
   async function applyConfig(payload: Partial<BackendEvents['config:init']>): Promise<void> {
@@ -341,11 +357,8 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         void applyConfig(payload)
       }),
       backend.on('config:updated', (payload) => {
-        if (payload.section === 'launcher') {
-          const launcher = (payload.data as { debug?: boolean } | null) ?? {}
-          isDevMode.value = launcher.debug === true
-        }
         if (!['ui', 'game', 'download', 'launcher', 'connector'].includes(payload.section)) return
+        if (!acceptConfigSnapshot(payload)) void invalidateConfig()
         changedSettings.add(payload.section)
         if (settingsRefreshTimer) clearTimeout(settingsRefreshTimer)
         settingsRefreshTimer = setTimeout(() => {
@@ -353,6 +366,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
           void syncChangedSettings().catch((error) => console.warn('[AppRuntime] 同步设置变更失败:', error))
         }, 50)
       }),
+      backend.on('game:instance_categories_changed', (payload) =>
+        instanceProfileApi.acceptCategoriesSnapshot(payload.categories)
+      ),
       backend.on('plugin:css_injected', (payload) => {
         const pluginName = payload.plugin || 'unknown'
         const styleKey =
@@ -441,6 +457,10 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     }
 
     registerBackendEvents()
+    cleanupCallbacks.push(
+      () => useInstanceStore().dispose(),
+      () => instanceInstallApi.disposeChangeListeners()
+    )
     cleanupCallbacks.push(installDesktopInteractionPolicy(readonly(isDevMode)))
     initPluginBridge(options.router)
     await backend.waitForEventListeners()

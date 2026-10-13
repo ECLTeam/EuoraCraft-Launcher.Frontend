@@ -4,6 +4,7 @@
     "loading": "載入中...",
     "delete": "刪除"
   },
+  "dataSync": { "invalid": "資料格式無效，請重新整理後重試", "changing": "資料持續變更，請稍後重新整理再試" },
   "sidebar": {
     "toggle": "切換側邊欄",
     "collapse": "收起側邊欄",

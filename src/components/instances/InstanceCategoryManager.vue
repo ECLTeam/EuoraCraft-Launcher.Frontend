@@ -27,6 +27,8 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useResourceSnapshot } from '@/app/data/useResourceSnapshot'
+import { queryKeys } from '@/app/queryKeys'
 import Modal from '@/components/modals/Modal.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -36,7 +38,7 @@ import type { InstanceCategory } from '@/types/instances'
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ 'update:visible': [value: boolean]; changed: [] }>()
 const visible = ref(props.visible)
-const categories = ref<InstanceCategory[]>([])
+const categories = useResourceSnapshot<InstanceCategory[]>(queryKeys.instanceCategories, [])
 const editingId = ref('')
 const name = ref('')
 const color = ref('#7d8da6')

@@ -113,19 +113,19 @@ export const useAccountStore = defineStore('accounts', () => {
   async function loadCurrent(): Promise<void> {
     const revision = accountsRevision
     const loadId = ++currentLoadId
-    const account = await accountsApi.current()
+    const account = (await accountsQuery()).current
     if (revision === accountsRevision && loadId === currentLoadId) currentAccount.value = account
   }
 
   function applySnapshot(result: { accounts: MinecraftAccount[]; current: MinecraftAccount | null }): void {
     accountsRevision += 1
     if (loadPromise) reloadRequested = true
-    setAccountsSnapshot(result)
-    const snapshot = deduplicateAccounts(result.accounts ?? [], result.current?.id)
-    reconcileAvatarAccounts({ ...result, accounts: snapshot, textureInvalidatedAccountIds: [] })
+    const data = setAccountsSnapshot(result)
+    const snapshot = deduplicateAccounts(data.accounts, data.current?.id)
+    reconcileAvatarAccounts({ ...data, accounts: snapshot, textureInvalidatedAccountIds: [] })
     accounts.value = snapshot
-    currentAccount.value = result.current
-      ? (snapshot.find((account) => account.id === result.current?.id) ?? result.current)
+    currentAccount.value = data.current
+      ? (snapshot.find((account) => account.id === data.current?.id) ?? data.current)
       : null
     if (!loadPromise) status.value = 'ready'
     error.value = ''
@@ -135,9 +135,11 @@ export const useAccountStore = defineStore('accounts', () => {
    * 执行变更操作后刷新账户列表。
    * 多个「先调用后端 API、再 load()」的动作共用此模式，避免重复样板代码。
    */
-  async function runAndReload<T>(action: () => Promise<T>, reload: () => Promise<void> = () => load(true)): Promise<T> {
+  async function runAndReload<T>(action: () => Promise<T>, reload?: () => Promise<void>): Promise<T> {
+    const revision = accountsRevision
     const result = await action()
-    await reload()
+    if (reload) await reload()
+    else if (revision === accountsRevision) await load(true)
     return result
   }
 

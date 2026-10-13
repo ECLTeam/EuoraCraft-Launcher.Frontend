@@ -1,6 +1,7 @@
 import { defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { configQuery, invalidateConfig } from '@/app/data'
+import { serializeConfigWrite, waitForConfigWrites } from '@/app/data/configQueries'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { toJavaInstallations, useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
@@ -97,10 +98,10 @@ export const useSettingsStore = defineStore('settings', () => {
   let loadPromise: Promise<void> | null = null
   let latestLoadId = 0
   let configRevision = 0
-  const writeQueues = new Map<string, Promise<void>>()
+  let refreshPromise: Promise<void> | null = null
 
-  async function load(force = false): Promise<void> {
-    if (!force && status.value === 'ready') return
+  async function load(force = false, synchronize = false): Promise<void> {
+    if (!force && !synchronize && status.value === 'ready') return
     if (!force && loadPromise) return loadPromise
     const loadId = ++latestLoadId
     const revisionAtStart = configRevision
@@ -108,8 +109,7 @@ export const useSettingsStore = defineStore('settings', () => {
     error.value = ''
     const request: Promise<void> = (async () => {
       try {
-        if (force) await invalidateConfig()
-        const config = await configQuery()
+        const config = await configQuery({ force })
         // 读取期间若已有本地写入完成，旧快照不能覆盖新状态。
         if (loadId !== latestLoadId) return
         if (revisionAtStart !== configRevision) {
@@ -148,16 +148,7 @@ export const useSettingsStore = defineStore('settings', () => {
    * 同一配置区的“读取当前值 → 合并 → 写回”必须串行执行，避免并发局部更新互相覆盖。
    */
   function enqueueWrite<T>(section: string, action: () => Promise<T>): Promise<T> {
-    const previous = writeQueues.get(section) ?? Promise.resolve()
-    const request = previous.catch(() => undefined).then(action)
-    writeQueues.set(
-      section,
-      request.then(
-        () => undefined,
-        () => undefined
-      )
-    )
-    return request
+    return serializeConfigWrite(section, action)
   }
 
   async function ensureReady(): Promise<void> {
@@ -165,16 +156,37 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function refreshAfterWrites(): Promise<void> {
-    await Promise.all([...writeQueues.values()])
-    await load(true)
+    if (refreshPromise) return refreshPromise
+    const refreshing = (async () => {
+      await waitForConfigWrites()
+      await load(false, true)
+    })()
+    refreshPromise = refreshing
+    try {
+      await refreshing
+    } finally {
+      if (refreshPromise === refreshing) refreshPromise = null
+    }
   }
 
   async function patchUi(patch: Partial<UiConfig>): Promise<void> {
     await enqueueWrite('ui', async () => {
       await ensureReady()
       const next = { ...ui.value, ...patch }
-      await settingsApi.saveUi(next)
-      ui.value = next
+      const saved = await settingsApi.saveUi(next)
+      ui.value = saved ?? next
+      if (!saved) void invalidateConfig()
+      configRevision += 1
+    })
+  }
+
+  async function updateUi(update: (current: UiConfig) => UiConfig): Promise<void> {
+    await enqueueWrite('ui', async () => {
+      await ensureReady()
+      const next = update((await configQuery()).ui)
+      const saved = await settingsApi.saveUi(next)
+      ui.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -183,8 +195,9 @@ export const useSettingsStore = defineStore('settings', () => {
     await enqueueWrite('ui', async () => {
       await ensureReady()
       const next = { ...ui.value, theme: { ...ui.value.theme, ...patch } }
-      await settingsApi.saveUi(next)
-      ui.value = next
+      const saved = await settingsApi.saveUi(next)
+      ui.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -207,8 +220,9 @@ export const useSettingsStore = defineStore('settings', () => {
         ...ui.value,
         background: { ...current, ...patch, image, video },
       }
-      await settingsApi.saveUi(next)
-      ui.value = next
+      const saved = await settingsApi.saveUi(next)
+      ui.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -217,8 +231,9 @@ export const useSettingsStore = defineStore('settings', () => {
     await enqueueWrite('game', async () => {
       await ensureReady()
       const next = { ...game.value, ...patch }
-      await settingsApi.saveGame(next)
-      game.value = next
+      const saved = await settingsApi.saveGame(next)
+      game.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -227,8 +242,9 @@ export const useSettingsStore = defineStore('settings', () => {
     await enqueueWrite('launcher', async () => {
       await ensureReady()
       const next = { ...launcher.value, ...patch }
-      await settingsApi.saveLauncher(next)
-      launcher.value = next
+      const saved = await settingsApi.saveLauncher(next)
+      launcher.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -246,8 +262,9 @@ export const useSettingsStore = defineStore('settings', () => {
     await enqueueWrite('connector', async () => {
       await ensureReady()
       const next = { ...connector.value, ...patch }
-      await settingsApi.saveConnector(next)
-      connector.value = next
+      const saved = await settingsApi.saveConnector(next)
+      connector.value = saved ?? next
+      if (!saved) void invalidateConfig()
       configRevision += 1
     })
   }
@@ -288,6 +305,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   return {
+    updateUi,
     refreshAfterWrites,
     ui,
     game,

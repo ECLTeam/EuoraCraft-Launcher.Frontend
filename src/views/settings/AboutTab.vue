@@ -123,6 +123,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { launcherInfoQuery } from '@/app/data'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import AboutEntryRow from '@/components/settings/AboutEntryRow.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -130,7 +131,6 @@ import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { specialThanksEntries, teamMembers, technologyCategories } from '@/features/settings/about/aboutContent'
-import { aboutApi } from '@/features/settings/api/aboutApi'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import type { LauncherInfo, UpdateCheckResult } from '@/types/system'
 import { openExternalUrl } from '@/utils/openExternal'
@@ -193,7 +193,7 @@ const versionText = computed(() => {
 })
 
 onMounted(async () => {
-  launcherInfo.value = await aboutApi.getLauncherInfo()
+  launcherInfo.value = await launcherInfoQuery()
 })
 
 // 技术栈分类默认全部收起：避免默认展开的"后端运行依赖"等把卡片撑成超出视口的大块，与下拉/折叠式行设计一致

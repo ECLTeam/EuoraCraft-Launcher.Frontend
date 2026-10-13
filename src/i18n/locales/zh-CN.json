@@ -12,6 +12,7 @@
     "copyFailed": "复制失败，请手动选择并复制色值",
     "unavailable": "暂无可用 UUID"
   },
+  "dataSync": { "invalid": "数据格式无效，请刷新重试", "changing": "数据持续变化，请稍后刷新重试" },
   "sidebar": {
     "toggle": "切换侧边栏",
     "collapse": "收起侧边栏",
