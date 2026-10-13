@@ -63,6 +63,7 @@
 }
 
 .tq-task {
+  --tq-hover-border: var(--control-border-hover);
   width: 100%;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
@@ -74,15 +75,23 @@
 }
 
 .tq-task--running {
+  --tq-hover-border: color-mix(in srgb, var(--primary) 60%, var(--border));
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
 
 .tq-task--completed {
+  --tq-hover-border: rgba(76, 175, 80, 0.55);
   border-color: rgba(76, 175, 80, 0.35);
 }
 
 .tq-task--error {
+  --tq-hover-border: rgba(244, 67, 54, 0.55);
   border-color: rgba(244, 67, 54, 0.35);
+}
+
+.tq-task:hover {
+  border-color: var(--tq-hover-border);
+  box-shadow: var(--control-glow);
 }
 
 .tq-task-top {
@@ -111,10 +120,6 @@
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: var(--s-sm);
-}
-
-.tq-task-header:hover {
-  background: var(--bg-hover);
 }
 
 .tq-task-main {
