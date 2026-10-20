@@ -75,6 +75,8 @@ import type {
 import type {
   PluginInfo,
   PluginPermissions,
+  PluginResourcePage,
+  PluginResourceQuery,
   PluginPermissionDecision,
   PluginPermissionUpdateResult,
   PluginRuntimeInfo,
@@ -580,11 +582,13 @@ export interface CommandPayloadMap {
 
   // 插件
   plugin_permissions_get: { installation_id: string }
+  plugin_permission_resources: PluginResourceQuery
   plugin_permissions_update: {
     installation_id: string
     content_digest: string
     expected_revision: number
     decisions: PluginPermissionDecision[]
+    resource_revision?: number
   }
   plugin_runtime_info: { installation_id: string }
   plugin_list: undefined
@@ -903,6 +907,7 @@ export const COMMAND_NAMES = {
   process_stop: 'process_stop',
   debug_process_spawn: 'debug_process_spawn',
   plugin_permissions_get: 'plugin_permissions_get',
+  plugin_permission_resources: 'plugin_permission_resources',
   plugin_permissions_update: 'plugin_permissions_update',
   plugin_runtime_info: 'plugin_runtime_info',
   plugin_list: 'plugin_list',
@@ -1199,6 +1204,7 @@ export interface CommandResponseMap {
   game_crash_export: { path: string }
 
   plugin_permissions_get: PluginPermissions
+  plugin_permission_resources: PluginResourcePage
   plugin_permissions_update: PluginPermissionUpdateResult
   plugin_runtime_info: PluginRuntimeInfo
   plugin_list: PluginInfo[]

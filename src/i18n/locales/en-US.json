@@ -766,7 +766,8 @@
       "commands_execute": "Run own commands",
       "settings_read": "Read own settings",
       "settings_write": "Change own settings",
-      "events_subscribe": "Subscribe to own setting changes"
+      "events_subscribe": "Subscribe to own setting changes",
+      "instances_read": "Read approved instances"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -780,7 +781,23 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "Plugin dependencies are unavailable or conflict.",
       "PLUGIN_WORKER_EXECUTION_FAILED": "The plugin could not start. Check logs before retrying."
     },
-    "runtimeError": "The plugin operation did not complete. Check permissions or retry."
+    "runtimeError": "The plugin operation did not complete. Check permissions or retry.",
+    "resourcesTitle": "Allowed instances",
+    "resourcesNote": "Selecting a directory includes future instances. Selecting one instance allows only that instance.",
+    "resourcesBack": "Game directories",
+    "resourcesSearch": "Filter this list",
+    "resourcesLoadFailed": "The resource list changed or could not be read. Refresh and try again.",
+    "resourcesEmpty": "No resources to select. Add a game directory on the instances page first.",
+    "resourcesEntireRoot": "{name}: all instances, including future additions",
+    "resourcesUnavailable": "Unavailable resource. Remove this selection and review again.",
+    "resourcesCovered": "Covered by directory permission",
+    "resourcesRootHint": "Allows reading every instance in this directory",
+    "resourcesInstanceHint": "Allows reading only this instance",
+    "resourcesBrowse": "Choose instances",
+    "resourcesSelected": "{count} resources selected",
+    "resourcesClear": "Clear all selections",
+    "resourcesMore": "Load more",
+    "resourcesLimitReached": "Select at most 128 resources. Narrow the scope."
   },
   "settings": {
     "title": "Settings",

@@ -766,7 +766,8 @@
       "commands_execute": "执行自身命令",
       "settings_read": "读取自身设置",
       "settings_write": "修改自身设置",
-      "events_subscribe": "订阅自身设置变化"
+      "events_subscribe": "订阅自身设置变化",
+      "instances_read": "读取获准实例"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -780,7 +781,23 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "插件依赖不可用或存在冲突。",
       "PLUGIN_WORKER_EXECUTION_FAILED": "插件启动失败，请检查日志后重试。"
     },
-    "runtimeError": "插件运行未完成，请检查权限或重试。"
+    "runtimeError": "插件运行未完成，请检查权限或重试。",
+    "resourcesTitle": "允许访问的实例",
+    "resourcesNote": "选择整个目录会包含以后新增的实例；选择单个实例只允许读取该实例。",
+    "resourcesBack": "游戏目录",
+    "resourcesSearch": "筛选当前列表",
+    "resourcesLoadFailed": "资源列表已变化或读取失败，请刷新后重试。",
+    "resourcesEmpty": "没有可选择的资源，请先在实例页添加游戏目录。",
+    "resourcesEntireRoot": "{name}：全部实例（含以后新增）",
+    "resourcesUnavailable": "资源已不可用，请移除选择后重新审阅。",
+    "resourcesCovered": "已由目录授权覆盖",
+    "resourcesRootHint": "批准后可读取此目录的全部实例",
+    "resourcesInstanceHint": "仅允许读取此实例",
+    "resourcesBrowse": "选择实例",
+    "resourcesSelected": "已选择 {count} 个资源",
+    "resourcesClear": "清除全部选择",
+    "resourcesMore": "加载更多",
+    "resourcesLimitReached": "最多选择 128 个资源，请缩小范围。"
   },
   "settings": {
     "title": "设置",

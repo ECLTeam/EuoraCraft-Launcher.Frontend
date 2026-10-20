@@ -113,6 +113,7 @@ export interface PluginPermissionItem {
   required: boolean
   decision: 'allow' | 'deny'
   resource_refs: string[]
+  selected_resource_refs: string[]
   implemented: boolean
   expires_at: number | null
   grant_epoch: number
@@ -150,4 +151,30 @@ export interface PluginRuntimeInfo {
   pid: number | null
   cleanup_state: string
   last_error: { code: string; message: string } | null
+}
+
+export interface PluginResourceCandidate {
+  resource_id: string
+  kind: 'instance_root' | 'instance'
+  label: string
+  parent_ref: string | null
+  version_id: string | null
+  available: boolean
+  selected: boolean
+}
+
+export interface PluginResourcePage {
+  catalog_revision: number
+  items: PluginResourceCandidate[]
+  next_cursor: string | null
+}
+
+export interface PluginResourceQuery {
+  installation_id: string
+  content_digest: string
+  capability: 'instances.read'
+  parent_ref?: string | null
+  search?: string
+  cursor?: string | null
+  limit?: number
 }

@@ -36,6 +36,7 @@ const view: PluginPermissions = {
       decision: 'deny',
       implemented: true,
       resource_refs: [],
+      selected_resource_refs: [],
       expires_at: null,
       grant_epoch: 1,
     },
@@ -53,6 +54,18 @@ describe('plugin permission review', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.permissions.mockResolvedValue(view)
+  })
+
+  it('includes the capability in the checkbox accessible name', async () => {
+    const wrapper = open()
+    try {
+      await flushPromises()
+      const checkbox = wrapper.get('[role="checkbox"]')
+      const labelId = checkbox.attributes('aria-labelledby')
+      expect(wrapper.get(`[id="${labelId}"]`).text()).toContain(i18n.global.t('plugins.capabilities.settings_read'))
+    } finally {
+      wrapper.unmount()
+    }
   })
 
   it('defaults to deny and submits only once while saving', async () => {

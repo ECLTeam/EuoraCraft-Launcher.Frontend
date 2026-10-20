@@ -1,4 +1,10 @@
-import type { PluginPermissionItem, PluginPermissions, PluginPermissionUpdateResult } from '@/types/plugins'
+import type {
+  PluginPermissionItem,
+  PluginPermissions,
+  PluginPermissionUpdateResult,
+  PluginResourcePage,
+  PluginResourceCandidate,
+} from '@/types/plugins'
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -19,6 +25,7 @@ function parseItem(value: unknown): PluginPermissionItem {
     typeof value.required !== 'boolean' ||
     (value.decision !== 'allow' && value.decision !== 'deny') ||
     !strings(value.resource_refs) ||
+    !strings(value.selected_resource_refs) ||
     typeof value.implemented !== 'boolean' ||
     !integer(value.grant_epoch) ||
     !(value.expires_at === null || (typeof value.expires_at === 'number' && Number.isFinite(value.expires_at)))
@@ -29,10 +36,47 @@ function parseItem(value: unknown): PluginPermissionItem {
     required: value.required,
     decision: value.decision,
     resource_refs: value.resource_refs,
+    selected_resource_refs: value.selected_resource_refs,
     implemented: value.implemented,
     expires_at: value.expires_at,
     grant_epoch: value.grant_epoch,
   }
+}
+
+export function parseResourcePage(value: unknown): PluginResourcePage {
+  if (
+    !record(value) ||
+    !integer(value.catalog_revision) ||
+    !Array.isArray(value.items) ||
+    value.items.length > 100 ||
+    !(value.next_cursor === null || typeof value.next_cursor === 'string')
+  )
+    throw new Error('PLUGIN_SCHEMA_INVALID')
+  const items = value.items.map((item: unknown): PluginResourceCandidate => {
+    if (
+      !record(item) ||
+      typeof item.resource_id !== 'string' ||
+      !/^[0-9a-f]{32}$/.test(item.resource_id) ||
+      (item.kind !== 'instance_root' && item.kind !== 'instance') ||
+      typeof item.label !== 'string' ||
+      item.label.length > 120 ||
+      !(item.parent_ref === null || typeof item.parent_ref === 'string') ||
+      !(item.version_id === null || typeof item.version_id === 'string') ||
+      typeof item.available !== 'boolean' ||
+      typeof item.selected !== 'boolean'
+    )
+      throw new Error('PLUGIN_SCHEMA_INVALID')
+    return {
+      resource_id: item.resource_id,
+      kind: item.kind,
+      label: item.label,
+      parent_ref: item.parent_ref,
+      version_id: item.version_id,
+      available: item.available,
+      selected: item.selected,
+    }
+  })
+  return { catalog_revision: value.catalog_revision, items, next_cursor: value.next_cursor }
 }
 
 export function parsePermissions(value: unknown): PluginPermissions {

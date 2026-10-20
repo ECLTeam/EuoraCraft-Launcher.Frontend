@@ -758,7 +758,8 @@
       "commands_execute": "Eigene Befehle ausführen",
       "settings_read": "Eigene Einstellungen lesen",
       "settings_write": "Eigene Einstellungen ändern",
-      "events_subscribe": "Eigene Einstellungsänderungen abonnieren"
+      "events_subscribe": "Eigene Einstellungsänderungen abonnieren",
+      "instances_read": "Genehmigte Instanzen lesen"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
@@ -772,7 +773,23 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "Pluginabhängigkeiten fehlen oder stehen im Konflikt.",
       "PLUGIN_WORKER_EXECUTION_FAILED": "Pluginstart fehlgeschlagen. Vor dem Wiederholen die Protokolle prüfen."
     },
-    "runtimeError": "Pluginvorgang nicht abgeschlossen. Berechtigungen prüfen oder erneut versuchen."
+    "runtimeError": "Pluginvorgang nicht abgeschlossen. Berechtigungen prüfen oder erneut versuchen.",
+    "resourcesTitle": "Erlaubte Instanzen",
+    "resourcesNote": "Ein Verzeichnis umfasst auch künftige Instanzen. Eine einzelne Auswahl erlaubt nur diese Instanz.",
+    "resourcesBack": "Spielverzeichnisse",
+    "resourcesSearch": "Diese Liste filtern",
+    "resourcesLoadFailed": "Die Ressourcenliste hat sich geändert oder konnte nicht gelesen werden. Bitte aktualisieren.",
+    "resourcesEmpty": "Keine Ressourcen verfügbar. Zuerst ein Spielverzeichnis auf der Instanzseite hinzufügen.",
+    "resourcesEntireRoot": "{name}: alle Instanzen, auch künftige",
+    "resourcesUnavailable": "Ressource nicht verfügbar. Auswahl entfernen und erneut prüfen.",
+    "resourcesCovered": "Durch Verzeichnisberechtigung abgedeckt",
+    "resourcesRootHint": "Lesen aller Instanzen in diesem Verzeichnis erlauben",
+    "resourcesInstanceHint": "Nur diese Instanz lesen",
+    "resourcesBrowse": "Instanzen auswählen",
+    "resourcesSelected": "{count} Ressourcen ausgewählt",
+    "resourcesClear": "Auswahl löschen",
+    "resourcesMore": "Mehr laden",
+    "resourcesLimitReached": "Höchstens 128 Ressourcen auswählen. Den Umfang einschränken."
   },
   "settings": {
     "title": "Einstellungen",

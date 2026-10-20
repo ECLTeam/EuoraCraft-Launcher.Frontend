@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parsePermissions, parsePermissionUpdate } from './pluginPermissionValidation'
+import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 
 const valid = {
   installation_id: 'a'.repeat(32),
@@ -15,6 +15,7 @@ const valid = {
       decision: 'deny',
       implemented: true,
       resource_refs: [],
+      selected_resource_refs: [],
       expires_at: null,
       grant_epoch: 1,
     },
@@ -22,6 +23,34 @@ const valid = {
 }
 
 describe('plugin permission boundary', () => {
+  const candidate = {
+    resource_id: 'a'.repeat(32),
+    kind: 'instance_root',
+    label: 'Game',
+    parent_ref: null,
+    version_id: null,
+    available: true,
+    selected: false,
+  }
+  it('projects resource candidates without passing additional host fields to the selector', () => {
+    const page = parseResourcePage({
+      catalog_revision: 1,
+      items: [{ ...candidate, path: 'private' }],
+      next_cursor: null,
+    })
+    expect(page.items).toEqual([candidate])
+  })
+  it.each([
+    { ...candidate, resource_id: '../outside' },
+    { ...candidate, kind: 'file' },
+    { ...candidate, selected: 'true' },
+    { ...candidate, available: 1 },
+    { ...candidate, label: 'x'.repeat(121) },
+  ])('rejects malformed resource candidates', (item) => {
+    expect(() => parseResourcePage({ catalog_revision: 1, items: [item], next_cursor: null })).toThrow(
+      'PLUGIN_SCHEMA_INVALID'
+    )
+  })
   it('accepts a reviewed installation and preserves explicit denial', () => {
     expect(parsePermissions(valid).items[0]?.decision).toBe('deny')
   })

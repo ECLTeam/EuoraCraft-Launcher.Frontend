@@ -7,8 +7,9 @@ import type {
   PluginPackageInstallResult,
   PluginPackagePreflight,
   PluginSettingsData,
+  PluginResourceQuery,
 } from '@/types/plugins'
-import { parsePermissions, parsePermissionUpdate } from './pluginPermissionValidation'
+import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 
 export const pluginManagementApi = {
   async permissions(installationId: string): Promise<PluginPermissions> {
@@ -20,7 +21,13 @@ export const pluginManagementApi = {
     )
   },
 
-  async updatePermissions(view: PluginPermissions, decisions: PluginPermissionDecision[]) {
+  async permissionResources(query: PluginResourceQuery) {
+    return parseResourcePage(
+      assertSuccess(await backend.command('plugin_permission_resources', query), '查询可审阅实例资源')
+    )
+  },
+
+  async updatePermissions(view: PluginPermissions, decisions: PluginPermissionDecision[], resourceRevision?: number) {
     return parsePermissionUpdate(
       assertSuccess(
         await backend.command('plugin_permissions_update', {
@@ -28,6 +35,7 @@ export const pluginManagementApi = {
           content_digest: view.content_digest,
           expected_revision: view.revision,
           decisions,
+          resource_revision: resourceRevision,
         }),
         '保存插件权限'
       )

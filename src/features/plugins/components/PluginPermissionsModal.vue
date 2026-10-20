@@ -24,12 +24,20 @@
           <NCheckbox
             :checked="allowed.includes(item.capability)"
             :disabled="saving || !item.implemented"
-            :aria-label="capabilityLabel(item.capability)"
             @update:checked="toggle(item.capability, $event)"
           >
+            <span class="permission-accessible-label">{{ capabilityLabel(item.capability) }} </span>
             {{ t('plugins.permissionAllow') }}
           </NCheckbox>
         </div>
+        <PluginResourceSelector
+          v-if="view.items.some((item) => item.capability === 'instances.read' && item.implemented)"
+          v-model:selected="selectedResources"
+          :view="view"
+          :disabled="saving"
+          @revision="resourceRevision = $event"
+          @busy="resourceLoading = $event"
+        />
         <NRadioGroup v-model:value="lifetime" :disabled="saving" :aria-label="t('plugins.permissionLifetime')">
           <NRadio value="permanent">{{ t('plugins.permissionPermanent') }}</NRadio>
           <NRadio value="session">{{ t('plugins.permissionSession') }}</NRadio>
@@ -42,7 +50,12 @@
       <NButton v-if="view?.revision" type="error" :disabled="saving || loading" @click="save(true)">
         {{ t('plugins.permissionsRevoke') }}
       </NButton>
-      <NButton type="primary" :loading="saving" :disabled="!view || loading || !!error" @click="save(false)">
+      <NButton
+        type="primary"
+        :loading="saving"
+        :disabled="!view || loading || !!error || resourceLoading || needsResourceRevision"
+        @click="save(false)"
+      >
         {{ t('plugins.permissionsSave') }}
       </NButton>
     </template>
@@ -51,19 +64,26 @@
 
 <script setup lang="ts">
 import { NAlert, NButton, NCheckbox, NRadio, NRadioGroup } from 'naive-ui'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modals/Modal.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type { PluginInfo, PluginPermissions } from '@/types/plugins'
+import PluginResourceSelector from './PluginResourceSelector.vue'
 
 const props = defineProps<{ visible: boolean; plugin: PluginInfo | null }>()
 const emit = defineEmits<{ (e: 'update:visible', value: boolean): void; (e: 'saved'): void }>()
 const { t, te } = useI18n()
 const view = ref<PluginPermissions | null>(null)
 const allowed = ref<string[]>([])
+const selectedResources = ref<string[]>([])
+const resourceRevision = ref<number>()
+const resourceLoading = ref(false)
+const needsResourceRevision = computed(
+  () => allowed.value.includes('instances.read') && resourceRevision.value === undefined
+)
 const lifetime = ref<'session' | 'permanent'>('permanent')
 const loading = ref(false)
 const saving = ref(false)
@@ -96,6 +116,9 @@ async function load(): Promise<void> {
     const result = await pluginManagementApi.permissions(id)
     if (!current()) return
     view.value = result
+    selectedResources.value =
+      result.items.find((item) => item.capability === 'instances.read')?.selected_resource_refs ?? []
+    resourceRevision.value = undefined
     allowed.value = result.items
       .filter((item) => item.implemented && item.decision === 'allow')
       .map((item) => item.capability)
@@ -107,7 +130,13 @@ async function load(): Promise<void> {
 }
 
 async function save(revoke: boolean): Promise<void> {
-  if (saving.value || loading.value || !view.value) return
+  if (
+    saving.value ||
+    loading.value ||
+    !view.value ||
+    (!revoke && (resourceLoading.value || needsResourceRevision.value))
+  )
+    return
   const reviewed = view.value
   const current = scope.begin()
   saving.value = true
@@ -117,10 +146,15 @@ async function save(revoke: boolean): Promise<void> {
       reviewed,
       reviewed.items.map((item) => ({
         capability: item.capability,
-        resource_refs: item.resource_refs,
+        resource_refs: revoke
+          ? []
+          : item.capability === 'instances.read'
+            ? selectedResources.value
+            : item.resource_refs,
         decision: !revoke && item.implemented && allowed.value.includes(item.capability) ? 'allow' : 'deny',
         lifetime: lifetime.value,
-      }))
+      })),
+      resourceRevision.value
     )
     if (!current()) return
     view.value = {
@@ -129,7 +163,10 @@ async function save(revoke: boolean): Promise<void> {
       grant_epoch: result.grant_epoch,
       required_satisfied: result.required_satisfied,
     }
-    if (revoke) allowed.value = []
+    if (revoke) {
+      allowed.value = []
+      selectedResources.value = []
+    }
     resultMessage.value = t(
       result.cleanup_state === 'pending' ? 'plugins.permissionsCleanupPending' : 'plugins.permissionsSaved'
     )
@@ -183,5 +220,15 @@ watch(
 .permission-label span {
   color: var(--text-color-secondary);
   font-size: 12px;
+}
+.permission-accessible-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

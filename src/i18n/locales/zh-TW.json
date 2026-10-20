@@ -758,7 +758,8 @@
       "commands_execute": "執行自身命令",
       "settings_read": "讀取自身設定",
       "settings_write": "修改自身設定",
-      "events_subscribe": "訂閱自身設定變更"
+      "events_subscribe": "訂閱自身設定變更",
+      "instances_read": "讀取獲准實例"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -772,7 +773,23 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "外掛相依項目無法使用或發生衝突。",
       "PLUGIN_WORKER_EXECUTION_FAILED": "外掛啟動失敗，請檢查記錄後重試。"
     },
-    "runtimeError": "外掛執行未完成，請檢查權限或重試。"
+    "runtimeError": "外掛執行未完成，請檢查權限或重試。",
+    "resourcesTitle": "允許存取的實例",
+    "resourcesNote": "選擇整個目錄會包含以後新增的實例；選擇單一實例只允許讀取該實例。",
+    "resourcesBack": "遊戲目錄",
+    "resourcesSearch": "篩選目前清單",
+    "resourcesLoadFailed": "資源清單已變更或讀取失敗，請重新整理後再試。",
+    "resourcesEmpty": "沒有可選擇的資源，請先在實例頁新增遊戲目錄。",
+    "resourcesEntireRoot": "{name}：全部實例（含以後新增）",
+    "resourcesUnavailable": "資源已無法使用，請移除選擇後重新審閱。",
+    "resourcesCovered": "已由目錄授權涵蓋",
+    "resourcesRootHint": "核准後可讀取此目錄的全部實例",
+    "resourcesInstanceHint": "僅允許讀取此實例",
+    "resourcesBrowse": "選擇實例",
+    "resourcesSelected": "已選擇 {count} 個資源",
+    "resourcesClear": "清除全部選擇",
+    "resourcesMore": "載入更多",
+    "resourcesLimitReached": "最多選擇 128 個資源，請縮小範圍。"
   },
   "settings": {
     "title": "設定",
