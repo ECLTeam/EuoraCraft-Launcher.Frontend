@@ -12,7 +12,10 @@
     "copyFailed": "复制失败，请手动选择并复制色值",
     "unavailable": "暂无可用 UUID"
   },
-  "dataSync": { "invalid": "数据格式无效，请刷新重试", "changing": "数据持续变化，请稍后刷新重试" },
+  "dataSync": {
+    "invalid": "数据格式无效，请刷新重试",
+    "changing": "数据持续变化，请稍后刷新重试"
+  },
   "sidebar": {
     "toggle": "切换侧边栏",
     "collapse": "收起侧边栏",
@@ -733,9 +736,51 @@
     "events": "事件",
     "providedEvents": "提供的事件",
     "subscribedEvents": "订阅的事件",
-    "loadFailed": "加载插件失败",
+    "loadFailed": "插件列表读取失败，请重试。",
     "pluginInstalled": "插件已安装",
-    "settingSaved": "已保存"
+    "settingSaved": "已保存",
+    "permissions": "权限",
+    "permissionsTitle": "{name} 的权限",
+    "permissionsNote": "安装不会自动运行插件。审阅权限后保存，再手动启用；未允许的必要权限会阻止运行。 会话选项只影响允许期限；拒绝始终保留。",
+    "permissionsEmpty": "此插件没有请求业务权限，仍需保存本次审阅后启用。",
+    "permissionRequired": "运行必需",
+    "permissionOptional": "可选",
+    "permissionUnavailable": "此能力尚未开放",
+    "permissionAllow": "允许",
+    "permissionLifetime": "授权期限",
+    "permissionPermanent": "持续允许",
+    "permissionSession": "仅本次运行",
+    "permissionsRevoke": "撤销全部授权",
+    "permissionsSave": "保存审阅",
+    "permissionsLoadFailed": "读取权限失败，请重试。",
+    "permissionsSaveFailed": "保存未完成。请重新读取权限，确认当前状态后重试。",
+    "permissionsCleanupPending": "授权已保存，运行资源仍在清理中。",
+    "permissionsSaved": "审阅已保存；启用和实际运行状态请查看插件列表。",
+    "review_required": "待审阅",
+    "unsupported": "不支持",
+    "starting": "启动中",
+    "stopping": "停止中",
+    "failed": "运行失败",
+    "capabilities": {
+      "commands_register": "注册自身命令",
+      "commands_execute": "执行自身命令",
+      "settings_read": "读取自身设置",
+      "settings_write": "修改自身设置",
+      "events_subscribe": "订阅自身设置变化"
+    },
+    "settingLoadFailed": "设置读取失败，请重试。",
+    "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
+    "settingsTitle": "{name} 的设置",
+    "errors": {
+      "PLUGIN_API_VERSION_UNSUPPORTED": "此插件需要受支持的 API v2。",
+      "PLUGIN_GRANT_REVIEW_REQUIRED": "请先审阅插件权限。",
+      "PLUGIN_REQUIRED_PERMISSION_DENIED": "必要权限未获准，请检查权限设置。",
+      "PLUGIN_RUNTIME_UNSUPPORTED": "当前平台暂不支持第三方插件。",
+      "PLUGIN_CONTENT_CHANGED": "插件内容已变化，请重新审阅。",
+      "PLUGIN_DEPENDENCY_CONFLICT": "插件依赖不可用或存在冲突。",
+      "PLUGIN_WORKER_EXECUTION_FAILED": "插件启动失败，请检查日志后重试。"
+    },
+    "runtimeError": "插件运行未完成，请检查权限或重试。"
   },
   "settings": {
     "title": "设置",

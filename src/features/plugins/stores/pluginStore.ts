@@ -75,7 +75,9 @@ export const usePluginStore = defineStore('plugins', () => {
   }
 
   function toggle(plugin: PluginInfo): Promise<ActionResult<void>> {
-    const action = plugin.status === 'enabled' ? pluginManagementApi.disable : pluginManagementApi.enable
+    const action = ['enabled', 'stopping'].includes(plugin.status)
+      ? pluginManagementApi.disable
+      : pluginManagementApi.enable
     return runOperation(`toggle:${plugin.name}`, () => action(plugin.name))
   }
 
@@ -116,12 +118,16 @@ export const usePluginStore = defineStore('plugins', () => {
   }
 
   async function updateSetting(pluginName: string, key: string, value: unknown): Promise<void> {
-    await pluginManagementApi.updateSetting(pluginName, key, value)
     const cached = settingsCache.value[pluginName]
+    const result = await pluginManagementApi.updateSetting(pluginName, key, value, cached?.revision)
     if (cached) {
       settingsCache.value = {
         ...settingsCache.value,
-        [pluginName]: { ...cached, values: { ...cached.values, [key]: value } },
+        [pluginName]: {
+          ...cached,
+          revision: result?.revision ?? cached.revision,
+          values: { ...cached.values, [key]: value },
+        },
       }
     }
   }

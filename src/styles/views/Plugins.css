@@ -1,5 +1,5 @@
 .plugins-page {
-  width: min(860px, 100%);
+  width: 100%;
   height: 100%;
   min-height: 0;
   margin: 0 auto;
@@ -45,7 +45,7 @@
   display: grid;
   height: 32px;
   flex-shrink: 0;
-  grid-template-columns: minmax(0, 1fr) 66px 126px 112px;
+  grid-template-columns: minmax(0, 1fr) 66px 110px 230px;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
@@ -64,7 +64,7 @@
   position: relative;
   display: grid;
   min-height: 60px;
-  grid-template-columns: minmax(0, 1fr) 66px 126px 112px;
+  grid-template-columns: minmax(0, 1fr) 66px 110px 230px;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;

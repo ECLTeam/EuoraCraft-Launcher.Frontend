@@ -49,8 +49,13 @@ export function getPluginSettings(pluginName: string): Promise<ApiResponse<Plugi
  * @param key - 设置键
  * @param value - 设置值
  */
-export function updatePluginSetting(pluginName: string, key: string, value: unknown): Promise<ApiResponse<void>> {
-  return toApiResponse(pluginManagementApi.updateSetting(pluginName, key, value))
+export function updatePluginSetting(
+  pluginName: string,
+  key: string,
+  value: unknown,
+  expectedRevision?: number
+): Promise<ApiResponse<{ revision: number } | undefined>> {
+  return toApiResponse(pluginManagementApi.updateSetting(pluginName, key, value, expectedRevision))
 }
 
 // ── 插件路由 ──

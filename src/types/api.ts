@@ -74,6 +74,10 @@ import type {
 } from '@/types/mods'
 import type {
   PluginInfo,
+  PluginPermissions,
+  PluginPermissionDecision,
+  PluginPermissionUpdateResult,
+  PluginRuntimeInfo,
   PluginPackagePreflight,
   PluginRoute,
   PluginSettingsData,
@@ -575,6 +579,14 @@ export interface CommandPayloadMap {
   }
 
   // 插件
+  plugin_permissions_get: { installation_id: string }
+  plugin_permissions_update: {
+    installation_id: string
+    content_digest: string
+    expected_revision: number
+    decisions: PluginPermissionDecision[]
+  }
+  plugin_runtime_info: { installation_id: string }
   plugin_list: undefined
   plugin_info: { plugin_name: string }
   plugin_enable: { plugin_name: string }
@@ -593,7 +605,7 @@ export interface CommandPayloadMap {
   plugin_get_vue_components: Record<string, never>
   plugin_call_command: { command: string; params?: Record<string, unknown> }
   plugin_get_settings: { plugin_name: string }
-  plugin_update_setting: { plugin_name: string; key: string; value: unknown }
+  plugin_update_setting: { plugin_name: string; key: string; value: unknown; expected_revision?: number }
   plugin_notify_sidebar_state: { collapsed: boolean }
 
   // Mod 管理（主框架）
@@ -890,6 +902,9 @@ export const COMMAND_NAMES = {
   process_input: 'process_input',
   process_stop: 'process_stop',
   debug_process_spawn: 'debug_process_spawn',
+  plugin_permissions_get: 'plugin_permissions_get',
+  plugin_permissions_update: 'plugin_permissions_update',
+  plugin_runtime_info: 'plugin_runtime_info',
   plugin_list: 'plugin_list',
   plugin_info: 'plugin_info',
   plugin_enable: 'plugin_enable',
@@ -1183,6 +1198,9 @@ export interface CommandResponseMap {
   game_crash_output: { name: string; content: string }
   game_crash_export: { path: string }
 
+  plugin_permissions_get: PluginPermissions
+  plugin_permissions_update: PluginPermissionUpdateResult
+  plugin_runtime_info: PluginRuntimeInfo
   plugin_list: PluginInfo[]
   plugin_info: PluginInfo
   plugin_enable: void
@@ -1197,7 +1215,7 @@ export interface CommandResponseMap {
   plugin_get_vue_components: Record<string, VueComponentDef>
   plugin_call_command: unknown
   plugin_get_settings: PluginSettingsData
-  plugin_update_setting: void
+  plugin_update_setting: { revision: number } | undefined
   plugin_notify_sidebar_state: void
 
   get_mods: ModItem[]

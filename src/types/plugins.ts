@@ -5,6 +5,11 @@
 
 export interface PluginInfo {
   name: string
+  installation_id?: string
+  content_digest?: string
+  review_required?: boolean
+  required_satisfied?: boolean
+  cleanup_state?: string
   title: string
   version: string
   description: string
@@ -82,6 +87,7 @@ export interface VueComponentDef {
 }
 
 export interface PluginSettingsData {
+  revision?: number
   schema: PluginSettingSchema[]
   values: Record<string, unknown>
 }
@@ -96,7 +102,52 @@ export interface PluginDependency {
 }
 export interface PluginSettingSchema {
   key: string
+  options?: string[]
   default: unknown
   description: string
   type: 'bool' | 'string' | 'number' | 'select'
+}
+
+export interface PluginPermissionItem {
+  capability: string
+  required: boolean
+  decision: 'allow' | 'deny'
+  resource_refs: string[]
+  implemented: boolean
+  expires_at: number | null
+  grant_epoch: number
+}
+
+export interface PluginPermissions {
+  installation_id: string
+  content_digest: string
+  revision: number
+  grant_epoch: number
+  required_satisfied: boolean
+  error_code: string | null
+  items: PluginPermissionItem[]
+}
+
+export interface PluginPermissionDecision {
+  capability: string
+  resource_refs: string[]
+  decision: 'allow' | 'deny'
+  lifetime: 'session' | 'permanent'
+}
+
+export interface PluginPermissionUpdateResult {
+  revision: number
+  grant_epoch: number
+  persisted: boolean
+  required_satisfied: boolean
+  cleanup_state: string
+}
+
+export interface PluginRuntimeInfo {
+  installation_id: string
+  run_id: string
+  run_state: string
+  pid: number | null
+  cleanup_state: string
+  last_error: { code: string; message: string } | null
 }

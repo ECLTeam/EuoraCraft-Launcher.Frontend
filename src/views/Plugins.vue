@@ -39,7 +39,12 @@
       </div>
 
       <div class="plugins-list-body">
-        <UiLoading :show="loading" mode="overlay" class="plugins-spin">
+        <UiLoading v-if="loading && !plugins.length" mode="block" class="plugins-spin" />
+        <NAlert v-else-if="listError" type="error" :showIcon="false">
+          {{ t('plugins.loadFailed') }}
+          <NButton text @click="refreshPermissions">{{ t('common.retry') }}</NButton>
+        </NAlert>
+        <div v-else>
           <div v-if="filteredPlugins.length" class="plugins-list">
             <article v-for="plugin in filteredPlugins" :key="plugin.name" class="plugin-row">
               <div class="plugin-identity">
@@ -47,9 +52,15 @@
                   <UiIcon :name="plugin.icon || 'plugin'" :size="16" />
                 </div>
                 <div class="plugin-content">
-                  <span class="plugin-name">{{ plugin.title || plugin.name }}</span>
-                  <div class="plugin-description">{{ pluginDescription(plugin) }}</div>
-                  <div v-if="plugin.error" class="plugin-error" :title="plugin.error">{{ plugin.error }}</div>
+                  <span class="plugin-name" :title="plugin.title || plugin.name">{{
+                    plugin.title || plugin.name
+                  }}</span>
+                  <div class="plugin-description" :title="pluginDescription(plugin)">
+                    {{ pluginDescription(plugin) }}
+                  </div>
+                  <div v-if="plugin.error" class="plugin-error" :title="pluginError(plugin)">
+                    {{ pluginError(plugin) }}
+                  </div>
                 </div>
               </div>
 
@@ -66,7 +77,10 @@
                 </NTag>
               </div>
 
-              <NSpace class="plugin-actions" :size="3" :wrap="false">
+              <NSpace class="plugin-actions" :size="3" :wrap="true">
+                <NButton v-if="plugin.installation_id" quaternary size="tiny" @click="openPermissions(plugin)">
+                  {{ t('plugins.permissions') }}
+                </NButton>
                 <NButton
                   v-if="plugin.settings?.length"
                   quaternary
@@ -82,7 +96,7 @@
                   :disabled="plugin.pending_restart && plugin.status !== 'enabled'"
                   @click="togglePlugin(plugin)"
                 >
-                  {{ plugin.status === 'enabled' ? t('plugins.disable') : t('plugins.enable') }}
+                  {{ ['enabled', 'stopping'].includes(plugin.status) ? t('plugins.disable') : t('plugins.enable') }}
                 </NButton>
                 <NButton
                   quaternary
@@ -117,11 +131,16 @@
               </NButton>
             </template>
           </NEmpty>
-        </UiLoading>
+        </div>
         <PluginSlotHost slotId="plugin-slot-plugins-list-bottom" class="plugin-slot-container" />
       </div>
     </section>
 
+    <PluginPermissionsModal
+      v-model:visible="permissionsVisible"
+      :plugin="permissionsTarget"
+      @saved="refreshPermissions"
+    />
     <PluginSettingsModal
       :visible="settingsModalVisible"
       :plugin="settingsTarget"
@@ -137,6 +156,7 @@
 
 <script setup lang="ts">
 import {
+  NAlert,
   NButton,
   NDropdown,
   NEmpty,
@@ -158,16 +178,19 @@ import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
+import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const { isFolia } = useUiSkin()
 const { run, runResult } = useAsyncAction({ showSuccess: false, showError: false })
 const pluginStore = usePluginStore()
-const { plugins, loading, reloadingPlugins } = storeToRefs(pluginStore)
+const { plugins, loading, error: listError, reloadingPlugins } = storeToRefs(pluginStore)
+const permissionsVisible = ref(false)
+const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const settingsModalVisible = ref(false)
@@ -221,13 +244,36 @@ function statusType(status: string): 'success' | 'error' | 'warning' | 'info' | 
   return 'default'
 }
 
+function pluginError(plugin: PluginInfo): string {
+  if (!plugin.error) return ''
+  const key = `plugins.errors.${plugin.error}`
+  return te(key) ? t(key) : plugin.error.startsWith('PLUGIN_') ? t('plugins.runtimeError') : plugin.error
+}
+
 function pluginDescription(plugin: PluginInfo): string {
   const pluginId = plugin.author ? `${plugin.author}:${plugin.name}` : plugin.name
   return [pluginId, plugin.description].filter(Boolean).join(' · ')
 }
 
+function openPermissions(plugin: PluginInfo): void {
+  permissionsTarget.value = plugin
+  permissionsVisible.value = true
+}
+
+async function refreshPermissions(): Promise<void> {
+  await pluginStore.load(true)
+}
+
 async function togglePlugin(plugin: PluginInfo) {
-  const action = plugin.status === 'enabled' ? 'disable' : 'enable'
+  if (
+    !['enabled', 'stopping'].includes(plugin.status) &&
+    plugin.installation_id &&
+    (plugin.review_required || !plugin.required_satisfied)
+  ) {
+    openPermissions(plugin)
+    return
+  }
+  const action = ['enabled', 'stopping'].includes(plugin.status) ? 'disable' : 'enable'
   await runResult(async () => pluginStore.toggle(plugin), {
     showSuccess: true,
     successMessage: t(`plugins.${action}Success`, { name: plugin.title || plugin.name }),

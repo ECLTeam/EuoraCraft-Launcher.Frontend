@@ -4,7 +4,10 @@
     "loading": "載入中...",
     "delete": "刪除"
   },
-  "dataSync": { "invalid": "資料格式無效，請重新整理後重試", "changing": "資料持續變更，請稍後重新整理再試" },
+  "dataSync": {
+    "invalid": "資料格式無效，請重新整理後重試",
+    "changing": "資料持續變更，請稍後重新整理再試"
+  },
   "sidebar": {
     "toggle": "切換側邊欄",
     "collapse": "收起側邊欄",
@@ -725,9 +728,51 @@
     "events": "事件",
     "providedEvents": "提供的事件",
     "subscribedEvents": "訂閱的事件",
-    "loadFailed": "載入外掛失敗",
+    "loadFailed": "讀取外掛清單失敗，請重試。",
     "pluginInstalled": "外掛已安裝",
-    "settingSaved": "已儲存"
+    "settingSaved": "已儲存",
+    "permissions": "權限",
+    "permissionsTitle": "{name} 的權限",
+    "permissionsNote": "安裝不會自動執行外掛。審閱權限並儲存後，再手動啟用；未允許的必要權限會阻止執行。 工作階段選項僅影響允許期限；拒絕會持續保留。",
+    "permissionsEmpty": "此外掛未請求業務權限，仍需儲存本次審閱後啟用。",
+    "permissionRequired": "執行必需",
+    "permissionOptional": "選用",
+    "permissionUnavailable": "此能力尚未開放",
+    "permissionAllow": "允許",
+    "permissionLifetime": "授權期限",
+    "permissionPermanent": "持續允許",
+    "permissionSession": "僅本次執行",
+    "permissionsRevoke": "撤銷全部授權",
+    "permissionsSave": "儲存審閱",
+    "permissionsLoadFailed": "讀取權限失敗，請重試。",
+    "permissionsSaveFailed": "儲存未完成。請重新讀取權限並確認目前狀態後重試。",
+    "permissionsCleanupPending": "授權已儲存，執行資源仍在清理中。",
+    "permissionsSaved": "審閱已儲存；啟用和實際狀態請查看外掛清單。",
+    "review_required": "待審閱",
+    "unsupported": "不支援",
+    "starting": "啟動中",
+    "stopping": "停止中",
+    "failed": "執行失敗",
+    "capabilities": {
+      "commands_register": "註冊自身命令",
+      "commands_execute": "執行自身命令",
+      "settings_read": "讀取自身設定",
+      "settings_write": "修改自身設定",
+      "events_subscribe": "訂閱自身設定變更"
+    },
+    "settingLoadFailed": "設定讀取失敗，請重試。",
+    "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
+    "settingsTitle": "{name} 的設定",
+    "errors": {
+      "PLUGIN_API_VERSION_UNSUPPORTED": "此外掛需要受支援的 API v2。",
+      "PLUGIN_GRANT_REVIEW_REQUIRED": "請先審閱外掛權限。",
+      "PLUGIN_REQUIRED_PERMISSION_DENIED": "必要權限尚未允許，請檢查權限設定。",
+      "PLUGIN_RUNTIME_UNSUPPORTED": "目前平台暫不支援第三方外掛。",
+      "PLUGIN_CONTENT_CHANGED": "外掛內容已變更，請重新審閱。",
+      "PLUGIN_DEPENDENCY_CONFLICT": "外掛相依項目無法使用或發生衝突。",
+      "PLUGIN_WORKER_EXECUTION_FAILED": "外掛啟動失敗，請檢查記錄後重試。"
+    },
+    "runtimeError": "外掛執行未完成，請檢查權限或重試。"
   },
   "settings": {
     "title": "設定",
