@@ -759,7 +759,9 @@
       "settings_read": "讀取自身設定",
       "settings_write": "修改自身設定",
       "events_subscribe": "訂閱自身設定變更",
-      "instances_read": "讀取獲准實例"
+      "instances_read": "讀取獲准實例",
+      "filesystem_read": "讀取自身私有檔案（本機 NTFS）",
+      "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",

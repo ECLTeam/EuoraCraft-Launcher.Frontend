@@ -759,7 +759,9 @@
       "settings_read": "自身の設定を読む",
       "settings_write": "自身の設定を変更",
       "events_subscribe": "自身の設定変更を購読",
-      "instances_read": "許可されたインスタンスの読み取り"
+      "instances_read": "許可されたインスタンスの読み取り",
+      "filesystem_read": "自身の専用ファイルを読み取る（ローカル NTFS）",
+      "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",

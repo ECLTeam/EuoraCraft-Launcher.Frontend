@@ -767,7 +767,9 @@
       "settings_read": "Read own settings",
       "settings_write": "Change own settings",
       "events_subscribe": "Subscribe to own setting changes",
-      "instances_read": "Read approved instances"
+      "instances_read": "Read approved instances",
+      "filesystem_read": "Read own private files (local NTFS)",
+      "filesystem_write": "Create own private files (no overwrite, local NTFS only)"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",

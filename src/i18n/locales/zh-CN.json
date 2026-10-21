@@ -767,7 +767,9 @@
       "settings_read": "读取自身设置",
       "settings_write": "修改自身设置",
       "events_subscribe": "订阅自身设置变化",
-      "instances_read": "读取获准实例"
+      "instances_read": "读取获准实例",
+      "filesystem_read": "读取自身私有文件（本地 NTFS）",
+      "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",

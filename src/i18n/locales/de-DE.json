@@ -759,7 +759,9 @@
       "settings_read": "Eigene Einstellungen lesen",
       "settings_write": "Eigene Einstellungen ändern",
       "events_subscribe": "Eigene Einstellungsänderungen abonnieren",
-      "instances_read": "Genehmigte Instanzen lesen"
+      "instances_read": "Genehmigte Instanzen lesen",
+      "filesystem_read": "Eigene private Dateien lesen (lokales NTFS)",
+      "filesystem_write": "Eigene private Dateien erstellen (kein Überschreiben, nur lokales NTFS)"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
