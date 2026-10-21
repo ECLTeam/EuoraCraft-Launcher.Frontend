@@ -37,6 +37,7 @@ const view: PluginPermissions = {
       implemented: true,
       resource_refs: [],
       selected_resource_refs: [],
+      requested_resource_refs: [],
       expires_at: null,
       grant_epoch: 1,
     },
@@ -91,6 +92,44 @@ describe('plugin permission review', () => {
       finish?.({ revision: 1, grant_epoch: 2, persisted: true, required_satisfied: true, cleanup_state: 'not_needed' })
       await flushPromises()
       expect(wrapper.emitted('saved')).toHaveLength(1)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('displays every requested site and grants the displayed group even when effective scope is empty', async () => {
+    const origins = Array.from({ length: 16 }, (_, index) => `https:api${index}.example.com:443`)
+    mocks.permissions.mockResolvedValue({
+      ...view,
+      items: [{ ...view.items[0], capability: 'network.read', required: false, requested_resource_refs: origins }],
+    })
+    mocks.updatePermissions.mockResolvedValue({
+      revision: 1,
+      grant_epoch: 2,
+      persisted: true,
+      required_satisfied: true,
+    })
+    const wrapper = open()
+    try {
+      await flushPromises()
+      expect(wrapper.findAll('.permission-origins li').map((item) => item.text())).toEqual(
+        origins.map((origin) => origin.replace('https:', 'https://'))
+      )
+      expect(wrapper.get('.permission-origins').attributes('tabindex')).toBe('0')
+      await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', true)
+      const save = () =>
+        wrapper.findAll('button').find((item) => item.text() === i18n.global.t('plugins.permissionsSave'))!
+      await save().trigger('click')
+      await flushPromises()
+      expect(mocks.updatePermissions.mock.calls[0]?.[1]).toEqual([
+        { capability: 'network.read', resource_refs: origins, decision: 'allow', lifetime: 'permanent' },
+      ])
+      await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', false)
+      await save().trigger('click')
+      await flushPromises()
+      expect(mocks.updatePermissions.mock.calls[1]?.[1]).toEqual([
+        { capability: 'network.read', resource_refs: [], decision: 'deny', lifetime: 'permanent' },
+      ])
     } finally {
       wrapper.unmount()
     }

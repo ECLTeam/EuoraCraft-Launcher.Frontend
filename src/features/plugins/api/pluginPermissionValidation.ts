@@ -18,6 +18,26 @@ function strings(value: unknown): value is string[] {
   return Array.isArray(value) && value.length <= 128 && value.every((item) => typeof item === 'string')
 }
 
+function networkReferences(value: string[]): boolean {
+  if (!value.length || value.length > 16 || new Set(value).size !== value.length) return false
+  return value.every((reference) => {
+    const match = /^(https?):([a-z0-9.-]+):([1-9][0-9]{0,4})$/.exec(reference)
+    if (!match || reference.length > 128) return false
+    const [, scheme, host, port] = match
+    if (!host || !port || !scheme || Number(port) > 65535 || !/[a-z]/.test(host.split('.').at(-1) ?? '')) return false
+    if (
+      host.split('.').length < 2 ||
+      host.split('.').some((label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+    )
+      return false
+    try {
+      return new URL(`${scheme}://${host}:${port}`).hostname === host
+    } catch {
+      return false
+    }
+  })
+}
+
 function parseItem(value: unknown): PluginPermissionItem {
   if (
     !record(value) ||
@@ -26,6 +46,8 @@ function parseItem(value: unknown): PluginPermissionItem {
     (value.decision !== 'allow' && value.decision !== 'deny') ||
     !strings(value.resource_refs) ||
     !strings(value.selected_resource_refs) ||
+    !strings(value.requested_resource_refs) ||
+    (value.capability === 'network.read' && !networkReferences(value.requested_resource_refs)) ||
     typeof value.implemented !== 'boolean' ||
     !integer(value.grant_epoch) ||
     !(value.expires_at === null || (typeof value.expires_at === 'number' && Number.isFinite(value.expires_at)))
@@ -37,6 +59,7 @@ function parseItem(value: unknown): PluginPermissionItem {
     decision: value.decision,
     resource_refs: value.resource_refs,
     selected_resource_refs: value.selected_resource_refs,
+    requested_resource_refs: value.requested_resource_refs,
     implemented: value.implemented,
     expires_at: value.expires_at,
     grant_epoch: value.grant_epoch,

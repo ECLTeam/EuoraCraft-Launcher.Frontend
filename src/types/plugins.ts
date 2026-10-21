@@ -114,6 +114,7 @@ export interface PluginPermissionItem {
   decision: 'allow' | 'deny'
   resource_refs: string[]
   selected_resource_refs: string[]
+  requested_resource_refs: string[]
   implemented: boolean
   expires_at: number | null
   grant_epoch: number

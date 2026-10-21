@@ -769,7 +769,8 @@
       "events_subscribe": "Subscribe to own setting changes",
       "instances_read": "Read approved instances",
       "filesystem_read": "Read own private files (local NTFS)",
-      "filesystem_write": "Create own private files (no overwrite, local NTFS only)"
+      "filesystem_write": "Create own private files (no overwrite, local NTFS only)",
+      "network_read": "Read approved sites"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -799,7 +800,9 @@
     "resourcesSelected": "{count} resources selected",
     "resourcesClear": "Clear all selections",
     "resourcesMore": "Load more",
-    "resourcesLimitReached": "Select at most 128 resources. Narrow the scope."
+    "resourcesLimitReached": "Select at most 128 resources. Narrow the scope.",
+    "permissionNetworkNote": "Allows all paths on these sites as a group, using public-network GET/HEAD requests only.",
+    "permissionNetworkOrigins": "Requested sites"
   },
   "settings": {
     "title": "Settings",

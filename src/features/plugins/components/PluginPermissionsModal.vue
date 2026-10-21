@@ -20,6 +20,12 @@
             <strong>{{ capabilityLabel(item.capability) }}</strong>
             <span>{{ t(item.required ? 'plugins.permissionRequired' : 'plugins.permissionOptional') }}</span>
             <span v-if="!item.implemented">{{ t('plugins.permissionUnavailable') }}</span>
+            <template v-if="item.capability === 'network.read'">
+              <span>{{ t('plugins.permissionNetworkNote') }}</span>
+              <ul class="permission-origins" :aria-label="t('plugins.permissionNetworkOrigins')" tabindex="0">
+                <li v-for="origin in item.requested_resource_refs" :key="origin">{{ displayOrigin(origin) }}</li>
+              </ul>
+            </template>
           </div>
           <NCheckbox
             :checked="allowed.includes(item.capability)"
@@ -70,7 +76,7 @@ import Modal from '@/components/modals/Modal.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
-import type { PluginInfo, PluginPermissions } from '@/types/plugins'
+import type { PluginInfo, PluginPermissions, PluginPermissionItem } from '@/types/plugins'
 import PluginResourceSelector from './PluginResourceSelector.vue'
 
 const props = defineProps<{ visible: boolean; plugin: PluginInfo | null }>()
@@ -98,6 +104,18 @@ function capabilityLabel(capability: string): string {
 
 function toggle(capability: string, checked: boolean): void {
   allowed.value = checked ? [...allowed.value, capability] : allowed.value.filter((item) => item !== capability)
+}
+
+function displayOrigin(reference: string): string {
+  const [scheme, host, port] = reference.split(':')
+  return `${scheme}://${host}:${port}`
+}
+
+function decisionResources(item: PluginPermissionItem, revoke: boolean): string[] {
+  if (revoke || !item.implemented || !allowed.value.includes(item.capability)) return []
+  if (item.capability === 'instances.read') return selectedResources.value
+  if (item.capability === 'network.read') return item.requested_resource_refs
+  return item.resource_refs
 }
 
 function close(visible: boolean): void {
@@ -146,11 +164,7 @@ async function save(revoke: boolean): Promise<void> {
       reviewed,
       reviewed.items.map((item) => ({
         capability: item.capability,
-        resource_refs: revoke
-          ? []
-          : item.capability === 'instances.read'
-            ? selectedResources.value
-            : item.resource_refs,
+        resource_refs: decisionResources(item, revoke),
         decision: !revoke && item.implemented && allowed.value.includes(item.capability) ? 'allow' : 'deny',
         lifetime: lifetime.value,
       })),
@@ -217,9 +231,25 @@ watch(
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.permission-row > .n-checkbox {
+  flex-shrink: 0;
+}
 .permission-label span {
   color: var(--text-color-secondary);
   font-size: 12px;
+}
+.permission-origins {
+  margin: 0;
+  padding: 4px 8px 4px 24px;
+  max-height: 160px;
+  overflow-y: auto;
+  color: var(--text-color);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.permission-origins:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 .permission-accessible-label {
   position: absolute;

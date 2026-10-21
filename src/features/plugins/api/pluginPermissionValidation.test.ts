@@ -16,6 +16,7 @@ const valid = {
       implemented: true,
       resource_refs: [],
       selected_resource_refs: [],
+      requested_resource_refs: [],
       expires_at: null,
       grant_epoch: 1,
     },
@@ -59,6 +60,8 @@ describe('plugin permission boundary', () => {
     { ...valid, installation_id: '../other' },
     { ...valid, required_satisfied: 'true' },
     { ...valid, items: [{ ...valid.items[0], implemented: 'true' }] },
+    { ...valid, items: [{ ...valid.items[0], requested_resource_refs: undefined }] },
+    { ...valid, items: [{ ...valid.items[0], requested_resource_refs: [3] }] },
   ])('rejects malformed host responses', (value) => {
     expect(() => parsePermissions(value)).toThrow('PLUGIN_SCHEMA_INVALID')
   })

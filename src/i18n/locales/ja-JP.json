@@ -761,7 +761,8 @@
       "events_subscribe": "自身の設定変更を購読",
       "instances_read": "許可されたインスタンスの読み取り",
       "filesystem_read": "自身の専用ファイルを読み取る（ローカル NTFS）",
-      "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）"
+      "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）",
+      "network_read": "承認済みサイトの読み取り"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",
@@ -791,7 +792,9 @@
     "resourcesSelected": "{count} 件を選択中",
     "resourcesClear": "すべて選択解除",
     "resourcesMore": "さらに読み込む",
-    "resourcesLimitReached": "最大 128 件まで選択できます。範囲を絞ってください。"
+    "resourcesLimitReached": "最大 128 件まで選択できます。範囲を絞ってください。",
+    "permissionNetworkNote": "これらのサイトの全パスを一括で許可します。公開ネットワークへの GET/HEAD リクエストのみ対応します。",
+    "permissionNetworkOrigins": "アクセスを申請するサイト"
   },
   "settings": {
     "title": "設定",

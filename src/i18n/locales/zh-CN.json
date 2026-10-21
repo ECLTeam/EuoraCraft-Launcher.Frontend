@@ -769,7 +769,8 @@
       "events_subscribe": "订阅自身设置变化",
       "instances_read": "读取获准实例",
       "filesystem_read": "读取自身私有文件（本地 NTFS）",
-      "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）"
+      "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）",
+      "network_read": "读取已批准站点"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -799,7 +800,9 @@
     "resourcesSelected": "已选择 {count} 个资源",
     "resourcesClear": "清除全部选择",
     "resourcesMore": "加载更多",
-    "resourcesLimitReached": "最多选择 128 个资源，请缩小范围。"
+    "resourcesLimitReached": "最多选择 128 个资源，请缩小范围。",
+    "permissionNetworkNote": "整组授权这些站点的全部路径，仅允许公网 GET/HEAD 请求。",
+    "permissionNetworkOrigins": "申请访问的站点"
   },
   "settings": {
     "title": "设置",

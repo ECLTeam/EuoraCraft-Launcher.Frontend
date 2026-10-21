@@ -761,7 +761,8 @@
       "events_subscribe": "訂閱自身設定變更",
       "instances_read": "讀取獲准實例",
       "filesystem_read": "讀取自身私有檔案（本機 NTFS）",
-      "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）"
+      "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）",
+      "network_read": "讀取已核准網站"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -791,7 +792,9 @@
     "resourcesSelected": "已選擇 {count} 個資源",
     "resourcesClear": "清除全部選擇",
     "resourcesMore": "載入更多",
-    "resourcesLimitReached": "最多選擇 128 個資源，請縮小範圍。"
+    "resourcesLimitReached": "最多選擇 128 個資源，請縮小範圍。",
+    "permissionNetworkNote": "整組授權這些網站的所有路徑，僅允許公網 GET/HEAD 請求。",
+    "permissionNetworkOrigins": "申請存取的網站"
   },
   "settings": {
     "title": "設定",
