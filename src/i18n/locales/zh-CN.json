@@ -770,6 +770,7 @@
       "instances_read": "读取获准实例",
       "filesystem_read": "读取自身私有文件（本地 NTFS）",
       "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）",
+      "filesystem_delete": "删除自身私有文件（仅本地 NTFS，成功删除不可恢复）",
       "network_read": "读取已批准站点"
     },
     "settingLoadFailed": "设置读取失败，请重试。",

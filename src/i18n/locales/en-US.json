@@ -770,6 +770,7 @@
       "instances_read": "Read approved instances",
       "filesystem_read": "Read own private files (local NTFS)",
       "filesystem_write": "Create own private files (no overwrite, local NTFS only)",
+      "filesystem_delete": "Delete own private files (local NTFS only; successful deletion is irreversible)",
       "network_read": "Read approved sites"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",

@@ -69,6 +69,47 @@ describe('plugin permission review', () => {
     }
   })
 
+  it.each(['zh-CN', 'zh-TW', 'en-US', 'de-DE', 'ja-JP', 'ru-RU'] as const)(
+    'labels private deletion and saves allow or revoke with empty scope in %s',
+    async (locale) => {
+      const previous = i18n.global.locale.value
+      i18n.global.locale.value = locale
+      mocks.permissions.mockResolvedValue({
+        ...view,
+        items: [{ ...view.items[0], capability: 'filesystem.delete', required: false }],
+      })
+      mocks.updatePermissions.mockResolvedValue({ revision: 1, grant_epoch: 2, persisted: true })
+      const wrapper = open()
+      try {
+        await flushPromises()
+        const label = i18n.global.t('plugins.capabilities.filesystem_delete')
+        expect(label).not.toBe('plugins.capabilities.filesystem_delete')
+        expect(label).toContain('NTFS')
+        const checkbox = wrapper.get('[role="checkbox"]')
+        expect(wrapper.get(`[id="${checkbox.attributes('aria-labelledby')}"]`).text()).toContain(label)
+        for (const allowed of [true, false]) {
+          await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', allowed)
+          await wrapper
+            .findAll('button')
+            .find((item) => item.text() === i18n.global.t('plugins.permissionsSave'))!
+            .trigger('click')
+          await flushPromises()
+          expect(mocks.updatePermissions.mock.lastCall?.[1]).toEqual([
+            {
+              capability: 'filesystem.delete',
+              resource_refs: [],
+              decision: allowed ? 'allow' : 'deny',
+              lifetime: 'permanent',
+            },
+          ])
+        }
+      } finally {
+        wrapper.unmount()
+        i18n.global.locale.value = previous
+      }
+    }
+  )
+
   it('defaults to deny and submits only once while saving', async () => {
     let finish: ((value: unknown) => void) | undefined
     mocks.updatePermissions.mockReturnValue(

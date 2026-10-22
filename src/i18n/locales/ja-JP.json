@@ -762,6 +762,7 @@
       "instances_read": "許可されたインスタンスの読み取り",
       "filesystem_read": "自身の専用ファイルを読み取る（ローカル NTFS）",
       "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）",
+      "filesystem_delete": "自身の専用ファイルを削除する（ローカル NTFS のみ、削除成功後は復元不可）",
       "network_read": "承認済みサイトの読み取り"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",

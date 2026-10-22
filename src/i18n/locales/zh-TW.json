@@ -762,6 +762,7 @@
       "instances_read": "讀取獲准實例",
       "filesystem_read": "讀取自身私有檔案（本機 NTFS）",
       "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）",
+      "filesystem_delete": "刪除自身私有檔案（僅本機 NTFS，成功刪除無法復原）",
       "network_read": "讀取已核准網站"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",

@@ -762,6 +762,7 @@
       "instances_read": "Genehmigte Instanzen lesen",
       "filesystem_read": "Eigene private Dateien lesen (lokales NTFS)",
       "filesystem_write": "Eigene private Dateien erstellen (kein Überschreiben, nur lokales NTFS)",
+      "filesystem_delete": "Eigene private Dateien löschen (nur lokales NTFS; erfolgreiches Löschen ist unwiderruflich)",
       "network_read": "Genehmigte Websites lesen"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
