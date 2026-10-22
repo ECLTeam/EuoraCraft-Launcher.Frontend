@@ -7,7 +7,7 @@
 
 后续 A 方案调整：普通卡片取消统一强制模糊，弹窗保留独立模糊。按用户最新要求，
 卡片和控件透明度保留原值，不采用新增的嵌套卡片轻底色。启动预取改为页面按需查询，
-搜索缓存和节点调度由后端负责。详细记录见主仓库 `docs/backend-startup-cache-and-surface-correction-plan.md`。
+搜索缓存和节点调度由后端负责。详细记录见主仓库 `docs/plans/backend-startup-cache-and-surface-correction-plan.md`。
 下方验证结果记录前一轮实现，最终变更以 A 方案及用户后续透明度回退要求为准。
 
 ## 已确认问题与实施点
