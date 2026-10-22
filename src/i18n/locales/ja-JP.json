@@ -763,7 +763,8 @@
       "filesystem_read": "自身の専用ファイルを読み取る（ローカル NTFS）",
       "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）",
       "filesystem_delete": "自身の専用ファイルを削除する（ローカル NTFS のみ、削除成功後は復元不可）",
-      "network_read": "承認済みサイトの読み取り"
+      "network_read": "承認済みサイトの読み取り",
+      "filesystem_replace": "自身の専用ファイルを置換する（ローカル NTFS のみ、成功後の旧版は復元不可）"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",
@@ -775,7 +776,9 @@
       "PLUGIN_RUNTIME_UNSUPPORTED": "このプラットフォームではサードパーティ製プラグインはまだ利用できません。",
       "PLUGIN_CONTENT_CHANGED": "プラグインの内容が変わりました。もう一度確認してください。",
       "PLUGIN_DEPENDENCY_CONFLICT": "依存関係が利用できないか、競合しています。",
-      "PLUGIN_WORKER_EXECUTION_FAILED": "起動に失敗しました。ログを確認してから再試行してください。"
+      "PLUGIN_WORKER_EXECUTION_FAILED": "起動に失敗しました。ログを確認してから再試行してください。",
+      "PLUGIN_FILE_RECOVERY_REQUIRED": "元の名前は別のファイルに使われています。元のバックアップは保持されています。",
+      "PLUGIN_FILE_RECOVERY_INVALID": "復元記録を確認できません。ファイルは保持されています。"
     },
     "runtimeError": "操作が完了していません。権限を確認するか再試行してください。",
     "resourcesTitle": "アクセスを許可するインスタンス",
@@ -795,7 +798,26 @@
     "resourcesMore": "さらに読み込む",
     "resourcesLimitReached": "最大 128 件まで選択できます。範囲を絞ってください。",
     "permissionNetworkNote": "これらのサイトの全パスを一括で許可します。公開ネットワークへの GET/HEAD リクエストのみ対応します。",
-    "permissionNetworkOrigins": "アクセスを申請するサイト"
+    "permissionNetworkOrigins": "アクセスを申請するサイト",
+    "fileRecoveryTitle": "ファイルの復元",
+    "fileRecoveryNote": "置換に失敗した元のファイルは保持されます。後から作成されたファイルは上書きしません。この画面を閉じても受け付けた復元処理は停止しません。",
+    "fileRecoveryEmpty": "復元が必要なファイルはありません",
+    "fileRecoveryUnknown": "確認できないファイル",
+    "fileRecoveryState_pending": "元のファイルは復元を待っています。",
+    "fileRecoveryState_conflict": "元の名前は別のファイルに使われています。元のバックアップは保持されています。",
+    "fileRecoveryState_invalid": "復元記録を確認できません。ファイルは保持されています。",
+    "fileRecoveryRestore": "元の場所に復元",
+    "fileRecoveryDiscard": "元のバックアップを破棄",
+    "fileRecoveryDiscardConfirm": "「{name}」の元のバックアップを完全に破棄しますか？この操作は取り消せません。",
+    "fileRecoveryName": "新しいファイル名",
+    "fileRecoverySaveAs": "元のファイルを別名で保存",
+    "fileRecoveryMore": "さらに読み込む",
+    "fileRecoveryLoadFailed": "復元状態を読み取れません。再試行してください。",
+    "fileRecoveryInvalidName": "有効な単一ファイル名を入力してください。",
+    "fileRecoverySubmitFailed": "受付状態を確認できません。更新して同じ選択で再試行してください。処理が続いている可能性があります。",
+    "fileRecoveryCompleted": "復元処理が完了しました。",
+    "fileRecoveryFailed": "復元処理は完了していません。実際の状態を更新してから再試行してください。",
+    "fileRecoveryState_cleanup": "新しいファイルは公開済みです。バックアップと記録の後処理を待っています。"
   },
   "settings": {
     "title": "設定",
@@ -2017,7 +2039,8 @@
     "cancelRequested": "キャンセルを要求しました。停止を待っています。",
     "java_install": "Javaをインストール",
     "java_remove": "Javaを削除",
-    "java_cleanup": "整理を再試行"
+    "java_cleanup": "整理を再試行",
+    "plugin_file_recovery": "ファイルの復元"
   },
   "more": {
     "nav": {

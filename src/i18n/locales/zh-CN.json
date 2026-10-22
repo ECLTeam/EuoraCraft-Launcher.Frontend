@@ -771,7 +771,8 @@
       "filesystem_read": "读取自身私有文件（本地 NTFS）",
       "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）",
       "filesystem_delete": "删除自身私有文件（仅本地 NTFS，成功删除不可恢复）",
-      "network_read": "读取已批准站点"
+      "network_read": "读取已批准站点",
+      "filesystem_replace": "替换自身私有文件（仅本地 NTFS，成功后旧版本不可恢复）"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -783,7 +784,9 @@
       "PLUGIN_RUNTIME_UNSUPPORTED": "当前平台暂不支持第三方插件。",
       "PLUGIN_CONTENT_CHANGED": "插件内容已变化，请重新审阅。",
       "PLUGIN_DEPENDENCY_CONFLICT": "插件依赖不可用或存在冲突。",
-      "PLUGIN_WORKER_EXECUTION_FAILED": "插件启动失败，请检查日志后重试。"
+      "PLUGIN_WORKER_EXECUTION_FAILED": "插件启动失败，请检查日志后重试。",
+      "PLUGIN_FILE_RECOVERY_REQUIRED": "原名称已被其他文件占用，原文件备份仍保留。",
+      "PLUGIN_FILE_RECOVERY_INVALID": "无法核实恢复记录，文件已保留。"
     },
     "runtimeError": "插件运行未完成，请检查权限或重试。",
     "resourcesTitle": "允许访问的实例",
@@ -803,7 +806,26 @@
     "resourcesMore": "加载更多",
     "resourcesLimitReached": "最多选择 128 个资源，请缩小范围。",
     "permissionNetworkNote": "整组授权这些站点的全部路径，仅允许公网 GET/HEAD 请求。",
-    "permissionNetworkOrigins": "申请访问的站点"
+    "permissionNetworkOrigins": "申请访问的站点",
+    "fileRecoveryTitle": "文件恢复",
+    "fileRecoveryNote": "替换失败的原文件会保留。恢复不会覆盖后来出现的文件；关闭弹窗不会停止已接纳的恢复任务。",
+    "fileRecoveryEmpty": "没有待恢复文件",
+    "fileRecoveryUnknown": "无法确认的文件",
+    "fileRecoveryState_pending": "原文件等待恢复。",
+    "fileRecoveryState_conflict": "原名称已被其他文件占用，原文件备份仍保留。",
+    "fileRecoveryState_invalid": "无法核实恢复记录，文件已保留。",
+    "fileRecoveryRestore": "恢复原位置",
+    "fileRecoveryDiscard": "丢弃原备份",
+    "fileRecoveryDiscardConfirm": "永久丢弃“{name}”的原备份？此操作不可恢复。",
+    "fileRecoveryName": "新的文件名",
+    "fileRecoverySaveAs": "将原文件另存",
+    "fileRecoveryMore": "加载更多",
+    "fileRecoveryLoadFailed": "无法读取恢复状态，请重试。",
+    "fileRecoveryInvalidName": "请输入有效的平铺文件名。",
+    "fileRecoverySubmitFailed": "提交状态未确认，请刷新并重试原选择；任务可能仍在执行。",
+    "fileRecoveryCompleted": "恢复任务已完成。",
+    "fileRecoveryFailed": "恢复任务未完成，请刷新检查实际状态后重试。",
+    "fileRecoveryState_cleanup": "新文件已发布，正在完成备份和记录清理。"
   },
   "settings": {
     "title": "设置",
@@ -1930,7 +1952,8 @@
     "cancelRequested": "已请求取消，等待任务停止",
     "java_install": "安装 Java",
     "java_remove": "移除 Java",
-    "java_cleanup": "重试清理"
+    "java_cleanup": "重试清理",
+    "plugin_file_recovery": "文件恢复"
   },
   "more": {
     "nav": {

@@ -12,21 +12,24 @@
           <template #prefix><UiIcon name="search" :size="14" /></template>
         </NInput>
 
-        <NTabs v-if="isFolia" v-model:value="activeFilter" type="segment" size="small">
+        <NTabs v-if="isFolia" v-model:value="activeFilter" class="plugins-filters" type="segment" size="small">
           <NTab v-for="filter in filters" :key="filter.key" :name="filter.key">{{ filter.label }}</NTab>
         </NTabs>
-        <NRadioGroup v-else v-model:value="activeFilter" size="small">
+        <NRadioGroup v-else v-model:value="activeFilter" class="plugins-filters" size="small">
           <NRadioButton v-for="filter in filters" :key="filter.key" :value="filter.key">
             {{ filter.label }}
           </NRadioButton>
         </NRadioGroup>
 
-        <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
-          <NButton type="primary" size="small">
-            <template #icon><UiIcon name="add" :size="14" /></template>
-            {{ t('plugins.install') }}
-          </NButton>
-        </NDropdown>
+        <div class="plugins-toolbar-actions">
+          <NButton size="small" @click="recoveryVisible = true">{{ t('plugins.fileRecoveryTitle') }}</NButton>
+          <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
+            <NButton type="primary" size="small">
+              <template #icon><UiIcon name="add" :size="14" /></template>
+              {{ t('plugins.install') }}
+            </NButton>
+          </NDropdown>
+        </div>
       </header>
 
       <PluginSlotHost slotId="plugin-slot-plugins-toolbar-after" class="plugin-slot-container" />
@@ -136,6 +139,7 @@
       </div>
     </section>
 
+    <PluginFileRecoveryModal v-model:visible="recoveryVisible" @resolved="refreshPermissions" />
     <PluginPermissionsModal
       v-model:visible="permissionsVisible"
       :plugin="permissionsTarget"
@@ -177,6 +181,7 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
+import PluginFileRecoveryModal from '@/features/plugins/components/PluginFileRecoveryModal.vue'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
@@ -190,6 +195,7 @@ const { run, runResult } = useAsyncAction({ showSuccess: false, showError: false
 const pluginStore = usePluginStore()
 const { plugins, loading, error: listError, reloadingPlugins } = storeToRefs(pluginStore)
 const permissionsVisible = ref(false)
+const recoveryVisible = ref(false)
 const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')

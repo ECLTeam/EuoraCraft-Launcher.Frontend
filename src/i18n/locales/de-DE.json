@@ -763,7 +763,8 @@
       "filesystem_read": "Eigene private Dateien lesen (lokales NTFS)",
       "filesystem_write": "Eigene private Dateien erstellen (kein Überschreiben, nur lokales NTFS)",
       "filesystem_delete": "Eigene private Dateien löschen (nur lokales NTFS; erfolgreiches Löschen ist unwiderruflich)",
-      "network_read": "Genehmigte Websites lesen"
+      "network_read": "Genehmigte Websites lesen",
+      "filesystem_replace": "Eigene private Dateien ersetzen (nur lokales NTFS; die vorherige Version ist danach nicht wiederherstellbar)"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
@@ -775,7 +776,9 @@
       "PLUGIN_RUNTIME_UNSUPPORTED": "Drittanbieterplugins werden auf dieser Plattform noch nicht unterstützt.",
       "PLUGIN_CONTENT_CHANGED": "Plugininhalt geändert. Erneut prüfen.",
       "PLUGIN_DEPENDENCY_CONFLICT": "Pluginabhängigkeiten fehlen oder stehen im Konflikt.",
-      "PLUGIN_WORKER_EXECUTION_FAILED": "Pluginstart fehlgeschlagen. Vor dem Wiederholen die Protokolle prüfen."
+      "PLUGIN_WORKER_EXECUTION_FAILED": "Pluginstart fehlgeschlagen. Vor dem Wiederholen die Protokolle prüfen.",
+      "PLUGIN_FILE_RECOVERY_REQUIRED": "Eine andere Datei belegt den ursprünglichen Namen. Die Originalsicherung bleibt erhalten.",
+      "PLUGIN_FILE_RECOVERY_INVALID": "Der Wiederherstellungsdatensatz konnte nicht geprüft werden. Dateien bleiben erhalten."
     },
     "runtimeError": "Pluginvorgang nicht abgeschlossen. Berechtigungen prüfen oder erneut versuchen.",
     "resourcesTitle": "Erlaubte Instanzen",
@@ -795,7 +798,26 @@
     "resourcesMore": "Mehr laden",
     "resourcesLimitReached": "Höchstens 128 Ressourcen auswählen. Den Umfang einschränken.",
     "permissionNetworkNote": "Erlaubt alle Pfade dieser Websites gemeinsam, ausschließlich mit GET/HEAD-Anfragen im öffentlichen Netz.",
-    "permissionNetworkOrigins": "Angeforderte Websites"
+    "permissionNetworkOrigins": "Angeforderte Websites",
+    "fileRecoveryTitle": "Dateiwiederherstellung",
+    "fileRecoveryNote": "Originaldateien bleiben nach fehlgeschlagenem Ersetzen erhalten. Neuere Dateien werden nicht überschrieben. Das Schließen beendet keine angenommenen Wiederherstellungsaufgaben.",
+    "fileRecoveryEmpty": "Keine Dateien wiederherzustellen",
+    "fileRecoveryUnknown": "Nicht überprüfte Datei",
+    "fileRecoveryState_pending": "Die Originaldatei wartet auf Wiederherstellung.",
+    "fileRecoveryState_conflict": "Eine andere Datei belegt den ursprünglichen Namen. Die Originalsicherung bleibt erhalten.",
+    "fileRecoveryState_invalid": "Der Wiederherstellungsdatensatz konnte nicht geprüft werden. Dateien bleiben erhalten.",
+    "fileRecoveryRestore": "Am ursprünglichen Ort wiederherstellen",
+    "fileRecoveryDiscard": "Originalsicherung verwerfen",
+    "fileRecoveryDiscardConfirm": "Die Originalsicherung von „{name}“ endgültig verwerfen? Dies kann nicht rückgängig gemacht werden.",
+    "fileRecoveryName": "Neuer Dateiname",
+    "fileRecoverySaveAs": "Original speichern unter",
+    "fileRecoveryMore": "Weitere laden",
+    "fileRecoveryLoadFailed": "Wiederherstellungsstatus konnte nicht gelesen werden. Erneut versuchen.",
+    "fileRecoveryInvalidName": "Geben Sie einen gültigen einzelnen Dateinamen ein.",
+    "fileRecoverySubmitFailed": "Die Übermittlung ist unbestätigt. Aktualisieren Sie und wiederholen Sie dieselbe Auswahl; die Aufgabe läuft möglicherweise noch.",
+    "fileRecoveryCompleted": "Die Wiederherstellungsaufgabe ist abgeschlossen.",
+    "fileRecoveryFailed": "Die Wiederherstellung ist nicht abgeschlossen. Prüfen Sie vor einem neuen Versuch den aktuellen Status.",
+    "fileRecoveryState_cleanup": "Die neue Datei ist veröffentlicht. Sicherung und Protokoll werden noch bereinigt."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2017,7 +2039,8 @@
     "cancelRequested": "Abbruch angefordert. Warte auf das Ende der Aufgabe.",
     "java_install": "Java installieren",
     "java_remove": "Java entfernen",
-    "java_cleanup": "Bereinigung wiederholen"
+    "java_cleanup": "Bereinigung wiederholen",
+    "plugin_file_recovery": "Dateiwiederherstellung"
   },
   "more": {
     "nav": {

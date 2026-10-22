@@ -771,7 +771,8 @@
       "filesystem_read": "Read own private files (local NTFS)",
       "filesystem_write": "Create own private files (no overwrite, local NTFS only)",
       "filesystem_delete": "Delete own private files (local NTFS only; successful deletion is irreversible)",
-      "network_read": "Read approved sites"
+      "network_read": "Read approved sites",
+      "filesystem_replace": "Replace own private files (local NTFS only; previous version is irrecoverable after success)"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -783,7 +784,9 @@
       "PLUGIN_RUNTIME_UNSUPPORTED": "Third-party plugins are not supported on this platform yet.",
       "PLUGIN_CONTENT_CHANGED": "Plugin contents changed. Review them again.",
       "PLUGIN_DEPENDENCY_CONFLICT": "Plugin dependencies are unavailable or conflict.",
-      "PLUGIN_WORKER_EXECUTION_FAILED": "The plugin could not start. Check logs before retrying."
+      "PLUGIN_WORKER_EXECUTION_FAILED": "The plugin could not start. Check logs before retrying.",
+      "PLUGIN_FILE_RECOVERY_REQUIRED": "Another file occupies the original name. The original backup is retained.",
+      "PLUGIN_FILE_RECOVERY_INVALID": "The recovery record could not be verified. Files have been retained."
     },
     "runtimeError": "The plugin operation did not complete. Check permissions or retry.",
     "resourcesTitle": "Allowed instances",
@@ -803,7 +806,26 @@
     "resourcesMore": "Load more",
     "resourcesLimitReached": "Select at most 128 resources. Narrow the scope.",
     "permissionNetworkNote": "Allows all paths on these sites as a group, using public-network GET/HEAD requests only.",
-    "permissionNetworkOrigins": "Requested sites"
+    "permissionNetworkOrigins": "Requested sites",
+    "fileRecoveryTitle": "File recovery",
+    "fileRecoveryNote": "Original files are retained after a failed replacement. Recovery never overwrites newer files. Closing this dialog does not stop accepted recovery tasks.",
+    "fileRecoveryEmpty": "No files need recovery",
+    "fileRecoveryUnknown": "Unverified file",
+    "fileRecoveryState_pending": "The original file is waiting for recovery.",
+    "fileRecoveryState_conflict": "Another file occupies the original name. The original backup is retained.",
+    "fileRecoveryState_invalid": "The recovery record could not be verified. Files have been retained.",
+    "fileRecoveryRestore": "Restore original location",
+    "fileRecoveryDiscard": "Discard original backup",
+    "fileRecoveryDiscardConfirm": "Permanently discard the original backup of “{name}”? This cannot be undone.",
+    "fileRecoveryName": "New file name",
+    "fileRecoverySaveAs": "Save original as",
+    "fileRecoveryMore": "Load more",
+    "fileRecoveryLoadFailed": "Could not read recovery status. Retry.",
+    "fileRecoveryInvalidName": "Enter a valid single file name.",
+    "fileRecoverySubmitFailed": "Submission is unconfirmed. Refresh and retry the same choice; the task may still be running.",
+    "fileRecoveryCompleted": "The recovery task completed.",
+    "fileRecoveryFailed": "The recovery task did not complete. Refresh the actual status before retrying.",
+    "fileRecoveryState_cleanup": "The new file is published. Backup and record cleanup is still pending."
   },
   "settings": {
     "title": "Settings",
@@ -2035,7 +2057,8 @@
     "cancelRequested": "Cancellation requested. Waiting for the task to stop.",
     "java_install": "Install Java",
     "java_remove": "Remove Java",
-    "java_cleanup": "Retry cleanup"
+    "java_cleanup": "Retry cleanup",
+    "plugin_file_recovery": "File recovery"
   },
   "more": {
     "nav": {

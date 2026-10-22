@@ -179,3 +179,26 @@ export interface PluginResourceQuery {
   cursor?: string | null
   limit?: number
 }
+export type PluginFileRecoveryAction = 'restore' | 'save_as' | 'discard'
+
+export interface PluginFileRecovery {
+  recovery_ref: string
+  name: string
+  revision: number
+  etag: string
+  state: 'pending' | 'conflict' | 'cleanup' | 'invalid'
+  actions: PluginFileRecoveryAction[]
+}
+
+export interface PluginFileRecoveryPage {
+  items: PluginFileRecovery[]
+  next_cursor: string | null
+}
+
+export interface PluginFileRecoveryChoice {
+  recovery_ref: string
+  expected_revision: number
+  expected_etag: string
+  action: PluginFileRecoveryAction
+  saved_name?: string
+}

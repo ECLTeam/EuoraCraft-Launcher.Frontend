@@ -763,7 +763,8 @@
       "filesystem_read": "讀取自身私有檔案（本機 NTFS）",
       "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）",
       "filesystem_delete": "刪除自身私有檔案（僅本機 NTFS，成功刪除無法復原）",
-      "network_read": "讀取已核准網站"
+      "network_read": "讀取已核准網站",
+      "filesystem_replace": "替換自身私有檔案（僅本機 NTFS，成功後舊版本無法復原）"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -775,7 +776,9 @@
       "PLUGIN_RUNTIME_UNSUPPORTED": "目前平台暫不支援第三方外掛。",
       "PLUGIN_CONTENT_CHANGED": "外掛內容已變更，請重新審閱。",
       "PLUGIN_DEPENDENCY_CONFLICT": "外掛相依項目無法使用或發生衝突。",
-      "PLUGIN_WORKER_EXECUTION_FAILED": "外掛啟動失敗，請檢查記錄後重試。"
+      "PLUGIN_WORKER_EXECUTION_FAILED": "外掛啟動失敗，請檢查記錄後重試。",
+      "PLUGIN_FILE_RECOVERY_REQUIRED": "原名稱已被其他檔案占用，原檔案備份仍保留。",
+      "PLUGIN_FILE_RECOVERY_INVALID": "無法核實復原記錄，檔案已保留。"
     },
     "runtimeError": "外掛執行未完成，請檢查權限或重試。",
     "resourcesTitle": "允許存取的實例",
@@ -795,7 +798,26 @@
     "resourcesMore": "載入更多",
     "resourcesLimitReached": "最多選擇 128 個資源，請縮小範圍。",
     "permissionNetworkNote": "整組授權這些網站的所有路徑，僅允許公網 GET/HEAD 請求。",
-    "permissionNetworkOrigins": "申請存取的網站"
+    "permissionNetworkOrigins": "申請存取的網站",
+    "fileRecoveryTitle": "檔案復原",
+    "fileRecoveryNote": "替換失敗的原檔案會保留。復原不會覆寫後來出現的檔案；關閉視窗不會停止已接受的復原工作。",
+    "fileRecoveryEmpty": "沒有待復原檔案",
+    "fileRecoveryUnknown": "無法確認的檔案",
+    "fileRecoveryState_pending": "原檔案等待復原。",
+    "fileRecoveryState_conflict": "原名稱已被其他檔案占用，原檔案備份仍保留。",
+    "fileRecoveryState_invalid": "無法核實復原記錄，檔案已保留。",
+    "fileRecoveryRestore": "復原至原位置",
+    "fileRecoveryDiscard": "捨棄原備份",
+    "fileRecoveryDiscardConfirm": "永久捨棄「{name}」的原備份？此操作無法復原。",
+    "fileRecoveryName": "新的檔案名稱",
+    "fileRecoverySaveAs": "將原檔案另存",
+    "fileRecoveryMore": "載入更多",
+    "fileRecoveryLoadFailed": "無法讀取復原狀態，請重試。",
+    "fileRecoveryInvalidName": "請輸入有效的單層檔案名稱。",
+    "fileRecoverySubmitFailed": "提交狀態尚未確認，請重新整理並重試原選擇；工作可能仍在執行。",
+    "fileRecoveryCompleted": "復原工作已完成。",
+    "fileRecoveryFailed": "復原工作未完成，請重新整理確認實際狀態後重試。",
+    "fileRecoveryState_cleanup": "新檔案已發布，正在完成備份及記錄清理。"
   },
   "settings": {
     "title": "設定",
@@ -1900,7 +1922,8 @@
     "cancelRequested": "已請求取消，等待工作停止",
     "java_install": "安裝 Java",
     "java_remove": "移除 Java",
-    "java_cleanup": "重試清理"
+    "java_cleanup": "重試清理",
+    "plugin_file_recovery": "檔案復原"
   },
   "more": {
     "nav": {

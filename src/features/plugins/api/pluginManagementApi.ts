@@ -2,6 +2,7 @@ import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import type {
   PluginInfo,
+  PluginFileRecoveryChoice,
   PluginPermissions,
   PluginPermissionDecision,
   PluginPackageInstallResult,
@@ -9,9 +10,27 @@ import type {
   PluginSettingsData,
   PluginResourceQuery,
 } from '@/types/plugins'
+import { parseFileRecoveryPage, parseFileRecoveryReceipt } from './pluginFileRecoveryValidation'
 import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 
 export const pluginManagementApi = {
+  async fileRecoveries(cursor?: string) {
+    return parseFileRecoveryPage(
+      assertSuccess(
+        await backend.command('plugin_file_recoveries_list', {
+          ...(cursor ? { cursor } : {}),
+          limit: 50,
+        }),
+        '查询插件文件恢复'
+      )
+    )
+  },
+
+  async resolveFileRecovery(choice: PluginFileRecoveryChoice) {
+    return parseFileRecoveryReceipt(
+      assertSuccess(await backend.command('plugin_file_recovery_resolve', choice), '恢复插件私有文件')
+    )
+  },
   async permissions(installationId: string): Promise<PluginPermissions> {
     return parsePermissions(
       assertSuccess(
