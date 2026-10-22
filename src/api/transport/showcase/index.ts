@@ -410,6 +410,13 @@ export function createShowcaseTransport(): BackendTransport {
         setCurrentAccount(account.id)
         return success(structuredClone(account))
       }
+      case 'accounts_preview_offline_uuid': {
+        const username = String(payload.username || 'ShowcasePlayer')
+        return success({
+          player_name: username,
+          uuid: `showcase-${username.toLowerCase().replace(/\s+/g, '-')}`,
+        })
+      }
       case 'accounts_add_authlib': {
         const account = createShowcaseAccount(String(payload.email || 'AuthlibPlayer'), 'authlib')
         account.auth_server = String(payload.server_url || '')

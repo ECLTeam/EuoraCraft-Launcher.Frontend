@@ -15,6 +15,7 @@ import type {
   MicrosoftLoginStatusEvent,
   MicrosoftPollData,
   MinecraftAccount,
+  OfflineUuidPreview,
 } from '@/types/accounts'
 
 export const useAccountStore = defineStore('accounts', () => {
@@ -145,6 +146,10 @@ export const useAccountStore = defineStore('accounts', () => {
 
   async function addOffline(username: string, uuid?: string, skin?: string): Promise<void> {
     await runAndReload(() => accountsApi.addOffline(username, uuid, skin))
+  }
+
+  async function previewOfflineUuid(username: string): Promise<OfflineUuidPreview> {
+    return accountsApi.previewOfflineUuid(username)
   }
 
   async function defaultSkins(): Promise<DefaultSkin[]> {
@@ -282,6 +287,7 @@ export const useAccountStore = defineStore('accounts', () => {
     load,
     loadCurrent,
     addOffline,
+    previewOfflineUuid,
     defaultSkins,
     setOfflineSkin,
     addAuthlib,

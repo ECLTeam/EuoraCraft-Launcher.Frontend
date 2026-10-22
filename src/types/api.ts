@@ -16,6 +16,7 @@ import type {
   MicrosoftLoginStatusEvent,
   MicrosoftPollData,
   MinecraftAccount,
+  OfflineUuidPreview,
   SelectResult,
   SkinModel,
   WardrobeImportResult,
@@ -310,6 +311,7 @@ export interface CommandPayloadMap {
   accounts_auth_providers: undefined
   accounts_add_plugin: { provider_id: string; values: Record<string, string> }
   accounts_add_offline: { username: string; uuid?: string; skin?: string }
+  accounts_preview_offline_uuid: { username: string }
   accounts_default_skins: undefined
   accounts_set_offline_skin: { account_id: string; skin?: string }
   accounts_add_authlib: {
@@ -778,6 +780,7 @@ export const COMMAND_NAMES = {
   accounts_auth_providers: 'accounts_auth_providers',
   accounts_add_plugin: 'accounts_add_plugin',
   accounts_add_offline: 'accounts_add_offline',
+  accounts_preview_offline_uuid: 'accounts_preview_offline_uuid',
   accounts_default_skins: 'accounts_default_skins',
   accounts_set_offline_skin: 'accounts_set_offline_skin',
   accounts_add_authlib: 'accounts_add_authlib',
@@ -1048,6 +1051,7 @@ export interface CommandResponseMap {
   accounts_auth_providers: AuthProvider[]
   accounts_add_plugin: MinecraftAccount
   accounts_add_offline: MinecraftAccount
+  accounts_preview_offline_uuid: OfflineUuidPreview
   accounts_default_skins: DefaultSkin[]
   accounts_set_offline_skin: AccountListData
   accounts_add_authlib: MinecraftAccount

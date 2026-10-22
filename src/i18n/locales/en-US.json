@@ -182,6 +182,7 @@
     "username": "Username",
     "enterUsername": "Enter username",
     "advancedOptions": "Advanced options",
+    "offlineUuidPreview": "Offline UUID",
     "customUuid": "Custom UUID",
     "customUuidPlaceholder": "Enter a 32-digit or standard UUID",
     "customUuidHint": "Leave blank to generate an offline UUID from the username.",

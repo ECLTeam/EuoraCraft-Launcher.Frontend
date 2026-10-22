@@ -295,6 +295,10 @@
                 :placeholder="t('game.enterUsername')"
                 @keyup.enter="addOfflineFromModal"
               />
+              <p v-if="account.offlineUuidPreview" class="offline-uuid-preview">
+                <span>{{ t('game.offlineUuidPreview') }}</span>
+                <code>{{ account.offlineUuidPreview }}</code>
+              </p>
               <div v-if="account.offlineSkinOptions.length" class="offline-skin-field">
                 <label for="offline-skin-select">{{ t('game.offlineSkinLabel') }}</label>
                 <NSelect
