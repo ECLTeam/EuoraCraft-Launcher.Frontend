@@ -215,12 +215,16 @@
    Results Content
    ============================================= */
 .mods-results-content {
-  /* 不再限制高度，内容随列表自然撑开 */
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  /* 空结果时也撑满卡片，避免绝对定位的加载指示器落在零高度容器上。 */
   min-height: 0;
 }
 
 .mods-results-spin.ui-loading {
   --ui-loading-overlay: transparent;
+  flex: 1;
 }
 
 /* =============================================
