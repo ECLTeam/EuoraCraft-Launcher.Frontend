@@ -764,7 +764,8 @@
       "filesystem_write": "新增自身私有檔案（不覆寫，僅本機 NTFS）",
       "filesystem_delete": "刪除自身私有檔案（僅本機 NTFS，成功刪除無法復原）",
       "network_read": "讀取已核准網站",
-      "filesystem_replace": "替換自身私有檔案（僅本機 NTFS，成功後舊版本無法復原）"
+      "filesystem_replace": "替換自身私有檔案（僅本機 NTFS，成功後舊版本無法復原）",
+      "instances_write": "修改所選實例資料（別名、描述、收藏及標籤）"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -778,7 +779,11 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "外掛相依項目無法使用或發生衝突。",
       "PLUGIN_WORKER_EXECUTION_FAILED": "外掛啟動失敗，請檢查記錄後重試。",
       "PLUGIN_FILE_RECOVERY_REQUIRED": "原名稱已被其他檔案占用，原檔案備份仍保留。",
-      "PLUGIN_FILE_RECOVERY_INVALID": "無法核實復原記錄，檔案已保留。"
+      "PLUGIN_FILE_RECOVERY_INVALID": "無法核實復原記錄，檔案已保留。",
+      "PLUGIN_INSTANCE_PROFILE_CONFLICT": "實例資料已變更，請重新讀取後再提交。",
+      "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "無法儲存實例資料，原資料已保留。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "實例資料正在處理或等待復原，請先查看檔案復原。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "無法核實實例資料復原對象，檔案已保留。"
     },
     "runtimeError": "外掛執行未完成，請檢查權限或重試。",
     "resourcesTitle": "允許存取的實例",
@@ -817,7 +822,16 @@
     "fileRecoverySubmitFailed": "提交狀態尚未確認，請重新整理並重試原選擇；工作可能仍在執行。",
     "fileRecoveryCompleted": "復原工作已完成。",
     "fileRecoveryFailed": "復原工作未完成，請重新整理確認實際狀態後重試。",
-    "fileRecoveryState_cleanup": "新檔案已發布，正在完成備份及記錄清理。"
+    "fileRecoveryState_cleanup": "新檔案已發布，正在完成備份及記錄清理。",
+    "readResourcesTitle": "可讀取的實例",
+    "writeResourcesTitle": "可修改資料的實例",
+    "writeResourcesNote": "逐一選擇允許修改資料的實例；讀取許可不會自動授予寫入許可。",
+    "writeResourcesRootHint": "展開目錄以選擇個別實例。",
+    "fileRecoveryKind": "復原內容",
+    "fileRecoveryPrivate": "私有檔案",
+    "fileRecoveryProfile": "實例資料",
+    "profileRecoverySuffix": "另存後綴（檔名為 recovered-profile-後綴.json）",
+    "profileRecoveryInvalidSuffix": "後綴須為1—64個字母、數字、底線或連字號。"
   },
   "settings": {
     "title": "設定",
@@ -1923,7 +1937,9 @@
     "java_install": "安裝 Java",
     "java_remove": "移除 Java",
     "java_cleanup": "重試清理",
-    "plugin_file_recovery": "檔案復原"
+    "plugin_file_recovery": "檔案復原",
+    "plugin_instance_profile_patch": "修改實例資料",
+    "plugin_instance_profile_recovery": "復原實例原資料"
   },
   "more": {
     "nav": {

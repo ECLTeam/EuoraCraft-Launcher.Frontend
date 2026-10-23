@@ -764,7 +764,8 @@
       "filesystem_write": "自身の専用ファイルを新規作成する（上書き不可、ローカル NTFS のみ）",
       "filesystem_delete": "自身の専用ファイルを削除する（ローカル NTFS のみ、削除成功後は復元不可）",
       "network_read": "承認済みサイトの読み取り",
-      "filesystem_replace": "自身の専用ファイルを置換する（ローカル NTFS のみ、成功後の旧版は復元不可）"
+      "filesystem_replace": "自身の専用ファイルを置換する（ローカル NTFS のみ、成功後の旧版は復元不可）",
+      "instances_write": "選択したインスタンスのプロフィールを変更（別名、説明、お気に入り、タグ）"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",
@@ -778,7 +779,11 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "依存関係が利用できないか、競合しています。",
       "PLUGIN_WORKER_EXECUTION_FAILED": "起動に失敗しました。ログを確認してから再試行してください。",
       "PLUGIN_FILE_RECOVERY_REQUIRED": "元の名前は別のファイルに使われています。元のバックアップは保持されています。",
-      "PLUGIN_FILE_RECOVERY_INVALID": "復元記録を確認できません。ファイルは保持されています。"
+      "PLUGIN_FILE_RECOVERY_INVALID": "復元記録を確認できません。ファイルは保持されています。",
+      "PLUGIN_INSTANCE_PROFILE_CONFLICT": "プロフィールが変更されています。再読み込みしてから送信してください。",
+      "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "プロフィールを保存できませんでした。元のデータは保持されています。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "プロフィールは処理中か復元待ちです。ファイルの復元を開いてください。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "復元対象を確認できませんでした。ファイルは保持されています。"
     },
     "runtimeError": "操作が完了していません。権限を確認するか再試行してください。",
     "resourcesTitle": "アクセスを許可するインスタンス",
@@ -817,7 +822,16 @@
     "fileRecoverySubmitFailed": "受付状態を確認できません。更新して同じ選択で再試行してください。処理が続いている可能性があります。",
     "fileRecoveryCompleted": "復元処理が完了しました。",
     "fileRecoveryFailed": "復元処理は完了していません。実際の状態を更新してから再試行してください。",
-    "fileRecoveryState_cleanup": "新しいファイルは公開済みです。バックアップと記録の後処理を待っています。"
+    "fileRecoveryState_cleanup": "新しいファイルは公開済みです。バックアップと記録の後処理を待っています。",
+    "readResourcesTitle": "読み取り可能なインスタンス",
+    "writeResourcesTitle": "プロフィールを変更できるインスタンス",
+    "writeResourcesNote": "変更を許可するインスタンスを個別に選択してください。読み取り権限だけでは変更できません。",
+    "writeResourcesRootHint": "フォルダーを開いて個別のインスタンスを選択します。",
+    "fileRecoveryKind": "復元対象",
+    "fileRecoveryPrivate": "プライベートファイル",
+    "fileRecoveryProfile": "インスタンスのプロフィール",
+    "profileRecoverySuffix": "別名保存の接尾辞（ファイル名: recovered-profile-接尾辞.json）",
+    "profileRecoveryInvalidSuffix": "英字、数字、アンダースコア、ハイフンを1〜64文字で入力してください。"
   },
   "settings": {
     "title": "設定",
@@ -2040,7 +2054,9 @@
     "java_install": "Javaをインストール",
     "java_remove": "Javaを削除",
     "java_cleanup": "整理を再試行",
-    "plugin_file_recovery": "ファイルの復元"
+    "plugin_file_recovery": "ファイルの復元",
+    "plugin_instance_profile_patch": "インスタンスのプロフィールを変更",
+    "plugin_instance_profile_recovery": "元のインスタンスプロフィールを復元"
   },
   "more": {
     "nav": {

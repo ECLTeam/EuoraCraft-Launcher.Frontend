@@ -36,7 +36,7 @@ const child: PluginResourceCandidate = {
 }
 function open(selected: string[] = []) {
   return mount(PluginResourceSelector, {
-    props: { view, selected, disabled: false },
+    props: { view, selected, disabled: false, capability: 'instances.read' },
     global: { plugins: [i18n] },
   })
 }
@@ -132,6 +132,28 @@ describe('instance resource selection', () => {
         .find((button) => button.text() === i18n.global.t('plugins.resourcesClear'))!
         .trigger('click')
       expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([[]])
+    } finally {
+      wrapper.unmount()
+    }
+  })
+  it('allows browsing a write directory but only selects concrete instances', async () => {
+    const wrapper = mount(PluginResourceSelector, {
+      props: { view, selected: [], disabled: false, capability: 'instances.write' },
+      global: { plugins: [i18n] },
+    })
+    try {
+      await flushPromises()
+      expect(wrapper.findAllComponents(NCheckbox)).toHaveLength(0)
+      expect(mocks.permissionResources.mock.calls[0]?.[0].capability).toBe('instances.write')
+      mocks.permissionResources.mockResolvedValue({ catalog_revision: 3, items: [child], next_cursor: null })
+      await wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.resourcesBrowse'))!
+        .trigger('click')
+      await flushPromises()
+      expect(wrapper.findAllComponents(NCheckbox)).toHaveLength(1)
+      await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', true)
+      expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([[child.resource_id]])
     } finally {
       wrapper.unmount()
     }

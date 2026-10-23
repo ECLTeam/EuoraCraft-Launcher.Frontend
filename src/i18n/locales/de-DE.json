@@ -764,7 +764,8 @@
       "filesystem_write": "Eigene private Dateien erstellen (kein Überschreiben, nur lokales NTFS)",
       "filesystem_delete": "Eigene private Dateien löschen (nur lokales NTFS; erfolgreiches Löschen ist unwiderruflich)",
       "network_read": "Genehmigte Websites lesen",
-      "filesystem_replace": "Eigene private Dateien ersetzen (nur lokales NTFS; die vorherige Version ist danach nicht wiederherstellbar)"
+      "filesystem_replace": "Eigene private Dateien ersetzen (nur lokales NTFS; die vorherige Version ist danach nicht wiederherstellbar)",
+      "instances_write": "Profile ausgewählter Instanzen ändern (Alias, Beschreibung, Favorit und Tags)"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
@@ -778,7 +779,11 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "Pluginabhängigkeiten fehlen oder stehen im Konflikt.",
       "PLUGIN_WORKER_EXECUTION_FAILED": "Pluginstart fehlgeschlagen. Vor dem Wiederholen die Protokolle prüfen.",
       "PLUGIN_FILE_RECOVERY_REQUIRED": "Eine andere Datei belegt den ursprünglichen Namen. Die Originalsicherung bleibt erhalten.",
-      "PLUGIN_FILE_RECOVERY_INVALID": "Der Wiederherstellungsdatensatz konnte nicht geprüft werden. Dateien bleiben erhalten."
+      "PLUGIN_FILE_RECOVERY_INVALID": "Der Wiederherstellungsdatensatz konnte nicht geprüft werden. Dateien bleiben erhalten.",
+      "PLUGIN_INSTANCE_PROFILE_CONFLICT": "Das Instanzprofil wurde geändert. Lesen Sie es vor dem Speichern erneut.",
+      "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "Das Profil konnte nicht gespeichert werden. Die Originaldaten bleiben erhalten.",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "Das Profil wird bearbeitet oder muss wiederhergestellt werden. Öffnen Sie die Dateiwiederherstellung.",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "Die Wiederherstellungsobjekte konnten nicht geprüft werden. Dateien bleiben erhalten."
     },
     "runtimeError": "Pluginvorgang nicht abgeschlossen. Berechtigungen prüfen oder erneut versuchen.",
     "resourcesTitle": "Erlaubte Instanzen",
@@ -817,7 +822,16 @@
     "fileRecoverySubmitFailed": "Die Übermittlung ist unbestätigt. Aktualisieren Sie und wiederholen Sie dieselbe Auswahl; die Aufgabe läuft möglicherweise noch.",
     "fileRecoveryCompleted": "Die Wiederherstellungsaufgabe ist abgeschlossen.",
     "fileRecoveryFailed": "Die Wiederherstellung ist nicht abgeschlossen. Prüfen Sie vor einem neuen Versuch den aktuellen Status.",
-    "fileRecoveryState_cleanup": "Die neue Datei ist veröffentlicht. Sicherung und Protokoll werden noch bereinigt."
+    "fileRecoveryState_cleanup": "Die neue Datei ist veröffentlicht. Sicherung und Protokoll werden noch bereinigt.",
+    "readResourcesTitle": "Lesbare Instanzen",
+    "writeResourcesTitle": "Instanzen mit bearbeitbaren Profilen",
+    "writeResourcesNote": "Wählen Sie jede Instanz einzeln aus. Lesezugriff erteilt keinen Schreibzugriff auf Profile.",
+    "writeResourcesRootHint": "Öffnen Sie das Verzeichnis, um einzelne Instanzen auszuwählen.",
+    "fileRecoveryKind": "Wiederherstellungsinhalt",
+    "fileRecoveryPrivate": "Private Dateien",
+    "fileRecoveryProfile": "Instanzprofile",
+    "profileRecoverySuffix": "Namenszusatz (Datei: recovered-profile-Zusatz.json)",
+    "profileRecoveryInvalidSuffix": "Verwenden Sie 1–64 Buchstaben, Ziffern, Unter- oder Bindestriche."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2040,7 +2054,9 @@
     "java_install": "Java installieren",
     "java_remove": "Java entfernen",
     "java_cleanup": "Bereinigung wiederholen",
-    "plugin_file_recovery": "Dateiwiederherstellung"
+    "plugin_file_recovery": "Dateiwiederherstellung",
+    "plugin_instance_profile_patch": "Instanzprofil ändern",
+    "plugin_instance_profile_recovery": "Ursprüngliches Instanzprofil wiederherstellen"
   },
   "more": {
     "nav": {

@@ -772,7 +772,8 @@
       "filesystem_write": "Create own private files (no overwrite, local NTFS only)",
       "filesystem_delete": "Delete own private files (local NTFS only; successful deletion is irreversible)",
       "network_read": "Read approved sites",
-      "filesystem_replace": "Replace own private files (local NTFS only; previous version is irrecoverable after success)"
+      "filesystem_replace": "Replace own private files (local NTFS only; previous version is irrecoverable after success)",
+      "instances_write": "Edit selected instance profiles (alias, description, favorite and tags)"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -786,7 +787,11 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "Plugin dependencies are unavailable or conflict.",
       "PLUGIN_WORKER_EXECUTION_FAILED": "The plugin could not start. Check logs before retrying.",
       "PLUGIN_FILE_RECOVERY_REQUIRED": "Another file occupies the original name. The original backup is retained.",
-      "PLUGIN_FILE_RECOVERY_INVALID": "The recovery record could not be verified. Files have been retained."
+      "PLUGIN_FILE_RECOVERY_INVALID": "The recovery record could not be verified. Files have been retained.",
+      "PLUGIN_INSTANCE_PROFILE_CONFLICT": "The instance profile changed. Read it again before submitting.",
+      "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "The instance profile could not be saved. Original data was retained.",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "The instance profile is busy or needs recovery. Open File recovery.",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "The recovery objects could not be verified. Files were retained."
     },
     "runtimeError": "The plugin operation did not complete. Check permissions or retry.",
     "resourcesTitle": "Allowed instances",
@@ -825,7 +830,16 @@
     "fileRecoverySubmitFailed": "Submission is unconfirmed. Refresh and retry the same choice; the task may still be running.",
     "fileRecoveryCompleted": "The recovery task completed.",
     "fileRecoveryFailed": "The recovery task did not complete. Refresh the actual status before retrying.",
-    "fileRecoveryState_cleanup": "The new file is published. Backup and record cleanup is still pending."
+    "fileRecoveryState_cleanup": "The new file is published. Backup and record cleanup is still pending.",
+    "readResourcesTitle": "Readable instances",
+    "writeResourcesTitle": "Instances with editable profiles",
+    "writeResourcesNote": "Select each instance whose profile may be changed. Read access does not grant write access.",
+    "writeResourcesRootHint": "Browse this directory to select individual instances.",
+    "fileRecoveryKind": "Recovery content",
+    "fileRecoveryPrivate": "Private files",
+    "fileRecoveryProfile": "Instance profiles",
+    "profileRecoverySuffix": "Save-as suffix (file name: recovered-profile-suffix.json)",
+    "profileRecoveryInvalidSuffix": "Use 1–64 letters, digits, underscores or hyphens."
   },
   "settings": {
     "title": "Settings",
@@ -2058,7 +2072,9 @@
     "java_install": "Install Java",
     "java_remove": "Remove Java",
     "java_cleanup": "Retry cleanup",
-    "plugin_file_recovery": "File recovery"
+    "plugin_file_recovery": "File recovery",
+    "plugin_instance_profile_patch": "Edit instance profile",
+    "plugin_instance_profile_recovery": "Recover original instance profile"
   },
   "more": {
     "nav": {

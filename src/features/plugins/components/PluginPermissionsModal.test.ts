@@ -4,8 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '@/i18n'
 import type { PluginInfo, PluginPermissions } from '@/types/plugins'
 import PluginPermissionsModal from './PluginPermissionsModal.vue'
+import PluginResourceSelector from './PluginResourceSelector.vue'
 
-const mocks = vi.hoisted(() => ({ permissions: vi.fn(), updatePermissions: vi.fn() }))
+const mocks = vi.hoisted(() => ({ permissions: vi.fn(), updatePermissions: vi.fn(), permissionResources: vi.fn() }))
 vi.mock('@/features/plugins/api/pluginManagementApi', () => ({ pluginManagementApi: mocks }))
 
 const plugin: PluginInfo = {
@@ -213,6 +214,45 @@ describe('plugin permission review', () => {
         .trigger('click')
       await flushPromises()
       expect(mocks.permissions).toHaveBeenCalledTimes(2)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+  it('keeps read-directory and write-instance choices independent', async () => {
+    mocks.permissions.mockResolvedValue({
+      ...view,
+      items: ['instances.read', 'instances.write'].map((capability) => ({
+        ...view.items[0],
+        capability,
+        decision: 'allow',
+      })),
+    })
+    mocks.permissionResources.mockResolvedValue({ catalog_revision: 2, items: [], next_cursor: null })
+    mocks.updatePermissions.mockResolvedValue({
+      revision: 2,
+      grant_epoch: 3,
+      persisted: true,
+      required_satisfied: true,
+      cleanup_state: 'completed',
+    })
+    const wrapper = open()
+    try {
+      await flushPromises()
+      const selectors = wrapper.findAllComponents(PluginResourceSelector)
+      expect(selectors).toHaveLength(2)
+      await selectors[0]!.vm.$emit('update:selected', ['c'.repeat(32)])
+      await selectors[1]!.vm.$emit('update:selected', ['d'.repeat(32)])
+      await selectors[1]!.vm.$emit('revision', 3)
+      await wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.permissionsSave'))!
+        .trigger('click')
+      await flushPromises()
+      expect(mocks.updatePermissions.mock.calls[0]?.[1]).toEqual([
+        { capability: 'instances.read', resource_refs: ['c'.repeat(32)], decision: 'allow', lifetime: 'permanent' },
+        { capability: 'instances.write', resource_refs: ['d'.repeat(32)], decision: 'allow', lifetime: 'permanent' },
+      ])
+      expect(mocks.updatePermissions.mock.calls[0]?.[2]).toBe(3)
     } finally {
       wrapper.unmount()
     }

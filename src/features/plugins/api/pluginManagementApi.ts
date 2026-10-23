@@ -3,6 +3,7 @@ import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation
 import type {
   PluginInfo,
   PluginFileRecoveryChoice,
+  PluginInstanceProfileRecoveryChoice,
   PluginPermissions,
   PluginPermissionDecision,
   PluginPackageInstallResult,
@@ -14,6 +15,24 @@ import { parseFileRecoveryPage, parseFileRecoveryReceipt } from './pluginFileRec
 import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 
 export const pluginManagementApi = {
+  async profileRecoveries(cursor?: string) {
+    return parseFileRecoveryPage(
+      assertSuccess(
+        await backend.command('plugin_instance_profile_recoveries_list', {
+          ...(cursor ? { cursor } : {}),
+          limit: 50,
+        }),
+        '查询实例资料恢复'
+      )
+    )
+  },
+
+  async resolveProfileRecovery(choice: PluginInstanceProfileRecoveryChoice) {
+    return parseFileRecoveryReceipt(
+      assertSuccess(await backend.command('plugin_instance_profile_recovery_resolve', choice), '恢复实例原资料')
+    )
+  },
+
   async fileRecoveries(cursor?: string) {
     return parseFileRecoveryPage(
       assertSuccess(

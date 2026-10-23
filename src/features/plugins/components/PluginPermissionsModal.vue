@@ -36,14 +36,17 @@
             {{ t('plugins.permissionAllow') }}
           </NCheckbox>
         </div>
-        <PluginResourceSelector
-          v-if="view.items.some((item) => item.capability === 'instances.read' && item.implemented)"
-          v-model:selected="selectedResources"
-          :view="view"
-          :disabled="saving"
-          @revision="resourceRevision = $event"
-          @busy="resourceLoading = $event"
-        />
+        <template v-for="capability in instanceCapabilities" :key="capability">
+          <PluginResourceSelector
+            v-if="view.items.some((item) => item.capability === capability && item.implemented)"
+            v-model:selected="selectedResources[capability]"
+            :capability="capability"
+            :view="view"
+            :disabled="saving"
+            @revision="resourceRevisions[capability] = $event"
+            @busy="resourceLoading[capability] = $event"
+          />
+        </template>
         <NRadioGroup v-model:value="lifetime" :disabled="saving" :aria-label="t('plugins.permissionLifetime')">
           <NRadio value="permanent">{{ t('plugins.permissionPermanent') }}</NRadio>
           <NRadio value="session">{{ t('plugins.permissionSession') }}</NRadio>
@@ -59,7 +62,7 @@
       <NButton
         type="primary"
         :loading="saving"
-        :disabled="!view || loading || !!error || resourceLoading || needsResourceRevision"
+        :disabled="!view || loading || !!error || resourcesBusy || needsResourceRevision"
         @click="save(false)"
       >
         {{ t('plugins.permissionsSave') }}
@@ -84,11 +87,20 @@ const emit = defineEmits<{ (e: 'update:visible', value: boolean): void; (e: 'sav
 const { t, te } = useI18n()
 const view = ref<PluginPermissions | null>(null)
 const allowed = ref<string[]>([])
-const selectedResources = ref<string[]>([])
-const resourceRevision = ref<number>()
-const resourceLoading = ref(false)
-const needsResourceRevision = computed(
-  () => allowed.value.includes('instances.read') && resourceRevision.value === undefined
+const instanceCapabilities = ['instances.read', 'instances.write'] as const
+type InstanceCapability = (typeof instanceCapabilities)[number]
+const selectedResources = ref<Record<InstanceCapability, string[]>>({ 'instances.read': [], 'instances.write': [] })
+const resourceRevisions = ref<Partial<Record<InstanceCapability, number>>>({})
+const resourceLoading = ref<Record<InstanceCapability, boolean>>({ 'instances.read': false, 'instances.write': false })
+const resourcesBusy = computed(() => Object.values(resourceLoading.value).some(Boolean))
+const resourceRevision = computed(() => {
+  const revisions = Object.values(resourceRevisions.value).filter((value): value is number => value !== undefined)
+  return revisions.length ? Math.max(...revisions) : undefined
+})
+const needsResourceRevision = computed(() =>
+  instanceCapabilities.some(
+    (capability) => allowed.value.includes(capability) && resourceRevisions.value[capability] === undefined
+  )
 )
 const lifetime = ref<'session' | 'permanent'>('permanent')
 const loading = ref(false)
@@ -113,7 +125,8 @@ function displayOrigin(reference: string): string {
 
 function decisionResources(item: PluginPermissionItem, revoke: boolean): string[] {
   if (revoke || !item.implemented || !allowed.value.includes(item.capability)) return []
-  if (item.capability === 'instances.read') return selectedResources.value
+  if (item.capability === 'instances.read' || item.capability === 'instances.write')
+    return selectedResources.value[item.capability]
   if (item.capability === 'network.read') return item.requested_resource_refs
   return item.resource_refs
 }
@@ -134,9 +147,11 @@ async function load(): Promise<void> {
     const result = await pluginManagementApi.permissions(id)
     if (!current()) return
     view.value = result
-    selectedResources.value =
-      result.items.find((item) => item.capability === 'instances.read')?.selected_resource_refs ?? []
-    resourceRevision.value = undefined
+    for (const capability of instanceCapabilities) {
+      selectedResources.value[capability] =
+        result.items.find((item) => item.capability === capability)?.selected_resource_refs ?? []
+    }
+    resourceRevisions.value = {}
     allowed.value = result.items
       .filter((item) => item.implemented && item.decision === 'allow')
       .map((item) => item.capability)
@@ -148,12 +163,7 @@ async function load(): Promise<void> {
 }
 
 async function save(revoke: boolean): Promise<void> {
-  if (
-    saving.value ||
-    loading.value ||
-    !view.value ||
-    (!revoke && (resourceLoading.value || needsResourceRevision.value))
-  )
+  if (saving.value || loading.value || !view.value || (!revoke && (resourcesBusy.value || needsResourceRevision.value)))
     return
   const reviewed = view.value
   const current = scope.begin()
@@ -179,7 +189,7 @@ async function save(revoke: boolean): Promise<void> {
     }
     if (revoke) {
       allowed.value = []
-      selectedResources.value = []
+      selectedResources.value = { 'instances.read': [], 'instances.write': [] }
     }
     resultMessage.value = t(
       result.cleanup_state === 'pending' ? 'plugins.permissionsCleanupPending' : 'plugins.permissionsSaved'

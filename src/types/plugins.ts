@@ -173,7 +173,7 @@ export interface PluginResourcePage {
 export interface PluginResourceQuery {
   installation_id: string
   content_digest: string
-  capability: 'instances.read'
+  capability: 'instances.read' | 'instances.write'
   parent_ref?: string | null
   search?: string
   cursor?: string | null
@@ -201,4 +201,12 @@ export interface PluginFileRecoveryChoice {
   expected_etag: string
   action: PluginFileRecoveryAction
   saved_name?: string
+}
+
+export interface PluginInstanceProfileRecoveryChoice {
+  recovery_ref: string
+  expected_revision: number
+  expected_etag: string
+  action: PluginFileRecoveryAction
+  saved_suffix?: string
 }

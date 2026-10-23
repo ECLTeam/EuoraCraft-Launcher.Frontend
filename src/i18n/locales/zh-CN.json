@@ -772,7 +772,8 @@
       "filesystem_write": "新建自身私有文件（不覆盖，仅本地 NTFS）",
       "filesystem_delete": "删除自身私有文件（仅本地 NTFS，成功删除不可恢复）",
       "network_read": "读取已批准站点",
-      "filesystem_replace": "替换自身私有文件（仅本地 NTFS，成功后旧版本不可恢复）"
+      "filesystem_replace": "替换自身私有文件（仅本地 NTFS，成功后旧版本不可恢复）",
+      "instances_write": "修改所选实例资料（别名、描述、收藏及标签）"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -786,7 +787,11 @@
       "PLUGIN_DEPENDENCY_CONFLICT": "插件依赖不可用或存在冲突。",
       "PLUGIN_WORKER_EXECUTION_FAILED": "插件启动失败，请检查日志后重试。",
       "PLUGIN_FILE_RECOVERY_REQUIRED": "原名称已被其他文件占用，原文件备份仍保留。",
-      "PLUGIN_FILE_RECOVERY_INVALID": "无法核实恢复记录，文件已保留。"
+      "PLUGIN_FILE_RECOVERY_INVALID": "无法核实恢复记录，文件已保留。",
+      "PLUGIN_INSTANCE_PROFILE_CONFLICT": "实例资料已变化，请重新读取后再提交。",
+      "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "实例资料未能保存，原资料已保留。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "实例资料正在处理或等待恢复，请先查看文件恢复。",
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "无法核实实例资料恢复对象，文件已保留。"
     },
     "runtimeError": "插件运行未完成，请检查权限或重试。",
     "resourcesTitle": "允许访问的实例",
@@ -825,7 +830,16 @@
     "fileRecoverySubmitFailed": "提交状态未确认，请刷新并重试原选择；任务可能仍在执行。",
     "fileRecoveryCompleted": "恢复任务已完成。",
     "fileRecoveryFailed": "恢复任务未完成，请刷新检查实际状态后重试。",
-    "fileRecoveryState_cleanup": "新文件已发布，正在完成备份和记录清理。"
+    "fileRecoveryState_cleanup": "新文件已发布，正在完成备份和记录清理。",
+    "readResourcesTitle": "可读取的实例",
+    "writeResourcesTitle": "可修改资料的实例",
+    "writeResourcesNote": "逐个选择允许修改资料的实例；读取许可不会自动授予写入许可。",
+    "writeResourcesRootHint": "展开目录以选择具体实例。",
+    "fileRecoveryKind": "恢复内容",
+    "fileRecoveryPrivate": "私有文件",
+    "fileRecoveryProfile": "实例资料",
+    "profileRecoverySuffix": "另存后缀（文件名为 recovered-profile-后缀.json）",
+    "profileRecoveryInvalidSuffix": "后缀须为1—64个字母、数字、下划线或连字符。"
   },
   "settings": {
     "title": "设置",
@@ -1953,7 +1967,9 @@
     "java_install": "安装 Java",
     "java_remove": "移除 Java",
     "java_cleanup": "重试清理",
-    "plugin_file_recovery": "文件恢复"
+    "plugin_file_recovery": "文件恢复",
+    "plugin_instance_profile_patch": "修改实例资料",
+    "plugin_instance_profile_recovery": "恢复实例原资料"
   },
   "more": {
     "nav": {
