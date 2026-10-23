@@ -1120,8 +1120,9 @@
 }
 
 .online-mods-page :deep(.mods-results-panel) {
-  flex: 1;
-  min-height: 0;
+  /* 与下载页一致：面板高度由内容撑开，滚动交给外层 oms-root */
+  flex: none;
+  min-height: 160px;
 }
 
 .online-mods-page :deep(.search-controls) {

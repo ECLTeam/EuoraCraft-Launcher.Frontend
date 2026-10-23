@@ -146,6 +146,8 @@
   flex: 1;
   flex-direction: column;
   min-height: 0;
+  /* 筛选条件与结果列表共用同一个滚动区，避免只有列表内部滚动 */
+  overflow-y: auto;
 }
 
 .oms-drop-overlay {
@@ -181,7 +183,8 @@
    ============================================= */
 .mods-results-panel {
   display: flex;
-  flex: 1;
+  /* 高度由内容撑开，滚动交给外层 oms-root，避免列表单独滚动 */
+  flex: none;
   flex-direction: column;
   min-height: 160px;
   overflow: hidden;
@@ -212,22 +215,12 @@
    Results Content
    ============================================= */
 .mods-results-content {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.mods-results-spin {
-  height: 100%;
+  /* 不再限制高度，内容随列表自然撑开 */
   min-height: 0;
 }
 
 .mods-results-spin.ui-loading {
   --ui-loading-overlay: transparent;
-}
-
-.mods-results-scroll {
-  height: 100%;
 }
 
 /* =============================================
