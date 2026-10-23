@@ -223,228 +223,11 @@
           </UiLoading>
         </section>
 
-        <Modal
+        <AddAccountModal
           v-model:visible="showAddAccountModal"
-          :title="t('game.addAccount')"
-          :showFooter="false"
-          bodyClass="account-add-modal-body"
-          width="480px"
-        >
-          <div class="account-add-body">
-            <NAlert
-              v-if="isShowcaseMode"
-              class="showcase-account-warning"
-              type="warning"
-              :title="t('game.showcase.title')"
-            >
-              {{ t('game.showcase.description') }}
-            </NAlert>
-            <NTabs
-              v-if="isFolia"
-              v-model:value="selectedAccountType"
-              type="segment"
-              size="small"
-              class="account-type-switch"
-            >
-              <NTab v-for="option in accountTypeOptions" :key="option.value" :name="option.value">
-                {{ option.label }}
-              </NTab>
-            </NTabs>
-            <NRadioGroup v-else v-model:value="selectedAccountType" class="account-type-switch" size="small">
-              <NRadioButton v-for="option in accountTypeOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </NRadioButton>
-            </NRadioGroup>
-
-            <!--<div class="account-type-intro">
-              <div class="account-type-icon">
-                <UiIcon :name="selectedAccountMeta.icon" :size="18" />
-              </div>
-              <div>
-                <strong>{{ selectedAccountMeta.label }}</strong>
-                <p>{{ selectedAccountMeta.description }}</p>
-              </div>
-            </div>-->
-
-            <div v-if="selectedAccountType === 'microsoft'" class="account-form">
-              <NAlert
-                v-if="account.microsoftLoginConfig.needs_client_id"
-                class="microsoft-client-id-alert"
-                type="warning"
-                :title="t('game.clientId.title')"
-              >
-                <p>{{ t('game.clientId.description') }}</p>
-                <p>{{ t('game.clientId.fileHint') }}</p>
-                <code class="microsoft-client-id-value">MICROSOFT_CLIENT_ID=your_client_id_here</code>
-              </NAlert>
-              <NButton
-                type="primary"
-                block
-                :loading="account.startingMicrosoftLogin || account.isMicrosoftLoginConfigLoading"
-                :disabled="!account.microsoftLoginConfig.available"
-                @click="startMicrosoftFromAddModal"
-              >
-                <template #icon><UiIcon name="microsoft" :size="15" /></template>
-                {{ t('game.continueMicrosoftLogin') }}
-              </NButton>
-            </div>
-
-            <div v-else-if="selectedAccountType === 'offline'" class="account-form">
-              <NInput
-                v-model:value="account.newOfflineUsername"
-                :placeholder="t('game.enterUsername')"
-                @keyup.enter="addOfflineFromModal"
-              />
-              <p v-if="account.offlineUuidPreview" class="offline-uuid-preview">
-                <span>{{ t('game.offlineUuidPreview') }}</span>
-                <code>{{ account.offlineUuidPreview }}</code>
-              </p>
-              <div v-if="account.offlineSkinOptions.length" class="offline-skin-field">
-                <label for="offline-skin-select">{{ t('game.offlineSkinLabel') }}</label>
-                <NSelect
-                  id="offline-skin-select"
-                  v-model:value="account.selectedOfflineSkinId"
-                  :options="account.offlineSkinOptions"
-                  :placeholder="t('game.offlineSkinPlaceholder')"
-                  size="small"
-                  clearable
-                  :loading="account.offlineSkinsLoading"
-                />
-              </div>
-              <button
-                type="button"
-                class="offline-advanced-toggle"
-                :class="{ expanded: showOfflineAdvanced }"
-                :aria-expanded="showOfflineAdvanced"
-                @click="showOfflineAdvanced = !showOfflineAdvanced"
-              >
-                <span>{{ t('game.advancedOptions') }}</span>
-                <UiIcon name="chevron-down" :size="16" />
-              </button>
-              <Transition name="offline-advanced">
-                <div v-if="showOfflineAdvanced" class="offline-advanced-panel">
-                  <label for="offline-custom-uuid">{{ t('game.customUuid') }}</label>
-                  <NInput
-                    id="offline-custom-uuid"
-                    v-model:value="account.newOfflineUuid"
-                    :placeholder="t('game.customUuidPlaceholder')"
-                    :status="account.offlineUuidError ? 'error' : undefined"
-                    @keyup.enter="addOfflineFromModal"
-                  />
-                  <small :class="{ error: account.offlineUuidError }">
-                    {{ account.offlineUuidError || t('game.customUuidHint') }}
-                  </small>
-                </div>
-              </Transition>
-              <!--<NAlert type="default" :showIcon="false">{{ t('game.offlineNoPassword') }}</NAlert>-->
-              <NButton
-                type="primary"
-                block
-                :loading="account.addingOffline"
-                :disabled="!account.newOfflineUsername.trim() || !!account.offlineUuidError"
-                @click="addOfflineFromModal"
-              >
-                {{ t('game.addOfflineAccount') }}
-              </NButton>
-            </div>
-
-            <div v-else-if="account.pendingAuthlibAccountId" class="account-form">
-              <NAlert type="info" :showIcon="false">{{ t('auth.selectProfileHint') }}</NAlert>
-              <NSelect
-                v-model:value="account.selectedAuthlibProfileId"
-                :options="account.authlibProfileOptions"
-                :renderLabel="renderAuthlibProfileLabel"
-                :placeholder="t('auth.profilePlaceholder')"
-              />
-              <NButton
-                type="primary"
-                block
-                :loading="account.selectingAuthlibProfile"
-                :disabled="!account.selectedAuthlibProfileId"
-                @click="selectAuthlibProfileFromModal"
-              >
-                {{ t('auth.loginSelectedProfile') }}
-              </NButton>
-            </div>
-
-            <div v-else-if="selectedPluginProvider" class="account-form">
-              <NAlert v-if="selectedPluginProvider.description" type="default" :showIcon="false">
-                {{ selectedPluginProvider.description }}
-              </NAlert>
-              <div v-for="field in selectedPluginProvider.fields" :key="field.key" class="plugin-auth-field">
-                <label :for="`plugin-field-${field.key}`">{{ field.label }}</label>
-                <NInput
-                  :id="`plugin-field-${field.key}`"
-                  v-model:value="account.pluginFieldValues[field.key]"
-                  :type="field.type === 'password' ? 'password' : 'text'"
-                  :placeholder="field.placeholder"
-                  :showPasswordOn="field.type === 'password' ? 'mousedown' : undefined"
-                  @keyup.enter="addPluginAccountFromModal"
-                />
-              </div>
-              <NButton
-                type="primary"
-                block
-                :loading="account.addingPluginAccount"
-                :disabled="
-                  !selectedPluginProvider.fields.every(
-                    (field) => !field.required || (account.pluginFieldValues[field.key] ?? '').trim()
-                  )
-                "
-                @click="addPluginAccountFromModal"
-              >
-                {{ t('game.addAccount') }}
-              </NButton>
-            </div>
-
-            <div v-else class="account-form">
-              <NAutoComplete
-                v-model:value="account.authlibServerUrl"
-                :options="account.authlibServerOptions"
-                :renderLabel="account.renderAuthlibServerOption"
-                :placeholder="t('auth.serverUrlPlaceholder')"
-                clearable
-                @select="account.selectAuthlibServer"
-                @blur="account.resolveAuthlibServer"
-              />
-              <NInput
-                v-model:value="account.authlibEmail"
-                :placeholder="t('auth.emailPlaceholder')"
-                @keyup.enter="addAuthlibFromModal"
-              />
-              <NInput
-                v-model:value="account.authlibPassword"
-                type="password"
-                showPasswordOn="mousedown"
-                :placeholder="t('auth.passwordPlaceholder')"
-                @keyup.enter="addAuthlibFromModal"
-              />
-              <small class="authlib-server-hint">{{ t('auth.serverUrlHint') }}</small>
-              <NAlert
-                v-if="!account.authlibLoginConfig.available"
-                class="authlib-unavailable-alert"
-                type="warning"
-                :showIcon="true"
-              >
-                {{ t('auth.authlibUnavailable') }}
-              </NAlert>
-              <NButton
-                type="primary"
-                block
-                :loading="account.addingAuthlib"
-                :disabled="
-                  !account.authlibLoginConfig.available ||
-                  !account.authlibServerUrl.trim() ||
-                  !account.authlibEmail.trim() ||
-                  !account.authlibPassword
-                "
-                @click="addAuthlibFromModal"
-              >
-                {{ t('auth.addAuthlibAccount') }}
-              </NButton>
-            </div>
-          </div>
-        </Modal>
+          :account="account"
+          :parentId="accountModalRef?.modalId"
+        />
 
         <Modal
           v-model:visible="showAccountDetailsModal"
@@ -521,20 +304,6 @@
       @accountsChanged="account.loadAccounts(true)"
     />
 
-    <MicrosoftLoginModal
-      :visible="account.showMicrosoftLoginModal"
-      :parentId="accountModalRef?.modalId"
-      :status="account.microsoftLoginStatus"
-      :stage="account.microsoftLoginStage"
-      :userCode="account.microsoftLoginData.userCode || ''"
-      :verificationUri="account.microsoftLoginData.verificationUri || ''"
-      :copied="account.copiedUserCode"
-      :error="account.microsoftLoginError"
-      @cancel="account.cancelMicrosoftLogin"
-      @copyCode="account.copyUserCode"
-      @openBrowser="account.openMicrosoftLoginPage"
-    />
-
     <JavaManagerModal
       v-model:visible="javaManagerVisible"
       initialView="download"
@@ -559,26 +328,11 @@
 </template>
 
 <script setup lang="ts">
-import {
-  NAlert,
-  NAutoComplete,
-  NButton,
-  NEmpty,
-  NInput,
-  NPopselect,
-  NRadioButton,
-  NRadioGroup,
-  NSelect,
-  NTab,
-  NTabs,
-  NTag,
-  type SelectOption,
-} from 'naive-ui'
+import { NButton, NEmpty, NPopselect, NTag } from 'naive-ui'
 import { storeToRefs } from 'pinia'
-import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import backend from '@/api/client'
 import AvatarRenderer from '@/components/game/AvatarRenderer.vue'
 import GameAccountCard from '@/components/game/GameAccountCard.vue'
 import GameInfoCard from '@/components/game/GameInfoCard.vue'
@@ -595,10 +349,9 @@ import { useInstanceManager } from '@/composables/useInstanceManager'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalLaunchProgress } from '@/composables/useLaunchProgress'
 import { useRecentInstances, type RecentInstance } from '@/composables/useRecentInstances'
-import { useUiSkin } from '@/composables/useUiSkin'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
 import AccountLocatorColor from '@/features/accounts/components/AccountLocatorColor.vue'
-import MicrosoftLoginModal from '@/features/accounts/components/MicrosoftLoginModal.vue'
+import AddAccountModal from '@/features/accounts/components/AddAccountModal.vue'
 import WardrobeModal from '@/features/accounts/components/WardrobeModal.vue'
 import { useGameInfoCard } from '@/features/game-home/composables/useGameInfoCard'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
@@ -611,14 +364,13 @@ import InstanceTerminalModule from '@/features/terminal/components/InstanceTermi
 import type { AccountTextures, MinecraftAccount } from '@/types/accounts'
 import type { ScannedVersion } from '@/types/instances'
 import type { JavaRuntime } from '@/types/java'
-import { getAccountTypeLabelKey, getAccountTypeShortLabelKey } from '@/utils/enums'
+import { getAccountTypeShortLabelKey } from '@/utils/enums'
 import { gamePathIdentity } from '@/utils/path'
 import RunningInstancesTab from '@/views/instances/RunningInstancesTab.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const account = useAccountManager(t)
-const { isFolia } = useUiSkin()
 const version = useInstanceManager(t)
 const javaManagerVisible = ref(false)
 const javaTarget = ref<ScannedVersion | null>(null)
@@ -709,37 +461,8 @@ function closeInstanceTerminal(): void {
   runningView.value = 'management'
 }
 
-const selectedAccountType = ref<string>('microsoft')
-const showOfflineAdvanced = ref(false)
-const isShowcaseMode = backend.runtime.isShowcase
-const accountTypeOptions = computed(() => [
-  { value: 'microsoft', label: t(getAccountTypeLabelKey('microsoft')) },
-  { value: 'offline', label: t(getAccountTypeLabelKey('offline')) },
-  { value: 'authlib', label: t(getAccountTypeLabelKey('authlib')) },
-  ...account.authProviders.map((provider) => ({ value: `plugin:${provider.id}`, label: provider.title })),
-])
-const selectedPluginProvider = computed(() => {
-  if (!selectedAccountType.value.startsWith('plugin:')) return null
-  return account.pluginProviderById(selectedAccountType.value.slice('plugin:'.length))
-})
-function renderAuthlibProfileLabel(option: SelectOption) {
-  return h('div', { class: 'authlib-profile-option-label' }, [
-    h('span', String(option.profileName ?? option.label ?? '')),
-    option.loggedIn
-      ? h(NTag, { size: 'small', type: 'success', bordered: false }, { default: () => t('auth.loggedIn') })
-      : null,
-  ])
-}
-
-function openAddAccountModal() {
-  selectedAccountType.value = account.pendingAuthlibAccountId ? 'authlib' : 'microsoft'
-  showOfflineAdvanced.value = false
-  account.newOfflineUuid = ''
-  account.selectedOfflineSkinId = ''
+function openAddAccountModal(): void {
   showAddAccountModal.value = true
-  void account.loadMicrosoftLoginConfig()
-  void account.loadAuthlibServers()
-  account.loadOfflineSkins()
 }
 
 function openWardrobeModal() {
@@ -771,35 +494,6 @@ async function returnToAccountManagement() {
   await nextTick()
   account.openAccountModal()
   returningFromWardrobe = false
-}
-
-async function startMicrosoftFromAddModal() {
-  const started = await account.startMicrosoftLogin()
-  if (started) showAddAccountModal.value = false
-}
-
-async function addOfflineFromModal() {
-  const accountCount = account.accounts.length
-  await account.addOfflineAccount()
-  if (account.accounts.length > accountCount) showAddAccountModal.value = false
-}
-
-async function addAuthlibFromModal() {
-  const accountCount = account.accounts.length
-  await account.addAuthlibAccount()
-  if (account.accounts.length > accountCount) showAddAccountModal.value = false
-}
-
-async function selectAuthlibProfileFromModal() {
-  await account.selectAuthlibProfile()
-  if (!account.pendingAuthlibAccountId) showAddAccountModal.value = false
-}
-
-async function addPluginAccountFromModal() {
-  if (!selectedPluginProvider.value) return
-  const accountCount = account.accounts.length
-  await account.addPluginAccount(selectedPluginProvider.value)
-  if (account.accounts.length > accountCount) showAddAccountModal.value = false
 }
 
 function accountTypeName(type: string): string {

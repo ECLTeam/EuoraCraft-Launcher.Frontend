@@ -412,17 +412,6 @@
   box-shadow: none !important;
 }
 
-[data-ui-skin='folia'] .account-type-switch .n-tabs-rail,
-[data-ui-skin='folia'] .account-type-switch .n-tabs-tab-wrapper {
-  display: flex;
-  width: 100%;
-  flex: 1;
-}
-
-[data-ui-skin='folia'] .account-type-switch .n-tabs-tab {
-  justify-content: center;
-}
-
 @keyframes aurora-drift {
   from {
     transform: translate3d(-1.5%, -1%, 0) scale(1);
