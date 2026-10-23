@@ -1,61 +1,39 @@
 <template>
-  <div
-    ref="selectRef"
-    v-bind="$attrs"
-    v-click-outside
+  <NSelect
+    v-model:show="isOpen"
     class="ui-select"
-    :class="{ open: isOpen, 'is-disabled': disabled }"
+    role="combobox"
+    :aria-label="ariaLabel || placeholder || t('common.selectPlaceholder')"
+    :aria-expanded="isOpen"
+    :aria-disabled="disabled"
+    :value="selectedValue"
+    :options="normalizedOptions"
+    :size="naiveSize"
+    :placeholder="placeholder || t('common.selectPlaceholder')"
+    :filterable="searchable"
+    :filter="filterOption"
+    :disabled="disabled"
+    :inputProps="{ id, 'aria-label': ariaLabel || placeholder || t('common.selectPlaceholder') }"
+    :renderLabel="renderLabel"
+    to="#app"
+    @update:value="select"
   >
-    <div class="select-trigger" @click="toggle">
-      <span class="selected-text">
-        <slot name="trigger" :selected="selectedOption">
-          <template v-if="selectedOption">
-            {{ selectedOption.label || selectedOption.value }}
-          </template>
-          <span v-else class="placeholder">{{ placeholder }}</span>
-        </slot>
-      </span>
-      <UiIcon name="arrow-right" class="select-arrow" :class="{ rotated: isOpen }" />
-    </div>
-  </div>
-
-  <Teleport to="body">
-    <Transition name="select-dropdown">
-      <div v-show="isOpen" ref="dropdownRef" class="select-dropdown" :style="dropdownStyle">
-        <div v-if="searchable" class="select-search">
-          <UiInput v-model="searchQuery" :placeholder="searchPlaceholder" size="sm" />
-        </div>
-        <div class="select-options">
-          <div
-            v-for="option in filteredOptions"
-            :key="option.value"
-            class="select-option"
-            :class="{ active: modelValue === option.value }"
-            @click="select(option.value)"
-          >
-            <div class="option-content">
-              <slot name="option" :option="option" :active="modelValue === option.value">
-                <span class="option-label">{{ option.label || option.value }}</span>
-                <span v-if="option.desc" class="option-desc">{{ option.desc }}</span>
-              </slot>
-            </div>
-            <UiIcon v-if="modelValue === option.value" name="check" class="check-icon" />
-          </div>
-          <div v-if="filteredOptions.length === 0" class="select-empty">
-            {{ emptyText }}
-          </div>
-        </div>
-      </div>
-    </Transition>
-  </Teleport>
+    <template #empty>{{ emptyText || t('common.noOptions') }}</template>
+  </NSelect>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onBeforeUnmount, type CSSProperties } from 'vue'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiInput from '@/components/ui/Input.vue'
+import { NSelect, type SelectOption as NaiveSelectOption } from 'naive-ui'
+import { computed, h, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-defineOptions({ name: 'UiSelect', inheritAttrs: false })
+export interface SelectOption {
+  label?: string
+  value: string
+  desc?: string
+}
+
+defineOptions({ name: 'UiSelect' })
 
 const props = withDefaults(
   defineProps<{
@@ -63,128 +41,60 @@ const props = withDefaults(
     options: SelectOption[]
     placeholder?: string
     searchable?: boolean
-    searchPlaceholder?: string
     emptyText?: string
     disabled?: boolean
+    size?: 'sm' | 'md' | 'lg'
+    id?: string
+    ariaLabel?: string
   }>(),
-  {
-    placeholder: '请选择',
-    searchable: false,
-    searchPlaceholder: '搜索...',
-    emptyText: '暂无选项',
-    disabled: false,
-  }
+  { size: 'md', disabled: false, searchable: false, placeholder: '', emptyText: '', id: '', ariaLabel: '' }
 )
-
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
-  (e: 'change', value: string): void
+  'update:modelValue': [value: string]
+  change: [value: string]
 }>()
 
-export interface SelectOption {
-  label?: string
-  value: string
-  desc?: string
-  [key: string]: unknown
-}
-
+const { t } = useI18n()
 const isOpen = ref(false)
-const selectRef = ref<HTMLElement | null>(null)
-const dropdownRef = ref<HTMLElement | null>(null)
-const dropdownStyle = ref<CSSProperties>({})
-const searchQuery = ref('')
-
-const selectedOption = computed(() => props.options.find((o) => o.value === props.modelValue))
-
-const filteredOptions = computed(() => {
-  if (!props.searchable || !searchQuery.value.trim()) {
-    return props.options
-  }
-  const query = searchQuery.value.toLowerCase()
-  return props.options.filter(
-    (o) => (o.label || o.value).toLowerCase().includes(query) || (o.desc?.toLowerCase().includes(query) ?? false)
-  )
-})
-
-function toggle() {
-  if (props.disabled) return
-  isOpen.value = !isOpen.value
-}
-
-function close() {
-  isOpen.value = false
-}
-
-function select(value: string) {
-  emit('update:modelValue', value)
-  emit('change', value)
-  isOpen.value = false
-  searchQuery.value = ''
-}
-
-// 下拉菜单通过 Teleport 挂到 body，用 fixed 定位避免被 UiCard 的 overflow:hidden 裁剪。
-// 始终在触发框正下方展开，高度受限时收缩以适配视口。
-function positionDropdown() {
-  if (!isOpen.value || !selectRef.value) return
-  const rect = selectRef.value.getBoundingClientRect()
-  const gap = 6
-  const spaceBelow = window.innerHeight - rect.bottom - gap
-  const maxH = Math.max(120, Math.min(288, spaceBelow))
-  dropdownStyle.value = {
-    position: 'fixed',
-    top: `${rect.bottom + gap}px`,
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
-    maxHeight: `${maxH}px`,
-    zIndex: 9000,
-  }
-}
-
-watch(isOpen, (open) => {
-  if (open) {
-    requestAnimationFrame(positionDropdown)
-    window.addEventListener('scroll', positionDropdown, true)
-    window.addEventListener('resize', positionDropdown)
-  } else {
-    window.removeEventListener('scroll', positionDropdown, true)
-    window.removeEventListener('resize', positionDropdown)
-  }
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', positionDropdown, true)
-  window.removeEventListener('resize', positionDropdown)
-})
-
 watch(
-  () => props.modelValue,
-  () => {
-    searchQuery.value = ''
+  () => props.disabled,
+  (disabled) => {
+    if (disabled) isOpen.value = false
   }
 )
+const naiveSize = computed(() => {
+  if (props.size === 'sm') return 'small'
+  if (props.size === 'lg') return 'large'
+  return 'medium'
+})
+const normalizedOptions = computed(() =>
+  props.options.map((option) => ({ ...option, label: option.label || option.value }))
+)
+const selectedValue = computed(() =>
+  props.options.some((option) => option.value === props.modelValue) ? props.modelValue : null
+)
 
-interface ClickOutsideElement extends HTMLElement {
-  __clickOutsideHandler?: (e: MouseEvent) => void
+function filterOption(pattern: string, option: NaiveSelectOption): boolean {
+  const query = pattern.toLocaleLowerCase()
+  const label = String(option.label ?? option.value).toLocaleLowerCase()
+  const description = typeof option.desc === 'string' ? option.desc.toLocaleLowerCase() : ''
+  return label.includes(query) || description.includes(query)
 }
 
-const vClickOutside = {
-  mounted(el: ClickOutsideElement) {
-    const handler = (e: MouseEvent) => {
-      const target = e.target as Node
-      const inSelect = el.contains(target)
-      const inDropdown = dropdownRef.value ? dropdownRef.value.contains(target) : false
-      if (!inSelect && !inDropdown) close()
-    }
-    document.addEventListener('click', handler)
-    el.__clickOutsideHandler = handler
-  },
-  unmounted(el: ClickOutsideElement) {
-    const handler = el.__clickOutsideHandler
-    if (handler) {
-      document.removeEventListener('click', handler)
-    }
-  },
+function renderLabel(option: NaiveSelectOption) {
+  return h('div', { class: 'ui-select-option' }, [
+    h('span', { class: 'ui-select-option-label' }, String(option.label ?? option.value)),
+    typeof option.desc === 'string' && option.desc
+      ? h('span', { class: 'ui-select-option-description' }, option.desc)
+      : null,
+  ])
+}
+
+function select(value: string | number | Array<string | number> | null) {
+  if (props.disabled || typeof value !== 'string') return
+  emit('update:modelValue', value)
+  emit('change', value)
 }
 </script>
 
-<style scoped src="@/styles/components/ui/Select.css"></style>
+<style src="@/styles/components/ui/Select.css"></style>

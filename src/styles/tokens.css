@@ -22,6 +22,8 @@
   --ecl-shadow-surface: 0 1px 2px rgba(29, 36, 51, 0.04);
   --ecl-shadow-pop: 0 8px 24px rgba(29, 36, 51, 0.1);
   --ecl-control-height: 36px;
+  --ecl-control-height-sm: 32px;
+  --ecl-control-height-lg: 40px;
   --ecl-radius-control: 6px;
   --ecl-radius-sm: 6px;
   --ecl-radius-card: 8px;

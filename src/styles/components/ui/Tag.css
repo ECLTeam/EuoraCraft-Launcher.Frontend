@@ -11,17 +11,17 @@
 
 .ui-tag--tiny {
   padding: 0 5px;
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .ui-tag--small {
   padding: 1px 7px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .ui-tag--medium {
   padding: 2px 9px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .ui-tag--round {

@@ -316,7 +316,7 @@
   min-width: 0;
 }
 
-.connect-room-input-row :deep(.ui-select .select-trigger),
+.connect-room-input-row :deep(.ui-select .n-base-selection),
 .connect-room-input-row :deep(.ui-btn),
 .connect-room-input-row :deep(.ui-input) {
   height: 32px;

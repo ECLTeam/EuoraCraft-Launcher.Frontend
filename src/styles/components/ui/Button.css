@@ -1,4 +1,5 @@
 .ui-btn {
+  --ui-button-height: var(--ecl-control-height);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6,11 +7,12 @@
   border: 1px solid transparent;
   border-radius: var(--r-sm);
   cursor: pointer;
-  font-weight: 500;
-  font-size: 12px;
+  font-weight: 550;
+  font-size: 14px;
   line-height: 1;
-  min-height: 29px;
-  padding: 5px 13px;
+  height: var(--ui-button-height);
+  min-height: var(--ui-button-height);
+  padding: 0 14px;
   transition:
     background-color var(--duration-fast) var(--ease-emphasized),
     border-color var(--duration-fast) var(--ease-emphasized),
@@ -152,63 +154,25 @@
 }
 
 .btn-sm {
-  padding: 4px 9px;
-  font-size: 11px;
-  height: var(--row-h-xs);
-  min-height: var(--row-h-xs);
-  border-radius: var(--r-sm);
-}
-
-.btn-md {
-  padding: 5px 13px;
-  font-size: 12px;
-  height: 29px;
-  border-radius: var(--r-sm);
+  --ui-button-height: var(--ecl-control-height-sm);
+  padding: 0 10px;
+  font-size: 13px;
 }
 
 .btn-lg {
-  padding: 9px 18px;
-  font-size: 13px;
-  height: 36px;
-  border-radius: var(--r-sm);
+  --ui-button-height: var(--ecl-control-height-lg);
+  padding: 0 18px;
+}
+
+.btn-circle,
+.btn-square {
+  width: var(--ui-button-height);
+  aspect-ratio: 1;
+  padding: 0;
 }
 
 .btn-circle {
   border-radius: var(--r-full);
-  aspect-ratio: 1;
-  padding: 0;
-}
-
-.btn-circle.btn-sm {
-  width: var(--row-h-xs);
-  height: var(--row-h-xs);
-}
-.btn-circle.btn-md {
-  width: 29px;
-  height: 29px;
-}
-.btn-circle.btn-lg {
-  width: 36px;
-  height: 36px;
-}
-
-.btn-square {
-  border-radius: var(--r-sm);
-  aspect-ratio: 1;
-  padding: 0;
-}
-
-.btn-square.btn-sm {
-  width: var(--row-h-xs);
-  height: var(--row-h-xs);
-}
-.btn-square.btn-md {
-  width: 29px;
-  height: 29px;
-}
-.btn-square.btn-lg {
-  width: 36px;
-  height: 36px;
 }
 
 .is-disabled {

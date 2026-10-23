@@ -84,7 +84,15 @@
           <div class="tool-desc">{{ t('dev.animationSpeedDesc') }}</div>
         </div>
         <div class="tool-control">
-          <UiSlider v-model="animSpeed" :min="0.25" :max="2" :step="0.05" suffix="×" :disabled="!debugMode" />
+          <UiSlider
+            v-model="animSpeed"
+            :min="0.25"
+            :max="2"
+            :step="0.05"
+            suffix="×"
+            :aria-label="t('dev.animationSpeed')"
+            :disabled="!debugMode"
+          />
           <UiButton size="sm" variant="outline" :disabled="!debugMode || animSpeed === 1" @click="resetAnimSpeed">
             {{ t('common.reset') }}
           </UiButton>

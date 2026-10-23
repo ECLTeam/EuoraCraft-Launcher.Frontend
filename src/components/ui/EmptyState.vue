@@ -34,10 +34,14 @@ withDefaults(defineProps<{ icon?: string; title: string; description?: string }>
 .empty-text,
 .empty-hint {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
+}
+.empty-text {
+  color: var(--ecl-text);
+  font-weight: 600;
 }
 .empty-hint {
-  color: var(--ecl-text-tertiary);
-  font-size: 10px;
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
 }
 </style>

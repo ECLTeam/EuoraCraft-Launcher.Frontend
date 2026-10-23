@@ -1652,7 +1652,11 @@
     "select": "選択",
     "clear": "クリア",
     "more": "もっと見る",
-    "reset": "リセット"
+    "reset": "リセット",
+    "selectPlaceholder": "選択してください",
+    "noOptions": "選択肢がありません",
+    "clearInput": "入力をクリア",
+    "versionType": "バージョンの種類"
   },
   "agreement": {
     "title": "利用規約",

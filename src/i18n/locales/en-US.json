@@ -1646,7 +1646,11 @@
     "clear": "Clear",
     "more": "More",
     "reset": "Reset",
-    "retry": "Retry"
+    "retry": "Retry",
+    "selectPlaceholder": "Select an option",
+    "noOptions": "No options",
+    "clearInput": "Clear input",
+    "versionType": "Version type"
   },
   "agreement": {
     "title": "User Agreement",

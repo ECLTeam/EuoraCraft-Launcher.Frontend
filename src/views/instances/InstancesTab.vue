@@ -2,7 +2,13 @@
   <div class="install-page">
     <!-- 顶部栏：类型筛选 + 搜索 -->
     <div class="panel-header">
-      <UiSelect v-model="selectedCategory" :options="categoryOptions" class="category-select" />
+      <UiSelect
+        v-model="selectedCategory"
+        :options="categoryOptions"
+        size="sm"
+        :aria-label="t('common.versionType')"
+        class="category-select"
+      />
 
       <div class="header-right">
         <span v-if="filteredVersions.length > 0" class="version-count-badge">

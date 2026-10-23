@@ -1,4 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { NSelect } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
@@ -114,13 +115,16 @@ function mountRoomTab(state: ReturnType<typeof connectorState>) {
   i18n.global.locale.value = 'zh-CN'
 
   return mount(Harness, {
-    attachTo: document.body,
+    attachTo: '#app',
     global: { plugins: [i18n, pinia], components: { UiIcon } },
   })
 }
 
 describe('ConnectRoomTab', () => {
   beforeEach(() => {
+    const app = document.createElement('div')
+    app.id = 'app'
+    document.body.appendChild(app)
     mocks.navigate.mockReset().mockResolvedValue(undefined)
     mocks.listRunningInstances.mockReset().mockResolvedValue([])
     mocks.onRunningChanged.mockReset().mockReturnValue(undefined)
@@ -248,35 +252,27 @@ describe('ConnectRoomTab', () => {
 
     const select = wrapper.getComponent(UiSelect)
     expect(select.props('disabled')).toBe(true)
-    expect(select.get('.placeholder').text()).toBe('暂无运行实例')
+    expect(select.text()).toBe('暂无运行实例')
     expect(wrapper.text()).toContain('没有检测到已启动的实例，请先在「游戏」页启动实例')
 
-    await select.get('.select-trigger').trigger('click')
-    expect(select.get('.ui-select').classes()).not.toContain('open')
+    await select.get('.n-base-selection-label').trigger('click')
+    expect(select.find('.n-base-selection--active').exists()).toBe(false)
   })
 
-  it('展开运行实例列表时没有搜索框且可以选择实例', async () => {
+  it('运行实例选择器不启用搜索，选择后更新当前实例', async () => {
     mocks.listRunningInstances.mockResolvedValue([runningInstance])
     const wrapper = mountRoomTab(connectorState(idleStatus()))
     await flushPromises()
-
     const select = wrapper.getComponent(UiSelect)
     expect(select.props('disabled')).toBe(false)
-    expect(select.get('.placeholder').text()).toBe('请选择已启动的实例')
-    await select.get('.select-trigger').trigger('click')
-
-    expect(select.get('.ui-select').classes()).toContain('open')
-    const dropdown = document.body.querySelector('.select-dropdown')
-    expect(dropdown?.querySelector('.select-search')).toBeNull()
-    expect(dropdown?.querySelector('input')).toBeNull()
-    const option = dropdown?.querySelector<HTMLElement>('.select-option')
-    expect(option?.textContent).toContain(runningInstance.name)
-    option?.click()
+    expect(select.text()).toBe('请选择已启动的实例')
+    const nativeSelect = select.getComponent(NSelect)
+    expect(nativeSelect.props('filterable')).toBe(false)
+    expect(nativeSelect.props('options')?.[0]?.label).toBe(runningInstance.name)
+    nativeSelect.vm.$emit('update:value', runningInstance.id)
     await wrapper.vm.$nextTick()
-
     expect(select.props('modelValue')).toBe(runningInstance.id)
-    expect(select.get('.selected-text').text()).toBe(runningInstance.name)
-    expect(select.get('.ui-select').classes()).not.toContain('open')
+    expect(select.text()).toContain(runningInstance.name)
   })
 
   it('运行实例启动和退出时同步更新禁用状态与占位文案', async () => {
@@ -290,18 +286,17 @@ describe('ConnectRoomTab', () => {
     onChanged()
     await flushPromises()
     expect(select.props('disabled')).toBe(false)
-    expect(select.get('.placeholder').text()).toBe('请选择已启动的实例')
-    await select.get('.select-trigger').trigger('click')
-    document.body.querySelector<HTMLElement>('.select-option')?.click()
+    expect(select.text()).toBe('请选择已启动的实例')
+    select.getComponent(NSelect).vm.$emit('update:value', runningInstance.id)
     await wrapper.vm.$nextTick()
 
     mocks.listRunningInstances.mockResolvedValue([])
     onChanged()
     await flushPromises()
     expect(select.props('disabled')).toBe(true)
-    expect(select.get('.placeholder').text()).toBe('暂无运行实例')
-    await select.get('.select-trigger').trigger('click')
-    expect(select.get('.ui-select').classes()).not.toContain('open')
+    expect(select.text()).toBe('暂无运行实例')
+    await select.get('.n-base-selection-label').trigger('click')
+    expect(select.find('.n-base-selection--active').exists()).toBe(false)
   })
 
   it.each([
@@ -319,7 +314,7 @@ describe('ConnectRoomTab', () => {
 
     i18n.global.locale.value = locale
     await wrapper.vm.$nextTick()
-    expect(wrapper.getComponent(UiSelect).get('.placeholder').text()).toBe(placeholder)
+    expect(wrapper.getComponent(UiSelect).text()).toBe(placeholder)
   })
 
   it('加入房间成功后主动刷新一次成员', async () => {

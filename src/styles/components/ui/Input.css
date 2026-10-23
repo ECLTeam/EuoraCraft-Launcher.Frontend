@@ -8,13 +8,14 @@
 .ui-input {
   flex: 1;
   width: 100%;
-  height: 29px;
-  padding: 0 9px;
+  height: var(--ecl-control-height);
+  min-width: 0;
+  padding: 0 12px;
   border: 1px solid var(--control-border);
   border-radius: var(--r-sm);
   background: var(--control-bg);
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 14px;
   outline: none;
   transition:
     border-color var(--duration-fast) var(--ease-emphasized),
@@ -35,10 +36,22 @@
   box-shadow: var(--control-ring);
 }
 
-.ui-input:disabled,
-.ui-input:read-only {
+.ui-input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.ui-input:read-only:not(:disabled) {
+  cursor: text;
+}
+
+.input-sm .ui-input {
+  height: var(--ecl-control-height-sm);
+  font-size: 13px;
+}
+
+.input-lg .ui-input {
+  height: var(--ecl-control-height-lg);
 }
 
 .ui-input-wrapper:has(.prefix-icon) .ui-input {

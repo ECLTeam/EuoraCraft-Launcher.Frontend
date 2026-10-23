@@ -1652,7 +1652,11 @@
     "select": "Auswählen",
     "clear": "Leeren",
     "more": "Mehr",
-    "reset": "Zurücksetzen"
+    "reset": "Zurücksetzen",
+    "selectPlaceholder": "Bitte auswählen",
+    "noOptions": "Keine Optionen",
+    "clearInput": "Eingabe leeren",
+    "versionType": "Versionstyp"
   },
   "agreement": {
     "title": "Nutzungsvereinbarung",

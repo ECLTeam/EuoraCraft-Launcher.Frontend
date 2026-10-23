@@ -1649,7 +1649,11 @@
     "select": "Выбрать",
     "clear": "Очистить",
     "more": "Ещё",
-    "reset": "Сбросить"
+    "reset": "Сбросить",
+    "selectPlaceholder": "Выберите вариант",
+    "noOptions": "Нет вариантов",
+    "clearInput": "Очистить поле",
+    "versionType": "Тип версии"
   },
   "agreement": {
     "title": "Пользовательское соглашение",

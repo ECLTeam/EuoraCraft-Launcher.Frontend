@@ -2,7 +2,7 @@
   background: var(--card-bg);
   backdrop-filter: var(--ecl-surface-backdrop);
   -webkit-backdrop-filter: var(--ecl-surface-backdrop);
-  border-radius: var(--r-sm);
+  border-radius: var(--ecl-radius-card);
   border: 1px solid var(--ecl-border);
   overflow: hidden;
   display: flex;

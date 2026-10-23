@@ -147,23 +147,6 @@
   transform: translateX(24px);
 }
 
-/* ── 下拉选择框 ───────────────────── */
-.select-dropdown-enter-active {
-  transition:
-    opacity var(--duration-fast) var(--ease-emphasized-decelerate),
-    transform var(--duration-fast) var(--ease-emphasized-decelerate);
-}
-.select-dropdown-leave-active {
-  transition:
-    opacity var(--duration-fast) var(--ease-emphasized-accelerate),
-    transform var(--duration-fast) var(--ease-emphasized-accelerate);
-}
-.select-dropdown-enter-from,
-.select-dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
 /* ── 信息卡片切换 ─────────────────── */
 .info-fade-enter-active {
   transition:
