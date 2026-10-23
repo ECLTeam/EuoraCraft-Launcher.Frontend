@@ -173,7 +173,11 @@ async function persistProfile() {
   const queued = profileSaveSession.enqueue(key, form, async (submitted) => {
     const payload = profilePayload(submitted)
     await instanceProfileApi.patch(target, payload)
-    Object.assign(version, payload, { displayName: submitted.alias })
+    // 保存期间列表项可能已被 store 用新对象替换（例如刚执行过「恢复」），
+    // 必须写入当前引用，否则界面上的别名、标签与排序不会更新。
+    if (loadedProfileVersion && instanceKey(loadedProfileVersion) === key) {
+      Object.assign(loadedProfileVersion, payload, { displayName: submitted.alias })
+    }
   })
   latestProfileSave = queued
   try {
@@ -235,6 +239,17 @@ watch(
     }
   },
   { immediate: true }
+)
+
+// 重置字段等操作会让 store 用新对象替换列表项；同步引用，避免后续保存
+// 写入已脱离 store 的旧对象。表单内容不重载，以免覆盖用户正在编辑的输入。
+watch(
+  () => props.version,
+  (next) => {
+    if (!next) return
+    if (loadedProfileVersion && instanceKey(next) !== instanceKey(loadedProfileVersion)) return
+    loadedProfileVersion = next
+  }
 )
 
 // 个性化表单：修改即自动保存（300ms 防抖）

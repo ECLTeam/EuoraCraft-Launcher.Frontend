@@ -208,6 +208,16 @@ export const useInstanceStore = defineStore('versions', () => {
     const resolvedPath = selected?.gamePath || gamePath || currentGamePath.value
     selectedVersion.value = selected?.id || versionId
     currentGamePath.value = resolvedPath
+    // 跨游戏目录选择时必须同步全局 active_path，否则下次 loadAll 会按旧路径
+    // 把选中项改回去，用户的选择会在切换页面后静默丢失。
+    if (resolvedPath && resolvedPath !== prevPath) {
+      const settingsStore = useSettingsStore()
+      if (settingsStore.game.active_path !== resolvedPath) {
+        void settingsStore.patchGame({ active_path: resolvedPath }).catch((error) => {
+          console.warn('[instanceStore] 保存 active_path 失败:', error)
+        })
+      }
+    }
     // 值未变化时跳过写入，避免每次页面加载都重写 ecl.json
     if (versionId && resolvedPath && (versionId !== prevId || resolvedPath !== prevPath)) {
       void instancePathConfigApi.setActiveVersion(resolvedPath, versionId).catch((error) => {

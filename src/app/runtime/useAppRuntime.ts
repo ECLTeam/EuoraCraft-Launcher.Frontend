@@ -290,8 +290,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         )
           return
         if (payload && typeof payload === 'object' && 'game_path' in payload && typeof payload.game_path === 'string') {
+          // 复制与导入类命令同时带源 id 和结果 id，操作完成后的刷新应作用在结果实例上。
           const versionId =
-            'version_id' in payload ? payload.version_id : 'new_version_id' in payload ? payload.new_version_id : ''
+            'new_version_id' in payload ? payload.new_version_id : 'version_id' in payload ? payload.version_id : ''
           operationStore.targets[data.operationId] = {
             game_path: payload.game_path,
             version_id: typeof versionId === 'string' ? versionId : '',

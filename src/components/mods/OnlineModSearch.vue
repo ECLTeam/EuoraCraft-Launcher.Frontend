@@ -1384,6 +1384,15 @@ watch(
     searchPagesCriteria = ''
     searchRequestId++
     loading.value = false
+    // 筛选或排序变化后旧结果不再对应当前条件，必须清空并重新查询第一页，
+    // 否则列表内容与控件、分页状态互相矛盾。
+    const hadResults = results.value.length > 0
+    results.value = []
+    page.value = 1
+    total.value = 0
+    knownPageCount.value = 0
+    hasMore.value = false
+    if (hadResults && query.value.trim()) void fetchPage(1, true)
   }
 )
 

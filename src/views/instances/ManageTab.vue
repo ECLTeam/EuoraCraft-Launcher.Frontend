@@ -345,10 +345,14 @@ const scanCurrentPath = async (force = false) => {
 const handleRefresh = async () => {
   const isCurrent = selectionRequests.begin()
   refreshLoading.value = true
-  await scanCurrentPath(true)
-  if (!isCurrent()) return
-  if (currentPath.value) await instanceStore.switchPath(currentPath.value.path, { forceConfig: true })
-  refreshLoading.value = false
+  try {
+    await scanCurrentPath(true)
+    if (!isCurrent()) return
+    if (currentPath.value) await instanceStore.switchPath(currentPath.value.path, { forceConfig: true })
+  } finally {
+    // 路径被编辑打断刷新时也必须复位，否则刷新按钮会一直保持禁用。
+    refreshLoading.value = false
+  }
 }
 
 const handleProfileChanged = async () => {

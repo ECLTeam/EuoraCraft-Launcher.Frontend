@@ -394,9 +394,11 @@ function coverStyle(version: ScannedVersion) {
   return { '--instance-cover': `linear-gradient(rgba(20,24,32,.78),rgba(20,24,32,.9)), url(${JSON.stringify(cover)})` }
 }
 
+let coverRequestId = 0
 watch(
   () => props.versions.map((version) => `${instanceKey(version)}:${version.cover?.value || ''}`).join('|'),
   async () => {
+    const requestId = ++coverRequestId
     const next: Record<string, string> = {}
     await Promise.all(
       props.versions.map(async (version) => {
@@ -405,7 +407,8 @@ watch(
         if (url) next[instanceKey(version)] = url
       })
     )
-    coverUrls.value = next
+    // 连续更换封面时旧回调可能后返回，只有最后一次请求允许写入。
+    if (requestId === coverRequestId) coverUrls.value = next
   },
   { immediate: true }
 )

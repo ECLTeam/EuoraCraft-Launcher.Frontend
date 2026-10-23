@@ -65,13 +65,9 @@ import type {
   ModInfo,
   ModInstallResult,
   ModItem,
-  ModpackTypeInfo,
   ModSearchResult,
   ModSourceConfig,
   ModVersion,
-  ResourcePack,
-  SaveEntry,
-  ShaderPack,
 } from '@/types/mods'
 import type {
   PluginInfo,
@@ -625,31 +621,6 @@ export interface CommandPayloadMap {
   remove_mod: { game_path: string; filename: string }
   open_mods_folder: { game_path: string }
 
-  // 整合包 / 资源
-  detect_modpack_type: { file_path: string }
-  import_modpack: {
-    file_path: string
-    game_path?: string
-    version_name?: string
-  }
-  export_modpack: {
-    game_path?: string
-    output_path?: string
-    format?: string
-    name?: string
-    version?: string
-    author?: string
-  }
-  list_resourcepacks: { game_path?: string }
-  list_shaderpacks: { game_path?: string }
-  list_saves: { game_path?: string }
-  remove_resourcepack: { game_path: string; filename: string }
-  remove_shaderpack: { game_path: string; filename: string }
-  delete_save: { game_path: string; save_name: string }
-  open_resourcepacks_folder: { game_path: string }
-  open_shaderpacks_folder: { game_path: string }
-  open_saves_folder: { game_path: string }
-
   // 在线 Mod 搜索
   search_mods: {
     query: string
@@ -940,18 +911,6 @@ export const COMMAND_NAMES = {
   add_mod: 'add_mod',
   remove_mod: 'remove_mod',
   open_mods_folder: 'open_mods_folder',
-  detect_modpack_type: 'detect_modpack_type',
-  import_modpack: 'import_modpack',
-  export_modpack: 'export_modpack',
-  list_resourcepacks: 'list_resourcepacks',
-  list_shaderpacks: 'list_shaderpacks',
-  list_saves: 'list_saves',
-  remove_resourcepack: 'remove_resourcepack',
-  remove_shaderpack: 'remove_shaderpack',
-  delete_save: 'delete_save',
-  open_resourcepacks_folder: 'open_resourcepacks_folder',
-  open_shaderpacks_folder: 'open_shaderpacks_folder',
-  open_saves_folder: 'open_saves_folder',
   search_mods: 'search_mods',
   mod_source_config: 'mod_source_config',
   get_mod_info: 'get_mod_info',
@@ -1241,19 +1200,6 @@ export interface CommandResponseMap {
   add_mod: { filename: string }
   remove_mod: void
   open_mods_folder: SelectResult
-
-  detect_modpack_type: ModpackTypeInfo
-  import_modpack: void
-  export_modpack: void
-  list_resourcepacks: ResourcePack[]
-  list_shaderpacks: ShaderPack[]
-  list_saves: SaveEntry[]
-  remove_resourcepack: void
-  remove_shaderpack: void
-  delete_save: void
-  open_resourcepacks_folder: void
-  open_shaderpacks_folder: void
-  open_saves_folder: void
 
   search_mods: ModSearchResult
   mod_source_config: ModSourceConfig

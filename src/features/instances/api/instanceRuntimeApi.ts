@@ -9,11 +9,26 @@ import type {
 } from '@/types/instances'
 
 let listRequest: Promise<GameInstance[]> | null = null
+// 运行实例的变化版本号：变化事件与停止操作都会递增，用于丢弃已经过期的列表结果。
+let listGeneration = 0
+
+function invalidateRunningInstances(): void {
+  listGeneration++
+  listRequest = null
+}
 
 function listRunningInstances(): Promise<GameInstance[]> {
   if (listRequest) return listRequest
 
-  const request = backend.command('game_instances').then((response) => assertSuccess(response, '读取运行实例') ?? [])
+  const generation = listGeneration
+  const request = backend.command('game_instances').then((response) => {
+    if (generation !== listGeneration) {
+      // 请求期间收到了变化事件或停止操作，本次快照已经过期，重新读取。
+      listRequest = null
+      return listRunningInstances()
+    }
+    return assertSuccess(response, '读取运行实例') ?? []
+  })
   listRequest = request
   const removeRequest = () => {
     if (listRequest === request) listRequest = null
@@ -27,6 +42,8 @@ export const instanceRuntimeApi = {
 
   async stop(instanceId: string): Promise<void> {
     assertSuccess(await backend.command('game_instance_stop', { instance_id: instanceId }), '停止实例')
+    // 停止后让进行中的列表请求失效，避免旧快照把已停止的实例又写回列表。
+    invalidateRunningInstances()
   },
 
   async getStats(gamePath: string, versionId: string): Promise<VersionRunStats> {
@@ -57,6 +74,10 @@ export const instanceRuntimeApi = {
   },
 
   onChanged(handler: (payload: GameInstancesChangedEvent) => void): () => void {
-    return backend.on('game:instances_changed', handler)
+    return backend.on('game:instances_changed', (payload) => {
+      // 事件先让进行中的请求失效，再由调用方重新读取，保证列表反映最新状态。
+      invalidateRunningInstances()
+      handler(payload)
+    })
   },
 }

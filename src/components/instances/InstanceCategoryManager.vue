@@ -22,6 +22,14 @@
         <UiButton v-if="editingId" variant="secondary" size="sm" @click="resetForm">取消</UiButton>
       </div>
     </div>
+    <ConfirmDialog
+      v-model:visible="confirmVisible"
+      title="删除分类"
+      content="该分类下的实例会变为「未分类」，此操作无法撤销。"
+      danger
+      :loading="deleting"
+      @confirm="confirmDeleteCategory"
+    />
   </Modal>
 </template>
 
@@ -29,6 +37,7 @@
 import { ref, watch } from 'vue'
 import { useResourceSnapshot } from '@/app/data/useResourceSnapshot'
 import { queryKeys } from '@/app/queryKeys'
+import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import Modal from '@/components/modals/Modal.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -81,11 +90,29 @@ async function saveCategory() {
   }
 }
 
-async function deleteCategory(category: InstanceCategory) {
-  await instanceProfileApi.deleteCategory(category.id)
-  if (editingId.value === category.id) resetForm()
-  await loadCategories()
-  emit('changed')
+const confirmVisible = ref(false)
+const deleting = ref(false)
+const pendingCategory = ref<InstanceCategory | null>(null)
+
+function deleteCategory(category: InstanceCategory) {
+  pendingCategory.value = category
+  confirmVisible.value = true
+}
+
+async function confirmDeleteCategory() {
+  const category = pendingCategory.value
+  if (!category) return
+  deleting.value = true
+  try {
+    await instanceProfileApi.deleteCategory(category.id)
+    if (editingId.value === category.id) resetForm()
+    await loadCategories()
+    emit('changed')
+    confirmVisible.value = false
+    pendingCategory.value = null
+  } finally {
+    deleting.value = false
+  }
 }
 </script>
 

@@ -206,6 +206,30 @@ const types = computed(() =>
   props.allowedTypes?.length ? allTypes.filter((t) => props.allowedTypes!.includes(t.value)) : allTypes
 )
 const target = computed(() => workspaceTarget(props.version))
+const localWorldOptions = ref<Array<{ label: string; value: string }>>([])
+// 数据包依赖存档选择，而父组件的 worldOptions 只在「存档」标签页打开后才填充；
+// 直接进入数据包标签时必须自己补齐，否则下拉为空、资源列表恒为空。
+const worldOptions = computed(() => (props.worldOptions?.length ? props.worldOptions : localWorldOptions.value))
+let worldOptionsRequestId = 0
+async function ensureWorldOptions() {
+  if (props.worldOptions?.length || localWorldOptions.value.length) return
+  const requestId = ++worldOptionsRequestId
+  try {
+    const worlds = await instanceWorkspaceApi.worlds(target.value)
+    if (requestId === worldOptionsRequestId) {
+      localWorldOptions.value = worlds.map((world) => ({ label: world.name, value: world.id }))
+    }
+  } catch {
+    if (requestId === worldOptionsRequestId) localWorldOptions.value = []
+  }
+}
+watch(
+  () => resourceType.value,
+  (type) => {
+    if (type === 'datapack') void ensureWorldOptions()
+  },
+  { immediate: true }
+)
 const filtered = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase()
   return needle
