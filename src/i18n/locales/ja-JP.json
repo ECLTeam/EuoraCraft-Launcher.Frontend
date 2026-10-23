@@ -174,6 +174,7 @@
     "username": "ユーザー名",
     "enterUsername": "ユーザー名を入力",
     "advancedOptions": "詳細オプション",
+    "offlineUuidPreview": "オフライン UUID",
     "customUuid": "カスタム UUID",
     "customUuidPlaceholder": "32 桁または標準形式の UUID を入力",
     "customUuidHint": "空欄の場合、ユーザー名からオフライン UUID が自動生成されます。",

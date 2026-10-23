@@ -19,6 +19,7 @@ vi.mock('@/features/accounts/api/accountsApi', () => ({
     list: vi.fn(),
     current: vi.fn(),
     addOffline: vi.fn(),
+    previewOfflineUuid: vi.fn(),
     addAuthlib: vi.fn(),
     selectAuthlibProfile: vi.fn(),
     resolveAuthlibServer: vi.fn(),
@@ -187,6 +188,64 @@ describe('useAccountManager Microsoft login', () => {
     expect(account.offlineUuidError).toBe('game.invalidOfflineUuid')
     expect(accountsApi.addOffline).not.toHaveBeenCalled()
     expect(mocks.error).toHaveBeenCalledWith('game.invalidOfflineUuid')
+  })
+
+  it('输入用户名后按防抖显示派生的离线 UUID', async () => {
+    vi.useFakeTimers()
+    try {
+      vi.mocked(accountsApi.previewOfflineUuid).mockResolvedValue({
+        player_name: 'Steve',
+        uuid: '5627dd98-e6be-3c21-b8a8-e92344183641',
+      })
+      const account = useAccountManager((key) => key)
+
+      account.newOfflineUsername = 'Steve'
+      expect(accountsApi.previewOfflineUuid).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(300)
+
+      expect(accountsApi.previewOfflineUuid).toHaveBeenCalledWith('Steve')
+      expect(account.offlineUuidPreview).toBe('5627dd98-e6be-3c21-b8a8-e92344183641')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('清空用户名后不再显示离线 UUID 预览', async () => {
+    vi.useFakeTimers()
+    try {
+      vi.mocked(accountsApi.previewOfflineUuid).mockResolvedValue({
+        player_name: 'Steve',
+        uuid: '5627dd98-e6be-3c21-b8a8-e92344183641',
+      })
+      const account = useAccountManager((key) => key)
+
+      account.newOfflineUsername = 'Steve'
+      await vi.advanceTimersByTimeAsync(300)
+      expect(account.offlineUuidPreview).toBe('5627dd98-e6be-3c21-b8a8-e92344183641')
+
+      account.newOfflineUsername = ''
+      await vi.advanceTimersByTimeAsync(300)
+      expect(account.offlineUuidPreview).toBe('')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('填写自定义 UUID 时预览显示规范化后的自定义值', () => {
+    const account = useAccountManager((key) => key)
+    account.newOfflineUsername = 'CustomPlayer'
+    account.newOfflineUuid = '0123456789ABCDEF0123456789ABCDEF'
+
+    expect(account.offlineUuidPreview).toBe('01234567-89ab-cdef-0123-456789abcdef')
+  })
+
+  it('自定义 UUID 格式无效时不显示预览', () => {
+    const account = useAccountManager((key) => key)
+    account.newOfflineUsername = 'CustomPlayer'
+    account.newOfflineUuid = 'invalid-uuid'
+
+    expect(account.offlineUuidPreview).toBe('')
   })
 
   it('completes login when the backend pushes a ready event', async () => {

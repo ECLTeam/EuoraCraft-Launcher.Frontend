@@ -22,6 +22,25 @@ describe('accountsApi validation', () => {
     expect(mocks.command).not.toHaveBeenCalled()
   })
 
+  it('离线账户 UUID 留空时通过校验，交由后端按用户名派生', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: { id: 'offline:uuid' } })
+
+    await accountsApi.addOffline('Steve')
+
+    expect(mocks.command).toHaveBeenCalledWith('accounts_add_offline', {
+      username: 'Steve',
+      uuid: undefined,
+      skin: undefined,
+    })
+  })
+
+  it('预览离线 UUID 时用户名必填', async () => {
+    mocks.command.mockResolvedValue({ success: true, data: {} })
+
+    await expect(accountsApi.previewOfflineUuid('')).rejects.toThrow(/用户名不能为空/)
+    expect(mocks.command).not.toHaveBeenCalled()
+  })
+
   it('外置登录缺少邮箱时校验失败，不发起 IPC', async () => {
     mocks.command.mockResolvedValue({ success: true, data: {} })
     await expect(accountsApi.addAuthlib('https://auth.example.com', '', 'pass')).rejects.toThrow(/邮箱不能为空/)

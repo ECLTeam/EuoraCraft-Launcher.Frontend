@@ -182,6 +182,7 @@
     "username": "用户名",
     "enterUsername": "输入用户名",
     "advancedOptions": "高级选项",
+    "offlineUuidPreview": "离线 UUID",
     "customUuid": "自定义 UUID",
     "customUuidPlaceholder": "输入 32 位或标准格式 UUID",
     "customUuidHint": "留空时将根据用户名自动生成离线 UUID。",

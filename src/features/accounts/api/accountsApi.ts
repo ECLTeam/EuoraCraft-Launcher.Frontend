@@ -16,6 +16,7 @@ import type {
   MicrosoftLoginStatusEvent,
   MicrosoftPollData,
   MinecraftAccount,
+  OfflineUuidPreview,
   SkinModel,
   WardrobeImportResult,
   WardrobeItem,
@@ -44,13 +45,20 @@ export const accountsApi = {
     assertParams(
       object({
         username: pipe(string(), minLength(1, '用户名不能为空'), nonEmpty('用户名不能为空')),
-        uuid: pipe(string(), nonEmpty('UUID 不能为空')),
+        // 留空由后端按用户名派生离线 UUID，这里只约束类型，不要求非空。
+        uuid: string(),
       }),
       { username, uuid: uuid ?? '' },
       '添加离线账户'
     )
 
     return assertSuccess(await backend.command('accounts_add_offline', { username, uuid, skin }), '添加离线账户')
+  },
+
+  async previewOfflineUuid(username: string): Promise<OfflineUuidPreview> {
+    assertParams(object({ username: pipe(string(), nonEmpty('用户名不能为空')) }), { username }, '预览离线 UUID')
+
+    return assertSuccess(await backend.command('accounts_preview_offline_uuid', { username }), '预览离线 UUID')
   },
 
   async defaultSkins(): Promise<DefaultSkin[]> {

@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia'
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, watch } from 'vue'
 import { notifyLauncherPopup } from '@/app/runtime/useLauncherPopupQueue'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import type {
@@ -20,6 +20,9 @@ import type { AutoCompleteOption } from 'naive-ui'
 export type Account = MinecraftAccount
 const OFFLINE_UUID_PATTERN =
   /^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/
+
+/** 用户名停止输入后多久请求派生 UUID，与项目其他输入类防抖保持一致。 */
+const offlineUuidPreviewDelayMs = 300
 
 export function useAccountManager(t: (key: string, ...args: unknown[]) => string) {
   const message = useLauncherMessage()
@@ -45,6 +48,69 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     const value = newOfflineUuid.value.trim()
     return value && !OFFLINE_UUID_PATTERN.test(value) ? t('game.invalidOfflineUuid') : ''
   })
+
+  // 用户名派生 UUID 的预览值。后端是派生规则的唯一权威，前端只展示结果。
+  const derivedOfflineUuid = ref('')
+  let derivedOfflineUuidTimer: ReturnType<typeof setTimeout> | undefined
+  let derivedOfflineUuidRequestId = 0
+
+  /**
+   * 将 32 位紧凑 UUID 还原为标准带连字符形式，用于和实际落盘结果一致。
+   */
+  function formatOfflineUuid(value: string): string {
+    const compact = value.replaceAll('-', '').toLowerCase()
+    if (compact.length !== 32) return value
+    return [
+      compact.slice(0, 8),
+      compact.slice(8, 12),
+      compact.slice(12, 16),
+      compact.slice(16, 20),
+      compact.slice(20),
+    ].join('-')
+  }
+  async function loadDerivedOfflineUuid(username: string) {
+    const requestId = (derivedOfflineUuidRequestId += 1)
+    try {
+      const preview = await accountStore.previewOfflineUuid(username)
+      if (requestId !== derivedOfflineUuidRequestId) return
+      if (newOfflineUsername.value.trim() !== username) return
+      derivedOfflineUuid.value = preview.uuid
+    } catch (reason) {
+      if (requestId !== derivedOfflineUuidRequestId) return
+      // 预览失败不阻断添加流程，清空后界面回退到通用提示。
+      console.warn('[AccountManager] 预览离线 UUID 失败:', reason)
+      derivedOfflineUuid.value = ''
+    }
+  }
+
+  function scheduleDerivedOfflineUuid() {
+    if (derivedOfflineUuidTimer !== undefined) {
+      clearTimeout(derivedOfflineUuidTimer)
+      derivedOfflineUuidTimer = undefined
+    }
+
+    const username = newOfflineUsername.value.trim()
+    if (!username) {
+      derivedOfflineUuidRequestId += 1
+      derivedOfflineUuid.value = ''
+      return
+    }
+
+    derivedOfflineUuidTimer = setTimeout(() => {
+      derivedOfflineUuidTimer = undefined
+      void loadDerivedOfflineUuid(username)
+    }, offlineUuidPreviewDelayMs)
+  }
+
+  watch(newOfflineUsername, scheduleDerivedOfflineUuid)
+
+  // 自定义 UUID 有效时优先展示它，否则展示按用户名派生的结果。
+  const offlineUuidPreview = computed(() => {
+    const customUuid = newOfflineUuid.value.trim()
+    if (customUuid) return offlineUuidError.value ? '' : formatOfflineUuid(customUuid)
+    return derivedOfflineUuid.value
+  })
+
   const addingOffline = ref(false)
 
   // 离线账户默认皮肤（resources/Skins），新增与更换时共用。
@@ -552,6 +618,12 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
   function reset() {
     const shouldCancelMicrosoftLogin =
       showMicrosoftLoginModal.value || startingMicrosoftLogin.value || completingMicrosoftLogin.value
+    if (derivedOfflineUuidTimer !== undefined) {
+      clearTimeout(derivedOfflineUuidTimer)
+      derivedOfflineUuidTimer = undefined
+    }
+    derivedOfflineUuidRequestId += 1
+    derivedOfflineUuid.value = ''
     showAccountModal.value = false
     showMicrosoftLoginModal.value = false
     showDeleteConfirmModal.value = false
@@ -573,6 +645,7 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     newOfflineUsername,
     newOfflineUuid,
     offlineUuidError,
+    offlineUuidPreview,
     addingOffline,
     offlineSkins,
     offlineSkinsLoading,

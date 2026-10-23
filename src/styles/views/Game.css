@@ -498,6 +498,22 @@
   border-radius: var(--r-sm);
 }
 
+.offline-uuid-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.offline-uuid-preview code {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
 .offline-skin-field {
   display: flex;
   flex-direction: column;

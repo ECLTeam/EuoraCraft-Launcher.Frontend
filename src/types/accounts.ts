@@ -51,6 +51,11 @@ export interface DefaultSkin {
   skinUrl: string
 }
 
+export interface OfflineUuidPreview {
+  player_name: string
+  uuid: string
+}
+
 export interface MicrosoftCape {
   id: string
   name?: string
