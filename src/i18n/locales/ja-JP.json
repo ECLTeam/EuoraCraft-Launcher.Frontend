@@ -2313,6 +2313,8 @@
     "checkUpdates": "更新を確認",
     "add": "既存のJavaを追加",
     "search": "バージョン、ベンダー、パスで検索",
+    "showPath": "完全なパスを表示",
+    "moreActions": "Java {version} のその他の操作",
     "scanning": "Javaをスキャン中",
     "empty": "登録されたJavaがありません。スキャンまたはダウンロードしてください。",
     "noMatch": "一致する Java がありません",

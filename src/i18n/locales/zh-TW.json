@@ -2196,6 +2196,8 @@
     "checkUpdates": "檢查更新",
     "add": "新增現有 Java",
     "search": "搜尋版本、供應商或路徑",
+    "showPath": "查看完整路徑",
+    "moreActions": "Java {version} 的更多操作",
     "scanning": "正在掃描 Java",
     "empty": "尚未登記 Java，可掃描或下載",
     "noMatch": "沒有符合的 Java",

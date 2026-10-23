@@ -2332,6 +2332,8 @@
     "checkUpdates": "Check updates",
     "add": "Add existing Java",
     "search": "Search version, vendor or path",
+    "showPath": "Show full path",
+    "moreActions": "More actions for Java {version}",
     "scanning": "Scanning Java",
     "empty": "No registered Java. Scan or download a runtime.",
     "noMatch": "No matching Java runtimes",

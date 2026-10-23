@@ -2227,6 +2227,8 @@
     "checkUpdates": "检查更新",
     "add": "添加现有 Java",
     "search": "搜索版本、供应商或路径",
+    "showPath": "查看完整路径",
+    "moreActions": "Java {version} 的更多操作",
     "scanning": "正在扫描 Java",
     "empty": "没有登记的 Java，可扫描或下载",
     "noMatch": "没有匹配的 Java",

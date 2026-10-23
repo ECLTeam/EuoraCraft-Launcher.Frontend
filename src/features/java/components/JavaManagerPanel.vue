@@ -20,13 +20,13 @@
         </button>
       </div>
       <div v-if="view === 'installed'" class="java-manager-actions">
-        <UiButton variant="ghost" icon="refresh" :loading="store.isLoading" @click="load(true)">{{
+        <UiButton size="sm" variant="ghost" icon="refresh" :loading="store.isLoading" @click="load(true)">{{
           t('javaManager.rescan')
         }}</UiButton>
-        <UiButton variant="ghost" icon="download" :loading="isCheckingUpdates" @click="checkUpdates">{{
+        <UiButton size="sm" variant="ghost" icon="download" :loading="isCheckingUpdates" @click="checkUpdates">{{
           t('javaManager.checkUpdates')
         }}</UiButton>
-        <UiButton variant="secondary" icon="plus" :loading="isRegistering" @click="register">{{
+        <UiButton size="sm" variant="secondary" icon="plus" :loading="isRegistering" @click="register">{{
           t('javaManager.add')
         }}</UiButton>
       </div>
@@ -66,18 +66,17 @@
             t('javaManager.downloadJava')
           }}</UiButton>
         </UiEmptyState>
-        <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
-          <div class="java-runtime-copy">
-            <strong
-              >Java {{ runtime.majorVersion || '?' }} · {{ runtime.vendor || t('javaManager.unknownVendor') }} ·
-              {{ runtime.runtimeKind }}</strong
-            >
-            <span
-              >{{ runtime.fullVersion }} · {{ runtime.architecture }} ·
-              {{ t(`javaManager.origins.${runtime.origin}`) }}</span
-            >
-            <small class="java-runtime-path" :title="runtime.executablePath">{{ runtime.executablePath }}</small>
-            <div class="java-runtime-tags">
+        <div v-else class="java-runtime-list">
+          <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
+            <div class="java-runtime-heading">
+              <strong>Java {{ runtime.majorVersion || '?' }}</strong>
+              <span>{{ runtime.vendor || t('javaManager.unknownVendor') }} · {{ runtime.runtimeKind }}</span>
+            </div>
+            <div class="java-runtime-metadata">
+              <span
+                >{{ runtime.fullVersion }} · {{ runtime.architecture }} ·
+                {{ t(`javaManager.origins.${runtime.origin}`) }}</span
+              >
               <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
                 t(`javaManager.validation.${runtime.validationStatus}`)
               }}</NTag>
@@ -85,56 +84,61 @@
               <NTag v-if="runtime.isInUse" size="small" type="info">{{
                 t(runtime.usageUnknown ? 'javaManager.usageUnknown' : 'javaManager.inUse')
               }}</NTag>
-              <span v-if="runtime.references?.length" class="java-runtime-references">{{
+              <span v-if="runtime.references?.length">{{
                 t('javaManager.referenced', { count: runtime.references.length })
               }}</span>
             </div>
-          </div>
-          <div class="java-runtime-actions">
-            <UiButton
-              variant="secondary"
-              size="sm"
-              :disabled="!canUse(runtime) || isActing"
-              @click="useRuntime(runtime)"
-              >{{ t(selectable ? 'javaManager.use' : 'javaManager.useGlobal') }}</UiButton
-            >
-            <UiButton variant="ghost" size="sm" :disabled="isActing" @click="toggleRuntime(runtime)">{{
-              t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')
-            }}</UiButton>
-            <UiButton
-              v-if="runtime.validationStatus !== 'valid'"
-              variant="secondary"
-              size="sm"
-              :disabled="isRegistering"
-              @click="register"
-              >{{ t('javaManager.relocate') }}</UiButton
-            >
-            <UiButton
-              v-if="updates[runtime.runtimeId]"
-              variant="secondary"
-              size="sm"
-              :disabled="isActing"
-              @click="prepareInstall(updates[runtime.runtimeId]!)"
-              >{{ t('javaManager.update') }}</UiButton
-            >
-            <UiButton
-              size="sm"
-              variant="ghost"
-              icon="folder"
-              :aria-label="t('javaManager.openFolder')"
-              :title="t('javaManager.openFolder')"
-              @click="openFolder(runtime)"
-            />
-            <UiButton
-              v-if="runtime.origin !== 'system'"
-              size="sm"
-              variant="danger"
-              :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
-              @click="confirmRemoval(runtime)"
-              >{{ t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget') }}</UiButton
-            >
-          </div>
-        </article>
+            <details class="java-runtime-location">
+              <summary :title="runtime.executablePath" :aria-label="t('javaManager.showPath')">
+                <UiIcon name="folder" :size="14" />
+                <span class="java-runtime-path">{{ runtime.executablePath }}</span>
+                <UiIcon class="java-runtime-path-arrow" name="chevron-down" :size="14" />
+              </summary>
+              <div class="java-runtime-full-path">{{ runtime.executablePath }}</div>
+            </details>
+            <div class="java-runtime-actions">
+              <UiButton
+                variant="secondary"
+                size="sm"
+                :disabled="!canUse(runtime) || isActing"
+                @click="useRuntime(runtime)"
+                >{{ t(selectable ? 'javaManager.use' : 'javaManager.useGlobal') }}</UiButton
+              >
+              <UiButton
+                v-if="runtime.validationStatus !== 'valid'"
+                variant="secondary"
+                size="sm"
+                :disabled="isRegistering"
+                @click="register"
+                >{{ t('javaManager.relocate') }}</UiButton
+              >
+              <UiButton
+                v-if="updates[runtime.runtimeId]"
+                variant="secondary"
+                size="sm"
+                :disabled="isActing"
+                @click="prepareInstall(updates[runtime.runtimeId]!)"
+                >{{ t('javaManager.update') }}</UiButton
+              >
+              <NDropdown
+                trigger="click"
+                placement="bottom-end"
+                :options="runtimeActions(runtime)"
+                to="#app"
+                @select="handleRuntimeAction($event, runtime)"
+              >
+                <UiButton
+                  class="java-runtime-more"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="isActing"
+                  :aria-label="t('javaManager.moreActions', { version: runtime.fullVersion })"
+                  >{{ t('common.more') }}<UiIcon name="chevron-down" :size="14"
+                /></UiButton>
+              </NDropdown>
+            </div>
+          </article>
+        </div>
       </template>
 
       <template v-else>
@@ -229,8 +233,8 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NInput, NProgress, NSelect, NTag } from 'naive-ui'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { NAlert, NDropdown, NInput, NProgress, NSelect, NTag, type DropdownOption } from 'naive-ui'
+import { computed, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
@@ -421,6 +425,43 @@ async function openFolder(runtime: JavaRuntime) {
     error.value = getErrorMessage(cause)
   }
 }
+
+function runtimeActions(runtime: JavaRuntime): DropdownOption[] {
+  const options: DropdownOption[] = [
+    {
+      key: 'toggle',
+      label: t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable'),
+      disabled: isActing.value,
+    },
+    { key: 'open', label: t('javaManager.openFolder'), disabled: isActing.value },
+  ]
+  if (runtime.origin !== 'system') {
+    options.push(
+      { key: 'remove-divider', type: 'divider' },
+      {
+        key: 'remove',
+        label: () =>
+          h(
+            'span',
+            { style: { color: 'var(--error)' } },
+            t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')
+          ),
+        disabled: isActing.value || runtime.isInUse || !!runtime.references?.length,
+      }
+    )
+  }
+  return options
+}
+
+function handleRuntimeAction(action: string, runtime: JavaRuntime) {
+  if (isActing.value) return
+  if (action === 'toggle') void toggleRuntime(runtime)
+  else if (action === 'open') void openFolder(runtime)
+  else if (action === 'remove' && runtime.origin !== 'system' && !runtime.isInUse && !runtime.references?.length) {
+    confirmRemoval(runtime)
+  }
+}
+
 async function prepareInstall(candidate: JavaPackage) {
   const revision = ++planGeneration
   const scope = generation
@@ -522,141 +563,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
-.java-manager,
-.java-manager-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-lg);
-  width: 100%;
-  min-width: 0;
-}
-.java-manager-toolbar,
-.java-manager-tabs,
-.java-manager-actions,
-.java-runtime-actions,
-.java-catalog-controls,
-.java-runtime-tags {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--s-sm);
-}
-.java-manager-toolbar {
-  justify-content: space-between;
-}
-.java-manager-tabs {
-  flex-wrap: nowrap;
-  gap: 2px;
-  padding: 3px;
-  border-radius: var(--r-md);
-  background: var(--control-bg);
-}
-.java-manager-tabs button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-xs);
-  height: 29px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: var(--r-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast),
-    color var(--duration-fast);
-}
-.java-manager-tabs button:hover {
-  background: var(--control-bg-hover);
-  color: var(--text-primary);
-}
-.java-manager-tabs button[aria-pressed='true'] {
-  background: var(--primary-alpha);
-  color: var(--primary);
-}
-.java-manager-tabs button:focus-visible {
-  outline: none;
-  box-shadow: var(--glow-focus);
-}
-.java-manager-empty,
-.java-manager-content > .ui-loading {
-  min-height: 180px;
-  justify-content: center;
-}
-.java-manager-empty :deep(.empty-icon svg) {
-  width: 32px;
-  height: 32px;
-}
-.java-manager-empty :deep(.empty-text) {
-  max-width: 420px;
-  line-height: 1.6;
-}
-.java-manager-empty :deep(.ui-btn) {
-  margin-top: var(--s-xs);
-}
-.java-runtime-row,
-.java-package-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--s-lg);
-  padding: var(--s-lg);
-  background: var(--ecl-surface-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-}
-.java-runtime-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-  min-width: min(260px, 100%);
-}
-.java-runtime-copy strong {
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-.java-runtime-copy span,
-.java-runtime-copy small,
-.java-manager-content > small {
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-.java-runtime-path {
-  overflow-wrap: anywhere;
-}
-.java-runtime-actions {
-  justify-content: flex-end;
-}
-.java-catalog-controls .n-select {
-  flex: 1;
-  min-width: 120px;
-  max-width: 260px;
-}
-.java-operation-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--s-md);
-  background: var(--ecl-surface-bg);
-  border-radius: var(--r-md);
-  font-size: 12px;
-  color: var(--text-secondary);
-  overflow-wrap: anywhere;
-}
-@media (max-width: 680px) {
-  .java-runtime-actions {
-    justify-content: flex-start;
-    width: 100%;
-  }
-}
-</style>
+<style scoped src="@/styles/features/java/JavaManagerPanel.css"></style>

@@ -2313,6 +2313,8 @@
     "checkUpdates": "Updates prüfen",
     "add": "Vorhandenes Java hinzufügen",
     "search": "Version, Anbieter oder Pfad suchen",
+    "showPath": "Vollständigen Pfad anzeigen",
+    "moreActions": "Weitere Aktionen für Java {version}",
     "scanning": "Java wird gesucht",
     "empty": "Kein Java registriert. Runtime suchen oder herunterladen.",
     "noMatch": "Keine passende Java-Laufzeit gefunden",
