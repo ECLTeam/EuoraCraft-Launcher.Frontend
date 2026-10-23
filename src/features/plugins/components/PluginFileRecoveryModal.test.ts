@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { NRadioGroup } from 'naive-ui'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
 import { i18n } from '@/i18n'
@@ -7,12 +8,19 @@ import PluginFileRecoveryModal from './PluginFileRecoveryModal.vue'
 
 const mocks = vi.hoisted(() => ({
   list: vi.fn(),
+  profileList: vi.fn(),
+  profileResolve: vi.fn(),
   resolve: vi.fn(),
   track: vi.fn(),
   store: { operations: {} as Record<string, ApplicationOperation> },
 }))
 vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
-  pluginManagementApi: { fileRecoveries: mocks.list, resolveFileRecovery: mocks.resolve },
+  pluginManagementApi: {
+    fileRecoveries: mocks.list,
+    resolveFileRecovery: mocks.resolve,
+    profileRecoveries: mocks.profileList,
+    resolveProfileRecovery: mocks.profileResolve,
+  },
 }))
 vi.mock('@/features/operations/stores/applicationOperationStore', () => ({
   useApplicationOperationStore: () => ({ operations: mocks.store.operations, track: mocks.track }),
@@ -38,6 +46,11 @@ describe('file recovery dialog', () => {
     vi.clearAllMocks()
     mocks.list.mockResolvedValue({ items: [row], next_cursor: null })
     mocks.store.operations = reactive<Record<string, ApplicationOperation>>({})
+    mocks.profileList.mockResolvedValue({
+      items: [{ ...row, name: 'One', recovery_ref: 'd'.repeat(32) }],
+      next_cursor: null,
+    })
+    mocks.profileResolve.mockResolvedValue({ operationId: 'e'.repeat(32), status: 'pending' })
     mocks.track.mockResolvedValue(undefined)
   })
   it('ignores a stale response after closing and reopening', async () => {
@@ -70,7 +83,7 @@ describe('file recovery dialog', () => {
     const wrapper = open()
     try {
       await flushPromises()
-      await wrapper.get('input').setValue('restored.bin')
+      await wrapper.get('.file-recovery-save input').setValue('restored.bin')
       const save = wrapper
         .findAll('button')
         .find((button) => button.text() === i18n.global.t('plugins.fileRecoverySaveAs'))!
@@ -107,7 +120,7 @@ describe('file recovery dialog', () => {
     const wrapper = open()
     try {
       await flushPromises()
-      await wrapper.get('input').setValue('restored.bin')
+      await wrapper.get('.file-recovery-save input').setValue('restored.bin')
       const save = wrapper
         .findAll('button')
         .find((button) => button.text() === i18n.global.t('plugins.fileRecoverySaveAs'))!
@@ -118,6 +131,68 @@ describe('file recovery dialog', () => {
       await save.trigger('click')
       await flushPromises()
       expect(mocks.resolve).toHaveBeenCalledTimes(2)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+  it('tracks an accepted private recovery with its original kind after reopening another view', async () => {
+    let accept: ((value: unknown) => void) | undefined
+    mocks.resolve.mockReturnValueOnce(
+      new Promise((resolve) => {
+        accept = resolve
+      })
+    )
+    const wrapper = open()
+    try {
+      await flushPromises()
+      await wrapper.get('.file-recovery-save input').setValue('restored.bin')
+      const save = wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.fileRecoverySaveAs'))!
+      await save.trigger('click')
+      await wrapper.setProps({ visible: false })
+      await wrapper.setProps({ visible: true })
+      await wrapper.getComponent(NRadioGroup).vm.$emit('update:value', 'profile')
+      await flushPromises()
+      accept?.({ operationId: 'c'.repeat(32), status: 'pending' })
+      await flushPromises()
+      expect(mocks.track.mock.calls[0]?.[0].kind).toBe('plugin_file_recovery')
+      expect(wrapper.text()).toContain('One')
+      expect(wrapper.text()).not.toContain('target.bin')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+  it('switches to instance profiles without accepting a stale private-file response', async () => {
+    let finish: ((value: unknown) => void) | undefined
+    mocks.list.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve
+      })
+    )
+    const wrapper = open()
+    try {
+      await wrapper.getComponent(NRadioGroup).vm.$emit('update:value', 'profile')
+      await flushPromises()
+      finish?.({ items: [row], next_cursor: null })
+      await flushPromises()
+      expect(wrapper.text()).toContain('One')
+      expect(wrapper.text()).not.toContain('target.bin')
+      await wrapper.get('.file-recovery-save input').setValue('original')
+      const save = wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.fileRecoverySaveAs'))!
+      await save.trigger('click')
+      await flushPromises()
+      expect(mocks.profileResolve).toHaveBeenCalledWith({
+        recovery_ref: 'd'.repeat(32),
+        expected_revision: 1,
+        expected_etag: row.etag,
+        action: 'save_as',
+        saved_suffix: 'original',
+      })
+      expect(mocks.resolve).not.toHaveBeenCalled()
+      expect(mocks.track.mock.calls[0]?.[0].kind).toBe('plugin_instance_profile_recovery')
     } finally {
       wrapper.unmount()
     }

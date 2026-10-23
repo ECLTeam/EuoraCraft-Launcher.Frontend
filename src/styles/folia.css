@@ -462,21 +462,6 @@
   box-shadow: 0 0 0 4px rgba(var(--primary-rgb, 91, 111, 245), 0.12);
 }
 
-[data-ui-skin='folia'] .select-trigger:hover {
-  box-shadow: var(--control-glow);
-}
-
-[data-ui-skin='folia'] .ui-select.open .select-trigger {
-  box-shadow: var(--control-ring);
-}
-
-[data-ui-skin='folia'] .select-dropdown {
-  background: var(--card-bg);
-  box-shadow:
-    var(--shadow-md),
-    inset 0 1px 0 var(--glass-highlight);
-}
-
 [data-ui-skin='folia'] .titlebar-tray-menu {
   background: var(--card-bg);
   box-shadow:

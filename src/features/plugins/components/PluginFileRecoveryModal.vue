@@ -7,6 +7,15 @@
     @update:visible="close"
   >
     <div class="file-recoveries">
+      <NRadioGroup
+        v-model:value="kind"
+        :disabled="submitting"
+        :aria-label="t('plugins.fileRecoveryKind')"
+        class="file-recovery-kinds"
+      >
+        <NRadioButton value="private">{{ t('plugins.fileRecoveryPrivate') }}</NRadioButton>
+        <NRadioButton value="profile">{{ t('plugins.fileRecoveryProfile') }}</NRadioButton>
+      </NRadioGroup>
       <p>{{ t('plugins.fileRecoveryNote') }}</p>
       <NAlert v-if="error" type="error" :showIcon="false">
         {{ error }}
@@ -39,9 +48,9 @@
           <NInput
             v-model:value="savedNames[row.recovery_ref]"
             :disabled="busy"
-            maxlength="120"
-            :placeholder="t('plugins.fileRecoveryName')"
-            :aria-label="t('plugins.fileRecoveryName')"
+            :maxlength="kind === 'profile' ? 64 : 120"
+            :placeholder="t(kind === 'profile' ? 'plugins.profileRecoverySuffix' : 'plugins.fileRecoveryName')"
+            :aria-label="t(kind === 'profile' ? 'plugins.profileRecoverySuffix' : 'plugins.fileRecoveryName')"
           />
           <NButton :disabled="busy || !savedNames[row.recovery_ref]" @click="resolve(row, 'save_as')">
             {{ t('plugins.fileRecoverySaveAs') }}
@@ -60,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NButton, NEmpty, NInput, NPopconfirm } from 'naive-ui'
+import { NAlert, NButton, NEmpty, NInput, NPopconfirm, NRadioButton, NRadioGroup } from 'naive-ui'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modals/Modal.vue'
@@ -74,8 +83,9 @@ import type { PluginFileRecovery, PluginFileRecoveryAction } from '@/types/plugi
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ 'update:visible': [value: boolean]; resolved: [] }>()
 const { t } = useI18n()
-const scope = useRequestScope(() => String(props.visible))
-const actionScope = useRequestScope(() => String(props.visible))
+const kind = ref<'private' | 'profile'>('private')
+const scope = useRequestScope(() => `${props.visible}:${kind.value}`)
+const actionScope = useRequestScope(() => `${props.visible}:${kind.value}`)
 const operations = useApplicationOperationStore()
 const rows = ref<PluginFileRecovery[]>([])
 const savedNames = ref<Record<string, string>>({})
@@ -85,7 +95,13 @@ const submitting = ref(false)
 const error = ref('')
 const notice = ref('')
 const hasFailed = ref(false)
-const task = ref<string | null>(null)
+const tasks = ref<Record<'private' | 'profile', string | null>>({ private: null, profile: null })
+const task = computed({
+  get: () => tasks.value[kind.value],
+  set: (value) => {
+    tasks.value[kind.value] = value
+  },
+})
 const active = computed(() => (task.value ? operations.operations[task.value] : undefined))
 const busy = computed(() => submitting.value || (!!task.value && (!active.value || !isFinishedOperation(active.value))))
 
@@ -101,7 +117,9 @@ async function load(next?: string) {
   loading.value = true
   error.value = ''
   try {
-    const page = await pluginManagementApi.fileRecoveries(next)
+    const page = await (kind.value === 'profile'
+      ? pluginManagementApi.profileRecoveries(next)
+      : pluginManagementApi.fileRecoveries(next))
     if (!current()) return
     rows.value = next
       ? [
@@ -119,26 +137,38 @@ async function load(next?: string) {
 
 async function resolve(row: PluginFileRecovery, action: PluginFileRecoveryAction) {
   if (busy.value) return
+  const recoveryKind = kind.value
   const name = savedNames.value[row.recovery_ref]
-  if (action === 'save_as' && (!name || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(name) || name.endsWith('.'))) {
-    error.value = t('plugins.fileRecoveryInvalidName')
-    return
+  if (action === 'save_as') {
+    const valid =
+      recoveryKind === 'profile'
+        ? !!name && /^[A-Za-z0-9_-]{1,64}$/.test(name)
+        : !!name && /^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(name) && !name.endsWith('.')
+    if (!valid) {
+      error.value = t(
+        recoveryKind === 'profile' ? 'plugins.profileRecoveryInvalidSuffix' : 'plugins.fileRecoveryInvalidName'
+      )
+      return
+    }
   }
   submitting.value = true
   error.value = ''
   notice.value = ''
   const current = actionScope.begin()
   try {
-    const receipt = await pluginManagementApi.resolveFileRecovery({
-      recovery_ref: row.recovery_ref,
-      expected_revision: row.revision,
-      expected_etag: row.etag,
-      action,
-      ...(action === 'save_as' ? { saved_name: name } : {}),
-    })
+    const choice = { recovery_ref: row.recovery_ref, expected_revision: row.revision, expected_etag: row.etag, action }
+    const receipt = await (recoveryKind === 'profile'
+      ? pluginManagementApi.resolveProfileRecovery({
+          ...choice,
+          ...(action === 'save_as' ? { saved_suffix: name } : {}),
+        })
+      : pluginManagementApi.resolveFileRecovery({ ...choice, ...(action === 'save_as' ? { saved_name: name } : {}) }))
     // 任务归应用所有，离开弹窗仍由共享任务服务跟踪。
     if (current()) task.value = receipt.operationId
-    await operations.track({ ...receipt, kind: 'plugin_file_recovery' }, t('plugins.fileRecoveryTitle'))
+    await operations.track(
+      { ...receipt, kind: recoveryKind === 'profile' ? 'plugin_instance_profile_recovery' : 'plugin_file_recovery' },
+      t('plugins.fileRecoveryTitle')
+    )
   } catch {
     if (current()) error.value = t('plugins.fileRecoverySubmitFailed')
   } finally {
@@ -147,9 +177,12 @@ async function resolve(row: PluginFileRecovery, action: PluginFileRecoveryAction
 }
 
 watch(
-  () => props.visible,
-  (visible) => {
+  () => [props.visible, kind.value] as const,
+  ([visible]) => {
     if (visible) {
+      rows.value = []
+      cursor.value = null
+      notice.value = ''
       loading.value = false
       submitting.value = false
       void load()
@@ -178,6 +211,10 @@ watch(
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+}
+.file-recovery-kinds {
+  display: flex;
+  flex-wrap: wrap;
 }
 .file-recovery-row {
   padding-block: 12px;

@@ -1,6 +1,9 @@
 <template>
   <section class="resource-selector" :aria-label="t('plugins.resourcesTitle')">
-    <p>{{ t('plugins.resourcesNote') }}</p>
+    <strong>{{
+      t(capability === 'instances.write' ? 'plugins.writeResourcesTitle' : 'plugins.readResourcesTitle')
+    }}</strong>
+    <p>{{ t(capability === 'instances.write' ? 'plugins.writeResourcesNote' : 'plugins.resourcesNote') }}</p>
     <div class="resource-toolbar">
       <NButton v-if="parent" size="small" :disabled="disabled" @click="open(null)">{{
         t('plugins.resourcesBack')
@@ -17,7 +20,7 @@
       }}</NButton>
     </div>
     <NCheckbox
-      v-if="parent"
+      v-if="parent && capability === 'instances.read'"
       :checked="selected.includes(parent.resource_id)"
       :disabled="disabled || !parent.available"
       @update:checked="parent && select(parent, $event)"
@@ -33,7 +36,11 @@
     <ul v-else class="resource-list">
       <li v-for="item in items" :key="item.resource_id" class="resource-row">
         <div class="resource-choice">
+          <span v-if="capability === 'instances.write' && item.kind === 'instance_root'" :title="item.label">{{
+            item.label
+          }}</span>
           <NCheckbox
+            v-else
             :checked="selected.includes(item.resource_id)"
             :disabled="disabled || !item.available || covered(item)"
             @update:checked="select(item, $event)"
@@ -42,13 +49,7 @@
               item.kind === 'instance_root' ? t('plugins.resourcesEntireRoot', { name: item.label }) : item.label
             }}</span>
           </NCheckbox>
-          <small>{{
-            !item.available
-              ? t('plugins.resourcesUnavailable')
-              : covered(item)
-                ? t('plugins.resourcesCovered')
-                : t(item.kind === 'instance_root' ? 'plugins.resourcesRootHint' : 'plugins.resourcesInstanceHint')
-          }}</small>
+          <small>{{ resourceHint(item) }}</small>
         </div>
         <NButton
           v-if="item.kind === 'instance_root' && item.available"
@@ -80,7 +81,12 @@ import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type { PluginPermissions, PluginResourceCandidate } from '@/types/plugins'
 
-const props = defineProps<{ view: PluginPermissions; selected: string[]; disabled: boolean }>()
+const props = defineProps<{
+  view: PluginPermissions
+  selected: string[]
+  disabled: boolean
+  capability: 'instances.read' | 'instances.write'
+}>()
 const emit = defineEmits<{
   'update:selected': [value: string[]]
   revision: [value: number | undefined]
@@ -95,15 +101,29 @@ const loading = ref(false)
 const error = ref(false)
 const selectionFull = ref(false)
 const scope = useRequestScope(
-  () => `${props.view.installation_id}:${props.view.content_digest}:${parent.value?.resource_id ?? ''}`
+  () =>
+    `${props.view.installation_id}:${props.view.content_digest}:${props.capability}:${parent.value?.resource_id ?? ''}`
 )
 
 function covered(item: PluginResourceCandidate): boolean {
-  return item.kind === 'instance' && !!parent.value && props.selected.includes(parent.value.resource_id)
+  return (
+    props.capability === 'instances.read' &&
+    item.kind === 'instance' &&
+    !!parent.value &&
+    props.selected.includes(parent.value.resource_id)
+  )
+}
+
+function resourceHint(item: PluginResourceCandidate): string {
+  if (!item.available) return t('plugins.resourcesUnavailable')
+  if (covered(item)) return t('plugins.resourcesCovered')
+  if (item.kind === 'instance') return t('plugins.resourcesInstanceHint')
+  return t(props.capability === 'instances.write' ? 'plugins.writeResourcesRootHint' : 'plugins.resourcesRootHint')
 }
 
 function select(item: PluginResourceCandidate, checked: boolean): void {
-  if (props.disabled || !item.available) return
+  if (props.disabled || !item.available || (props.capability === 'instances.write' && item.kind === 'instance_root'))
+    return
   const selected = checked
     ? [...new Set([...props.selected, item.resource_id])]
     : props.selected.filter((id) => id !== item.resource_id)
@@ -132,7 +152,7 @@ async function load(more: boolean): Promise<void> {
     const page = await pluginManagementApi.permissionResources({
       installation_id: props.view.installation_id,
       content_digest: props.view.content_digest,
-      capability: 'instances.read',
+      capability: props.capability,
       parent_ref: parent.value?.resource_id ?? null,
       search: search.value,
       cursor: more ? cursor.value : null,
@@ -158,7 +178,7 @@ async function load(more: boolean): Promise<void> {
 }
 
 watch(
-  () => [props.view.installation_id, props.view.content_digest] as const,
+  () => [props.view.installation_id, props.view.content_digest, props.capability] as const,
   () => {
     parent.value = null
     search.value = ''

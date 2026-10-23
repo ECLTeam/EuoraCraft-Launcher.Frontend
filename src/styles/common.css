@@ -17,7 +17,6 @@
 .n-tooltip,
 .n-base-select-menu,
 .n-base-auto-complete-menu,
-.select-dropdown,
 .task-queue-wrapper {
   backdrop-filter: var(--ecl-overlay-backdrop);
   -webkit-backdrop-filter: var(--ecl-overlay-backdrop);

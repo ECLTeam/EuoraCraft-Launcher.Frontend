@@ -12,7 +12,16 @@
   border-radius: 2px;
   outline: none;
   cursor: pointer;
-  background: var(--slider-track);
+  background: linear-gradient(
+    to right,
+    var(--primary) var(--ui-slider-percent),
+    var(--slider-track) var(--ui-slider-percent)
+  );
+}
+
+.ui-slider-input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 5px;
 }
 
 .ui-slider--disabled .ui-slider-input {
@@ -37,6 +46,20 @@
 
 .ui-slider-input::-webkit-slider-thumb:hover {
   transform: scale(1.1);
+}
+
+.ui-slider-input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.ui-slider-input::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--bg-elevated);
 }
 
 .ui-slider-value {

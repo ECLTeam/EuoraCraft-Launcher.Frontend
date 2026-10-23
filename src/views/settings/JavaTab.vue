@@ -1,6 +1,6 @@
 <template>
   <div class="tab-pane java-settings">
-    <UiCard bodyClass="java-settings-card-body">
+    <UiCard class="java-settings-card" bodyClass="java-settings-card-body">
       <JavaManagerPanel />
     </UiCard>
   </div>

@@ -73,6 +73,7 @@ import type {
   PluginInfo,
   PluginFileRecoveryPage,
   PluginFileRecoveryChoice,
+  PluginInstanceProfileRecoveryChoice,
   PluginPermissions,
   PluginResourcePage,
   PluginResourceQuery,
@@ -584,6 +585,8 @@ export interface CommandPayloadMap {
   plugin_permissions_get: { installation_id: string }
   plugin_permission_resources: PluginResourceQuery
   plugin_file_recoveries_list: { cursor?: string; limit?: number }
+  plugin_instance_profile_recoveries_list: { cursor?: string; limit?: number }
+  plugin_instance_profile_recovery_resolve: PluginInstanceProfileRecoveryChoice
   plugin_file_recovery_resolve: PluginFileRecoveryChoice
   plugin_permissions_update: {
     installation_id: string
@@ -887,6 +890,8 @@ export const COMMAND_NAMES = {
   plugin_permissions_get: 'plugin_permissions_get',
   plugin_permission_resources: 'plugin_permission_resources',
   plugin_file_recoveries_list: 'plugin_file_recoveries_list',
+  plugin_instance_profile_recoveries_list: 'plugin_instance_profile_recoveries_list',
+  plugin_instance_profile_recovery_resolve: 'plugin_instance_profile_recovery_resolve',
   plugin_file_recovery_resolve: 'plugin_file_recovery_resolve',
   plugin_permissions_update: 'plugin_permissions_update',
   plugin_runtime_info: 'plugin_runtime_info',
@@ -1175,6 +1180,8 @@ export interface CommandResponseMap {
   plugin_permissions_get: PluginPermissions
   plugin_permission_resources: PluginResourcePage
   plugin_file_recoveries_list: PluginFileRecoveryPage
+  plugin_instance_profile_recoveries_list: PluginFileRecoveryPage
+  plugin_instance_profile_recovery_resolve: { operationId: string; status: 'pending' }
   plugin_file_recovery_resolve: { operationId: string; status: 'pending' }
   plugin_permissions_update: PluginPermissionUpdateResult
   plugin_runtime_info: PluginRuntimeInfo

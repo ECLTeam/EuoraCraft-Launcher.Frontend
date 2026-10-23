@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-input-wrapper" :class="{ 'is-focused': isFocused, 'is-disabled': disabled }">
+  <div class="ui-input-wrapper" :class="[`input-${size}`, { 'is-focused': isFocused, 'is-disabled': disabled }]">
     <UiIcon v-if="leadingIcon" :name="leadingIcon.replace('icon-', '')" class="prefix-icon" />
 
     <input
@@ -19,7 +19,13 @@
       @keydown.enter="$emit('enter')"
     />
 
-    <button v-if="clearable && modelValue" type="button" class="clear-icon" aria-label="清空输入" @click="handleClear">
+    <button
+      v-if="clearable && modelValue && !readonly && !disabled"
+      type="button"
+      class="clear-icon"
+      :aria-label="t('common.clearInput')"
+      @click="handleClear"
+    >
       <UiIcon name="close" />
     </button>
 
@@ -29,6 +35,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 defineOptions({ name: 'UiInput' })
 
@@ -44,6 +51,7 @@ const props = withDefaults(
     suffixIcon?: string
     id?: string
     ariaLabel?: string
+    size?: 'sm' | 'md' | 'lg'
   }>(),
   {
     type: 'text',
@@ -56,6 +64,7 @@ const props = withDefaults(
     suffixIcon: '',
     id: '',
     ariaLabel: '',
+    size: 'md',
   }
 )
 
@@ -66,6 +75,7 @@ const emit = defineEmits<{
 }>()
 
 const leadingIcon = computed(() => props.prefixIcon)
+const { t } = useI18n()
 
 const inputRef = ref<HTMLInputElement | null>(null)
 const isFocused = ref(false)
@@ -76,6 +86,7 @@ const handleInput = (event: Event) => {
 }
 
 const handleClear = () => {
+  if (props.readonly || props.disabled) return
   emit('update:modelValue', '')
   emit('clear')
   inputRef.value?.focus()

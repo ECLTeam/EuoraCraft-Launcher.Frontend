@@ -24,11 +24,7 @@
 .category-select {
   width: 144px;
   flex-shrink: 0;
-  height: 29px;
-}
-
-.category-select :deep(.select-trigger) {
-  height: 29px;
+  height: var(--ecl-control-height-sm);
 }
 
 .header-right {

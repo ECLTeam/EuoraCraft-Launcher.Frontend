@@ -143,6 +143,8 @@
                         <UiSelect
                           id="connect-instance"
                           v-model="selectedInstanceKey"
+                          size="sm"
+                          :aria-label="t('connect.create.selectInstance')"
                           :options="runningInstanceOptions"
                           :placeholder="
                             t(

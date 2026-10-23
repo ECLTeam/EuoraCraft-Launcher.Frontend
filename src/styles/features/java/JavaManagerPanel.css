@@ -1,0 +1,207 @@
+.java-manager {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.java-manager-toolbar,
+.java-manager-tabs,
+.java-manager-actions,
+.java-runtime-heading,
+.java-runtime-metadata,
+.java-runtime-actions,
+.java-catalog-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s-sm);
+}
+.java-manager-toolbar {
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: var(--s-md) var(--s-lg);
+  border-bottom: 1px solid var(--divider);
+}
+.java-manager-tabs {
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--ecl-radius-control);
+  background: var(--control-bg);
+}
+.java-manager-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-xs);
+  height: var(--ecl-control-height-sm);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--ecl-radius-control);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast),
+    color var(--duration-fast);
+}
+.java-manager-tabs button:hover {
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+.java-manager-tabs button[aria-pressed='true'] {
+  background: var(--primary-alpha);
+  color: var(--primary);
+}
+.java-manager-tabs button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.java-manager-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s-lg);
+  min-width: 0;
+  min-height: 0;
+  padding: var(--s-lg);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+.java-manager-content > * {
+  flex-shrink: 0;
+}
+.java-manager-content > .java-manager-empty,
+.java-manager-content > .ui-loading {
+  flex: 1;
+  min-height: 180px;
+  justify-content: center;
+}
+.java-manager-empty :deep(.empty-icon svg) {
+  width: 32px;
+  height: 32px;
+}
+.java-manager-empty :deep(.empty-text) {
+  max-width: 420px;
+  line-height: 1.6;
+}
+.java-manager-empty :deep(.ui-btn) {
+  margin-top: var(--s-xs);
+}
+.java-runtime-list {
+  min-width: 0;
+}
+.java-runtime-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--s-lg);
+  row-gap: 4px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px 0;
+}
+.java-runtime-row + .java-runtime-row {
+  border-top: 1px solid var(--divider);
+}
+.java-runtime-heading {
+  grid-column: 1;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 10px;
+  color: var(--text-primary);
+}
+.java-runtime-heading strong {
+  flex-shrink: 0;
+}
+.java-runtime-heading span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.java-runtime-metadata {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  gap: 4px 8px;
+}
+.java-runtime-heading strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.java-runtime-heading span {
+  font-size: 13px;
+}
+.java-runtime-metadata,
+.java-manager-content > small,
+.java-runtime-copy span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.java-runtime-full-path {
+  max-width: min(420px, calc(100vw - 64px));
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.java-runtime-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-content: flex-end;
+  max-width: 360px;
+  gap: 4px;
+}
+.java-runtime-more :deep(.btn-content) {
+  display: flex;
+  align-items: center;
+  gap: var(--s-xs);
+}
+.java-package-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s-lg);
+  padding: var(--s-lg) 0;
+  border-bottom: 1px solid var(--divider);
+}
+.java-runtime-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: min(260px, 100%);
+  overflow-wrap: anywhere;
+}
+.java-runtime-copy strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+.java-catalog-controls .n-select {
+  flex: 1;
+  min-width: 120px;
+  max-width: 260px;
+}
+.java-operation-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-md);
+  background: var(--control-bg);
+  border-radius: var(--ecl-radius-control);
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
