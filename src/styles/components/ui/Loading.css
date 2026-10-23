@@ -1,5 +1,6 @@
 .ui-loading {
-  --ui-loading-color: var(--text-secondary);
+  --ui-loading-color: var(--accent);
+  --ui-loading-track: color-mix(in srgb, var(--accent) 18%, transparent);
   --ui-loading-overlay: color-mix(in srgb, var(--bg-surface) 72%, transparent);
 }
 
@@ -8,8 +9,30 @@
   color: var(--ui-loading-color);
 }
 
-.ui-loading__icon {
-  animation-duration: var(--loading-spin-duration, 900ms);
+/*
+ * 拖尾环：底色轨道 + 一段随旋转伸缩的圆弧，比单色圆环更能表达「正在推进」。
+ * 圆弧长度在 1/56 与 42/56 之间往返，配合匀速旋转形成连续的头尾追逐。
+ */
+.ui-loading__ring {
+  display: block;
+  flex: none;
+  animation: ui-loading-rotate var(--loading-spin-duration, 0.76s) var(--ease-linear, linear) infinite;
+  transform-origin: center;
+}
+
+.ui-loading__ring-track {
+  fill: none;
+  stroke: var(--ui-loading-track);
+  stroke-width: 2.5;
+}
+
+.ui-loading__ring-arc {
+  fill: none;
+  stroke: var(--ui-loading-color);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 14 56.5;
+  animation: ui-loading-dash 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .ui-loading__label {
@@ -70,4 +93,36 @@
 
 .ui-loading--xs .ui-loading__label {
   font-size: 10px;
+}
+
+@keyframes ui-loading-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ui-loading-dash {
+  0% {
+    stroke-dasharray: 1 56.5;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 42 56.5;
+    stroke-dashoffset: -14;
+  }
+  100% {
+    stroke-dasharray: 1 56.5;
+    stroke-dashoffset: -56.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-loading__ring {
+    animation-duration: 2.4s;
+  }
+  .ui-loading__ring-arc {
+    animation: none;
+    stroke-dasharray: 32 56.5;
+    stroke-dashoffset: -12;
+  }
 }

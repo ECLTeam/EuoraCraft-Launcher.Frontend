@@ -1,7 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { i18n } from '@/i18n'
-import UiIcon from './Icon.vue'
 import UiLoading from './Loading.vue'
 
 describe('UiLoading', () => {
@@ -13,7 +12,7 @@ describe('UiLoading', () => {
 
     expect(wrapper.classes()).toContain('ui-loading--block')
     expect(wrapper.get('[role="status"]').attributes('aria-label')).toBe('正在加载资源')
-    expect(wrapper.getComponent(UiIcon).props('size')).toBe(24)
+    expect(wrapper.get('svg.ui-loading__ring').attributes('width')).toBe('24')
   })
 
   it('在遮罩模式下保留内容并可隐藏加载指示器', async () => {
