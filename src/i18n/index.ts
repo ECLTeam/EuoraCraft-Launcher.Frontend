@@ -23,6 +23,17 @@ export type LocaleCode = (typeof supportedLocales)[number]['code']
 
 export const defaultLocale: LocaleCode = 'zh-CN'
 
+/**
+ * 判断界面语言是否为简体中文。
+ *
+ * 下载源、模组源与联机功能只面向简体中文用户，其他语言不提供这些入口。
+ * @param locale - 当前界面语言代码
+ * @returns 是否为简体中文
+ */
+export function isSimplifiedChinese(locale: string): boolean {
+  return locale === defaultLocale
+}
+
 export const i18n = createI18n({
   legacy: false,
   locale: defaultLocale,

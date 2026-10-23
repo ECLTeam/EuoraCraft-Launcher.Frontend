@@ -54,6 +54,7 @@ async function mountShell(path = '/more') {
 
 describe('More shell', () => {
   beforeEach(() => {
+    i18n.global.locale.value = 'zh-CN'
     useConnector().dispose()
     mocks.status.mockReset().mockResolvedValue({
       mode: 'idle',
@@ -96,6 +97,16 @@ describe('More shell', () => {
     expect(menuItems[0]?.text()).toContain('联机')
     expect(menuItems[1]?.text()).toContain('插件')
     expect(menuItems[2]?.text()).toContain('工具')
+  })
+
+  it('非简体中文不展示联机子页入口', async () => {
+    i18n.global.locale.value = 'en-US'
+    const { wrapper } = await mountShell('/more/plugins')
+
+    const menuItems = wrapper.findAll('.n-menu-item')
+    expect(menuItems).toHaveLength(2)
+    expect(wrapper.text()).not.toContain(i18n.global.t('more.nav.room'))
+    expect(menuItems[0]?.text()).toContain(i18n.global.t('more.nav.plugins'))
   })
 
   it('lands on the room sub-page by default', async () => {

@@ -22,7 +22,7 @@ import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { globalProcessInstances } from '@/features/terminal/composables/useProcessInstances'
-import { i18n, supportedLocales } from '@/i18n'
+import { defaultLocale, i18n, isSimplifiedChinese, supportedLocales } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
 import type { InstallProgress } from '@/types/instances'
@@ -230,11 +230,14 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     }
   }
 
-  function registerBackendEvents(): void {
+  function registerBackendEvents(isConnectorEnabled: boolean): void {
     globalProcessInstances.init()
     cleanupCallbacks.push(globalProcessInstances.dispose)
-    const connector = useConnector({ onError: (error) => options.message.error(error) })
-    cleanupCallbacks.push(connector.dispose)
+    // 联机只面向简体中文用户，其他语言不注册联机会话与错误处理。
+    if (isConnectorEnabled) {
+      const connector = useConnector({ onError: (error) => options.message.error(error) })
+      cleanupCallbacks.push(connector.dispose)
+    }
     const operationStore = useApplicationOperationStore()
     cleanupCallbacks.push(
       backend.on('java:runtimes_changed', () => {
@@ -450,14 +453,13 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
 
     // 必须在 registerBackendEvents 之前检查展示模式，
     // 否则 notifyFrontendReady 后后端发送的 config:init 事件会先于 swap 被处理
-    const launcherConfig = await configQuery()
-      .then((config) => config.launcher)
-      .catch(() => null)
-    if (launcherConfig?.showcase === true) {
+    const initialConfig = await configQuery().catch(() => null)
+    if (initialConfig?.launcher?.showcase === true) {
       backend.swapToShowcase()
     }
 
-    registerBackendEvents()
+    // 联机只面向简体中文用户，按配置中的语言判断，避免界面语言尚未应用时误判。
+    registerBackendEvents(isSimplifiedChinese(initialConfig?.ui?.locale ?? defaultLocale))
     cleanupCallbacks.push(
       () => useInstanceStore().dispose(),
       () => instanceInstallApi.disposeChangeListeners()
