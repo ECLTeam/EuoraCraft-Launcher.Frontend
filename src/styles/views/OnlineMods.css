@@ -7,11 +7,6 @@
 /* =============================================
    Search Toolbar — 单行紧凑工具栏
    ============================================= */
-/* 下拉菜单最小宽度，避免选项被截断（teleport 到 body，需 :global 绕过 scoped） */
-:global(.n-base-select-menu) {
-  min-width: 200px !important;
-}
-
 .mods-search-toolbar {
   display: flex;
   flex-shrink: 0;

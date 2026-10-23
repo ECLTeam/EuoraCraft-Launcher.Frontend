@@ -239,14 +239,6 @@
   border-radius: inherit;
 }
 
-/* 下拉选项弹层：加高 + 宽度随内容自适应（teleport 到 body，需全局选择器覆盖 naive 默认裁剪）。
-   min-width: max-content 让弹层至少和最长的选项同宽（长内容自动撑开，短内容保持触发框宽度作为下限） */
-.n-base-select-menu {
-  max-height: 360px;
-  min-width: max-content;
-  white-space: nowrap;
-}
-
 /* 分段标签 rail：对齐参考（无边框），避免与输入控件共用带边框规则 */
 .n-tabs--segment-type .n-tabs-rail {
   background: var(--control-bg) !important;

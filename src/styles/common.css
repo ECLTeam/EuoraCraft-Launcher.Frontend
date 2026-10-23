@@ -27,6 +27,18 @@
   -webkit-backdrop-filter: var(--ecl-surface-backdrop);
 }
 
+/* 菜单必须服从定位容器的尺寸，否则自动翻转会按错误宽度判断窗口边界。
+   长选项限宽；长列表最多占半屏，确保触发框位于窗口中部时两侧仍有一侧可容纳。 */
+.n-base-select-menu {
+  min-width: 0;
+  max-width: calc(100vw - 16px);
+}
+
+.n-base-select-menu.n-select-menu .n-scrollbar,
+.n-base-select-menu.n-select-menu .n-virtual-list {
+  max-height: min(var(--n-height), calc(50vh - 32px));
+}
+
 /* Naive UI 选择框：展开时翻转默认下拉箭头，便于反馈菜单状态。 */
 .n-select .n-base-suffix .n-base-suffix__arrow {
   transform-origin: center;

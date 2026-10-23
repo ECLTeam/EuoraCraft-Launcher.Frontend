@@ -26,14 +26,22 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.launchOptions') }}</div>
         <SettingRow :label="t('versions.detail.isolated')" :description="t('versions.detail.isolatedDesc')">
-          <NSelect v-model:value="versionSettings.isolationMode" :options="isolationModeOptions" />
+          <NSelect
+            v-model:value="versionSettings.isolationMode"
+            :consistentMenuWidth="false"
+            :options="isolationModeOptions"
+          />
         </SettingRow>
       </div>
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.memoryAllocation') }}</div>
         <SettingRow :label="t('versions.detail.memoryAllocation')" :description="inheritedDescription('memory_auto')">
-          <NSelect v-model:value="versionSettings.memoryMode" :options="runtimeModeOptions" />
+          <NSelect
+            v-model:value="versionSettings.memoryMode"
+            :consistentMenuWidth="false"
+            :options="runtimeModeOptions"
+          />
         </SettingRow>
 
         <div
@@ -117,7 +125,11 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.javaRuntime') }}</div>
         <SettingRow :label="t('versions.detail.javaRuntime')" :description="inheritedDescription('java_auto')">
-          <NSelect v-model:value="versionSettings.javaMode" :options="runtimeModeOptions" />
+          <NSelect
+            v-model:value="versionSettings.javaMode"
+            :consistentMenuWidth="false"
+            :options="runtimeModeOptions"
+          />
         </SettingRow>
         <SettingRow v-if="versionSettings.javaMode === 'manual'" :label="t('settings.javaPath')">
           <JavaRuntimeSelector
@@ -170,6 +182,7 @@
           :description="inheritedDescription(field.global)"
         >
           <NSelect
+            :consistentMenuWidth="false"
             :value="
               versionSettings[field.key] === null ? 'inherit' : versionSettings[field.key] ? 'enabled' : 'disabled'
             "
@@ -179,6 +192,7 @@
         </SettingRow>
         <SettingRow :label="t('settings.processPriority')" :description="inheritedDescription('process_priority')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.processPriority || 'inherit'"
             :options="priorityOptions"
             @update:value="versionSettings.processPriority = $event === 'inherit' ? null : $event"
@@ -206,6 +220,7 @@
         </SettingRow>
         <SettingRow v-if="isWindows" :label="t('settings.renderer')" :description="inheritedDescription('renderer')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.renderer || 'inherit'"
             :options="rendererOptions"
             @update:value="versionSettings.renderer = $event === 'inherit' ? null : $event"
@@ -217,6 +232,7 @@
         <SettingRow :label="t('settings.preLaunchCommand')" :description="inheritedDescription('pre_launch_command')">
           <div class="instance-command-controls">
             <NSelect
+              :consistentMenuWidth="false"
               :value="versionSettings.preLaunchCommand === null ? 'inherit' : 'custom'"
               :options="commandModeOptions"
               @update:value="versionSettings.preLaunchCommand = $event === 'inherit' ? null : ''"
@@ -230,6 +246,7 @@
         </SettingRow>
         <SettingRow :label="t('settings.wrapperCommand')" :description="inheritedDescription('wrapper_command')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.commandOverrides.includes('wrapperCommand') ? 'custom' : 'inherit'"
             :options="commandModeOptions"
             @update:value="setCommandOverride('wrapperCommand', $event === 'custom')"
@@ -245,6 +262,7 @@
         </SettingRow>
         <SettingRow :label="t('settings.postExitCommand')" :description="inheritedDescription('post_exit_command')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.commandOverrides.includes('postExitCommand') ? 'custom' : 'inherit'"
             :options="commandModeOptions"
             @update:value="setCommandOverride('postExitCommand', $event === 'custom')"
@@ -260,6 +278,7 @@
         </SettingRow>
         <SettingRow :label="t('settings.envVars')" :description="inheritedDescription('env_vars')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.commandOverrides.includes('envVars') ? 'custom' : 'inherit'"
             :options="commandModeOptions"
             @update:value="setCommandOverride('envVars', $event === 'custom')"
@@ -275,6 +294,7 @@
         </SettingRow>
         <SettingRow :label="t('settings.windowTitle')" :description="inheritedDescription('window_title_template')">
           <NSelect
+            :consistentMenuWidth="false"
             :value="versionSettings.commandOverrides.includes('windowTitle') ? 'custom' : 'inherit'"
             :options="commandModeOptions"
             @update:value="setCommandOverride('windowTitle', $event === 'custom')"
@@ -288,7 +308,11 @@
           :label="t('settings.launcherVisibility')"
           :description="inheritedDescription('launcher_visibility')"
         >
-          <NSelect v-model:value="versionSettings.launcherVisibility" :options="visibilityOptions" />
+          <NSelect
+            v-model:value="versionSettings.launcherVisibility"
+            :consistentMenuWidth="false"
+            :options="visibilityOptions"
+          />
         </SettingRow>
       </div>
     </SettingSection>
