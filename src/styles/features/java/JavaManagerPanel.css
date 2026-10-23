@@ -60,8 +60,7 @@
   background: var(--primary-alpha);
   color: var(--primary);
 }
-.java-manager-tabs button:focus-visible,
-.java-runtime-location summary:focus-visible {
+.java-manager-tabs button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -100,22 +99,39 @@
   min-width: 0;
 }
 .java-runtime-row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-sm);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--s-lg);
+  row-gap: 4px;
+  align-items: center;
   min-width: 0;
-  padding: var(--s-lg) 0;
-}
-.java-runtime-row:first-child {
-  padding-top: 0;
+  padding: 10px 0;
 }
 .java-runtime-row + .java-runtime-row {
   border-top: 1px solid var(--divider);
 }
 .java-runtime-heading {
-  gap: 6px 10px;
+  grid-column: 1;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 10px;
   color: var(--text-primary);
-  overflow-wrap: anywhere;
+}
+.java-runtime-heading strong {
+  flex-shrink: 0;
+}
+.java-runtime-heading span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.java-runtime-metadata {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+  gap: 4px 8px;
 }
 .java-runtime-heading strong {
   font-size: 14px;
@@ -131,56 +147,20 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
-.java-runtime-location {
-  min-width: 0;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-.java-runtime-location summary {
-  display: flex;
-  align-items: center;
-  gap: var(--s-sm);
-  min-width: 0;
-  padding: 4px 0;
-  border-radius: var(--ecl-radius-control);
-  cursor: pointer;
-  list-style: none;
-}
-.java-runtime-location summary::-webkit-details-marker {
-  display: none;
-}
-.java-runtime-location summary:hover {
-  color: var(--text-primary);
-}
-.java-runtime-location summary > .icon {
-  flex-shrink: 0;
-}
-.java-runtime-path {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.java-runtime-path-arrow {
-  margin-left: auto;
-}
-.java-runtime-location[open] .java-runtime-path-arrow {
-  transform: rotate(180deg);
-}
 .java-runtime-full-path {
-  padding: var(--s-sm) var(--s-md);
-  background: var(--control-bg);
-  border-radius: var(--ecl-radius-control);
+  max-width: min(420px, calc(100vw - 64px));
   color: var(--text-primary);
+  font-size: 12px;
   line-height: 1.6;
   overflow-wrap: anywhere;
   user-select: text;
 }
 .java-runtime-actions {
-  padding-top: var(--s-xs);
-}
-.java-runtime-more {
-  margin-left: auto;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-content: flex-end;
+  max-width: 360px;
+  gap: 4px;
 }
 .java-runtime-more :deep(.btn-content) {
   display: flex;

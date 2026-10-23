@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { NDropdown } from 'naive-ui'
+import { NDropdown, NPopover } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/app/queryClient'
@@ -83,13 +83,37 @@ describe('Java 管理与拥有权提示', () => {
     const executablePath = 'C:/Launcher/very-long-managed-runtime-directory/temurin-25/bin/java.exe'
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory([javaRuntime({ executablePath })]))
     const wrapper = await render()
-    expect(wrapper.get('.java-runtime-location summary').attributes('title')).toBe(executablePath)
-    expect(wrapper.get('.java-runtime-full-path').text()).toBe(executablePath)
+    expect(wrapper.get('.java-runtime-path-trigger').attributes('title')).toBe(executablePath)
+    expect(wrapper.get('.java-runtime-path-trigger').attributes('aria-label')).toBe('查看完整路径')
+    const popover = wrapper.getComponent(NPopover)
+    popover.vm.$emit('update:show', true)
+    await flushPromises()
+    expect(popover.props('show')).toBe(true)
+    await wrapper.get('.java-runtime-path-trigger').trigger('keydown', { key: 'Escape' })
+    expect(popover.props('show')).toBe(false)
+    popover.vm.$emit('update:show', true)
+    await wrapper.get('input').setValue('no-matching-runtime')
+    await wrapper.get('input').setValue('')
+    expect(wrapper.getComponent(NPopover).props('show')).toBe(false)
     const actions = wrapper.get('.java-runtime-actions')
     expect(actions.text()).toContain('设为全局 Java')
     expect(actions.text()).toContain('更多')
     expect(actions.findAll('button').some((button) => button.text() === '停用')).toBe(false)
     expect(actions.findAll('button').some((button) => button.text() === '移除登记')).toBe(false)
+  })
+
+  it('更多菜单可用 Esc 关闭，搜索后不会重新展开', async () => {
+    const wrapper = await render()
+    const menu = wrapper.getComponent(NDropdown)
+    menu.vm.$emit('update:show', true)
+    await flushPromises()
+    expect(menu.props('show')).toBe(true)
+    await wrapper.get('.java-runtime-more').trigger('keydown', { key: 'Escape' })
+    expect(menu.props('show')).toBe(false)
+    menu.vm.$emit('update:show', true)
+    await wrapper.get('input').setValue('no-matching-runtime')
+    await wrapper.get('input').setValue('')
+    expect(wrapper.getComponent(NDropdown).props('show')).toBe(false)
   })
 
   it.each(['managed', 'manual', 'system'] as const)('更多菜单保留 %s 来源的移除权限和确认流程', async (origin) => {

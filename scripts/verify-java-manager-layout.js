@@ -103,6 +103,15 @@ async function _verifyJavaManagerLayout(page) {
         card: rect(card),
         horizontal: content.scrollWidth > content.clientWidth + 1,
         outerScroll: viewport.scrollHeight > viewport.clientHeight + 1,
+        row: (() => {
+          const row = document.querySelector('.java-runtime-row')
+          if (!row) return null
+          return {
+            height: row.getBoundingClientRect().height,
+            heading: rect(row.querySelector('.java-runtime-heading')),
+            actions: rect(row.querySelector('.java-runtime-actions')),
+          }
+        })(),
         badButtons: [...document.querySelectorAll('.java-manager-toolbar button,.java-runtime-actions button')]
           .filter((el) => {
             const r = el.getBoundingClientRect()
@@ -113,12 +122,6 @@ async function _verifyJavaManagerLayout(page) {
             )
           })
           .map((el) => el.textContent),
-        path: (() => {
-          const el = document.querySelector('.java-runtime-path')
-          return el
-            ? { whiteSpace: getComputedStyle(el).whiteSpace, overflow: getComputedStyle(el).textOverflow }
-            : null
-        })(),
       }
     })
     assert(
@@ -130,8 +133,13 @@ async function _verifyJavaManagerLayout(page) {
       !result.horizontal && !result.outerScroll && !result.badButtons.length,
       label + ': overflow ' + JSON.stringify(result)
     )
-    if (result.path)
-      assert(result.path.whiteSpace === 'nowrap' && result.path.overflow === 'ellipsis', label + ': path not truncated')
+    if (result.row && !label.startsWith('de-') && !label.startsWith('ru-')) {
+      assert(result.row.height <= 72, label + ': list row too tall ' + result.row.height)
+      assert(
+        result.row.actions.left > result.row.heading.left && result.row.actions.top < result.row.heading.bottom,
+        label + ': actions not beside information'
+      )
+    }
     cases.push(label)
   }
   try {
@@ -159,16 +167,17 @@ async function _verifyJavaManagerLayout(page) {
             await measure(`${skin}/${mode}/blur-${blur}/${width}x${height}`)
           }
     await page.setViewportSize({ width: 960, height: 600 })
-    const summary = page.locator('.java-runtime-location summary').first()
-    await summary.focus()
-    await summary.press('Enter')
+    const pathTrigger = page.locator('.java-runtime-path-trigger').first()
+    await pathTrigger.focus()
+    await pathTrigger.press('Enter')
+    await page.locator('.java-runtime-full-path').waitFor({ state: 'visible' })
     assert(
-      (await page.locator('.java-runtime-location').first().getAttribute('open')) !== null,
-      'Cannot expand path with keyboard'
+      (await page.locator('.java-runtime-full-path').innerText()) === (await pathTrigger.getAttribute('title')),
+      'Full path is not available'
     )
-    await page.locator('.java-runtime-full-path').first().waitFor({ state: 'visible' })
-    await measure('expanded path')
-    await summary.press('Enter')
+    await measure('path popover')
+    await pathTrigger.press('Escape')
+    await page.locator('.java-runtime-full-path').waitFor({ state: 'hidden' })
     const more = page.locator('.java-runtime-more').first()
     await more.focus()
     await more.press('Enter')
@@ -229,7 +238,7 @@ async function _verifyJavaManagerLayout(page) {
       theme.setThemeMode('light', false)
     })
     await page.waitForTimeout(400)
-    await page.screenshot({ path: 'java-layout/after-classic-light.png', animations: 'disabled' })
+    await page.screenshot({ path: 'java-layout/compact-classic-light.png', animations: 'disabled' })
     await page.evaluate(async () => {
       const { useTheme } = await import('/src/composables/useTheme.ts')
       const theme = useTheme()
@@ -237,7 +246,7 @@ async function _verifyJavaManagerLayout(page) {
       theme.setThemeMode('dark', false)
     })
     await page.waitForTimeout(400)
-    await page.screenshot({ path: 'java-layout/after-folia-dark.png', animations: 'disabled' })
+    await page.screenshot({ path: 'java-layout/compact-folia-dark.png', animations: 'disabled' })
     return { passed: cases.length, cases }
   } finally {
     await page.evaluate(() => window.__javaLayoutRestore())

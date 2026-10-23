@@ -70,7 +70,9 @@
           <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
             <div class="java-runtime-heading">
               <strong>Java {{ runtime.majorVersion || '?' }}</strong>
-              <span>{{ runtime.vendor || t('javaManager.unknownVendor') }} · {{ runtime.runtimeKind }}</span>
+              <span :title="`${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.runtimeKind}`"
+                >{{ runtime.vendor || t('javaManager.unknownVendor') }} · {{ runtime.runtimeKind }}</span
+              >
             </div>
             <div class="java-runtime-metadata">
               <span
@@ -88,14 +90,6 @@
                 t('javaManager.referenced', { count: runtime.references.length })
               }}</span>
             </div>
-            <details class="java-runtime-location">
-              <summary :title="runtime.executablePath" :aria-label="t('javaManager.showPath')">
-                <UiIcon name="folder" :size="14" />
-                <span class="java-runtime-path">{{ runtime.executablePath }}</span>
-                <UiIcon class="java-runtime-path-arrow" name="chevron-down" :size="14" />
-              </summary>
-              <div class="java-runtime-full-path">{{ runtime.executablePath }}</div>
-            </details>
             <div class="java-runtime-actions">
               <UiButton
                 variant="secondary"
@@ -120,11 +114,36 @@
                 @click="prepareInstall(updates[runtime.runtimeId]!)"
                 >{{ t('javaManager.update') }}</UiButton
               >
+              <NPopover
+                trigger="click"
+                placement="bottom-end"
+                to="#app"
+                :show="visiblePathId === runtime.runtimeId"
+                @update:show="visiblePathId = $event ? runtime.runtimeId : null"
+              >
+                <template #trigger>
+                  <UiButton
+                    class="java-runtime-path-trigger"
+                    variant="ghost"
+                    size="sm"
+                    shape="square"
+                    icon="folder"
+                    :title="runtime.executablePath"
+                    :aria-label="t('javaManager.showPath')"
+                    @keydown.esc="closeRuntimeOverlayOnEscape"
+                  />
+                </template>
+                <div class="java-runtime-full-path" @keydown.esc="closeRuntimeOverlayOnEscape">
+                  {{ runtime.executablePath }}
+                </div>
+              </NPopover>
               <NDropdown
                 trigger="click"
                 placement="bottom-end"
                 :options="runtimeActions(runtime)"
+                :show="visibleMenuId === runtime.runtimeId"
                 to="#app"
+                @update:show="visibleMenuId = $event ? runtime.runtimeId : null"
                 @select="handleRuntimeAction($event, runtime)"
               >
                 <UiButton
@@ -133,6 +152,7 @@
                   size="sm"
                   :disabled="isActing"
                   :aria-label="t('javaManager.moreActions', { version: runtime.fullVersion })"
+                  @keydown.esc="closeRuntimeOverlayOnEscape"
                   >{{ t('common.more') }}<UiIcon name="chevron-down" :size="14"
                 /></UiButton>
               </NDropdown>
@@ -233,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NDropdown, NInput, NProgress, NSelect, NTag, type DropdownOption } from 'naive-ui'
+import { NAlert, NDropdown, NInput, NPopover, NProgress, NSelect, NTag, type DropdownOption } from 'naive-ui'
 import { computed, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
@@ -271,6 +291,8 @@ const operations = useApplicationOperationStore()
 const message = useLauncherMessage()
 const view = ref(props.initialView)
 const query = ref('')
+const visiblePathId = ref<string | null>(null)
+const visibleMenuId = ref<string | null>(null)
 const error = ref('')
 const isActing = ref(false)
 const isRegistering = ref(false)
@@ -426,6 +448,13 @@ async function openFolder(runtime: JavaRuntime) {
   }
 }
 
+function closeRuntimeOverlayOnEscape(event: KeyboardEvent) {
+  if (visiblePathId.value === null && visibleMenuId.value === null) return
+  event.stopPropagation()
+  visiblePathId.value = null
+  visibleMenuId.value = null
+}
+
 function runtimeActions(runtime: JavaRuntime): DropdownOption[] {
   const options: DropdownOption[] = [
     {
@@ -538,6 +567,10 @@ async function retryCleanup() {
     if (isMounted) isActing.value = false
   }
 }
+watch([view, query], () => {
+  visiblePathId.value = null
+  visibleMenuId.value = null
+})
 watch([view, runtimeKind, selectedMajor], () => {
   if (view.value === 'download') void loadCatalog()
 })
