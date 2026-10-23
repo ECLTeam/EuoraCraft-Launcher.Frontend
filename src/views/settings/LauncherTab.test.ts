@@ -161,4 +161,23 @@ describe('LauncherTab 联机设置定位', () => {
     expect(text).toContain(i18n.global.t('settings.gameDownloadSource'))
     expect(text).toContain(i18n.global.t('settings.modSource'))
   })
+
+  it('代理重要影响常驻显示，查看详情不提交设置', async () => {
+    const app = document.createElement('div')
+    app.id = 'app'
+    document.body.appendChild(app)
+    const { wrapper } = await mountSettings()
+    const proxyRow = wrapper
+      .findAll('.setting-item')
+      .find((row) => row.text().includes(i18n.global.t('settings.apiProxyModeDesc')))!
+    expect(proxyRow.text()).toContain('重启后生效')
+    expect(document.querySelector('.setting-details')).toBeNull()
+    mocks.command.mockClear()
+    await proxyRow.get('.setting-help').trigger('click')
+    await flushPromises()
+    expect(document.querySelector('.setting-details')?.textContent).toContain('自定义代理')
+    expect(mocks.command).not.toHaveBeenCalled()
+    await proxyRow.get('.setting-help').trigger('click')
+    expect(mocks.command).not.toHaveBeenCalled()
+  })
 })

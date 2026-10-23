@@ -131,7 +131,7 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.fullscreen')" :description="t('settings.fullscreenDesc')">
+      <SettingRow :label="t('settings.fullscreen')">
         <NSwitch :value="localSettings.fullscreen" @update:value="handleFullscreenToggle" />
       </SettingRow>
 
@@ -165,7 +165,11 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.launchAdvanced')">
-      <SettingRow :label="t('settings.jvmArgs')" :description="t('settings.jvmArgsDesc')">
+      <SettingRow
+        :label="t('settings.jvmArgs')"
+        :description="t('settings.jvmArgsDesc')"
+        :details="t('settings.jvmArgsDetails')"
+      >
         <NInput
           v-model:value="globalJvmArgsText"
           class="advanced-argument-input"
@@ -176,7 +180,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.gameArgsTail')" :description="t('settings.gameArgsTailDesc')">
+      <SettingRow
+        :label="t('settings.gameArgsTail')"
+        :description="t('settings.gameArgsTailDesc')"
+        :details="t('settings.gameArgsTailDetails')"
+      >
         <NInput
           v-model:value="localSettings.game_args_tail"
           class="advanced-argument-input"
@@ -196,7 +204,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.preLaunchCommand')" :description="t('settings.preLaunchCommandDesc')">
+      <SettingRow
+        :label="t('settings.preLaunchCommand')"
+        :description="t('settings.preLaunchCommandDesc')"
+        :details="t('settings.preLaunchCommandDetails')"
+      >
         <NInput
           v-model:value="localSettings.pre_launch_command"
           class="advanced-argument-input"
@@ -207,7 +219,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.wrapperCommand')" :description="t('settings.wrapperCommandDesc')">
+      <SettingRow
+        :label="t('settings.wrapperCommand')"
+        :description="t('settings.wrapperCommandDesc')"
+        :details="t('settings.wrapperCommandDetails')"
+      >
         <NInput
           v-model:value="localSettings.wrapper_command"
           class="advanced-argument-input"
@@ -218,7 +234,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.postExitCommand')" :description="t('settings.postExitCommandDesc')">
+      <SettingRow
+        :label="t('settings.postExitCommand')"
+        :description="t('settings.postExitCommandDesc')"
+        :details="t('settings.postExitCommandDetails')"
+      >
         <NInput
           v-model:value="localSettings.post_exit_command"
           class="advanced-argument-input"
@@ -229,7 +249,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.envVars')" :description="t('settings.envVarsDesc')">
+      <SettingRow
+        :label="t('settings.envVars')"
+        :description="t('settings.envVarsDesc')"
+        :details="t('settings.envVarsDetails')"
+      >
         <NInput
           v-model:value="localSettings.env_vars"
           class="advanced-argument-input"
@@ -240,7 +264,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.windowTitle')" :description="t('settings.windowTitleDesc')">
+      <SettingRow
+        :label="t('settings.windowTitle')"
+        :description="t('settings.windowTitleDesc')"
+        :details="t('settings.windowTitleDetails')"
+      >
         <NInput
           v-model:value="localSettings.window_title_template"
           :placeholder="t('settings.windowTitlePlaceholder')"
@@ -248,7 +276,11 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.launcherVisibility')" :description="t('settings.launcherVisibilityDesc')">
+      <SettingRow
+        :label="t('settings.launcherVisibility')"
+        :description="t('settings.launcherVisibilityDesc')"
+        :details="t('settings.launcherVisibilityDetails')"
+      >
         <NSelect
           :value="localSettings.launcher_visibility || 'none'"
           :options="launcherVisibilityOptions"

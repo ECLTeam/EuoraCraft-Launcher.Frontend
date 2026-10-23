@@ -1,7 +1,7 @@
 <template>
   <div ref="settingsPage" class="tab-pane launcher-settings">
     <SettingSection :title="t('settings.languageRegion')">
-      <SettingRow :label="t('settings.language')" :description="t('settings.languageDesc')">
+      <SettingRow :label="t('settings.language')">
         <NSelect
           class="setting-select"
           :value="currentLocale"
@@ -12,7 +12,11 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.downloadSettings')">
-      <SettingRow :label="t('settings.gameDownloadSource')" :description="t('settings.downloadSourceDesc')">
+      <SettingRow
+        :label="t('settings.gameDownloadSource')"
+        :description="t('settings.downloadSourceDesc')"
+        :details="t('settings.downloadSourceDetails')"
+      >
         <NSelect
           class="setting-select"
           :value="downloadSettings.mirror_source"
@@ -20,7 +24,11 @@
           @update:value="handleDownloadSourceChange"
         />
       </SettingRow>
-      <SettingRow :label="t('settings.modSource')" :description="t('settings.modSourceDesc')">
+      <SettingRow
+        :label="t('settings.modSource')"
+        :description="t('settings.modSourceDesc')"
+        :details="t('settings.modSourceDetails')"
+      >
         <NSelect
           class="setting-select"
           :value="downloadSettings.mod_source ?? 'official'"
@@ -31,7 +39,11 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.launcherProxy')">
-      <SettingRow :label="t('settings.proxyMode')" :description="t('settings.apiProxyModeDesc')">
+      <SettingRow
+        :label="t('settings.proxyMode')"
+        :description="t('settings.apiProxyModeDesc')"
+        :details="t('settings.apiProxyModeDetails')"
+      >
         <NSelect
           class="setting-select"
           :value="apiProxyMode"
@@ -61,7 +73,11 @@
           @update:value="handleRequestTimeoutChange"
         />
       </SettingRow>
-      <SettingRow :label="t('settings.requestRetries')" :description="t('settings.requestRetriesDesc')">
+      <SettingRow
+        :label="t('settings.requestRetries')"
+        :description="t('settings.requestRetriesDesc')"
+        :details="t('settings.requestRetriesDetails')"
+      >
         <NInputNumber
           :value="requestRetries"
           :min="0"
@@ -71,13 +87,21 @@
           @update:value="handleRequestRetriesChange"
         />
       </SettingRow>
-      <SettingRow :label="t('settings.disableSslVerify')" :description="t('settings.disableSslVerifyDesc')">
+      <SettingRow
+        :label="t('settings.disableSslVerify')"
+        :description="t('settings.disableSslVerifyDesc')"
+        :details="t('settings.disableSslVerifyDetails')"
+      >
         <NSwitch :value="disableSslVerify" @update:value="handleDisableSslVerifyChange" />
       </SettingRow>
     </SettingSection>
 
     <SettingSection :title="t('settings.downloadProxy')">
-      <SettingRow :label="t('settings.proxyMode')" :description="t('settings.proxyModeDesc')">
+      <SettingRow
+        :label="t('settings.proxyMode')"
+        :description="t('settings.proxyModeDesc')"
+        :details="t('settings.proxyModeDetails')"
+      >
         <NSelect
           class="setting-select"
           :value="proxyMode"

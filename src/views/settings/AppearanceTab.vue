@@ -1,7 +1,7 @@
 <template>
   <div class="tab-pane appearance-settings">
     <SettingSection :title="t('settings.appearanceSectionTheme')">
-      <SettingRow :label="t('settings.themeStyle')" :description="t('settings.themeDesc')">
+      <SettingRow :label="t('settings.themeStyle')">
         <NSelect
           class="setting-select"
           :value="themeId"
@@ -12,7 +12,7 @@
         />
       </SettingRow>
 
-      <SettingRow label="亮暗模式" description="选择亮暗显示模式（跟随系统时按系统偏好自动切换）">
+      <SettingRow :label="t('settings.lightDarkMode')" :description="t('settings.lightDarkModeDesc')">
         <NTabs :value="currentSettings.mode" type="segment" size="small" @update:value="handleThemeChange">
           <NTab v-for="option in themeOptions" :key="option.value" :name="option.value">
             <span class="theme-option-label">
@@ -23,7 +23,7 @@
         </NTabs>
       </SettingRow>
 
-      <SettingRow :label="t('settings.primaryColor')" :description="t('settings.primaryColorDesc')">
+      <SettingRow :label="t('settings.primaryColor')">
         <div class="color-presets">
           <button
             v-for="color in presetColors"
@@ -46,7 +46,11 @@
         </div>
       </SettingRow>
 
-      <SettingRow :label="t('settings.themeFromBackground')" :description="t('settings.themeFromBackgroundDesc')">
+      <SettingRow
+        :label="t('settings.themeFromBackground')"
+        :description="t('settings.themeFromBackgroundDesc')"
+        :details="t('settings.themeFromBackgroundDetails')"
+      >
         <NSelect
           class="setting-select"
           :value="deriveMode"
@@ -80,7 +84,11 @@
       <SettingRow :label="t('settings.auroraBackground')" :description="t('settings.auroraBackgroundDesc')">
         <NSwitch :value="auroraEnabled" @update:value="handleAuroraEnabledChange" />
       </SettingRow>
-      <SettingRow :label="t('settings.backgroundBlurLayer')" :description="t('settings.backgroundBlurLayerDesc')">
+      <SettingRow
+        :label="t('settings.backgroundBlurLayer')"
+        :description="t('settings.backgroundBlurLayerDesc')"
+        :details="t('settings.backgroundBlurLayerDetails')"
+      >
         <NSwitch :value="blurLayerEnabled" @update:value="handleBlurLayerEnabledChange" />
       </SettingRow>
     </SettingSection>
@@ -99,7 +107,7 @@
           <span>{{ radiusWindow }}px</span>
         </div>
       </SettingRow>
-      <SettingRow label="卡片圆角" description="用户级覆盖；未设置时由主题预设决定">
+      <SettingRow :label="t('settings.cardRadius')" :description="t('settings.cardRadiusDesc')">
         <div class="slider-control">
           <NSlider
             :value="radiusCard"
@@ -111,7 +119,7 @@
           <span>{{ radiusCard }}px</span>
         </div>
       </SettingRow>
-      <SettingRow label="控件圆角" description="按钮、输入框等控件圆角">
+      <SettingRow :label="t('settings.controlRadius')" :description="t('settings.controlRadiusDesc')">
         <div class="slider-control">
           <NSlider
             :value="radiusControl"
@@ -123,7 +131,7 @@
           <span>{{ radiusControl }}px</span>
         </div>
       </SettingRow>
-      <SettingRow label="对话框圆角" description="弹窗、确认框圆角">
+      <SettingRow :label="t('settings.dialogRadius')">
         <div class="slider-control">
           <NSlider
             :value="radiusDialog"
@@ -147,11 +155,7 @@
           <span>{{ cardOpacity }}%</span>
         </div>
       </SettingRow>
-      <SettingRow
-        class="font-setting-row"
-        :label="t('settings.fontInterface')"
-        :description="t('settings.fontInterfaceDesc')"
-      >
+      <SettingRow class="font-setting-row" :label="t('settings.fontInterface')">
         <FontFamilySelect
           :modelValue="appearance.font_family ?? ''"
           :defaultLabel="t('settings.fontDefaultUi')"
@@ -191,7 +195,7 @@
             @update:modelValue="handleFontFamilyChange('terminal_font_family', $event)"
           />
         </SettingRow>
-        <SettingRow class="font-setting-row" :label="t('settings.fontLog')" :description="t('settings.fontLogDesc')">
+        <SettingRow class="font-setting-row" :label="t('settings.fontLog')">
           <FontFamilySelect
             :modelValue="appearance.log_font_family ?? ''"
             :defaultLabel="t('settings.fontDefaultMono')"
@@ -212,7 +216,11 @@
       </SettingRow>
 
       <template v-if="backgroundMediaType === 'image'">
-        <SettingRow :label="t('settings.backgroundMode')" :description="t('settings.backgroundModeDesc')">
+        <SettingRow
+          :label="t('settings.backgroundMode')"
+          :description="t('settings.backgroundModeDesc')"
+          :details="t('settings.backgroundModeDetails')"
+        >
           <NTabs :value="bgMode" type="segment" size="small" @update:value="handleBgModeChange">
             <NTab v-for="option in bgModeOptions" :key="option.value" :name="option.value">
               {{ option.label }}
@@ -253,7 +261,7 @@
               <NButton size="small" @click="selectBackgroundFolder">{{ t('settings.selectFolder') }}</NButton>
             </div>
           </SettingRow>
-          <SettingRow :label="t('settings.carouselInterval')" :description="t('settings.carouselIntervalDesc')">
+          <SettingRow :label="t('settings.carouselInterval')">
             <div class="slider-control">
               <NSlider :value="bgInterval" :min="5" :max="60" :tooltip="false" @update:value="handleBgIntervalChange" />
               <span>{{ bgInterval }} {{ t('settings.carouselIntervalUnit') }}</span>
@@ -321,7 +329,11 @@
         </div>
       </SettingRow>
 
-      <SettingRow :label="t('settings.backgroundBlur')" :description="t('settings.backgroundBlurDesc')">
+      <SettingRow
+        :label="t('settings.backgroundBlur')"
+        :description="t('settings.backgroundBlurDesc')"
+        :details="t('settings.backgroundBlurDetails')"
+      >
         <div class="slider-control">
           <NSlider :value="blurAmount" :min="0" :max="20" :tooltip="false" @update:value="handleBlurChange" />
           <span>{{ blurAmount }}px</span>
@@ -330,10 +342,14 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.appearanceSectionSchedule')">
-      <SettingRow label="启用定时切换" description="仅在「跟随系统」模式下生效：按时间窗口强制亮暗，忽略系统偏好">
+      <SettingRow
+        :label="t('settings.scheduleEnabled')"
+        :description="t('settings.scheduleEnabledDesc')"
+        :details="t('settings.scheduleEnabledDetails')"
+      >
         <NSwitch :value="scheduleEnabled" @update:value="handleScheduleEnable" />
       </SettingRow>
-      <SettingRow v-if="scheduleEnabled" label="深色时段">
+      <SettingRow v-if="scheduleEnabled" :label="t('settings.scheduleDarkPeriod')">
         <div class="schedule-row">
           <NTimePicker
             :value="scheduleStart"
@@ -342,7 +358,7 @@
             size="small"
             @update:value="handleScheduleTime('dark_start', $event)"
           />
-          <span class="schedule-sep">至</span>
+          <span class="schedule-sep">{{ t('settings.scheduleTimeTo') }}</span>
           <NTimePicker
             :value="scheduleEnd"
             class="schedule-time"
