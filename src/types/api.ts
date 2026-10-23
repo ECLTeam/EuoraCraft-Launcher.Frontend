@@ -61,14 +61,7 @@ import type {
   WorldEntry,
 } from '@/types/instances'
 import type { JavaCatalog, JavaInstallPlan, JavaInventory, JavaRuntime, JavaUpdate } from '@/types/java'
-import type {
-  ModInfo,
-  ModInstallResult,
-  ModItem,
-  ModSearchResult,
-  ModSourceConfig,
-  ModVersion,
-} from '@/types/mods'
+import type { ModInfo, ModInstallResult, ModItem, ModSearchResult, ModSourceConfig, ModVersion } from '@/types/mods'
 import type {
   PluginInfo,
   PluginFileRecoveryPage,
