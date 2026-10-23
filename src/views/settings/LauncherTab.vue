@@ -11,9 +11,8 @@
       </SettingRow>
     </SettingSection>
 
-    <SettingSection :title="t('settings.downloadSettings')">
+    <SettingSection v-if="isSimplifiedChinese" :title="t('settings.downloadSettings')">
       <SettingRow
-        v-if="isSimplifiedChinese"
         :label="t('settings.gameDownloadSource')"
         :description="t('settings.downloadSourceDesc')"
         :details="t('settings.downloadSourceDetails')"
@@ -238,7 +237,8 @@ const { download: downloadSettings } = storeToRefs(settingsStore)
 const { debugMode, setDebugMode, debugLogLevel, setDebugLogLevel } = useDebugMode()
 
 const currentLocale = computed(() => locale.value as LocaleCode)
-// 下载源切换面向国内镜像使用场景，非简体中文界面不展示该项，已保存的下载源继续生效。
+// 下载源与模组源切换面向国内镜像使用场景，非简体中文界面隐藏整个下载设置分区；
+// 保存的配置保持原值，后端按界面语言固定使用官方源。
 const isSimplifiedChinese = computed(() => currentLocale.value === 'zh-CN')
 const disableSslVerify = computed(() => settingsStore.launcher.disable_ssl_verify === true)
 // 启动器通道代理无旧版布尔配置，无效值一律回退直连。

@@ -162,22 +162,26 @@ describe('LauncherTab 联机设置定位', () => {
     expect(text).toContain(i18n.global.t('settings.modSource'))
   })
 
-  it('非简体中文界面隐藏游戏下载源，模组源保持可用', async () => {
+  it('非简体中文界面隐藏下载设置分区，切回简体中文恢复', async () => {
     const { wrapper } = await mountSettings()
-    const findRow = (label: string) => wrapper.findAll('.setting-item').find((row) => row.text().includes(label))
+    const hasText = (label: string) => wrapper.text().includes(label)
 
-    expect(findRow(i18n.global.t('settings.gameDownloadSource'))).toBeTruthy()
+    expect(hasText(i18n.global.t('settings.downloadSettings'))).toBe(true)
+    expect(hasText(i18n.global.t('settings.gameDownloadSource'))).toBe(true)
+    expect(hasText(i18n.global.t('settings.modSource'))).toBe(true)
 
     i18n.global.locale.value = 'en-US'
     await flushPromises()
 
-    expect(findRow(i18n.global.t('settings.gameDownloadSource'))).toBeUndefined()
-    expect(findRow(i18n.global.t('settings.modSource'))).toBeTruthy()
+    expect(hasText(i18n.global.t('settings.downloadSettings'))).toBe(false)
+    expect(hasText(i18n.global.t('settings.gameDownloadSource'))).toBe(false)
+    expect(hasText(i18n.global.t('settings.modSource'))).toBe(false)
 
     i18n.global.locale.value = 'zh-CN'
     await flushPromises()
 
-    expect(findRow(i18n.global.t('settings.gameDownloadSource'))).toBeTruthy()
+    expect(hasText(i18n.global.t('settings.gameDownloadSource'))).toBe(true)
+    expect(hasText(i18n.global.t('settings.modSource'))).toBe(true)
   })
 
   it('代理重要影响常驻显示，查看详情不提交设置', async () => {
