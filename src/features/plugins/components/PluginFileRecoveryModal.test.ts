@@ -135,6 +135,34 @@ describe('file recovery dialog', () => {
       wrapper.unmount()
     }
   })
+  it('tracks an accepted private recovery with its original kind after reopening another view', async () => {
+    let accept: ((value: unknown) => void) | undefined
+    mocks.resolve.mockReturnValueOnce(
+      new Promise((resolve) => {
+        accept = resolve
+      })
+    )
+    const wrapper = open()
+    try {
+      await flushPromises()
+      await wrapper.get('.file-recovery-save input').setValue('restored.bin')
+      const save = wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.fileRecoverySaveAs'))!
+      await save.trigger('click')
+      await wrapper.setProps({ visible: false })
+      await wrapper.setProps({ visible: true })
+      await wrapper.getComponent(NRadioGroup).vm.$emit('update:value', 'profile')
+      await flushPromises()
+      accept?.({ operationId: 'c'.repeat(32), status: 'pending' })
+      await flushPromises()
+      expect(mocks.track.mock.calls[0]?.[0].kind).toBe('plugin_file_recovery')
+      expect(wrapper.text()).toContain('One')
+      expect(wrapper.text()).not.toContain('target.bin')
+    } finally {
+      wrapper.unmount()
+    }
+  })
   it('switches to instance profiles without accepting a stale private-file response', async () => {
     let finish: ((value: unknown) => void) | undefined
     mocks.list.mockReturnValueOnce(

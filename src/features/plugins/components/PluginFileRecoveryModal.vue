@@ -137,15 +137,16 @@ async function load(next?: string) {
 
 async function resolve(row: PluginFileRecovery, action: PluginFileRecoveryAction) {
   if (busy.value) return
+  const recoveryKind = kind.value
   const name = savedNames.value[row.recovery_ref]
   if (action === 'save_as') {
     const valid =
-      kind.value === 'profile'
+      recoveryKind === 'profile'
         ? !!name && /^[A-Za-z0-9_-]{1,64}$/.test(name)
         : !!name && /^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(name) && !name.endsWith('.')
     if (!valid) {
       error.value = t(
-        kind.value === 'profile' ? 'plugins.profileRecoveryInvalidSuffix' : 'plugins.fileRecoveryInvalidName'
+        recoveryKind === 'profile' ? 'plugins.profileRecoveryInvalidSuffix' : 'plugins.fileRecoveryInvalidName'
       )
       return
     }
@@ -156,7 +157,7 @@ async function resolve(row: PluginFileRecovery, action: PluginFileRecoveryAction
   const current = actionScope.begin()
   try {
     const choice = { recovery_ref: row.recovery_ref, expected_revision: row.revision, expected_etag: row.etag, action }
-    const receipt = await (kind.value === 'profile'
+    const receipt = await (recoveryKind === 'profile'
       ? pluginManagementApi.resolveProfileRecovery({
           ...choice,
           ...(action === 'save_as' ? { saved_suffix: name } : {}),
@@ -165,7 +166,7 @@ async function resolve(row: PluginFileRecovery, action: PluginFileRecoveryAction
     // 任务归应用所有，离开弹窗仍由共享任务服务跟踪。
     if (current()) task.value = receipt.operationId
     await operations.track(
-      { ...receipt, kind: kind.value === 'profile' ? 'plugin_instance_profile_recovery' : 'plugin_file_recovery' },
+      { ...receipt, kind: recoveryKind === 'profile' ? 'plugin_instance_profile_recovery' : 'plugin_file_recovery' },
       t('plugins.fileRecoveryTitle')
     )
   } catch {
