@@ -154,6 +154,13 @@ function button(wrapper: VueWrapper, label: string) {
   return wrapper.findAll('button').find((entry) => entry.text() === label)!
 }
 
+function nextTenPagesButton(wrapper: VueWrapper) {
+  return wrapper
+    .findAll('.mods-pagination button')
+    .filter((entry) => entry.text() === i18n.global.t('mods.next10Pages'))
+    .at(-1)!
+}
+
 describe('双平台搜索页面', () => {
   afterEach(() => globalModalStack.reset())
   beforeEach(() => {
@@ -229,7 +236,7 @@ describe('双平台搜索页面', () => {
     mocks.popular.mockResolvedValueOnce(result('first', 1, { items: [row('first', 2)] }))
     const { wrapper } = await mountSearch()
     expect(wrapper.get('.mods-pagination-info').text()).toBe('第 1 页')
-    expect(button(wrapper, '下十页')).toBeUndefined()
+    expect(nextTenPagesButton(wrapper).exists()).toBe(true)
     await button(wrapper, i18n.global.t('mods.nextPage')).trigger('click')
     await flushPromises()
     expect(mocks.search).toHaveBeenLastCalledWith(
@@ -241,6 +248,161 @@ describe('双平台搜索页面', () => {
     expect(mocks.search).toHaveBeenCalledTimes(requestCount)
     expect(wrapper.get('.mod-meta-source').text()).toBe('Modrinth · CurseForge')
     wrapper.unmount()
+  })
+
+  it('全部来源向后十页按顺序读取，提前到末页即停止，向前十页可回到首页', async () => {
+    mocks.popular.mockResolvedValue(result('page-1', 1, { pageCount: 1 }))
+    mocks.search.mockImplementation(async ({ page: requestedPage }) =>
+      result(`page-${requestedPage}`, requestedPage, {
+        hasMore: requestedPage < 4,
+        pageCount: requestedPage,
+        totalExact: requestedPage === 4,
+      })
+    )
+    const { wrapper } = await mountSearch()
+    try {
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('page-4')
+      expect(wrapper.get('.mods-pagination-info').text()).toBe('4 / 4')
+      expect(mocks.search.mock.calls.map(([request]) => request.page)).toEqual([2, 3, 4])
+      expect(nextTenPagesButton(wrapper).attributes('disabled')).toBeDefined()
+      await button(wrapper, i18n.global.t('mods.prev10Pages')).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('page-1')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('全部来源一次前进十页，不跳过尚未建立的页面', async () => {
+    mocks.popular.mockResolvedValue(result('page-1', 1, { pageCount: 1 }))
+    mocks.search.mockImplementation(async ({ page: requestedPage }) =>
+      result(`page-${requestedPage}`, requestedPage, { hasMore: true, pageCount: requestedPage })
+    )
+    const { wrapper } = await mountSearch()
+    try {
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('page-11')
+      expect(wrapper.get('.mods-pagination-info').text()).toBe('第 11 页')
+      const requestedPages = mocks.search.mock.calls.map(([request]) => request.page)
+      expect(requestedPages).toContain(11)
+      expect(requestedPages.every((page, index) => index === 0 || page === requestedPages[index - 1] + 1)).toBe(true)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('空关键字从全部来源切到单一来源后自动查询第一页并恢复十页按钮', async () => {
+    mocks.search.mockImplementation(async ({ source, offset }) => ({
+      items: [row(`${source}-${offset}`)],
+      sources: {},
+      query: '',
+      total: 250,
+    }))
+    const { wrapper } = await mountSearch()
+    try {
+      await wrapper.findAllComponents(NSelect)[0]!.vm.$emit('update:value', 'modrinth')
+      await flushPromises()
+      expect(mocks.search).toHaveBeenCalledWith(
+        expect.objectContaining({ source: 'modrinth', offset: 0, page: 1, refresh: true })
+      )
+      expect(wrapper.get('.mod-row-name').text()).toBe('modrinth-0')
+      expect(wrapper.get('.mods-pagination-info').text()).toBe('1 / 13')
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('modrinth-200')
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('modrinth-240')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('十页读取中途失败保留当前页，解除执行锁后可以重试', async () => {
+    let shouldFail = true
+    mocks.popular.mockResolvedValue(result('page-1', 1, { pageCount: 1 }))
+    mocks.search.mockImplementation(async ({ page: requestedPage }) => {
+      if (requestedPage === 7 && shouldFail) throw new Error('读取第七页失败')
+      return result(`page-${requestedPage}`, requestedPage, { hasMore: requestedPage < 11, pageCount: requestedPage })
+    })
+    const { wrapper } = await mountSearch()
+    try {
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('page-1')
+      expect(wrapper.text()).toContain('读取第七页失败')
+      expect(wrapper.findComponent(UiLoading).props('show')).toBe(false)
+      expect(nextTenPagesButton(wrapper).attributes('disabled')).toBeUndefined()
+      shouldFail = false
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('page-11')
+      expect(wrapper.text()).not.toContain('读取第七页失败')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('十页读取期间禁止重复翻页，切换来源后停止旧链路并丢弃旧响应', async () => {
+    let finishOld!: (value: ModSearchResult) => void
+    mocks.popular.mockResolvedValue(result('page-1', 1, { pageCount: 1 }))
+    mocks.search.mockImplementation(({ source, page: requestedPage }) => {
+      if (source !== 'all') return Promise.resolve({ items: [row('new-source')], sources: {}, query: '', total: 1 })
+      if (requestedPage === 7)
+        return new Promise<ModSearchResult>((resolve) => {
+          finishOld = resolve
+        })
+      return Promise.resolve(result(`page-${requestedPage}`, requestedPage, { pageCount: requestedPage }))
+    })
+    const { wrapper } = await mountSearch()
+    try {
+      await nextTenPagesButton(wrapper).trigger('click')
+      await flushPromises()
+      expect(wrapper.findComponent(UiLoading).props('show')).toBe(true)
+      expect(
+        wrapper.findAll('.mods-pagination button').every((entry) => entry.attributes('disabled') !== undefined)
+      ).toBe(true)
+      await nextTenPagesButton(wrapper).trigger('click')
+      expect(mocks.search.mock.calls.filter(([request]) => request.page === 7)).toHaveLength(1)
+      await wrapper.findAllComponents(NSelect)[0]!.vm.$emit('update:value', 'modrinth')
+      await flushPromises()
+      finishOld(result('old-page-7', 7))
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('new-source')
+      expect(mocks.search.mock.calls.some(([request]) => request.source === 'all' && request.page >= 8)).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('空结果切换来源仍重新查询，快速切换时旧来源响应不能覆盖当前来源', async () => {
+    mocks.popular.mockResolvedValueOnce(result('', 1, { items: [], total: 0, hasMore: false }))
+    const { wrapper } = await mountSearch()
+    let finishOld!: (value: ModSearchResult) => void
+    mocks.search.mockImplementation(({ source }) =>
+      source === 'modrinth'
+        ? new Promise<ModSearchResult>((resolve) => {
+            finishOld = resolve
+          })
+        : Promise.resolve({ items: [row('curseforge-result')], sources: {}, query: '', total: 1 })
+    )
+    try {
+      const source = wrapper.findAllComponents(NSelect)[0]!
+      await source.vm.$emit('update:value', 'modrinth')
+      await flushPromises()
+      expect(mocks.search).toHaveBeenCalledWith(expect.objectContaining({ source: 'modrinth', offset: 0 }))
+      await source.vm.$emit('update:value', 'curseforge')
+      await flushPromises()
+      finishOld(result('outdated'))
+      await flushPromises()
+      expect(wrapper.get('.mod-row-name').text()).toBe('curseforge-result')
+      expect(wrapper.findComponent(UiLoading).props('show')).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
   })
 
   it('会话过期只重新建立一次并回到第一页', async () => {

@@ -179,14 +179,14 @@
               </div>
             </div>
             <div v-if="totalPages > 1 || (isAggregated && hasMore)" class="mods-pagination">
-              <NButton size="small" quaternary circle :disabled="page <= 1" @click="goToPage(1)">
+              <NButton size="small" quaternary circle :disabled="page <= 1 || loading" @click="goToPage(1)">
                 <template #icon><UiIcon name="chevrons-left" :size="14" /></template>
               </NButton>
-              <NButton v-if="!isAggregated" size="small" quaternary :disabled="page <= 1" @click="goToPage(page - 10)">
+              <NButton size="small" quaternary :disabled="page <= 1 || loading" @click="goToPage(page - 10)">
                 <template #icon><UiIcon name="chevron-left" :size="14" /></template>
                 {{ t('mods.prev10Pages') }}
               </NButton>
-              <NButton size="small" quaternary :disabled="page <= 1" @click="goToPage(page - 1)">
+              <NButton size="small" quaternary :disabled="page <= 1 || loading" @click="goToPage(page - 1)">
                 <template #icon><UiIcon name="chevron-left" :size="14" /></template>
                 {{ t('mods.prevPage') }}
               </NButton>
@@ -197,13 +197,7 @@
                 {{ t('mods.nextPage') }}
                 <template #icon><UiIcon name="chevron-right" :size="14" /></template>
               </NButton>
-              <NButton
-                v-if="!isAggregated"
-                size="small"
-                quaternary
-                :disabled="page >= totalPages"
-                @click="goToPage(page + 10)"
-              >
+              <NButton size="small" quaternary :disabled="!canNextPage || loading" @click="goToPage(page + 10)">
                 {{ t('mods.next10Pages') }}
                 <template #icon><UiIcon name="chevron-right" :size="14" /></template>
               </NButton>
@@ -212,7 +206,7 @@
                 size="small"
                 quaternary
                 circle
-                :disabled="page >= totalPages"
+                :disabled="page >= totalPages || loading"
                 @click="goToPage(totalPages)"
               >
                 <template #icon><UiIcon name="chevrons-right" :size="14" /></template>
@@ -1386,13 +1380,18 @@ watch(
     loading.value = false
     // 筛选或排序变化后旧结果不再对应当前条件，必须清空并重新查询第一页，
     // 否则列表内容与控件、分页状态互相矛盾。
-    const hadResults = results.value.length > 0
     results.value = []
     page.value = 1
     total.value = 0
     knownPageCount.value = 0
     hasMore.value = false
-    if (hadResults && query.value.trim()) void fetchPage(1, true)
+    sessionId.value = ''
+    sessionKey.value = ''
+    totalExact.value = true
+    truncated.value = false
+    sourceStatuses.value = {}
+    searchError.value = ''
+    if (target.ready.value && listBootstrapped) void fetchPage(1, true)
   }
 )
 
@@ -1446,7 +1445,19 @@ async function fetchPage(targetPage: number, force = false) {
   try {
     let response: ModSearchResult | undefined
     try {
-      response = await pages.read(targetPage)
+      // 聚合搜索必须先建立中间页；只在完整读取后提交界面，途中失败时保留当前页。
+      const firstPage = aggregated && targetPage > page.value ? page.value + 1 : targetPage
+      for (let requestedPage = firstPage; requestedPage <= targetPage; requestedPage++) {
+        response = await pages.read(requestedPage)
+        if (!response || requestId !== searchRequestId) return
+        if (
+          !aggregated ||
+          (response.page ?? requestedPage) !== requestedPage ||
+          !response.hasMore ||
+          response.truncated
+        )
+          break
+      }
     } catch (error) {
       if (aggregated && error instanceof Error && 'code' in error && error.code === 'SEARCH_SESSION_EXPIRED') {
         if (requestId !== searchRequestId) return
@@ -1499,9 +1510,11 @@ async function loadPopular(force = false) {
 }
 
 async function goToPage(targetPage: number) {
-  if (loading.value || targetPage < 1 || targetPage === page.value) return
-  if (isAggregated.value ? targetPage > page.value && !hasMore.value : targetPage > totalPages.value) return
-  await fetchPage(targetPage)
+  if (loading.value) return
+  const lastPage = isAggregated.value ? page.value + 10 : totalPages.value
+  const destinationPage = Math.max(1, Math.min(targetPage, lastPage))
+  if (destinationPage === page.value || (isAggregated.value && destinationPage > page.value && !hasMore.value)) return
+  await fetchPage(destinationPage)
 }
 
 function refreshResults(): void {
