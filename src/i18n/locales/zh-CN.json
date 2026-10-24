@@ -1989,6 +1989,7 @@
     "nodesPolicy": "节点策略"
   },
   "operations": {
+    "modpack_prepare": "读取安装信息",
     "unknown": "后台任务",
     "custom_download": "自定义下载",
     "instance_import": "导入实例",
@@ -2295,6 +2296,59 @@
     "validation": {
       "missing": "路径不存在",
       "invalid": "无法运行或识别"
+    }
+  },
+  "modpackWizard": {
+    "prepare": "解析整合包",
+    "retryPrepare": "重新解析",
+    "prepareAgain": "重新准备并确认",
+    "prepareFailed": "整合包解析失败",
+    "installFailed": "安装失败",
+    "invalidResponse": "安装信息无效，请重新读取",
+    "previewExpired": "预览已失效，请重新解析",
+    "releaseFailed": "预览资源暂未释放，将自动过期",
+    "pathsFailed": "游戏目录读取失败，请关闭后重试",
+    "readHint": "先读取整合包，再选择安装内容。在线包需要先下载压缩包。",
+    "preparing": "正在读取安装信息…",
+    "format": "格式",
+    "loader": "加载器",
+    "fileCounts": "必需 {required} 项，可选 {optional} 项，客户端不适用 {unsupported} 项",
+    "hmclLimit": "此格式当前不会解析包内的加载器配置，请确认包的要求。",
+    "multimcLimit": "按声明的版本重新安装加载器，不应用 MultiMC 自定义补丁。",
+    "legacyLimit": "此包整体导入，不检查基础版本，也没有可选文件。",
+    "warnings": "查看 {count} 条提示",
+    "optionalFiles": "可选文件",
+    "optionalHint": "按整合包声明列出，默认全部安装；取消勾选的文件不会下载。",
+    "searchFiles": "搜索文件名或路径",
+    "selectAll": "全选",
+    "selectNone": "全不选",
+    "optionalSelected": "已选 {selected} / {total} 项可选文件",
+    "unknownSize": "大小未知",
+    "noMatches": "没有匹配的文件，已有选择保持不变",
+    "requiredFiles": "查看 {count} 项必需文件",
+    "unsupportedFiles": "查看 {count} 项客户端不适用文件",
+    "target": "安装到 {path}，实例名：{name}",
+    "selectedSummary": "将安装 {count} 项清单文件，已取消 {excluded} 项可选文件",
+    "knownSize": "已知文件大小小计：{size}；另有 {unknown} 项大小未知",
+    "sizeHint": "不含基础游戏、加载器、整合包压缩包及解压空间。",
+    "installing": "正在安装…",
+    "backgroundHint": "收起后安装继续，可在任务面板查看进度和结果。",
+    "completed": "安装完成",
+    "cancelled": "已取消",
+    "resultCounts": "已下载 {downloaded} 项，取消选择 {excluded} 项，客户端不适用 {unsupported} 项，复制包内文件 {overrides} 项",
+    "minimize": "收起",
+    "back": "上一步",
+    "continue": "确认安装信息",
+    "install": "开始安装",
+    "viewInstance": "查看实例",
+    "viewResult": "查看结果",
+    "steps": {
+      "source": "选择整合包",
+      "preparing": "读取安装信息",
+      "preview": "选择安装内容",
+      "confirm": "确认安装",
+      "installing": "安装进度",
+      "result": "安装结果"
     }
   }
 }

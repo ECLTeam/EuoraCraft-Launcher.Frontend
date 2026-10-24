@@ -81,6 +81,12 @@ export function createShowcaseTransport(): BackendTransport {
     nodes: [],
     error: null,
   }
+  let packVersionName = 'Showcase Pack'
+  let packExcludedCount = 0
+  let packSource = 'local'
+  const packPreparationId = 'c'.repeat(32)
+  const packPrepareOperationId = 'a'.repeat(32)
+  const packInstallOperationId = 'b'.repeat(32)
   let portScanCount = 0
   let connectorStartTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -1057,14 +1063,75 @@ export function createShowcaseTransport(): BackendTransport {
       case 'game_instance_files_repair':
       case 'game_instance_clone':
       case 'game_instance_export':
-      case 'game_instance_import':
         return success(demoOperation('instance_maintenance'))
       case 'game_instance_delete':
       case 'game_instance_icon_set':
       case 'game_instance_pin_order_set':
       case 'game_operation_cancel':
         return success()
+      case 'game_modpack_prepare':
+        packSource = String(payload.source)
+        return success({ operationId: packPrepareOperationId, preparationId: packPreparationId, status: 'pending' })
+      case 'game_modpack_preparation_get':
+        return success({
+          preparationId: packPreparationId,
+          status: 'ready',
+          expiresAt: Date.now() / 1000 + 1800,
+          cleanupPending: false,
+          preview: {
+            name: 'Showcase Pack',
+            format: 'mrpack',
+            source: packSource,
+            summary: '',
+            minecraftVersion: '1.21.1',
+            loader: 'fabric',
+            loaderVersion: '0.16.14',
+            files: [
+              { fileId: 'd'.repeat(32), path: 'mods/fabric-api.jar', size: 2500000, requirement: 'required' },
+              { fileId: 'e'.repeat(32), path: 'mods/sodium.jar', size: 1200000, requirement: 'optional' },
+              {
+                fileId: 'f'.repeat(32),
+                path: 'resourcepacks/Optional resource pack with a long descriptive name.zip',
+                size: null,
+                requirement: 'optional',
+              },
+              { fileId: '0'.repeat(32), path: 'mods/server-only.jar', size: 30000, requirement: 'unsupported' },
+            ],
+            warnings: [],
+          },
+        })
+      case 'game_modpack_preparation_release':
+        return success(true)
+      case 'game_modpack_install':
+        packVersionName = String(payload.new_version_id)
+        packExcludedCount = Array.isArray(payload.excluded_file_ids) ? payload.excluded_file_ids.length : 0
+        return success({ operationId: packInstallOperationId, status: 'pending' })
       case 'game_operation_get':
+        if (payload.operation_id === packPrepareOperationId)
+          return success({
+            operationId: packPrepareOperationId,
+            kind: 'modpack_prepare',
+            status: 'completed',
+            percent: 100,
+            result: { preparationId: packPreparationId },
+          })
+        if (payload.operation_id === packInstallOperationId)
+          return success({
+            operationId: packInstallOperationId,
+            kind: packSource === 'local' ? 'instance_import' : 'modpack_online_install',
+            status: 'completed',
+            percent: 100,
+            result: {
+              versionId: packVersionName,
+              format: 'mrpack',
+              downloadedFiles: 3 - packExcludedCount,
+              excludedOptionalFiles: packExcludedCount,
+              unsupportedFiles: 1,
+              overridesFiles: 2,
+              baseVersion: 'fabric-0.16.14-1.21.1',
+              warnings: [],
+            },
+          })
         return success(demoOperation('showcase'))
       case 'game_crash_list':
         return success([])

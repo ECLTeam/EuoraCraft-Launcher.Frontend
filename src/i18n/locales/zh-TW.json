@@ -1961,6 +1961,7 @@
     }
   },
   "operations": {
+    "modpack_prepare": "讀取安裝資訊",
     "unknown": "背景工作",
     "custom_download": "自訂下載",
     "instance_import": "匯入實例",
@@ -2266,6 +2267,59 @@
     "validation": {
       "missing": "路徑不存在",
       "invalid": "無法執行或識別"
+    }
+  },
+  "modpackWizard": {
+    "prepare": "解析整合包",
+    "retryPrepare": "重新解析",
+    "prepareAgain": "重新準備並確認",
+    "prepareFailed": "整合包解析失敗",
+    "installFailed": "安裝失敗",
+    "invalidResponse": "安裝資訊無效，請重新讀取",
+    "previewExpired": "預覽已失效，請重新解析",
+    "releaseFailed": "預覽資源暫未釋放，將自動到期",
+    "pathsFailed": "遊戲目錄讀取失敗，請關閉後重試",
+    "readHint": "先讀取整合包，再選擇安裝內容。線上包需要先下載壓縮包。",
+    "preparing": "正在讀取安裝資訊…",
+    "format": "格式",
+    "loader": "載入器",
+    "fileCounts": "必需 {required} 項，可選 {optional} 項，用戶端不適用 {unsupported} 項",
+    "hmclLimit": "此格式目前不會解析包內的載入器設定，請確認包的要求。",
+    "multimcLimit": "依宣告的版本重新安裝載入器，不套用 MultiMC 自訂修補。",
+    "legacyLimit": "此包整體匯入，不檢查基礎版本，也沒有可選檔案。",
+    "warnings": "檢視 {count} 則提示",
+    "optionalFiles": "可選檔案",
+    "optionalHint": "依整合包宣告列出，預設全部安裝；取消勾選的檔案不會下載。",
+    "searchFiles": "搜尋檔名或路徑",
+    "selectAll": "全選",
+    "selectNone": "全部取消",
+    "optionalSelected": "已選 {selected} / {total} 項可選檔案",
+    "unknownSize": "大小未知",
+    "noMatches": "沒有符合的檔案，既有選擇維持不變",
+    "requiredFiles": "檢視 {count} 項必需檔案",
+    "unsupportedFiles": "檢視 {count} 項用戶端不適用檔案",
+    "target": "安裝至 {path}，實例名稱：{name}",
+    "selectedSummary": "將安裝 {count} 項清單檔案，已取消 {excluded} 項可選檔案",
+    "knownSize": "已知檔案大小小計：{size}；另有 {unknown} 項大小未知",
+    "sizeHint": "不含基礎遊戲、載入器、整合包壓縮包及解壓空間。",
+    "installing": "正在安裝…",
+    "backgroundHint": "收起後安裝繼續，可在工作面板檢視進度與結果。",
+    "completed": "安裝完成",
+    "cancelled": "已取消",
+    "resultCounts": "已下載 {downloaded} 項，取消選擇 {excluded} 項，用戶端不適用 {unsupported} 項，複製包內檔案 {overrides} 項",
+    "minimize": "收起",
+    "back": "上一步",
+    "continue": "確認安裝資訊",
+    "install": "開始安裝",
+    "viewInstance": "檢視實例",
+    "viewResult": "檢視結果",
+    "steps": {
+      "source": "選擇整合包",
+      "preparing": "讀取安裝資訊",
+      "preview": "選擇安裝內容",
+      "confirm": "確認安裝",
+      "installing": "安裝進度",
+      "result": "安裝結果"
     }
   }
 }
