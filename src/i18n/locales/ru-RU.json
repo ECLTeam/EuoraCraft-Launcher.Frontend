@@ -855,9 +855,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "Особая благодарность",
+        "contributors": "Участники сообщества",
         "technologyStack": "Технологический стек",
         "licenses": "Лицензии и авторские права",
         "legal": "Юридическая информация"
+      },
+      "contributors": {
+        "description": "Спасибо всем участникам сообщества за вклад в EuoraCraft Launcher!",
+        "imageAlt": "Аватары участников сообщества EuoraCraft Launcher",
+        "loading": "Загрузка участников…",
+        "loadFailed": "Изображение участников временно недоступно",
+        "retry": "Повторить"
       },
       "version": {
         "label": "Версия лаунчера",

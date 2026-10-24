@@ -855,9 +855,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "Besonderer Dank",
+        "contributors": "Mitwirkende aus der Community",
         "technologyStack": "Technologie-Stack",
         "licenses": "Lizenzen & Urheberrechtshinweise",
         "legal": "Rechtliche Hinweise"
+      },
+      "contributors": {
+        "description": "Vielen Dank an alle Mitwirkenden aus der Community für eure Beiträge zu EuoraCraft Launcher!",
+        "imageAlt": "Avatare der Mitwirkenden an EuoraCraft Launcher",
+        "loading": "Mitwirkende werden geladen…",
+        "loadFailed": "Das Bild der Mitwirkenden ist vorübergehend nicht verfügbar",
+        "retry": "Erneut versuchen"
       },
       "version": {
         "label": "Launcher-Version",

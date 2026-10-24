@@ -16,6 +16,9 @@ export const URLS = {
   /** 提交问题（Issue） */
   issues: 'https://github.com/ECLTeam/EuoraCraft-Launcher/issues',
 
+  /** 社区贡献者头像合成图 */
+  contributorsImage: 'https://contrib.rocks/image?repo=ECLTeam/EuoraCraft-Launcher',
+
   /** Qomicex-Public GitHub 组织 */
   qomicexPublic: 'https://github.com/Qomicex-Public',
 

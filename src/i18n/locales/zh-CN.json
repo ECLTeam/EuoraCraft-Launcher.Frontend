@@ -863,9 +863,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "特别鸣谢",
+        "contributors": "社区贡献者",
         "technologyStack": "技术栈",
         "licenses": "许可与版权声明",
         "legal": "法律信息"
+      },
+      "contributors": {
+        "description": "感谢所有社区贡献者对 EuoraCraft Launcher 的贡献！",
+        "imageAlt": "EuoraCraft Launcher 社区贡献者头像",
+        "loading": "正在加载贡献者…",
+        "loadFailed": "贡献者图片暂时无法加载",
+        "retry": "重试"
       },
       "version": {
         "label": "启动器版本",

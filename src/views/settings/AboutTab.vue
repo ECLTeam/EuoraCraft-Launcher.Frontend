@@ -69,6 +69,37 @@
       </div>
     </div>
 
+    <!-- 社区贡献者 -->
+    <div class="about-card community-contributors">
+      <div class="card-title">{{ t('settings.aboutTab.sections.contributors') }}</div>
+      <div class="card-body">
+        <p class="contributors-message">{{ t('settings.aboutTab.contributors.description') }}</p>
+        <img
+          v-if="contributorsImageState !== 'error'"
+          v-show="contributorsImageState === 'loaded'"
+          :key="contributorsImageAttempt"
+          ref="contributorsImage"
+          class="contributors-image"
+          :src="URLS.contributorsImage"
+          :alt="t('settings.aboutTab.contributors.imageAlt')"
+          @load="finishContributorsImage($event, 'loaded')"
+          @error="finishContributorsImage($event, 'error')"
+        />
+        <UiLoading
+          v-if="contributorsImageState === 'loading'"
+          mode="inline"
+          size="sm"
+          :label="t('settings.aboutTab.contributors.loading')"
+        />
+        <div v-else-if="contributorsImageState === 'error'" class="contributors-status" role="status">
+          <span>{{ t('settings.aboutTab.contributors.loadFailed') }}</span>
+          <button type="button" class="about-btn" @click="retryContributorsImage">
+            {{ t('settings.aboutTab.contributors.retry') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 技术栈 -->
     <div class="about-card">
       <div class="card-title">{{ t('settings.aboutTab.sections.technologyStack') }}</div>
@@ -121,12 +152,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onMounted, ref, type Ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { launcherInfoQuery } from '@/app/data'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import AboutEntryRow from '@/components/settings/AboutEntryRow.vue'
 import UiIcon from '@/components/ui/Icon.vue'
+import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
@@ -136,6 +168,54 @@ import type { LauncherInfo, UpdateCheckResult } from '@/types/system'
 import { openExternalUrl } from '@/utils/openExternal'
 
 const { t } = useI18n()
+
+const contributorsImage = ref<HTMLImageElement | null>(null)
+const contributorsImageState = ref<'loading' | 'loaded' | 'error'>('loading')
+const contributorsImageAttempt = ref(0)
+let contributorsImageTimeout: ReturnType<typeof setTimeout> | undefined
+let hasUnmounted = false
+
+function clearContributorsImageTimeout(): void {
+  clearTimeout(contributorsImageTimeout)
+  contributorsImageTimeout = undefined
+}
+
+watch(
+  contributorsImage,
+  (image) => {
+    clearContributorsImageTimeout()
+    if (!image || contributorsImageState.value !== 'loading') return
+    if (image.complete && image.naturalWidth > 0) {
+      contributorsImageState.value = 'loaded'
+      return
+    }
+    contributorsImageTimeout = setTimeout(() => {
+      if (!hasUnmounted && contributorsImage.value === image && contributorsImageState.value === 'loading') {
+        contributorsImageState.value = 'error'
+      }
+    }, 20_000)
+  },
+  { flush: 'post' }
+)
+
+function finishContributorsImage(event: Event, state: 'loaded' | 'error'): void {
+  // 重试会替换图片元素；上一轮的迟到事件不能覆盖当前加载结果。
+  if (hasUnmounted || event.currentTarget !== contributorsImage.value || contributorsImageState.value !== 'loading')
+    return
+  clearContributorsImageTimeout()
+  contributorsImageState.value = state
+}
+
+function retryContributorsImage(): void {
+  if (contributorsImageState.value !== 'error') return
+  contributorsImageState.value = 'loading'
+  contributorsImageAttempt.value += 1
+}
+
+onBeforeUnmount(() => {
+  hasUnmounted = true
+  clearContributorsImageTimeout()
+})
 
 const launcherVersion = inject<Readonly<Ref<string>>>('launcherVersion')
 const launcherVersionType = inject<Readonly<Ref<'alpha' | 'beta' | 'rc' | 'release'>>>('launcherVersionType')

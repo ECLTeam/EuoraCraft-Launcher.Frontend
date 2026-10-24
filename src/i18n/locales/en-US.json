@@ -863,9 +863,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "Special Thanks",
+        "contributors": "Community Contributors",
         "technologyStack": "Technology Stack",
         "licenses": "Licenses & Copyright",
         "legal": "Legal Info"
+      },
+      "contributors": {
+        "description": "Thank you to all community contributors for your contributions to EuoraCraft Launcher!",
+        "imageAlt": "EuoraCraft Launcher community contributor avatars",
+        "loading": "Loading contributors…",
+        "loadFailed": "The contributor image is temporarily unavailable",
+        "retry": "Retry"
       },
       "version": {
         "label": "Launcher Version",

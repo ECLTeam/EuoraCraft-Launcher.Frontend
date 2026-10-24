@@ -26,6 +26,35 @@
   padding: 11px 18px 18px;
 }
 
+.contributors-message {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.contributors-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.contributors-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.contributors-status .about-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .launcher-summary {
   display: grid;
   grid-template-columns: 36px 1fr auto;

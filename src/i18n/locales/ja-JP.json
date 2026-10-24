@@ -855,9 +855,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "特別感謝",
+        "contributors": "コミュニティの貢献者",
         "technologyStack": "技術スタック",
         "licenses": "ライセンスと著作権表示",
         "legal": "法的情報"
+      },
+      "contributors": {
+        "description": "EuoraCraft Launcher に貢献してくださったコミュニティの皆様に感謝します！",
+        "imageAlt": "EuoraCraft Launcher のコミュニティ貢献者のアバター",
+        "loading": "貢献者を読み込み中…",
+        "loadFailed": "貢献者の画像を一時的に読み込めません",
+        "retry": "再試行"
       },
       "version": {
         "label": "ランチャーバージョン",

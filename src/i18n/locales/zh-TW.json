@@ -855,9 +855,17 @@
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "特別鳴謝",
+        "contributors": "社群貢獻者",
         "technologyStack": "技術棧",
         "licenses": "許可與版權宣告",
         "legal": "法律資訊"
+      },
+      "contributors": {
+        "description": "感謝所有社群貢獻者對 EuoraCraft Launcher 的貢獻！",
+        "imageAlt": "EuoraCraft Launcher 社群貢獻者頭像",
+        "loading": "正在載入貢獻者…",
+        "loadFailed": "暫時無法載入貢獻者圖片",
+        "retry": "重試"
       },
       "version": {
         "label": "啟動器版本",
