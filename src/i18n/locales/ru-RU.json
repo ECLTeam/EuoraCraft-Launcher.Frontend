@@ -1,4 +1,8 @@
 {
+  "instanceSettings": {
+    "enabledValue": "Включено",
+    "disabledValue": "Выключено"
+  },
   "app": {
     "title": "EuoraCraft Launcher",
     "loading": "Загрузка...",
@@ -491,7 +495,7 @@
       "saveSettingsFailed": "Не удалось сохранить настройки экземпляра",
       "profileSaveFailed": "Не удалось сохранить данные экземпляра",
       "invalidMemory": "Объём памяти должен быть от 512 до 65536 МБ",
-      "javaPathRequired": "Выберите исполняемый файл Java",
+      "javaPathRequired": "Выберите доступную среду Java",
       "javaSelectFailed": "Не удалось выбрать Java",
       "javaPathPlaceholder": "Выберите исполняемый файл Java...",
       "jvmArgsPlaceholder": "Например: -XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -499,9 +503,10 @@
       "placeholder": "Скоро будет доступно"
     },
     "mods": {
-      "title": "Управление модами",
+      "title": "Моды",
       "searchPlaceholder": "Поиск модов...",
       "addMod": "Добавить мод",
+      "diagnosticSummary": "Уведомлений о совместимости: {count}",
       "noMods": "Модов пока нет",
       "loaderNotSupported": "Текущий загрузчик не поддерживает моды",
       "addOne": "Добавить?",
@@ -1108,6 +1113,9 @@
     "javaManualDesc": "Вручную указать путь к исполняемому файлу Java",
     "javaPath": "Путь к Java",
     "javaPathDesc": "Выберите используемую версию Java",
+    "javaEmpty": "Нет доступной среды Java. Добавьте или установите её в управлении Java.",
+    "javaUnavailable": "Выбранная Java недоступна. Выберите среду в управлении Java: {path}",
+    "javaManagedHint": "Выберите включённую и проверенную среду в управлении Java",
     "javaPathPlaceholder": "Выберите Java",
     "javaBrowse": "Обзор",
     "gameDownloadSource": "Источник загрузки игры",

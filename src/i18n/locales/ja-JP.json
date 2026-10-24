@@ -1,4 +1,8 @@
 {
+  "instanceSettings": {
+    "enabledValue": "オン",
+    "disabledValue": "オフ"
+  },
   "app": {
     "title": "EuoraCraft Launcher",
     "loading": "読み込み中...",
@@ -491,7 +495,7 @@
       "saveSettingsFailed": "インスタンス設定の保存に失敗しました",
       "profileSaveFailed": "インスタンス情報の保存に失敗しました",
       "invalidMemory": "メモリーサイズは 512～65536 MB の間である必要があります",
-      "javaPathRequired": "Java 実行ファイルを選択してください",
+      "javaPathRequired": "利用可能な Java ランタイムを選択してください",
       "javaSelectFailed": "Java の選択に失敗しました",
       "javaPathPlaceholder": "Java 実行ファイルを選択...",
       "jvmArgsPlaceholder": "例：-XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -499,9 +503,10 @@
       "placeholder": "機能は近日提供予定"
     },
     "mods": {
-      "title": "Mod 管理",
+      "title": "Mod",
       "searchPlaceholder": "Mod を検索...",
       "addMod": "Mod を追加",
+      "diagnosticSummary": "互換性に関する通知：{count} 件",
       "noMods": "Mod はありません",
       "loaderNotSupported": "現在のローダーは Mod に対応していません",
       "addOne": "追加しますか？",
@@ -1108,6 +1113,9 @@
     "javaManualDesc": "Java 実行ファイルのパスを手動指定",
     "javaPath": "Java パス",
     "javaPathDesc": "使用する Java バージョンを選択",
+    "javaEmpty": "利用可能な Java がありません。Java 管理で追加またはインストールしてください。",
+    "javaUnavailable": "選択した Java は利用できません。Java 管理から選び直してください：{path}",
+    "javaManagedHint": "Java 管理から有効かつ検証済みのランタイムを選択します",
     "javaPathPlaceholder": "Java を選択してください",
     "javaBrowse": "参照",
     "gameDownloadSource": "ゲームのダウンロード元",

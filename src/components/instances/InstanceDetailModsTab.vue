@@ -41,7 +41,7 @@
           t('versions.mods.count', { count: filteredMods.length })
         }}</span>
         <NButton size="small" type="primary" @click="emit('openOnlineSearch')">
-          <template #icon><UiIcon name="search" :size="14" /></template>
+          <template #icon><UiIcon name="plus" :size="14" /></template>
           {{ t('versions.mods.addMod') }}
         </NButton>
         <NButton quaternary circle size="small" :title="t('versions.mods.openFolder')" @click="handleOpenModsFolder">
@@ -68,16 +68,35 @@
                 <UiIcon v-else name="cube" :size="17" />
               </span>
               <div class="mod-list-title">
-                <strong>{{ modDisplayName(mod) }}</strong>
-                <span v-if="hasTranslatedName(mod)" class="mod-original-name">{{ mod.name }}</span>
-                <span class="mod-list-filename" :title="mod.filename">{{ mod.filename }}</span>
-                <span class="mod-list-metadata">{{ [mod.version, mod.author].filter(Boolean).join(' · ') }}</span>
-                <ModDiagnostics
-                  :diagnostics="mod.diagnostics"
-                  :busy="modTogglePending.size > 0"
-                  @enable="enableProvider"
-                  @search="searchDependency"
-                />
+                <div class="mod-list-name">
+                  <strong :title="[modDisplayName(mod), mod.name].filter(Boolean).join(' · ')">{{
+                    modDisplayName(mod)
+                  }}</strong>
+                  <details
+                    v-if="mod.diagnostics?.length"
+                    class="mod-diagnostic-details"
+                    @keydown.esc.stop.prevent="closeDiagnostics"
+                  >
+                    <summary :class="{ 'has-error': mod.diagnostics.some((item) => item.severity === 'error') }">
+                      <UiIcon name="alert-triangle" :size="13" />
+                      {{ t('versions.mods.diagnosticSummary', { count: mod.diagnostics.length }) }}
+                    </summary>
+                    <ModDiagnostics
+                      :diagnostics="mod.diagnostics"
+                      :busy="modTogglePending.size > 0"
+                      @enable="enableProvider"
+                      @search="searchDependency"
+                    />
+                  </details>
+                </div>
+                <span class="mod-list-metadata" :title="modMetadata(mod)"
+                  ><span class="mod-list-filename">{{ mod.filename }}</span
+                  >{{
+                    [mod.version, mod.author].filter(Boolean).length
+                      ? ' · ' + [mod.version, mod.author].filter(Boolean).join(' · ')
+                      : ''
+                  }}</span
+                >
               </div>
             </div>
 
@@ -114,7 +133,7 @@
         </div>
         <template v-if="modSupported" #empty-actions>
           <NButton size="small" type="primary" @click="emit('openOnlineSearch')">
-            <template #icon><UiIcon name="search" :size="14" /></template>
+            <template #icon><UiIcon name="plus" :size="14" /></template>
             {{ t('versions.mods.addMod') }}
           </NButton>
         </template>
@@ -163,6 +182,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const message = useLauncherMessage()
+
+function modMetadata(mod: ModItem): string {
+  return [mod.filename, mod.version, mod.author].filter(Boolean).join(' · ')
+}
+function closeDiagnostics(event: KeyboardEvent): void {
+  if (!(event.currentTarget instanceof HTMLDetailsElement)) return
+  event.currentTarget.open = false
+  event.currentTarget.querySelector('summary')?.focus()
+}
 
 const mods = ref<ModItem[]>([])
 const modsLoading = ref(false)
@@ -302,10 +330,6 @@ async function handleOpenModsFolder() {
 
 function modDisplayName(mod: ModItem): string {
   return mod.display_name || mod.name || mod.filename.replace(/\.(jar|disabled)$/, '')
-}
-
-function hasTranslatedName(mod: ModItem): boolean {
-  return Boolean(mod.display_name && mod.name && mod.display_name !== mod.name)
 }
 
 function searchDependency(query: string) {

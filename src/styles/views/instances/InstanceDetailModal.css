@@ -611,17 +611,58 @@
   align-items: center;
   gap: 12px;
   min-height: 58px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-control);
+  border-radius: 0;
   transition: background var(--duration-fast) var(--ease-emphasized);
 }
 .mod-list-metadata {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ecl-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.mod-list-row:last-child {
+  border-bottom: 0;
+}
+.mod-list-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.mod-list-name > strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+.mod-diagnostic-details {
+  min-width: 0;
+  color: var(--warning);
+  font-size: 11px;
+}
+.mod-diagnostic-details[open] {
+  flex-basis: 100%;
+}
+.mod-diagnostic-details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  list-style: none;
+}
+.mod-diagnostic-details > summary.has-error {
+  color: var(--error);
+}
+.mod-diagnostic-details > summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.instance-memory-input {
+  width: 130px;
 }
 .mod-list-row:hover {
   background: var(--ecl-hover);

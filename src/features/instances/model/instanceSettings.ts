@@ -1,4 +1,5 @@
-import type { GameConfig, GameRenderer } from '@/types/config'
+import type { GameConfig, GameRenderer, InstanceIsolationPolicy } from '@/types/config'
+import type { ScannedVersion } from '@/types/instances'
 export interface VersionSettingsTarget {
   versionId: string
   path: string
@@ -72,6 +73,62 @@ export const DEFAULT_VERSION_SETTINGS: Readonly<VersionLaunchSettings> = {
 
 export function createDefaultVersionSettings(): VersionLaunchSettings {
   return { ...DEFAULT_VERSION_SETTINGS, commandOverrides: [] }
+}
+
+export function hasInstanceLaunchOverrides(settings: VersionLaunchSettings): boolean {
+  if (settings.javaMode !== 'inherit' || settings.memoryMode !== 'inherit' || settings.isolationMode !== 'inherit')
+    return true
+  if (settings.launcherVisibility !== 'inherit' || settings.commandOverrides.length > 0) return true
+  if (settings.jvmArgs.trim() || settings.gameArgs.trim() || settings.preLaunchCommand !== null) return true
+  return [
+    settings.lockMemory,
+    settings.processPriority,
+    settings.width,
+    settings.height,
+    settings.fullscreen,
+    settings.renderer,
+    settings.preferHighPerformanceGpu,
+    settings.useJavaExe,
+    settings.disableCrashAnalysis,
+  ].some((value) => value !== null)
+}
+
+export function resolveRuntimeAutomatic(mode: VersionLaunchSettings['javaMode'], globalAutomatic: boolean): boolean {
+  return mode === 'inherit' ? globalAutomatic : mode === 'auto'
+}
+
+export function javaSelectionOverride(
+  automatic: boolean,
+  path: string,
+  globalAutomatic: boolean,
+  globalPath: string
+): Pick<VersionLaunchSettings, 'javaMode' | 'javaPath'> {
+  const followsGlobal = automatic === globalAutomatic && (automatic || path === globalPath)
+  let javaMode: VersionLaunchSettings['javaMode'] = 'inherit'
+  if (!followsGlobal) javaMode = automatic ? 'auto' : 'manual'
+  return { javaMode, javaPath: automatic ? '' : path }
+}
+
+export function memoryAllocationOverride(
+  automatic: boolean,
+  memory: number,
+  globalAutomatic: boolean,
+  globalMemory: number
+): Pick<VersionLaunchSettings, 'memoryMode' | 'memory'> {
+  const followsGlobal = automatic === globalAutomatic && (automatic || memory === globalMemory)
+  let memoryMode: VersionLaunchSettings['memoryMode'] = 'inherit'
+  if (!followsGlobal) memoryMode = automatic ? 'auto' : 'manual'
+  return { memoryMode, memory }
+}
+
+export function globalInstanceIsolation(policy: InstanceIsolationPolicy, version: ScannedVersion | null): boolean {
+  const modded = (version?.primaryLoader || 'vanilla').toLowerCase() !== 'vanilla'
+  const nonRelease = ['snapshot', 'old_alpha', 'old_beta', 'april_fools'].includes(version?.versionType || 'release')
+  if (policy === 'disabled') return false
+  if (policy === 'all') return true
+  if (policy === 'modded_only') return modded
+  if (policy === 'non_release_only') return nonRelease
+  return modded || nonRelease
 }
 
 export function createVersionSettingsKey(target: VersionSettingsTarget): string {

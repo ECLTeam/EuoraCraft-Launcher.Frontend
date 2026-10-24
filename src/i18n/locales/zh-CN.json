@@ -499,7 +499,7 @@
       "saveSettingsFailed": "保存实例设置失败",
       "profileSaveFailed": "保存实例资料失败",
       "invalidMemory": "内存大小必须在 512–65536 MB 之间",
-      "javaPathRequired": "请选择 Java 可执行文件",
+      "javaPathRequired": "请选择可用的 Java 运行时",
       "javaSelectFailed": "选择 Java 失败",
       "javaPathPlaceholder": "选择 Java 可执行文件...",
       "jvmArgsPlaceholder": "例如：-XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -507,9 +507,10 @@
       "placeholder": "功能即将推出"
     },
     "mods": {
-      "title": "模组管理",
+      "title": "模组",
       "searchPlaceholder": "搜索模组...",
       "addMod": "添加模组",
+      "diagnosticSummary": "{count} 条兼容性提示",
       "noMods": "暂无模组",
       "loaderNotSupported": "当前加载器不支持模组",
       "addOne": "添加一个？",
@@ -1116,6 +1117,9 @@
     "javaManualDesc": "手动指定 Java 可执行文件路径",
     "javaPath": "Java 路径",
     "javaPathDesc": "选择要使用的 Java 版本",
+    "javaEmpty": "暂无可用 Java，请在 Java 管理中添加或安装。",
+    "javaUnavailable": "当前 Java 不可用，请从 Java 管理清单重新选择：{path}",
+    "javaManagedHint": "从 Java 管理清单中选择已启用且验证有效的运行时",
     "javaPathPlaceholder": "请选择 Java",
     "javaBrowse": "浏览",
     "gameDownloadSource": "游戏下载源",
@@ -1964,6 +1968,8 @@
     "manual": "手动指定",
     "custom": "此实例独立设置（允许留空）",
     "effectiveGlobal": "全局当前值：{value}",
+    "enabledValue": "开启",
+    "disabledValue": "关闭",
     "empty": "未设置"
   },
   "advanced": {

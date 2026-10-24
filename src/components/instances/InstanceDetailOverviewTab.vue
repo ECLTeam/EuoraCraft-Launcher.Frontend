@@ -43,6 +43,18 @@
     </div>
   </div>
 
+  <div v-if="isWindows" class="actions-card instance-shortcuts">
+    <div class="actions-card__header">{{ t('advanced.shortcutTitle') }}</div>
+    <div class="overview-actions">
+      <NButton :loading="shortcutCreating" :disabled="shortcutCreating" @click="emit('createShortcut', false)">
+        <template #icon><UiIcon name="external-link" :size="15" /></template>{{ t('advanced.shortcutDesktop') }}
+      </NButton>
+      <NButton :disabled="shortcutCreating" @click="emit('createShortcut', true)">{{
+        t('advanced.shortcutChoose')
+      }}</NButton>
+    </div>
+  </div>
+
   <div class="actions-card">
     <div class="actions-card__header">{{ t('versions.detail.quickActions') }}</div>
     <div class="overview-actions">
@@ -94,9 +106,11 @@ defineProps<{
   runStats: VersionRunStats
   statsLoading: boolean
   crashAnalyzing: boolean
+  shortcutCreating: boolean
 }>()
 
 const emit = defineEmits<{
+  createShortcut: [chooseLocation: boolean]
   launch: []
   openFolder: []
   analyzeCrash: []
@@ -105,6 +119,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const isWindows = window.navigator.userAgent.toLowerCase().includes('windows')
 </script>
 
 <style scoped src="@/styles/views/instances/InstanceDetailModal.css"></style>

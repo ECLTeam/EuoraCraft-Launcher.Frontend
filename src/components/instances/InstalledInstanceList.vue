@@ -257,7 +257,9 @@ const actionOptions = computed<DropdownOption[]>(() => [
     key: 'manage',
     icon: icon('layout-grid'),
     children: [
-      ...(hasModLoader(menuVersion.value) ? [{ label: 'Mod 管理', key: 'mods', icon: icon('cube') }] : []),
+      ...(hasModLoader(menuVersion.value)
+        ? [{ label: t('versions.mods.title'), key: 'mods', icon: icon('cube') }]
+        : []),
       { label: '存档管理', key: 'worlds', icon: icon('globe') },
       { label: '截图管理', key: 'screenshots', icon: icon('photo') },
       { label: '服务器管理', key: 'servers', icon: icon('server') },

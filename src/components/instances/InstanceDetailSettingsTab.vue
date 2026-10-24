@@ -26,26 +26,18 @@
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.launchOptions') }}</div>
         <SettingRow :label="t('versions.detail.isolated')" :description="t('versions.detail.isolatedDesc')">
-          <NSelect
-            v-model:value="versionSettings.isolationMode"
-            :consistentMenuWidth="false"
-            :options="isolationModeOptions"
-          />
+          <NSwitch v-model:value="isolationEnabled" />
         </SettingRow>
       </div>
 
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.memoryAllocation') }}</div>
-        <SettingRow :label="t('versions.detail.memoryAllocation')" :description="inheritedDescription('memory_auto')">
-          <NSelect
-            v-model:value="versionSettings.memoryMode"
-            :consistentMenuWidth="false"
-            :options="runtimeModeOptions"
-          />
+        <SettingRow :label="t('settings.memoryAuto')" :description="inheritedDescription('memory_auto')">
+          <NSwitch v-model:value="memoryAutomatic" />
         </SettingRow>
 
         <div
-          v-if="versionSettings.memoryMode === 'manual'"
+          v-if="!memoryAutomatic"
           class="memory-manual-section"
           :style="{ '--memory-slider-progress': sliderValuePosition + '%' }"
         >
@@ -54,6 +46,14 @@
               <div class="memory-header-label">{{ t('versions.detail.memorySize') }}</div>
               <div class="memory-header-desc">{{ t('settings.memorySizeDesc') }}</div>
             </div>
+            <NInputNumber
+              v-model:value="memoryInput"
+              :min="1024"
+              :max="65536"
+              :placeholder="String(settingsStore.game.memory_size ?? 4096)"
+              :aria-label="t('versions.detail.memorySize')"
+              class="instance-memory-input"
+            />
             <output class="memory-current-value" :class="{ 'is-over-recommended': isOverRecommended }">
               {{ formatMemory(safeMemorySize) }}
             </output>
@@ -122,18 +122,22 @@
         </div>
       </div>
 
+      <SettingRow :label="t('settings.lockMemory')" :description="inheritedDescription('lock_memory')">
+        <NSwitch
+          :value="versionSettings.lockMemory ?? settingsStore.game.lock_memory ?? false"
+          @update:value="setBooleanOverride('lockMemory', 'lock_memory', $event)"
+        />
+      </SettingRow>
+
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.javaRuntime') }}</div>
-        <SettingRow :label="t('versions.detail.javaRuntime')" :description="inheritedDescription('java_auto')">
-          <NSelect
-            v-model:value="versionSettings.javaMode"
-            :consistentMenuWidth="false"
-            :options="runtimeModeOptions"
-          />
+        <SettingRow :label="t('settings.javaAuto')" :description="inheritedDescription('java_auto')">
+          <NSwitch v-model:value="javaAutomatic" />
         </SettingRow>
-        <SettingRow v-if="versionSettings.javaMode === 'manual'" :label="t('settings.javaPath')">
+        <SettingRow v-if="!javaAutomatic" :label="t('settings.javaPath')">
           <JavaRuntimeSelector
-            v-model:value="versionSettings.javaPath"
+            v-model:value="javaPathInput"
+            :inheritedValue="settingsStore.game.java_path || ''"
             :requiredMajor="version?.requiredJava"
             :gamePath="version?.path"
             :versionId="version?.versionId"
@@ -181,22 +185,13 @@
           :label="t(field.label)"
           :description="inheritedDescription(field.global)"
         >
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="
-              versionSettings[field.key] === null ? 'inherit' : versionSettings[field.key] ? 'enabled' : 'disabled'
-            "
-            :options="isolationModeOptions"
-            @update:value="versionSettings[field.key] = $event === 'inherit' ? null : $event === 'enabled'"
+          <NSwitch
+            :value="versionSettings[field.key] ?? settingsStore.game[field.global] ?? false"
+            @update:value="setBooleanOverride(field.key, field.global, $event)"
           />
         </SettingRow>
         <SettingRow :label="t('settings.processPriority')" :description="inheritedDescription('process_priority')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.processPriority || 'inherit'"
-            :options="priorityOptions"
-            @update:value="versionSettings.processPriority = $event === 'inherit' ? null : $event"
-          />
+          <NSelect v-model:value="processPriorityInput" :consistentMenuWidth="false" :options="priorityOptions" />
         </SettingRow>
         <SettingRow
           :label="t('settings.windowSize')"
@@ -204,145 +199,97 @@
         >
           <div class="instance-window-controls">
             <NInputNumber
-              v-model:value="versionSettings.width"
+              v-model:value="widthInput"
               :min="320"
               :max="16384"
-              :placeholder="t('instanceSettings.inherit')"
+              :placeholder="String(settingsStore.game.game_width ?? 854)"
             />
             <span>×</span>
             <NInputNumber
-              v-model:value="versionSettings.height"
+              v-model:value="heightInput"
               :min="240"
               :max="16384"
-              :placeholder="t('instanceSettings.inherit')"
+              :placeholder="String(settingsStore.game.game_height ?? 480)"
             />
           </div>
         </SettingRow>
         <SettingRow v-if="isWindows" :label="t('settings.renderer')" :description="inheritedDescription('renderer')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.renderer || 'inherit'"
-            :options="rendererOptions"
-            @update:value="versionSettings.renderer = $event === 'inherit' ? null : $event"
-          />
+          <NSelect v-model:value="rendererInput" :consistentMenuWidth="false" :options="rendererOptions" />
         </SettingRow>
       </div>
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.advancedOptions') }}</div>
         <SettingRow :label="t('settings.preLaunchCommand')" :description="inheritedDescription('pre_launch_command')">
-          <div class="instance-command-controls">
-            <NSelect
-              :consistentMenuWidth="false"
-              :value="versionSettings.preLaunchCommand === null ? 'inherit' : 'custom'"
-              :options="commandModeOptions"
-              @update:value="versionSettings.preLaunchCommand = $event === 'inherit' ? null : ''"
-            />
-            <NInput
-              v-if="versionSettings.preLaunchCommand !== null"
-              v-model:value="versionSettings.preLaunchCommand"
-              type="textarea"
-            />
-          </div>
+          <NInput
+            :value="versionSettings.preLaunchCommand ?? ''"
+            :placeholder="settingsStore.game.pre_launch_command || t('instanceSettings.inherit')"
+            type="textarea"
+            :autosize="{ minRows: 2, maxRows: 6 }"
+            @update:value="setPreLaunchCommand"
+          />
         </SettingRow>
         <SettingRow :label="t('settings.wrapperCommand')" :description="inheritedDescription('wrapper_command')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.commandOverrides.includes('wrapperCommand') ? 'custom' : 'inherit'"
-            :options="commandModeOptions"
-            @update:value="setCommandOverride('wrapperCommand', $event === 'custom')"
-          />
           <NInput
-            v-model:value="versionSettings.wrapperCommand"
-            :disabled="!versionSettings.commandOverrides.includes('wrapperCommand')"
+            :value="versionSettings.wrapperCommand"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.wrapperCommandPlaceholder')"
+            @update:value="setCommandText('wrapperCommand', 'wrapper_command', $event)"
           />
         </SettingRow>
         <SettingRow :label="t('settings.postExitCommand')" :description="inheritedDescription('post_exit_command')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.commandOverrides.includes('postExitCommand') ? 'custom' : 'inherit'"
-            :options="commandModeOptions"
-            @update:value="setCommandOverride('postExitCommand', $event === 'custom')"
-          />
           <NInput
-            v-model:value="versionSettings.postExitCommand"
-            :disabled="!versionSettings.commandOverrides.includes('postExitCommand')"
+            :value="versionSettings.postExitCommand"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.postExitCommandPlaceholder')"
+            @update:value="setCommandText('postExitCommand', 'post_exit_command', $event)"
           />
         </SettingRow>
         <SettingRow :label="t('settings.envVars')" :description="inheritedDescription('env_vars')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.commandOverrides.includes('envVars') ? 'custom' : 'inherit'"
-            :options="commandModeOptions"
-            @update:value="setCommandOverride('envVars', $event === 'custom')"
-          />
           <NInput
-            v-model:value="versionSettings.envVars"
-            :disabled="!versionSettings.commandOverrides.includes('envVars')"
+            :value="versionSettings.envVars"
             class="argument-input"
             type="textarea"
             :autosize="{ minRows: 3, maxRows: 8 }"
             :placeholder="t('settings.envVarsPlaceholder')"
+            @update:value="setCommandText('envVars', 'env_vars', $event)"
           />
         </SettingRow>
         <SettingRow :label="t('settings.windowTitle')" :description="inheritedDescription('window_title_template')">
-          <NSelect
-            :consistentMenuWidth="false"
-            :value="versionSettings.commandOverrides.includes('windowTitle') ? 'custom' : 'inherit'"
-            :options="commandModeOptions"
-            @update:value="setCommandOverride('windowTitle', $event === 'custom')"
-          />
           <NInput
-            v-model:value="versionSettings.windowTitle"
-            :disabled="!versionSettings.commandOverrides.includes('windowTitle')"
+            :value="versionSettings.windowTitle"
+            @update:value="setCommandText('windowTitle', 'window_title_template', $event)"
           />
         </SettingRow>
         <SettingRow
           :label="t('settings.launcherVisibility')"
           :description="inheritedDescription('launcher_visibility')"
         >
-          <NSelect
-            v-model:value="versionSettings.launcherVisibility"
-            :consistentMenuWidth="false"
-            :options="visibilityOptions"
-          />
+          <NSelect v-model:value="launcherVisibilityInput" :consistentMenuWidth="false" :options="visibilityOptions" />
         </SettingRow>
       </div>
-    </SettingSection>
-    <SettingSection v-if="isWindows" :title="t('advanced.shortcutTitle')">
-      <SettingRow :label="t('advanced.shortcutTitle')" :description="t('advanced.shortcutHint')">
-        <div class="instance-window-controls">
-          <NButton :loading="shortcutCreating" :disabled="shortcutCreating" @click="createShortcut(false)">{{
-            t('advanced.shortcutDesktop')
-          }}</NButton>
-          <NButton :disabled="shortcutCreating" @click="createShortcut(true)">{{
-            t('advanced.shortcutChoose')
-          }}</NButton>
-        </div>
-      </SettingRow>
     </SettingSection>
   </template>
 </template>
 
 <script setup lang="ts">
-import { NButton, NInput, NInputNumber, NSelect } from 'naive-ui'
+import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import backend from '@/api/client'
-import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
 import { settingsSaveSession } from '@/features/instances/model/instanceSaveSession'
 import {
   createDefaultVersionSettings,
+  resolveRuntimeAutomatic,
+  javaSelectionOverride,
+  memoryAllocationOverride,
+  globalInstanceIsolation,
+  hasInstanceLaunchOverrides,
   normalizeVersionSettings,
   type VersionSettingsTarget,
   type VersionLaunchSettings,
@@ -365,73 +312,27 @@ const props = defineProps<{
 const { t } = useI18n()
 const message = useLauncherMessage()
 
-const shortcutCreating = ref(false)
-async function createShortcut(chooseLocation: boolean) {
-  if (!props.version) return
-  const target = { game_path: props.version.path, version_id: props.version.versionId }
-  shortcutCreating.value = true
-  try {
-    let outputPath: string | undefined
-    if (chooseLocation) {
-      const selected = unwrapResponse(
-        await backend.command('select_save_file', {
-          purpose: 'instance-shortcut',
-          default_name: `${props.version.alias || props.version.versionId}.lnk`.replace(/[<>:"/\\|?*]/g, '_'),
-        }),
-        t('advanced.shortcutTitle')
-      )
-      if (!selected.path) return
-      outputPath = selected.path
-    }
-    unwrapResponse(
-      await backend.command('game_instance_shortcut_create', { ...target, output_path: outputPath }),
-      t('advanced.shortcutTitle')
-    )
-    message.success(t('advanced.shortcutCreated'))
-  } catch (cause) {
-    message.error(cause instanceof Error ? cause.message : String(cause))
-  } finally {
-    shortcutCreating.value = false
-  }
-}
-
 const visibilityOptions = [
-  { value: 'inherit', label: t('settings.visibilityOptions.inherit') },
   { value: 'none', label: t('settings.visibilityOptions.none') },
   { value: 'minimize', label: t('settings.visibilityOptions.minimize') },
   { value: 'quit', label: t('settings.visibilityOptions.quit') },
 ]
 
-const isolationModeOptions = [
-  { value: 'inherit', label: t('versions.detail.isolationModes.inherit') },
-  { value: 'enabled', label: t('versions.detail.isolationModes.enabled') },
-  { value: 'disabled', label: t('versions.detail.isolationModes.disabled') },
-]
-
 const settingsStore = useSettingsStore()
 const isWindows = window.navigator.userAgent.toLowerCase().includes('windows')
-const runtimeModeOptions = computed(() =>
-  ['inherit', 'auto', 'manual'].map((value) => ({ value, label: t(`instanceSettings.${value}`) }))
-)
-const commandModeOptions = computed(() =>
-  ['inherit', 'custom'].map((value) => ({ value, label: t(`instanceSettings.${value}`) }))
-)
 const priorityOptions = computed(() => [
-  { value: 'inherit', label: t('instanceSettings.inherit') },
   ...['idle', 'below_normal', 'normal', 'above_normal', 'high'].map((value) => ({
     value,
     label: t(`settings.processPriorityOptions.${value}`),
   })),
 ])
 const rendererOptions = computed(() => [
-  { value: 'inherit', label: t('instanceSettings.inherit') },
   ...['default', 'software', 'directx12', 'vulkan'].map((value) => ({
     value,
     label: t(`settings.rendererOptions.${value}`),
   })),
 ])
 const booleanFields = computed(() => [
-  { key: 'lockMemory' as const, global: 'lock_memory' as const, label: 'settings.lockMemory' },
   { key: 'fullscreen' as const, global: 'fullscreen' as const, label: 'settings.fullscreen' },
   {
     key: 'disableCrashAnalysis' as const,
@@ -458,18 +359,131 @@ function inheritedDescription(key: keyof typeof settingsStore.game) {
       ? t('instanceSettings.auto')
       : formatMemory(settingsStore.game.memory_size ?? 4096)
   else if (typeof settingsStore.game[key] === 'boolean')
-    value = t(
-      settingsStore.game[key] ? 'versions.detail.isolationModes.enabled' : 'versions.detail.isolationModes.disabled'
-    )
+    value = t(settingsStore.game[key] ? 'instanceSettings.enabledValue' : 'instanceSettings.disabledValue')
+  else if (key === 'jvm_args') value = settingsStore.game.jvm_args?.join(' ') || t('instanceSettings.empty')
   else value = String(settingsStore.game[key] || t('instanceSettings.empty'))
   return t('instanceSettings.effectiveGlobal', { value })
 }
-function setCommandOverride(key: VersionLaunchSettings['commandOverrides'][number], enabled: boolean) {
-  versionSettings.commandOverrides = enabled
-    ? [...new Set([...versionSettings.commandOverrides, key])]
-    : versionSettings.commandOverrides.filter((item) => item !== key)
-}
 const versionSettings = reactive(createDefaultVersionSettings())
+const javaAutomatic = computed({
+  get: () => resolveRuntimeAutomatic(versionSettings.javaMode, settingsStore.game.java_auto ?? true),
+  set: (value: boolean) =>
+    Object.assign(
+      versionSettings,
+      javaSelectionOverride(
+        value,
+        javaPathInput.value || settingsStore.game.java_path || '',
+        settingsStore.game.java_auto ?? true,
+        settingsStore.game.java_path || ''
+      )
+    ),
+})
+const javaPathInput = computed({
+  get: () => (versionSettings.javaMode === 'manual' ? versionSettings.javaPath : ''),
+  set: (value: string) => {
+    if (!value.trim()) Object.assign(versionSettings, { javaMode: 'inherit', javaPath: '' })
+    else
+      Object.assign(
+        versionSettings,
+        javaSelectionOverride(false, value, settingsStore.game.java_auto ?? true, settingsStore.game.java_path || '')
+      )
+  },
+})
+const memoryAutomatic = computed({
+  get: () => resolveRuntimeAutomatic(versionSettings.memoryMode, settingsStore.game.memory_auto ?? true),
+  set: (value: boolean) =>
+    Object.assign(
+      versionSettings,
+      memoryAllocationOverride(
+        value,
+        versionSettings.memoryMode === 'inherit' ? (settingsStore.game.memory_size ?? 4096) : versionSettings.memory,
+        settingsStore.game.memory_auto ?? true,
+        settingsStore.game.memory_size ?? 4096
+      )
+    ),
+})
+const memoryInput = computed({
+  get: () => (versionSettings.memoryMode === 'manual' ? versionSettings.memory : null),
+  set: (value: number | null) => {
+    if (value === null) versionSettings.memoryMode = 'inherit'
+    else
+      Object.assign(
+        versionSettings,
+        memoryAllocationOverride(
+          false,
+          value,
+          settingsStore.game.memory_auto ?? true,
+          settingsStore.game.memory_size ?? 4096
+        )
+      )
+  },
+})
+const inheritedIsolation = computed(() =>
+  globalInstanceIsolation(settingsStore.game.instance_isolation_policy ?? 'all', props.version)
+)
+const isolationEnabled = computed({
+  get: () =>
+    versionSettings.isolationMode === 'inherit'
+      ? inheritedIsolation.value
+      : versionSettings.isolationMode === 'enabled',
+  set: (value: boolean) => {
+    versionSettings.isolationMode = value === inheritedIsolation.value ? 'inherit' : value ? 'enabled' : 'disabled'
+  },
+})
+type BooleanSetting = 'lockMemory' | 'fullscreen' | 'disableCrashAnalysis' | 'preferHighPerformanceGpu' | 'useJavaExe'
+type GlobalBooleanSetting =
+  'lock_memory' | 'fullscreen' | 'disable_crash_analysis' | 'prefer_high_performance_gpu' | 'use_java_exe'
+function setBooleanOverride(key: BooleanSetting, globalKey: GlobalBooleanSetting, value: boolean): void {
+  versionSettings[key] = value === (settingsStore.game[globalKey] ?? false) ? null : value
+}
+const processPriorityInput = computed({
+  get: () => versionSettings.processPriority ?? settingsStore.game.process_priority ?? 'normal',
+  set: (value: NonNullable<VersionLaunchSettings['processPriority']>) => {
+    versionSettings.processPriority = value === (settingsStore.game.process_priority ?? 'normal') ? null : value
+  },
+})
+const rendererInput = computed({
+  get: () => versionSettings.renderer ?? settingsStore.game.renderer ?? 'default',
+  set: (value: NonNullable<VersionLaunchSettings['renderer']>) => {
+    versionSettings.renderer = value === (settingsStore.game.renderer ?? 'default') ? null : value
+  },
+})
+const launcherVisibilityInput = computed({
+  get: () =>
+    versionSettings.launcherVisibility === 'inherit'
+      ? (settingsStore.game.launcher_visibility ?? 'none')
+      : versionSettings.launcherVisibility,
+  set: (value: Exclude<VersionLaunchSettings['launcherVisibility'], 'inherit'>) => {
+    versionSettings.launcherVisibility =
+      value === (settingsStore.game.launcher_visibility ?? 'none') ? 'inherit' : value
+  },
+})
+const widthInput = computed({
+  get: () => versionSettings.width,
+  set: (value: number | null) => {
+    versionSettings.width = value === (settingsStore.game.game_width ?? 854) ? null : value
+  },
+})
+const heightInput = computed({
+  get: () => versionSettings.height,
+  set: (value: number | null) => {
+    versionSettings.height = value === (settingsStore.game.game_height ?? 480) ? null : value
+  },
+})
+function setPreLaunchCommand(value: string): void {
+  versionSettings.preLaunchCommand = !value.trim() || value === settingsStore.game.pre_launch_command ? null : value
+}
+function setCommandText(
+  key: VersionLaunchSettings['commandOverrides'][number],
+  globalKey: 'wrapper_command' | 'post_exit_command' | 'env_vars' | 'window_title_template',
+  value: string
+): void {
+  const isOverride = !!value.trim() && value !== (settingsStore.game[globalKey] || '')
+  versionSettings[key] = isOverride ? value : ''
+  versionSettings.commandOverrides = versionSettings.commandOverrides.filter((item) => item !== key)
+  if (isOverride) versionSettings.commandOverrides.push(key)
+}
+
 const settingsLoading = ref(false)
 const settingsSaving = ref(false)
 const systemMemory = ref<SystemMemoryInfo>({ totalMb: 16384, usedMb: 4096, freeMb: 12288, percentUsed: 25 })
@@ -481,9 +495,21 @@ const recommendedMaxMemory = computed(() => Math.max(Math.floor(systemMemory.val
 const clampVersionMemory = (value: number) => Math.min(Math.max(value, MEMORY_MIN), maxMemory.value)
 const safeMemorySize = computed({
   // get 只保下限、不缩上限，避免存量分配值超过滑块范围时被锁死而无法调整
-  get: () => Math.max(versionSettings.memory, MEMORY_MIN),
+  get: () =>
+    Math.max(
+      versionSettings.memoryMode === 'inherit' ? (settingsStore.game.memory_size ?? 4096) : versionSettings.memory,
+      MEMORY_MIN
+    ),
   set: (value: number) => {
-    versionSettings.memory = clampVersionMemory(value)
+    Object.assign(
+      versionSettings,
+      memoryAllocationOverride(
+        false,
+        clampVersionMemory(value),
+        settingsStore.game.memory_auto ?? true,
+        settingsStore.game.memory_size ?? 4096
+      )
+    )
   },
 })
 const isOverRecommended = computed(() => versionSettings.memory > recommendedMaxMemory.value)
@@ -521,7 +547,7 @@ const formatMemory = (mb: number): string => {
 
 const savedSettingsSnapshot = ref(JSON.stringify(createDefaultVersionSettings()))
 const settingsDirty = computed(() => JSON.stringify(versionSettings) !== savedSettingsSnapshot.value)
-const isCustomized = computed(() => JSON.stringify(versionSettings) !== JSON.stringify(createDefaultVersionSettings()))
+const isCustomized = computed(() => hasInstanceLaunchOverrides(versionSettings))
 
 /** 加载/重置阶段跳过自动保存 watch */
 let skipSettingsWatch = false

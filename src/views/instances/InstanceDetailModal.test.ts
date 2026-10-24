@@ -1,8 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { NSelect } from 'naive-ui'
+import { NSwitch } from 'naive-ui'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import InstanceResourcesTab from '@/components/instances/InstanceResourcesTab.vue'
 import { instanceKey } from '@/composables/useResourceInstallTarget'
+import SettingRow from '@/features/settings/components/SettingRow.vue'
 import { i18n } from '@/i18n'
 import type { BackendMockState } from '@/test/mockBackend'
 import type { ScannedVersion } from '@/types/instances'
@@ -111,6 +112,40 @@ function mountModal(
 }
 
 describe('InstanceDetailModal', () => {
+  it('keeps the shortcut target fixed while a save dialog is open and blocks duplicate requests', async () => {
+    let finish!: (result: { success: boolean; data: { path: string } }) => void
+    const command = mock.state!.mocks.command
+    command.mockImplementation((name: string) => {
+      if (name === 'select_save_file')
+        return new Promise((resolve) => {
+          finish = resolve
+        })
+      return Promise.resolve({ success: true, data: {} })
+    })
+    const wrapper = mountModal('overview')
+    await flushPromises()
+    const overview = wrapper.findComponent({ name: 'InstanceDetailOverviewTab' })
+    overview.vm.$emit('createShortcut', true)
+    overview.vm.$emit('createShortcut', true)
+    expect(command.mock.calls.filter((call) => call[0] === 'select_save_file')).toHaveLength(1)
+    await wrapper.setProps({ version: { ...version, versionId: 'B', id: 'B' } })
+    finish({ success: true, data: { path: 'C:/Temporary/instance.lnk' } })
+    await flushPromises()
+    expect(command).toHaveBeenCalledWith('game_instance_shortcut_create', {
+      game_path: version.path,
+      version_id: version.versionId,
+      output_path: 'C:/Temporary/instance.lnk',
+    })
+  })
+  it('does not create a shortcut when choosing a location is cancelled', async () => {
+    const command = mock.state!.mocks.command
+    command.mockResolvedValue({ success: true, data: { path: null } })
+    const wrapper = mountModal('overview')
+    await flushPromises()
+    wrapper.findComponent({ name: 'InstanceDetailOverviewTab' }).vm.$emit('createShortcut', true)
+    await flushPromises()
+    expect(command.mock.calls.filter((call) => call[0] === 'game_instance_shortcut_create')).toHaveLength(0)
+  })
   it('请求删除先等待外层确认，详情保持打开', async () => {
     const wrapper = mountModal('overview')
     await flushPromises()
@@ -177,8 +212,10 @@ describe('InstanceDetailModal', () => {
     expect(wrapper.find('.version-settings-page').exists()).toBe(true)
     expect(
       wrapper
-        .findAllComponents(NSelect)
-        .filter((select) => select.props('options')?.some((option) => option.value === 'auto'))
+        .findAllComponents(SettingRow)
+        .filter((row) =>
+          [i18n.global.t('settings.javaAuto'), i18n.global.t('settings.memoryAuto')].includes(row.props('label'))
+        )
     ).toHaveLength(2)
     expect(mocks.getSettings).toHaveBeenCalledWith({
       versionId: '1.21.5',
@@ -190,7 +227,7 @@ describe('InstanceDetailModal', () => {
     const wrapper = mountModal('mods')
     await flushPromises()
 
-    expect(wrapper.findAll('.vdm-tab-button').some((button) => button.text().includes('模组管理'))).toBe(false)
+    expect(wrapper.findAll('.vdm-tab-button').some((button) => button.text().trim() === '模组')).toBe(false)
     expect(wrapper.find('.overview-page').exists()).toBe(true)
   })
 
@@ -206,7 +243,7 @@ describe('InstanceDetailModal', () => {
     const wrapper = mountModal('overview', fabricVersion)
     await flushPromises()
 
-    expect(wrapper.findAll('.vdm-tab-button').some((button) => button.text().includes('模组管理'))).toBe(true)
+    expect(wrapper.findAll('.vdm-tab-button').some((button) => button.text().trim() === '模组')).toBe(true)
   })
 
   it('switches from version settings to the compact overview page', async () => {
@@ -252,9 +289,10 @@ describe('InstanceDetailModal', () => {
     const wrapper = mountModal()
     await flushPromises()
     wrapper
-      .findAllComponents(NSelect)
-      .find((select) => select.props('options')?.some((option) => option.value === 'auto'))!
-      .vm.$emit('update:value', 'manual')
+      .findAllComponents(SettingRow)
+      .find((row) => row.props('label') === i18n.global.t('settings.memoryAuto'))!
+      .getComponent(NSwitch)
+      .vm.$emit('update:value', false)
     await wrapper.vm.$nextTick()
     await vi.advanceTimersByTimeAsync(300)
     expect(mocks.saveSettings).toHaveBeenCalledTimes(1)
@@ -276,9 +314,10 @@ describe('InstanceDetailModal', () => {
     const wrapper = mountModal()
     await flushPromises()
     wrapper
-      .findAllComponents(NSelect)
-      .find((select) => select.props('options')?.some((option) => option.value === 'auto'))!
-      .vm.$emit('update:value', 'manual')
+      .findAllComponents(SettingRow)
+      .find((row) => row.props('label') === i18n.global.t('settings.memoryAuto'))!
+      .getComponent(NSwitch)
+      .vm.$emit('update:value', false)
     await wrapper.vm.$nextTick()
     await wrapper.setProps({ visible: false })
     await flushPromises()

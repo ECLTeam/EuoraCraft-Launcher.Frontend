@@ -8,7 +8,7 @@
       <SettingRow
         v-if="!localSettings.java_auto"
         :label="t('settings.javaPath')"
-        :description="t('settings.javaPathDesc')"
+        :description="t('settings.javaManagedHint')"
       >
         <JavaRuntimeSelector :value="localSettings.java_path" @update:value="handleJavaPathChange" />
       </SettingRow>
@@ -107,6 +107,10 @@
           </div>
         </div>
       </div>
+
+      <SettingRow :label="t('settings.lockMemory')" :description="t('settings.lockMemoryDesc')">
+        <NSwitch :value="localSettings.lock_memory" @update:value="handleLockMemoryToggle" />
+      </SettingRow>
 
       <SettingRow :label="t('settings.processPriority')" :description="t('settings.processPriorityDesc')">
         <NSelect
@@ -302,10 +306,6 @@
 
       <SettingRow :label="t('settings.disableCrashAnalysis')" :description="t('settings.disableCrashAnalysisDesc')">
         <NSwitch :value="localSettings.disable_crash_analysis" @update:value="handleDisableCrashAnalysisToggle" />
-      </SettingRow>
-
-      <SettingRow :label="t('settings.lockMemory')" :description="t('settings.lockMemoryDesc')">
-        <NSwitch :value="localSettings.lock_memory" @update:value="handleLockMemoryToggle" />
       </SettingRow>
     </SettingSection>
 

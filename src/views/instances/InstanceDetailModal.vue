@@ -42,6 +42,8 @@
                 :runStats="runStats"
                 :statsLoading="statsLoading"
                 :crashAnalyzing="crashAnalyzing"
+                :shortcutCreating="shortcutCreating"
+                @createShortcut="createShortcut"
                 @launch="handleLaunch"
                 @openFolder="handleOpenFolder"
                 @analyzeCrash="handleAnalyzeCrash"
@@ -151,7 +153,8 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { launcherErrorQueue } from '@/app/runtime/errorPresentation'
+import backend from '@/api/client'
+import { launcherErrorQueue, unwrapResponse } from '@/app/runtime/errorPresentation'
 import CrashLogPickerModal from '@/components/instances/CrashLogPickerModal.vue'
 import InstanceDetailModsTab from '@/components/instances/InstanceDetailModsTab.vue'
 import InstanceDetailOverviewTab from '@/components/instances/InstanceDetailOverviewTab.vue'
@@ -208,6 +211,37 @@ const { t } = useI18n()
 const detailModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 defineExpose({ modalId: computed(() => detailModalRef.value?.modalId ?? null) })
 const message = useLauncherMessage()
+const shortcutCreating = ref(false)
+async function createShortcut(chooseLocation: boolean): Promise<void> {
+  if (!props.version || shortcutCreating.value) return
+  const version = props.version
+  const target = { game_path: version.path, version_id: version.versionId }
+  shortcutCreating.value = true
+  try {
+    let outputPath: string | undefined
+    if (chooseLocation) {
+      const selected = unwrapResponse(
+        await backend.command('select_save_file', {
+          purpose: 'instance-shortcut',
+          default_name: `${version.alias || version.versionId}.lnk`.replace(/[<>:"/\\|?*]/g, '_'),
+        }),
+        t('advanced.shortcutTitle')
+      )
+      if (!selected.path) return
+      outputPath = selected.path
+    }
+    unwrapResponse(
+      await backend.command('game_instance_shortcut_create', { ...target, output_path: outputPath }),
+      t('advanced.shortcutTitle')
+    )
+    message.success(t('advanced.shortcutCreated'))
+  } catch (cause) {
+    message.error(cause instanceof Error ? cause.message : String(cause))
+  } finally {
+    shortcutCreating.value = false
+  }
+}
+
 const router = useRouter()
 
 const visible = computed({

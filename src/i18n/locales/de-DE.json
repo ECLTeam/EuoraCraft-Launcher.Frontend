@@ -1,4 +1,8 @@
 {
+  "instanceSettings": {
+    "enabledValue": "Ein",
+    "disabledValue": "Aus"
+  },
   "app": {
     "title": "EuoraCraft Launcher",
     "loading": "Wird geladen...",
@@ -491,7 +495,7 @@
       "saveSettingsFailed": "Instanzeinstellungen konnten nicht gespeichert werden",
       "profileSaveFailed": "Instanzprofil konnte nicht gespeichert werden",
       "invalidMemory": "Die RAM-Größe muss zwischen 512 und 65536 MB liegen",
-      "javaPathRequired": "Bitte wähle eine Java-Programmdatei",
+      "javaPathRequired": "Bitte eine nutzbare Java-Laufzeit auswählen",
       "javaSelectFailed": "Java konnte nicht gewählt werden",
       "javaPathPlaceholder": "Java-Programmdatei auswählen...",
       "jvmArgsPlaceholder": "Beispiel: -XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -499,9 +503,10 @@
       "placeholder": "Funktion folgt in Kürze"
     },
     "mods": {
-      "title": "Mod-Verwaltung",
+      "title": "Mods",
       "searchPlaceholder": "Mods durchsuchen...",
       "addMod": "Mod hinzufügen",
+      "diagnosticSummary": "{count} Kompatibilitätshinweise",
       "noMods": "Keine Mods vorhanden",
       "loaderNotSupported": "Der aktuelle Loader unterstützt keine Mods",
       "addOne": "Einen hinzufügen?",
@@ -1108,6 +1113,9 @@
     "javaManualDesc": "Java-Programmpfad manuell angeben",
     "javaPath": "Java-Pfad",
     "javaPathDesc": "Zu verwendende Java-Version wählen",
+    "javaEmpty": "Keine nutzbare Java-Laufzeit. In der Java-Verwaltung hinzufügen oder installieren.",
+    "javaUnavailable": "Die gewählte Java-Laufzeit ist nicht verfügbar. Bitte neu auswählen: {path}",
+    "javaManagedHint": "Eine aktivierte und geprüfte Laufzeit aus der Java-Verwaltung wählen",
     "javaPathPlaceholder": "Bitte Java auswählen",
     "javaBrowse": "Durchsuchen",
     "gameDownloadSource": "Spiel-Download-Quelle",

@@ -499,7 +499,7 @@
       "saveSettingsFailed": "Failed to save instance settings",
       "profileSaveFailed": "Failed to save instance profile",
       "invalidMemory": "Memory must be between 512 and 65536 MB",
-      "javaPathRequired": "Select a Java executable",
+      "javaPathRequired": "Select a usable Java runtime",
       "javaSelectFailed": "Failed to select Java",
       "javaPathPlaceholder": "Select a Java executable...",
       "jvmArgsPlaceholder": "Example: -XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -507,9 +507,10 @@
       "placeholder": "Coming soon"
     },
     "mods": {
-      "title": "Mod Management",
+      "title": "Mods",
       "searchPlaceholder": "Search mods...",
       "addMod": "Add Mod",
+      "diagnosticSummary": "{count} compatibility notices",
       "noMods": "No mods available",
       "loaderNotSupported": "The current loader does not support mods",
       "addOne": "Add one?",
@@ -1116,6 +1117,9 @@
     "javaManualDesc": "Manually specify Java executable path",
     "javaPath": "Java Path",
     "javaPathDesc": "Select the Java version to use",
+    "javaEmpty": "No usable Java runtime. Add or install one in Java Management.",
+    "javaUnavailable": "The selected Java is unavailable. Choose a runtime from Java Management: {path}",
+    "javaManagedHint": "Choose an enabled and validated runtime from Java Management",
     "javaPathPlaceholder": "Please select Java",
     "javaBrowse": "Browse",
     "gameDownloadSource": "Game Download Source",
@@ -2069,6 +2073,8 @@
     "manual": "Manual",
     "custom": "Override for this instance (can be empty)",
     "effectiveGlobal": "Current global value: {value}",
+    "enabledValue": "On",
+    "disabledValue": "Off",
     "empty": "Not set"
   },
   "advanced": {

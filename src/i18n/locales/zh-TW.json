@@ -1,4 +1,8 @@
 {
+  "instanceSettings": {
+    "enabledValue": "開啟",
+    "disabledValue": "關閉"
+  },
   "app": {
     "title": "EuoraCraft Launcher",
     "loading": "載入中...",
@@ -491,7 +495,7 @@
       "saveSettingsFailed": "儲存實例設定失敗",
       "profileSaveFailed": "儲存實例資料失敗",
       "invalidMemory": "記憶體大小必須在 512–65536 MB 之間",
-      "javaPathRequired": "請選擇 Java 可執行檔案",
+      "javaPathRequired": "請選擇可用的 Java 執行環境",
       "javaSelectFailed": "選擇 Java 失敗",
       "javaPathPlaceholder": "選擇 Java 可執行檔案...",
       "jvmArgsPlaceholder": "例如：-XX:+UseG1GC -XX:+ParallelRefProcEnabled",
@@ -499,9 +503,10 @@
       "placeholder": "功能即將推出"
     },
     "mods": {
-      "title": "模組管理",
+      "title": "模組",
       "searchPlaceholder": "搜尋模組...",
       "addMod": "新增模組",
+      "diagnosticSummary": "{count} 項相容性提示",
       "noMods": "暫無模組",
       "loaderNotSupported": "當前載入器不支援模組",
       "addOne": "新增一個？",
@@ -1108,6 +1113,9 @@
     "javaManualDesc": "手動指定 Java 可執行檔案路徑",
     "javaPath": "Java 路徑",
     "javaPathDesc": "選擇要使用的 Java 版本",
+    "javaEmpty": "沒有可用的 Java，請到 Java 管理新增或安裝。",
+    "javaUnavailable": "目前 Java 無法使用，請從 Java 管理清單重新選擇：{path}",
+    "javaManagedHint": "從 Java 管理清單選擇已啟用且驗證有效的執行環境",
     "javaPathPlaceholder": "請選擇 Java",
     "javaBrowse": "瀏覽",
     "gameDownloadSource": "遊戲下載源",

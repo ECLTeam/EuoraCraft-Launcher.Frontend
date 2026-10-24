@@ -79,6 +79,32 @@ async function toggle() {
 }
 
 describe('实例模组文件名与启用状态', () => {
+  it('uses a plus icon for both add entries and keeps the empty-state action functional', async () => {
+    vi.mocked(instanceWorkspaceApi.mods).mockResolvedValue([])
+    await mountTab()
+    const addButtons = wrapper.findAll('button').filter((button) => button.text().includes('添加模组'))
+    expect(addButtons).toHaveLength(2)
+    for (const button of addButtons) expect(button.find('.icon-plus').exists()).toBe(true)
+    await addButtons[1]!.trigger('click')
+    expect(wrapper.emitted('openOnlineSearch')).toHaveLength(1)
+  })
+  it('keeps diagnostics compact until expanded and supports Escape to close them', async () => {
+    vi.mocked(instanceWorkspaceApi.mods).mockResolvedValue([
+      {
+        ...modItem(),
+        diagnostics: [{ code: 'constraint_unknown', modId: 'java', severity: 'warning', constraints: ['>=25'] }],
+      },
+    ])
+    await mountTab()
+    const details = wrapper.get('details')
+    expect((details.element as HTMLDetailsElement).open).toBe(false)
+    expect(details.get('summary').text()).toContain('1 条兼容性提示')
+    expect(wrapper.get('.mod-list-metadata').text()).toContain('sample.jar · 1.0 · ECLTeam')
+    ;(details.element as HTMLDetailsElement).open = true
+    expect(details.text()).toContain('>=25')
+    await details.trigger('keydown', { key: 'Escape' })
+    expect((details.element as HTMLDetailsElement).open).toBe(false)
+  })
   it('来源未知时按名称搜索，不把加载器 ID 当作 Modrinth 项目', async () => {
     vi.mocked(instanceWorkspaceApi.mods).mockResolvedValue([{ ...modItem(), project_id: 'loader-only-id' }])
     const open = vi.spyOn(modApi, 'openUrl').mockResolvedValue(undefined)
