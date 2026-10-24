@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import { beforeEach, expect, it, vi } from 'vitest'
 import { computed, defineComponent, reactive, ref, type PropType } from 'vue'
+import backend from '@/api/client'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import { globalModalStack } from '@/composables/useGlobalModalStack'
@@ -11,13 +12,21 @@ import type { CommandResponseMap } from '@/types/api'
 import type { ScannedVersion } from '@/types/instances'
 import ManageTab from './ManageTab.vue'
 
-const actions = vi.hoisted(() => ({ scan: vi.fn(), switchPath: vi.fn(), load: vi.fn(), patchGame: vi.fn() }))
+const actions = vi.hoisted(() => ({
+  scan: vi.fn(),
+  switchPath: vi.fn(),
+  selectVersion: vi.fn(),
+  load: vi.fn(),
+  patchGame: vi.fn(),
+  push: vi.fn(),
+}))
 const store = reactive({
   scannedVersions: [],
   selectedVersion: '',
   currentGamePath: '/A',
   scanPath: actions.scan,
   switchPath: actions.switchPath,
+  selectVersion: actions.selectVersion,
 })
 const settings = reactive({
   game: {
@@ -34,7 +43,7 @@ vi.mock('@/features/instances/stores/instanceStore', () => ({ useInstanceStore: 
 vi.mock('@/features/settings/stores/settingsStore', () => ({ useSettingsStore: () => settings }))
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: {} }),
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: actions.push, replace: vi.fn() }),
 }))
 vi.mock('@/composables/useLauncherMessage', () => ({
   useLauncherMessage: () => ({ success: vi.fn(), error: vi.fn() }),
@@ -45,6 +54,14 @@ beforeEach(() => {
   actions.scan.mockResolvedValue([])
   actions.load.mockResolvedValue(undefined)
   actions.patchGame.mockResolvedValue(undefined)
+  store.selectedVersion = 'previous'
+  store.currentGamePath = '/A'
+  settings.game.last_manage_path = '/A'
+  actions.push.mockReset()
+  actions.selectVersion.mockImplementation((id: string, path: string) => {
+    store.selectedVersion = id
+    store.currentGamePath = path
+  })
   actions.switchPath.mockImplementation(async (path: string) => {
     store.currentGamePath = path
   })
@@ -96,6 +113,70 @@ async function mountConfirmFlow() {
   await flushPromises()
   return { wrapper, list, detail: wrapper.findComponent(detailStub) }
 }
+
+it.each(['list', 'menu', 'detail'] as const)('从 %s 启动前同步选中实例和目录', async (source) => {
+  settings.game.last_manage_path = '/B'
+  store.selectedVersion = 'same'
+  const target = { ...fixture, versionId: 'same', path: '/B' }
+  const command = vi.spyOn(backend, 'command').mockResolvedValue({ success: false, message: '测试启动失败' })
+  const on = vi.spyOn(backend, 'on').mockReturnValue(vi.fn())
+  const wait = vi.spyOn(backend, 'waitForEventListeners').mockResolvedValue(undefined)
+  const { wrapper, list, detail } = await mountConfirmFlow()
+  store.selectedVersion = source === 'list' ? 'previous' : 'same'
+  store.currentGamePath = '/A'
+  let navigationSelection: { id: string; path: string } | undefined
+  actions.push.mockImplementation(() => {
+    navigationSelection = { id: store.selectedVersion, path: store.currentGamePath }
+  })
+  try {
+    if (source === 'list') list.vm.$emit('launch', target)
+    else if (source === 'menu') list.vm.$emit('action', 'launch', target)
+    else detail.vm.$emit('launch', target)
+    await flushPromises()
+    expect(navigationSelection).toEqual({ id: 'same', path: '/B' })
+    expect(actions.selectVersion).toHaveBeenCalledExactlyOnceWith('same', '/B')
+    expect(actions.push).toHaveBeenCalledWith({ name: 'game' })
+    expect(command).toHaveBeenCalledWith('game_launch', { version_id: 'same', game_path: '/B' })
+    expect(store.selectedVersion).toBe('same')
+    expect(store.currentGamePath).toBe('/B')
+  } finally {
+    wrapper.unmount()
+    globalModalStack.reset()
+    command.mockRestore()
+    on.mockRestore()
+    wait.mockRestore()
+  }
+})
+
+it('启动尚未结束时点击其他实例不会改变选中项', async () => {
+  let finish!: (value: { success: false; message: string }) => void
+  const command = vi.spyOn(backend, 'command').mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve
+      })
+  )
+  const on = vi.spyOn(backend, 'on').mockReturnValue(vi.fn())
+  const wait = vi.spyOn(backend, 'waitForEventListeners').mockResolvedValue(undefined)
+  const { wrapper, list } = await mountConfirmFlow()
+  try {
+    list.vm.$emit('launch', fixture)
+    await flushPromises()
+    list.vm.$emit('launch', { ...fixture, versionId: 'other' })
+    await flushPromises()
+    expect(command).toHaveBeenCalledOnce()
+    expect(actions.selectVersion).toHaveBeenCalledExactlyOnceWith(fixture.versionId, '/A')
+    expect(store.selectedVersion).toBe(fixture.versionId)
+  } finally {
+    finish({ success: false, message: '测试启动失败' })
+    await flushPromises()
+    wrapper.unmount()
+    globalModalStack.reset()
+    command.mockRestore()
+    on.mockRestore()
+    wait.mockRestore()
+  }
+})
 
 it('详情复制确认保留真实父窗口，随后列表操作不残留详情关联', async () => {
   const { wrapper, list, detail } = await mountConfirmFlow()

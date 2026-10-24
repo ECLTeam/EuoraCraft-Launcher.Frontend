@@ -526,6 +526,7 @@ const handleLaunch = async (version: ScannedVersion) => {
   // 防重入：双击或连点会并发发起两次 game_launch 并叠加多份进度监听
   if (launchInFlight) return
   launchInFlight = true
+  instanceStore.selectVersion(version.versionId, currentPath.value.path)
 
   // 先跳转到页面
   router.push({ name: 'game' })
