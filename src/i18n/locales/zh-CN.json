@@ -1275,7 +1275,7 @@
     "requestRetries": "失败重试次数",
     "requestRetriesDesc": "可重试请求的额外尝试次数，重启后生效",
     "downloadSourceDetails": "优先使用所选下载源；失败时尝试有备用地址的另一源",
-    "modSourceDetails": "Mod、资源包、数据包与整合包的下载来源；选择 MCIM 时 CurseForge 无需 API Key",
+    "modSourceDetails": "Mod、资源包、数据包与整合包的下载来源",
     "apiProxyModeDetails": "账户登录、元数据等启动器自身请求使用的代理方式；「自定义代理」需填写代理地址，重启后应用",
     "proxyModeDetails": "游戏文件、Mod 与资源包下载使用的代理方式，与启动器代理相互独立；「自定义代理」需填写代理地址，重启后应用",
     "requestRetriesDetails": "公告等可重试请求在网络错误、限流或临时服务错误后的额外尝试次数（0–5 次），重启后应用\n0 表示不额外重试。",
