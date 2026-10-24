@@ -19,11 +19,11 @@ describe('instancePathConfigApi', () => {
   })
 
   it('caches a successful active version read for the normalized path', async () => {
-    await expect(instancePathConfigApi.getActiveVersion('D:\\mc\\PCL2\\.minecraft')).resolves.toBe('26.2-Forge')
-    await expect(instancePathConfigApi.getActiveVersion('d:/mc/PCL2/.minecraft/')).resolves.toBe('26.2-Forge')
+    await expect(instancePathConfigApi.getActiveVersion('D:\\mc\\Launcher\\.minecraft')).resolves.toBe('26.2-Forge')
+    await expect(instancePathConfigApi.getActiveVersion('d:/mc/Launcher/.minecraft/')).resolves.toBe('26.2-Forge')
 
     expect(mocks.command).toHaveBeenCalledTimes(1)
-    expect(mocks.command).toHaveBeenCalledWith('game_config_get', { game_path: 'D:\\mc\\PCL2\\.minecraft' })
+    expect(mocks.command).toHaveBeenCalledWith('game_config_get', { game_path: 'D:\\mc\\Launcher\\.minecraft' })
   })
 
   it('coalesces concurrent reads and allows a failed read to retry', async () => {
@@ -35,8 +35,8 @@ describe('instancePathConfigApi', () => {
         })
     )
 
-    const first = instancePathConfigApi.getActiveVersion('D:/mc/PCL2/.minecraft')
-    const second = instancePathConfigApi.getActiveVersion('d:\\mc\\PCL2\\.minecraft\\')
+    const first = instancePathConfigApi.getActiveVersion('D:/mc/Launcher/.minecraft')
+    const second = instancePathConfigApi.getActiveVersion('d:\\mc\\Launcher\\.minecraft\\')
     await Promise.resolve()
 
     expect(mocks.command).toHaveBeenCalledTimes(1)
@@ -44,11 +44,11 @@ describe('instancePathConfigApi', () => {
     await expect(Promise.all([first, second])).resolves.toEqual(['26.2-Fabric', '26.2-Fabric'])
 
     mocks.command.mockRejectedValueOnce(new Error('IPC unavailable'))
-    instancePathConfigApi.invalidateActiveVersionCache('D:/mc/PCL2/.minecraft')
-    await expect(instancePathConfigApi.getActiveVersion('D:/mc/PCL2/.minecraft')).rejects.toThrow('IPC unavailable')
+    instancePathConfigApi.invalidateActiveVersionCache('D:/mc/Launcher/.minecraft')
+    await expect(instancePathConfigApi.getActiveVersion('D:/mc/Launcher/.minecraft')).rejects.toThrow('IPC unavailable')
 
     mocks.command.mockResolvedValueOnce({ success: true, data: { activeVersion: '26.2-NeoForge' } })
-    await expect(instancePathConfigApi.getActiveVersion('D:/mc/PCL2/.minecraft')).resolves.toBe('26.2-NeoForge')
+    await expect(instancePathConfigApi.getActiveVersion('D:/mc/Launcher/.minecraft')).resolves.toBe('26.2-NeoForge')
   })
 
   it('caches an empty active version and refreshes it only when forced', async () => {
