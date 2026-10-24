@@ -158,6 +158,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     const labels: Record<string, string> = {
       download_json: options.t('task.subtask.downloadJson'),
       download_assets: options.t('task.subtask.downloadAssets'),
+      download_files: options.t('task.subtask.downloadFiles'),
       check_files: options.t('task.subtask.checkFiles'),
     }
     return labels[subtask] || subtask
@@ -181,11 +182,21 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     const progressType =
       payload.progress_type === 'bytes' || payload.progress_type === 'files' ? payload.progress_type : undefined
 
+    const isCanceled = phase === 'error' && payload.errorCode === 'INSTALL_CANCELLED'
+    // 先登记本事件携带的阶段，再由队列一次性结束主任务及其余活动阶段。
+    if (subtask) {
+      let status: 'running' | 'completed' | 'error' | 'canceled' = 'running'
+      if (phase === 'done') status = 'completed'
+      else if (isCanceled) status = 'canceled'
+      else if (phase === 'error') status = 'error'
+      globalTaskQueue.addSubtask(taskId, { id: subtask, name: getSubtaskLabel(subtask), status, message })
+    }
+
     if (phase === 'done') {
       globalTaskQueue.updateTask(taskId, {
         status: 'completed',
         progress: 100,
-        message: message || '安装完成',
+        message: message || options.t('taskQueue.states.completed'),
         progressType,
         done,
         total,
@@ -195,8 +206,8 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       })
     } else if (phase === 'error') {
       globalTaskQueue.updateTask(taskId, {
-        status: 'error',
-        message: message || '安装失败',
+        status: isCanceled ? 'canceled' : 'error',
+        message: message || options.t(isCanceled ? 'taskQueue.states.canceled' : 'taskQueue.states.error'),
         progressType,
         done,
         total,
@@ -217,15 +228,6 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         totalFiles: payload.total_files,
         downloadedFiles: payload.downloaded_files,
         speedBytesPerSecond: payload.speed,
-      })
-    }
-
-    if (subtask) {
-      globalTaskQueue.addSubtask(taskId, {
-        id: subtask,
-        name: getSubtaskLabel(subtask),
-        status: phase === 'done' ? 'completed' : phase === 'error' ? 'error' : 'running',
-        message,
       })
     }
   }

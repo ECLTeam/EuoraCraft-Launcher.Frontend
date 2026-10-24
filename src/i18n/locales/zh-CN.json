@@ -1876,6 +1876,7 @@
     "subtask": {
       "downloadJson": "下载实例信息",
       "downloadAssets": "下载资源文件",
+      "downloadFiles": "下载文件",
       "checkFiles": "校验文件"
     },
     "title": "任务"

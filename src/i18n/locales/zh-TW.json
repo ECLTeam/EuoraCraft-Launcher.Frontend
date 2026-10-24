@@ -1870,6 +1870,7 @@
     "subtask": {
       "downloadJson": "下載實例資訊",
       "downloadAssets": "下載資原始檔",
+      "downloadFiles": "下載檔案",
       "checkFiles": "校驗檔案"
     },
     "title": "任務"

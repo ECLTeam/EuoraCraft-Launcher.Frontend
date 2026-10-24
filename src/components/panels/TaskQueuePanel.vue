@@ -143,6 +143,7 @@
                     <UiLoading v-if="sub.status === 'running'" mode="inline" size="xs" decorative />
                     <UiIcon v-else-if="sub.status === 'completed'" name="check" :size="12" class="tq-icon-success" />
                     <UiIcon v-else-if="sub.status === 'error'" name="x-mark" :size="12" class="tq-icon-error" />
+                    <UiIcon v-else-if="sub.status === 'canceled'" name="x-mark" :size="12" class="tq-icon-muted" />
                     <UiIcon v-else name="circle" :size="8" class="tq-icon-muted" />
                     <span class="tq-subtask-name">{{ sub.name }}</span>
                     <span class="tq-subtask-msg">{{ sub.message }}</span>

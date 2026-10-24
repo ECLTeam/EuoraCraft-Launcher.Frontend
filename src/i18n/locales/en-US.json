@@ -1981,6 +1981,7 @@
     "subtask": {
       "downloadJson": "Download instance info",
       "downloadAssets": "Download assets",
+      "downloadFiles": "Download files",
       "checkFiles": "Check files"
     },
     "title": "Task"

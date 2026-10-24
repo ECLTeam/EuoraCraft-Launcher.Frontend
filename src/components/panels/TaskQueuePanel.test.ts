@@ -29,6 +29,24 @@ function render() {
   })
 }
 
+it.each(['completed', 'error', 'canceled'] as const)('结束后的 %s 子阶段显示最终结果并停止转圈', async (status) => {
+  const id = globalTaskQueue.addTask({ type: 'download', name: '26.3-fabric', versionId: '', loaderType: '' })
+  globalTaskQueue.addSubtask(id, {
+    id: 'download_files',
+    name: '下载文件',
+    status: 'running',
+    message: '正在下载 26.3-fabric',
+  })
+  globalTaskQueue.updateTask(id, { status, message: '最终结果' })
+  useTaskQueueStore(pinia).tasks[0]!.expanded = true
+  const wrapper = render()
+  expect(wrapper.get('.tq-subtask').classes()).toContain(`tq-subtask--${status}`)
+  expect(wrapper.get('.tq-subtask-msg').text()).toBe('最终结果')
+  expect(wrapper.find('.tq-subtask .ui-loading').exists()).toBe(false)
+  expect(wrapper.text()).not.toContain('正在下载 26.3-fabric')
+  await flushPromises()
+})
+
 it('Java 任务使用中文名称，分数进度在列表与实时详情中显示为一致的整数', () => {
   useApplicationOperationStore().accept({
     operationId: 'java-install',

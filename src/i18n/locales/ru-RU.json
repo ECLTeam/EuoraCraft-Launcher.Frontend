@@ -1984,6 +1984,7 @@
     "subtask": {
       "downloadJson": "Загрузка сведений об экземпляре",
       "downloadAssets": "Загрузка ресурсов",
+      "downloadFiles": "Загрузка файлов",
       "checkFiles": "Проверка файлов"
     },
     "title": "Задача"

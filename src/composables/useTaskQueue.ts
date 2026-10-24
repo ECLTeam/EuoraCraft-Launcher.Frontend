@@ -1,11 +1,12 @@
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { pinia } from '@/app/stores'
+import { i18n } from '@/i18n'
 
 export interface Subtask {
   id: string
   name: string
-  status: 'pending' | 'running' | 'completed' | 'error'
+  status: 'pending' | 'running' | 'completed' | 'error' | 'canceled'
   message: string
 }
 
@@ -73,7 +74,7 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
       subtasks: [],
       expanded: false,
       progress: 0,
-      message: '准备中...',
+      message: i18n.global.t('taskQueue.states.pending'),
       status: 'pending',
     }
     tasks.value.unshift(item)
@@ -112,11 +113,22 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     if (updates.totalFiles !== undefined) task.totalFiles = updates.totalFiles
     if (updates.downloadedFiles !== undefined) task.downloadedFiles = updates.downloadedFiles
     if (updates.speedBytesPerSecond !== undefined) task.speedBytesPerSecond = updates.speedBytesPerSecond
+    const status = updates.status
+    if (status === 'completed' || status === 'error' || status === 'canceled') {
+      task.speedBytesPerSecond = 0
+      task.message = updates.message || i18n.global.t(`taskQueue.states.${status}`)
+      for (const subtask of task.subtasks) {
+        if (subtask.status !== 'pending' && subtask.status !== 'running') continue
+        subtask.status = status
+        subtask.message = task.message
+      }
+    }
   }
 
   function addSubtask(taskId: string, subtask: Subtask) {
     const task = tasks.value.find((t) => t.id === taskId)
     if (!task) return
+    if (['completed', 'error', 'canceled'].includes(task.status)) return
     const existing = task.subtasks.find((s) => s.id === subtask.id)
     if (existing) {
       existing.status = subtask.status

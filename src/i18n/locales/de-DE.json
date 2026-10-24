@@ -1987,6 +1987,7 @@
     "subtask": {
       "downloadJson": "Instanzinformationen herunterladen",
       "downloadAssets": "Ressourcendateien herunterladen",
+      "downloadFiles": "Dateien herunterladen",
       "checkFiles": "Dateien prüfen"
     },
     "title": "Aufgaben"
