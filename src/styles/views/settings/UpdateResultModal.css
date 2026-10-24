@@ -64,7 +64,8 @@
 .update-result-modal__notes-content {
   max-height: min(280px, 35vh);
   padding-right: 8px;
-  overflow-y: auto;
+  overflow: auto;
+  white-space: normal;
 }
 
 .update-result-modal__notes-empty {

@@ -23,7 +23,7 @@
 
       <section class="update-result-modal__notes">
         <h4>{{ t('settings.aboutTab.update.notesTitle') }}</h4>
-        <p v-if="notes" class="update-result-modal__notes-content">{{ notes }}</p>
+        <MarkdownContent v-if="notes" :content="notes" class="update-result-modal__notes-content" />
         <p v-else class="update-result-modal__notes-empty">{{ t('settings.aboutTab.update.notesEmpty') }}</p>
       </section>
 
@@ -77,6 +77,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
+import MarkdownContent from '@/components/ui/MarkdownContent.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { openExternalUrl } from '@/utils/openExternal'
 import { useUpdateCheck } from '../composables/useUpdateCheck'

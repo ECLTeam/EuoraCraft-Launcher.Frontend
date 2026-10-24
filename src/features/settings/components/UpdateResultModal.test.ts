@@ -84,6 +84,41 @@ describe('更新弹窗', () => {
     expect(state.downloadUpdate).not.toHaveBeenCalled()
   })
 
+  it('渲染 Markdown 标题、列表和代码，并通过系统浏览器打开外部链接', async () => {
+    state.lastResult.value!.latest_notes =
+      '## 新增功能\n\n- 支持 **整合包** 和 `Java`\n\n[完整日志](https://example.com/changelog)'
+    mountDialog()
+    const notes = wrapper.get('.update-result-modal__notes-content')
+    expect(notes.get('h2').text()).toBe('新增功能')
+    expect(notes.get('li strong').text()).toBe('整合包')
+    expect(notes.get('li code').text()).toBe('Java')
+    await notes.get('a').trigger('click')
+    expect(openExternalUrl).toHaveBeenCalledWith('https://example.com/changelog')
+  })
+
+  it('过滤说明中的脚本、事件处理器和危险链接', async () => {
+    state.lastResult.value!.latest_notes =
+      '正常说明\n\n<script>alert(1)</script><img src="invalid" onerror="alert(2)">\n\n[危险链接](javascript:alert(3))'
+    mountDialog()
+    const notes = wrapper.get('.update-result-modal__notes-content')
+    expect(notes.text()).toContain('正常说明')
+    expect(notes.find('script').exists()).toBe(false)
+    expect(notes.find('[onerror]').exists()).toBe(false)
+    expect(notes.find('a[href^="javascript:"]').exists()).toBe(false)
+    expect(openExternalUrl).not.toHaveBeenCalled()
+  })
+
+  it('保留纯文本换行，并在检测结果变化后显示新的 Markdown 内容', async () => {
+    state.lastResult.value!.latest_notes = '第一行\n第二行'
+    mountDialog()
+    expect(wrapper.find('.update-result-modal__notes-content br').exists()).toBe(true)
+    state.lastResult.value!.latest_notes = '### 修复\n\n- 新的说明'
+    await flushPromises()
+    expect(wrapper.get('.update-result-modal__notes-content h3').text()).toBe('修复')
+    expect(wrapper.get('.update-result-modal__notes-content li').text()).toBe('新的说明')
+    expect(wrapper.get('.update-result-modal__notes-content').text()).not.toContain('第一行')
+  })
+
   it.each([null, 'javascript:alert(1)'])('发布页地址 %s 不可用时不显示无效主按钮', (url) => {
     state.lastResult.value!.latest_url = url
     mountDialog()
