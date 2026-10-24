@@ -253,6 +253,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     function refreshFinishedTargets(): void {
       for (const operation of Object.values(operationStore.operations)) {
         if (operation.status !== 'completed' || finishedOperations.has(operation.operationId)) continue
+        if (operation.kind === 'modpack_prepare') continue
         const target = operationStore.targets[operation.operationId]
         if (!target) continue
         finishedOperations.add(operation.operationId)
@@ -268,11 +269,11 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       game_java_cleanup: 'java_cleanup',
       custom_download_start: 'custom_download',
       custom_download_retry: 'custom_download',
-      game_instance_import: 'instance_import',
       game_instance_export: 'instance_export',
       game_instance_clone: 'instance_clone',
       game_instance_files_repair: 'instance_repair',
-      game_modpack_online_install: 'modpack_online_install',
+      game_modpack_prepare: 'modpack_prepare',
+      game_modpack_install: 'modpack_online_install',
       game_resource_install: 'resource_install',
       game_resource_update: 'resource_update',
       game_world_copy: 'world_copy',

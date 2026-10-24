@@ -2078,6 +2078,7 @@
     }
   },
   "operations": {
+    "modpack_prepare": "Installationsdaten einlesen",
     "unknown": "Hintergrundaufgabe",
     "custom_download": "Eigener Download",
     "instance_import": "Instanz importieren",
@@ -2383,6 +2384,59 @@
     "validation": {
       "missing": "Pfad fehlt",
       "invalid": "Nicht ausführbar oder unbekannt"
+    }
+  },
+  "modpackWizard": {
+    "prepare": "Modpack einlesen",
+    "retryPrepare": "Erneut einlesen",
+    "prepareAgain": "Erneut vorbereiten und prüfen",
+    "prepareFailed": "Modpack konnte nicht gelesen werden",
+    "installFailed": "Installation fehlgeschlagen",
+    "invalidResponse": "Ungültige Installationsdaten. Bitte erneut einlesen.",
+    "previewExpired": "Vorschau abgelaufen. Modpack erneut einlesen.",
+    "releaseFailed": "Vorschau konnte noch nicht freigegeben werden; sie läuft automatisch ab.",
+    "pathsFailed": "Spielordner konnten nicht geladen werden. Schließen und erneut versuchen.",
+    "readHint": "Zuerst das Modpack einlesen, dann Inhalte auswählen. Online-Pakete benötigen zunächst das Archiv.",
+    "preparing": "Installationsdaten werden gelesen…",
+    "format": "Format",
+    "loader": "Modloader",
+    "fileCounts": "Erforderlich: {required}; optional: {optional}; nicht für Clients: {unsupported}",
+    "hmclLimit": "Loader-Einstellungen dieses Formats werden derzeit nicht importiert. Anforderungen prüfen.",
+    "multimcLimit": "Der angegebene Loader wird neu installiert. Eigene MultiMC-Patches werden nicht angewendet.",
+    "legacyLimit": "Dieses Paket wird unverändert importiert; Basisversion und optionale Dateien werden nicht geprüft.",
+    "warnings": "{count} Hinweise anzeigen",
+    "optionalFiles": "Optionale Dateien",
+    "optionalHint": "Vom Paket als optional markiert, standardmäßig ausgewählt. Abgewählte Dateien werden nicht heruntergeladen.",
+    "searchFiles": "Dateiname oder Pfad suchen",
+    "selectAll": "Alle auswählen",
+    "selectNone": "Alle abwählen",
+    "optionalSelected": "Optionale Dateien: {selected} / {total} ausgewählt",
+    "unknownSize": "Größe unbekannt",
+    "noMatches": "Keine passenden Dateien. Auswahl bleibt erhalten.",
+    "requiredFiles": "{count} erforderliche Dateien anzeigen",
+    "unsupportedFiles": "{count} nicht für Clients bestimmte Dateien anzeigen",
+    "target": "Installationsordner: {path}, Instanz: {name}",
+    "selectedSummary": "Zu installierende Dateien: {count}; abgewählte optionale Dateien: {excluded}",
+    "knownSize": "Bekannte Dateigrößen: {size}; {unknown} Dateien unbekannter Größe",
+    "sizeHint": "Ohne Basisspiel, Loader, Paketarchiv und Entpackplatz.",
+    "installing": "Wird installiert…",
+    "backgroundHint": "Nach dem Minimieren läuft die Installation weiter. Fortschritt und Ergebnis stehen im Aufgabenbereich.",
+    "completed": "Installation abgeschlossen",
+    "cancelled": "Abgebrochen",
+    "resultCounts": "Heruntergeladen: {downloaded}; abgewählt: {excluded}; nicht für Clients: {unsupported}; Paketdateien kopiert: {overrides}",
+    "minimize": "Minimieren",
+    "back": "Zurück",
+    "continue": "Installation prüfen",
+    "install": "Installieren",
+    "viewInstance": "Instanz anzeigen",
+    "viewResult": "Ergebnis anzeigen",
+    "steps": {
+      "source": "Modpack auswählen",
+      "preparing": "Installationsdaten einlesen",
+      "preview": "Inhalte auswählen",
+      "confirm": "Installation bestätigen",
+      "installing": "Installationsfortschritt",
+      "result": "Installationsergebnis"
     }
   }
 }

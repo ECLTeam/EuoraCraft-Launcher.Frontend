@@ -67,6 +67,17 @@
               </div>
               <div class="tq-task-actions">
                 <button
+                  v-if="
+                    task.operationId &&
+                    ['instance_import', 'modpack_online_install'].includes(task.operationKind || '') &&
+                    ['completed', 'error', 'canceled'].includes(task.status)
+                  "
+                  class="tq-clear-btn"
+                  @click="showModpackResult(task.operationId)"
+                >
+                  {{ t('modpackWizard.viewResult') }}
+                </button>
+                <button
                   v-if="task.operationId && (task.status === 'pending' || task.status === 'running')"
                   class="tq-clear-btn"
                   :disabled="
@@ -235,6 +246,7 @@ import UiProgress from '@/components/ui/Progress.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { globalTaskQueue, type TaskItem } from '@/composables/useTaskQueue'
 import { getLoaderLabel } from '@/config/version'
+import { useModpackImportStore } from '@/features/instances/stores/modpackImportStore'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 
@@ -244,6 +256,10 @@ const { t } = useI18n()
 const operationStore = useApplicationOperationStore()
 const { run } = useAsyncAction()
 const cancelOperation = (operationId: string) => run(() => operationStore.cancel(operationId))
+const showModpackResult = (operationId: string) => {
+  globalTaskQueue.panelVisible.value = false
+  void useModpackImportStore().openResult(operationId)
+}
 
 const { tasks, panelVisible, activeCount, removeTask, clearFinishedTasks: queueClearFinishedTasks } = globalTaskQueue
 

@@ -61,6 +61,7 @@ import type {
   WorldEntry,
 } from '@/types/instances'
 import type { JavaCatalog, JavaInstallPlan, JavaInventory, JavaRuntime, JavaUpdate } from '@/types/java'
+import type { ModpackPreparation, ModpackPrepareInput } from '@/types/modpack'
 import type { ModInfo, ModInstallResult, ModItem, ModSearchResult, ModSourceConfig, ModVersion } from '@/types/mods'
 import type {
   PluginInfo,
@@ -421,17 +422,18 @@ export interface CommandPayloadMap {
   game_instance_mod_remove: InstanceTargetPayload & { filename: string }
   game_instance_mods_folder_open: InstanceTargetPayload
   game_instance_clone: InstanceTargetPayload & { new_version_id: string }
-  game_instance_import: { game_path: string; source_path: string; new_version_id: string }
   game_instance_export: InstanceTargetPayload & {
     output_path: string
     pack_format: 'modrinth'
   }
-  game_modpack_online_install: {
-    source: 'modrinth' | 'curseforge' | 'ftb' | 'ftb'
-    project_id: string
-    file_id: string
+  game_modpack_prepare: ModpackPrepareInput
+  game_modpack_preparation_get: { preparation_id: string }
+  game_modpack_preparation_release: { preparation_id: string }
+  game_modpack_install: {
+    preparation_id: string
     game_path: string
     new_version_id: string
+    excluded_file_ids: string[]
   }
   game_instance_files_check: InstanceTargetPayload
   game_instance_files_repair: InstanceTargetPayload
@@ -817,9 +819,11 @@ export const COMMAND_NAMES = {
   game_instance_mod_remove: 'game_instance_mod_remove',
   game_instance_mods_folder_open: 'game_instance_mods_folder_open',
   game_instance_clone: 'game_instance_clone',
-  game_instance_import: 'game_instance_import',
   game_instance_export: 'game_instance_export',
-  game_modpack_online_install: 'game_modpack_online_install',
+  game_modpack_prepare: 'game_modpack_prepare',
+  game_modpack_preparation_get: 'game_modpack_preparation_get',
+  game_modpack_preparation_release: 'game_modpack_preparation_release',
+  game_modpack_install: 'game_modpack_install',
   game_instance_files_check: 'game_instance_files_check',
   game_instance_files_repair: 'game_instance_files_repair',
   game_instance_delete: 'game_instance_delete',
@@ -1081,9 +1085,11 @@ export interface CommandResponseMap {
   game_instance_mod_remove: void
   game_instance_mods_folder_open: { path: string }
   game_instance_clone: GameOperation
-  game_instance_import: GameOperation
   game_instance_export: GameOperation
-  game_modpack_online_install: GameOperation
+  game_modpack_prepare: GameOperation & { preparationId: string }
+  game_modpack_preparation_get: ModpackPreparation
+  game_modpack_preparation_release: boolean
+  game_modpack_install: GameOperation
   game_instance_files_check: {
     issues: Array<{ kind: string; path: string; size?: number; message?: string }>
     downloadBytes: number

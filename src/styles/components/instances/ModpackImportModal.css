@@ -1,7 +1,112 @@
-.modpack-import-fields {
+.mp-wizard {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.mp-wizard h4,
+.mp-wizard p {
+  margin: 0;
+}
+
+.mp-wizard {
+  min-width: 0;
+  color: var(--ecl-text);
+}
+
+.mp-step,
+.mp-note,
+.mp-field small,
+.mp-file-size {
+  color: var(--ecl-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.mp-summary,
+.mp-options,
+.mp-preparing,
+.mp-result,
+.mp-download-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mp-summary h4,
+.mp-description,
+.mp-path,
+.mp-error,
+.mp-wizard li {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.mp-metadata {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.mp-metadata dt {
+  color: var(--ecl-text-secondary);
+}
+
+.mp-metadata dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.mp-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mp-files {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mp-file {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.mp-file :deep(.n-checkbox) {
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-file :deep(.n-checkbox__label) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mp-file-size {
+  flex-shrink: 0;
+}
+
+.mp-wizard summary {
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.mp-wizard ul {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 12px;
+}
+
+.mp-error {
+  color: var(--ecl-color-error, var(--ecl-text));
 }
 
 .mp-field {

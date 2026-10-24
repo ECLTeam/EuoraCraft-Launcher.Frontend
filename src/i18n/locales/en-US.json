@@ -2094,6 +2094,7 @@
     "nodesPolicy": "Node policy"
   },
   "operations": {
+    "modpack_prepare": "Read installation information",
     "unknown": "Background task",
     "custom_download": "Custom download",
     "instance_import": "Import instance",
@@ -2400,6 +2401,59 @@
     "validation": {
       "missing": "Path missing",
       "invalid": "Cannot run or identify"
+    }
+  },
+  "modpackWizard": {
+    "prepare": "Read modpack",
+    "retryPrepare": "Retry reading",
+    "prepareAgain": "Prepare and review again",
+    "prepareFailed": "Could not read the modpack",
+    "installFailed": "Installation failed",
+    "invalidResponse": "Invalid installation information. Read it again.",
+    "previewExpired": "Preview expired. Read the modpack again.",
+    "releaseFailed": "Preview resources could not be released yet; they will expire automatically.",
+    "pathsFailed": "Could not load game folders. Close and retry.",
+    "readHint": "Read the modpack before choosing its contents. Online packs require downloading the archive first.",
+    "preparing": "Reading installation information…",
+    "format": "Format",
+    "loader": "Mod loader",
+    "fileCounts": "Required: {required}; optional: {optional}; unsupported on client: {unsupported}",
+    "hmclLimit": "Loader settings inside this format are not currently imported. Check the pack requirements.",
+    "multimcLimit": "The declared loader is reinstalled. Custom MultiMC patches are not applied.",
+    "legacyLimit": "This pack is imported as-is, without checking its base version or optional files.",
+    "warnings": "View {count} notices",
+    "optionalFiles": "Optional files",
+    "optionalHint": "Listed as optional by the pack, selected by default. Unchecked files will not be downloaded.",
+    "searchFiles": "Search file name or path",
+    "selectAll": "Select all",
+    "selectNone": "Deselect all",
+    "optionalSelected": "Optional files selected: {selected} / {total}",
+    "unknownSize": "Unknown size",
+    "noMatches": "No matching files. Your selections are preserved.",
+    "requiredFiles": "View {count} required files",
+    "unsupportedFiles": "View {count} files not used on clients",
+    "target": "Install in {path}, instance: {name}",
+    "selectedSummary": "Manifest files to install: {count}; optional files excluded: {excluded}",
+    "knownSize": "Known file sizes: {size}; {unknown} files have unknown sizes",
+    "sizeHint": "Excludes the base game, loader, pack archive and extraction space.",
+    "installing": "Installing…",
+    "backgroundHint": "Installation continues after minimizing. Check progress and results in the task panel.",
+    "completed": "Installation complete",
+    "cancelled": "Cancelled",
+    "resultCounts": "Downloaded: {downloaded}; excluded: {excluded}; unsupported on client: {unsupported}; bundled files copied: {overrides}",
+    "minimize": "Minimize",
+    "back": "Back",
+    "continue": "Review installation",
+    "install": "Install",
+    "viewInstance": "View instance",
+    "viewResult": "View result",
+    "steps": {
+      "source": "Choose a modpack",
+      "preparing": "Read installation information",
+      "preview": "Choose installation contents",
+      "confirm": "Confirm installation",
+      "installing": "Installation progress",
+      "result": "Installation result"
     }
   }
 }

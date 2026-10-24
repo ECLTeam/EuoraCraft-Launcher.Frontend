@@ -2078,6 +2078,7 @@
     }
   },
   "operations": {
+    "modpack_prepare": "インストール情報を読み込み",
     "unknown": "バックグラウンドタスク",
     "custom_download": "カスタムダウンロード",
     "instance_import": "インスタンスをインポート",
@@ -2383,6 +2384,59 @@
     "validation": {
       "missing": "パスがありません",
       "invalid": "実行または識別できません"
+    }
+  },
+  "modpackWizard": {
+    "prepare": "パックを読み込む",
+    "retryPrepare": "再読み込み",
+    "prepareAgain": "再準備して確認",
+    "prepareFailed": "パックを読み込めませんでした",
+    "installFailed": "インストールに失敗しました",
+    "invalidResponse": "インストール情報が無効です。再読み込みしてください。",
+    "previewExpired": "プレビューが失効しました。再読み込みしてください。",
+    "releaseFailed": "プレビューを解放できませんでした。有効期限後に自動解放されます。",
+    "pathsFailed": "ゲームフォルダーを取得できません。閉じて再試行してください。",
+    "readHint": "内容を選ぶ前にパックを読み込みます。オンラインパックは先にアーカイブをダウンロードします。",
+    "preparing": "インストール情報を読み込み中…",
+    "format": "形式",
+    "loader": "ローダー",
+    "fileCounts": "必須 {required} 件、任意 {optional} 件、クライアント対象外 {unsupported} 件",
+    "hmclLimit": "この形式のローダー設定は現在読み込まれません。パックの要件を確認してください。",
+    "multimcLimit": "指定ローダーを再インストールします。MultiMC のカスタムパッチは適用されません。",
+    "legacyLimit": "このパックはそのまま読み込まれ、ベースバージョンや任意ファイルは確認されません。",
+    "warnings": "注意事項を表示（{count} 件）",
+    "optionalFiles": "任意ファイル",
+    "optionalHint": "パックが任意と指定したファイルです。初期状態はすべて選択され、未選択ファイルはダウンロードされません。",
+    "searchFiles": "ファイル名・パスで検索",
+    "selectAll": "すべて選択",
+    "selectNone": "すべて解除",
+    "optionalSelected": "任意ファイル：{selected} / {total} 件選択",
+    "unknownSize": "サイズ不明",
+    "noMatches": "一致するファイルがありません。選択内容は保持されています。",
+    "requiredFiles": "必須ファイルを表示（{count} 件）",
+    "unsupportedFiles": "クライアント対象外ファイルを表示（{count} 件）",
+    "target": "インストール先：{path}、インスタンス名：{name}",
+    "selectedSummary": "インストール対象 {count} 件、除外した任意ファイル {excluded} 件",
+    "knownSize": "既知のファイルサイズ合計：{size}、サイズ不明 {unknown} 件",
+    "sizeHint": "ゲーム本体、ローダー、アーカイブ、展開領域は含みません。",
+    "installing": "インストール中…",
+    "backgroundHint": "閉じてもインストールは継続します。タスクパネルで進行状況と結果を確認できます。",
+    "completed": "インストール完了",
+    "cancelled": "キャンセル済み",
+    "resultCounts": "ダウンロード {downloaded} 件、除外 {excluded} 件、対象外 {unsupported} 件、同梱ファイルのコピー {overrides} 件",
+    "minimize": "閉じて継続",
+    "back": "戻る",
+    "continue": "インストール内容を確認",
+    "install": "インストール開始",
+    "viewInstance": "インスタンスを表示",
+    "viewResult": "結果を表示",
+    "steps": {
+      "source": "パックを選択",
+      "preparing": "インストール情報を読み込み",
+      "preview": "インストール内容を選択",
+      "confirm": "インストールを確認",
+      "installing": "インストール状況",
+      "result": "インストール結果"
     }
   }
 }
