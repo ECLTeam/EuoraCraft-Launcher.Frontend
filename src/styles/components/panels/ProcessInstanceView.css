@@ -10,32 +10,119 @@
 }
 
 /* ── 左列：实例列表 ─────────────────────────────── */
-.piv-list {
+.piv-sidebar {
   display: flex;
   width: 190px;
+  min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
-  gap: 2px;
-  overflow: auto;
-  padding: 8px;
   border-right: 1px solid var(--ecl-border);
   background: rgba(127, 127, 127, 0.04);
 }
 
+.piv-list-toolbar {
+  flex-shrink: 0;
+  padding: 8px;
+  border-bottom: 1px solid var(--ecl-border);
+}
+
+.piv-clear {
+  display: flex;
+  width: 100%;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid var(--ecl-border);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ecl-text-secondary);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.piv-clear span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.piv-clear .icon {
+  flex-shrink: 0;
+}
+
+.piv-clear:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.piv-list {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  padding: 8px;
+}
+
 .piv-item {
   display: flex;
+  flex-shrink: 0;
+  min-width: 0;
   align-items: center;
-  gap: 8px;
-  padding: 7px 8px;
-  border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--ecl-text);
-  text-align: left;
-  cursor: pointer;
   transition:
     background var(--duration-fast) var(--ease-emphasized),
     box-shadow var(--duration-fast) var(--ease-emphasized);
+}
+
+.piv-select {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--ecl-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.piv-remove {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 24px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 3px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ecl-text-secondary);
+  cursor: pointer;
+}
+
+.piv-remove:hover,
+.piv-clear:hover:not(:disabled) {
+  background: var(--ecl-surface-muted);
+  color: var(--primary);
+}
+
+.piv-select:focus-visible,
+.piv-remove:focus-visible,
+.piv-clear:focus-visible,
+.piv:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 .piv-item:hover {

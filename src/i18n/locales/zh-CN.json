@@ -1936,7 +1936,10 @@
       "stopped": "已停止",
       "running": "运行中",
       "gameType": "游戏",
-      "awaitingSnapshot": "等待进程信息"
+      "awaitingSnapshot": "等待进程信息",
+      "removeRecord": "移除“{name}”的终端记录",
+      "clearStopped": "清除已退出记录",
+      "removeHint": "仅清理已退出会话的终端记录，不会删除实例或日志文件。"
     }
   },
   "modpackImport": {

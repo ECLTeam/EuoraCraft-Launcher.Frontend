@@ -2041,7 +2041,10 @@
       "stopped": "Stopped",
       "running": "Running",
       "gameType": "Game",
-      "awaitingSnapshot": "Waiting for process details"
+      "awaitingSnapshot": "Waiting for process details",
+      "removeRecord": "Remove terminal record for “{name}”",
+      "clearStopped": "Clear stopped records",
+      "removeHint": "Only removes terminal history for stopped sessions. Instance and log files are kept."
     }
   },
   "modpackImport": {

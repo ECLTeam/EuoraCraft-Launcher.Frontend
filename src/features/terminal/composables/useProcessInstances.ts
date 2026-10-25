@@ -11,6 +11,8 @@ const selectedProcessId = ref<string | null>(null)
 const loading = ref(false)
 const stoppedOrderById = new Map<string, number>()
 const evictedProcessIds: string[] = []
+// 手动移除的历史在应用会话内保持屏蔽，避免迟到日志重新建立未知会话。
+const dismissedProcessIds = new Set<string>()
 let stoppedOrder = 0
 let initialized = false
 let generation = 0
@@ -41,7 +43,7 @@ function reclaimStoppedSessions(): void {
 }
 
 function onLog(entry: ProcessLogEntry): void {
-  if (evictedProcessIds.includes(entry.instanceId)) return
+  if (dismissedProcessIds.has(entry.instanceId) || evictedProcessIds.includes(entry.instanceId)) return
   if (!sessions.value.some((session) => session.processId === entry.instanceId)) {
     stoppedOrderById.set(entry.instanceId, ++stoppedOrder)
     sessions.value.push({
@@ -65,6 +67,13 @@ function syncList(list: ProcessInstance[]): void {
   const byId = new Map(sessions.value.map((session) => [session.processId, session]))
   const incoming = new Set(list.map((item) => item.id))
   for (const item of list) {
+    if (dismissedProcessIds.has(item.id) && !item.running) continue
+    if (item.running) {
+      // 真实运行状态优先，不能因同一 ID 曾被移除而隐藏仍在运行的进程。
+      dismissedProcessIds.delete(item.id)
+      const evictedIndex = evictedProcessIds.indexOf(item.id)
+      if (evictedIndex !== -1) evictedProcessIds.splice(evictedIndex, 1)
+    }
     byId.set(item.id, {
       processId: item.id,
       name: item.name,
@@ -111,12 +120,46 @@ function select(processId: string): void {
   if (sessions.value.some((session) => session.processId === processId)) selectedProcessId.value = processId
   reclaimStoppedSessions()
 }
+
+function removeStoppedSessions(processIds: ReadonlySet<string>): number {
+  const removed = sessions.value.filter((session) => session.state === 'stopped' && processIds.has(session.processId))
+  if (!removed.length) return 0
+  const removedIds = new Set(removed.map((session) => session.processId))
+  const selectedIndex = sessions.value.findIndex((session) => session.processId === selectedProcessId.value)
+  // 移除是新的快照事实；此前发起的查询不能恢复旧记录或旧的运行状态。
+  snapshotRevision++
+  sessions.value = sessions.value.filter((session) => !removedIds.has(session.processId))
+  for (const id of removedIds) {
+    dismissedProcessIds.add(id)
+    delete outputByProcessId.value[id]
+    stoppedOrderById.delete(id)
+  }
+  if (selectedProcessId.value && removedIds.has(selectedProcessId.value)) {
+    const next =
+      sessions.value.find((session) => session.state === 'running') ??
+      sessions.value[Math.min(selectedIndex, sessions.value.length - 1)]
+    selectedProcessId.value = next?.processId ?? null
+  }
+  return removed.length
+}
+
+function removeStopped(processId: string): boolean {
+  return removeStoppedSessions(new Set([processId])) > 0
+}
+
+function clearStopped(): number {
+  return removeStoppedSessions(
+    new Set(sessions.value.filter((session) => session.state === 'stopped').map((session) => session.processId))
+  )
+}
+
 function active(): TerminalSession | null {
   return sessions.value.find((item) => item.processId === selectedProcessId.value) ?? null
 }
 const selectedOutput = computed(() =>
   selectedProcessId.value ? (outputByProcessId.value[selectedProcessId.value] ?? []) : []
 )
+const stoppedCount = computed(() => sessions.value.filter((session) => session.state === 'stopped').length)
 
 async function sendInput(text: string): Promise<boolean> {
   const session = active()
@@ -148,6 +191,8 @@ function dispose(): void {
   offLog = null
   offChanged = null
   loading.value = false
+  dismissedProcessIds.clear()
+  evictedProcessIds.length = 0
 }
 
 const controller = {
@@ -156,10 +201,13 @@ const controller = {
   selectedProcessId,
   loading,
   selectedOutput,
+  stoppedCount,
   onLog,
   syncList,
   refresh,
   select,
+  removeStopped,
+  clearStopped,
   active,
   sendInput,
   stop,

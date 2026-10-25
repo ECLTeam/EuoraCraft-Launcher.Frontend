@@ -1934,7 +1934,10 @@
       "stopped": "已停止",
       "running": "執行中",
       "gameType": "遊戲",
-      "awaitingSnapshot": "等待程序資訊"
+      "awaitingSnapshot": "等待程序資訊",
+      "removeRecord": "移除「{name}」的終端記錄",
+      "clearStopped": "清除已結束記錄",
+      "removeHint": "僅清理已結束工作階段的終端記錄，不會刪除實例或日誌檔案。"
     }
   },
   "modpackImport": {

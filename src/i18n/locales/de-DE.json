@@ -2051,7 +2051,10 @@
       "stopped": "Gestoppt",
       "running": "Läuft",
       "gameType": "Spiel",
-      "awaitingSnapshot": "Warte auf Prozessdaten"
+      "awaitingSnapshot": "Warte auf Prozessdaten",
+      "removeRecord": "Terminaleintrag für „{name}“ entfernen",
+      "clearStopped": "Beendete Einträge leeren",
+      "removeHint": "Entfernt nur den Terminalverlauf beendeter Sitzungen. Instanz- und Protokolldateien bleiben erhalten."
     }
   },
   "modpackImport": {

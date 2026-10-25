@@ -36,6 +36,7 @@ function sampleInstance(id: string, overrides: Record<string, unknown> = {}) {
 
 describe('useProcessInstances 子进程实例状态', () => {
   beforeEach(() => {
+    inst.dispose()
     inst.sessions.value = []
     inst.outputByProcessId.value = {}
     inst.selectedProcessId.value = null
@@ -126,5 +127,88 @@ describe('useProcessInstances 子进程实例状态', () => {
     inst.onLog({ instanceId: 'a', name: 'proc-a', type: 'plugin:test', line: 'final line' })
     expect(inst.selectedOutput.value).toEqual(['a-1', 'final line'])
     expect(inst.sessions.value).toHaveLength(2)
+  })
+
+  it('移除选中的停止记录时清理输出并优先选择运行会话', () => {
+    inst.syncList([
+      sampleInstance('old', { running: false, lines: ['old output'] }),
+      sampleInstance('stopped', { running: false }),
+      sampleInstance('running'),
+    ])
+    inst.select('old')
+    expect(inst.removeStopped('old')).toBe(true)
+    expect(inst.sessions.value.map((session) => session.processId)).toEqual(['stopped', 'running'])
+    expect(inst.outputByProcessId.value.old).toBeUndefined()
+    expect(inst.selectedProcessId.value).toBe('running')
+    expect(inst.stoppedCount.value).toBe(1)
+    expect(hoisted.stopMock).not.toHaveBeenCalled()
+    expect(inst.removeStopped('old')).toBe(false)
+  })
+
+  it('运行中和待确认会话不能移除，批量清除仅影响已确认停止记录', () => {
+    inst.syncList([sampleInstance('stopped', { running: false }), sampleInstance('running')])
+    inst.onLog({ instanceId: 'unknown', name: 'pending', type: 'Minecraft', line: 'waiting' })
+    expect(inst.removeStopped('running')).toBe(false)
+    expect(inst.removeStopped('unknown')).toBe(false)
+    expect(inst.clearStopped()).toBe(1)
+    expect(inst.sessions.value.map((session) => session.processId)).toEqual(['running', 'unknown'])
+    expect(inst.selectedProcessId.value).toBe('running')
+    expect(inst.outputByProcessId.value.unknown).toEqual(['waiting'])
+    expect(inst.clearStopped()).toBe(0)
+    expect(hoisted.stopMock).not.toHaveBeenCalled()
+  })
+
+  it('没有运行会话时选相邻记录，清空后复位选择与输出', () => {
+    inst.syncList([sampleInstance('first', { running: false }), sampleInstance('next', { running: false })])
+    inst.removeStopped('first')
+    expect(inst.selectedProcessId.value).toBe('next')
+    expect(inst.clearStopped()).toBe(1)
+    expect(inst.selectedProcessId.value).toBeNull()
+    expect(inst.selectedOutput.value).toEqual([])
+    expect(inst.sessions.value).toEqual([])
+    expect(inst.outputByProcessId.value).toEqual({})
+  })
+
+  it('移除未选中记录不会切换选择，迟到日志和停止快照不会恢复历史', () => {
+    inst.syncList([sampleInstance('selected'), sampleInstance('removed', { running: false })])
+    inst.select('selected')
+    inst.removeStopped('removed')
+    inst.onLog({ instanceId: 'removed', name: 'removed', type: 'Minecraft', line: 'late' })
+    inst.syncList([sampleInstance('selected'), sampleInstance('removed', { running: false, lines: ['stale'] })])
+    expect(inst.selectedProcessId.value).toBe('selected')
+    expect(inst.sessions.value.map((session) => session.processId)).toEqual(['selected'])
+    expect(inst.outputByProcessId.value.removed).toBeUndefined()
+    inst.syncList([sampleInstance('selected'), sampleInstance('removed')])
+    inst.onLog({ instanceId: 'removed', name: 'removed', type: 'Minecraft', line: 'running output' })
+    expect(inst.sessions.value.find((session) => session.processId === 'removed')?.isRunning).toBe(true)
+    expect(inst.outputByProcessId.value.removed).toEqual(['running output'])
+  })
+
+  it('移除前发起的刷新不能恢复旧记录或旧运行状态', async () => {
+    inst.syncList([sampleInstance('removed', { running: false })])
+    let finish!: (instances: ReturnType<typeof sampleInstance>[]) => void
+    hoisted.getInstancesMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const pending = inst.refresh()
+    inst.removeStopped('removed')
+    finish([sampleInstance('removed')])
+    await pending
+    expect(inst.sessions.value).toEqual([])
+    expect(inst.outputByProcessId.value.removed).toBeUndefined()
+    expect(inst.loading.value).toBe(false)
+  })
+
+  it('批量清除的记录也屏蔽迟到事件，应用释放后清理移除标记', () => {
+    inst.syncList([sampleInstance('cleared', { running: false })])
+    inst.clearStopped()
+    inst.onLog({ instanceId: 'cleared', name: 'cleared', type: 'Minecraft', line: 'late' })
+    expect(inst.sessions.value).toEqual([])
+    inst.dispose()
+    inst.syncList([sampleInstance('cleared', { running: false })])
+    expect(inst.sessions.value).toHaveLength(1)
   })
 })

@@ -2051,7 +2051,10 @@
       "stopped": "停止中",
       "running": "実行中",
       "gameType": "ゲーム",
-      "awaitingSnapshot": "プロセス情報を待機中"
+      "awaitingSnapshot": "プロセス情報を待機中",
+      "removeRecord": "「{name}」のターミナル履歴を削除",
+      "clearStopped": "終了済み履歴を消去",
+      "removeHint": "終了済みセッションのターミナル履歴のみを消去します。インスタンスやログファイルは削除しません。"
     }
   },
   "modpackImport": {
