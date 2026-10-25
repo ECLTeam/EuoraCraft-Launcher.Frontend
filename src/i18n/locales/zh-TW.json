@@ -23,8 +23,7 @@
     "settings": "設定",
     "debug": "除錯",
     "debugTitle": "元件除錯",
-    "help": "文件",
-    "helpMessage": "幫助文件正在編寫中..."
+    "help": "文件"
   },
   "connect": {
     "description": "建立或加入 Minecraft 聯機房間",

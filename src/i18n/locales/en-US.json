@@ -27,8 +27,7 @@
     "settings": "Settings",
     "debug": "Debug",
     "debugTitle": "Component Debug",
-    "help": "Docs",
-    "helpMessage": "Help documentation is under construction..."
+    "help": "Docs"
   },
   "connect": {
     "description": "Create or join a Minecraft multiplayer room",

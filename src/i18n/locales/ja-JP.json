@@ -23,8 +23,7 @@
     "settings": "設定",
     "debug": "デバッグ",
     "debugTitle": "コンポーネントデバッグ",
-    "help": "ドキュメント",
-    "helpMessage": "ヘルプドキュメントは作成中です..."
+    "help": "ドキュメント"
   },
   "connect": {
     "description": "Minecraft のマルチプレイルームを作成または参加",

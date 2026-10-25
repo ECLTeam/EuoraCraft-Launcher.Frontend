@@ -23,8 +23,7 @@
     "settings": "Einstellungen",
     "debug": "Debug",
     "debugTitle": "Komponenten-Debug",
-    "help": "Dokumentation",
-    "helpMessage": "Die Hilfedokumentation wird derzeit erstellt..."
+    "help": "Dokumentation"
   },
   "connect": {
     "description": "Erstelle einen Mehrspieler-Raum für Minecraft oder tritt einem bei",

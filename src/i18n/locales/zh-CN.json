@@ -27,8 +27,7 @@
     "settings": "设置",
     "debug": "调试",
     "debugTitle": "组件调试",
-    "help": "文档",
-    "helpMessage": "帮助文档正在编写中..."
+    "help": "文档"
   },
   "connect": {
     "description": "创建或加入 Minecraft 联机房间",
