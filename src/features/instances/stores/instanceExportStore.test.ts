@@ -2,6 +2,7 @@ import { flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
+import type * as InstanceExportApiModule from '@/features/instances/api/instanceExportApi'
 import type { InstanceExportPreview } from '@/types/instanceExport'
 import type { InstanceTargetPayload } from '@/types/instances'
 import type { ApplicationOperation } from '@/types/operations'
@@ -9,7 +10,7 @@ import { useInstanceExportStore } from './instanceExportStore'
 
 const mocks = vi.hoisted(() => ({ preview: vi.fn(), chooseOutput: vi.fn(), export: vi.fn() }))
 vi.mock('@/features/instances/api/instanceExportApi', async (original) => ({
-  ...(await original<typeof import('@/features/instances/api/instanceExportApi')>()),
+  ...(await original<typeof InstanceExportApiModule>()),
   instanceExportApi: mocks,
 }))
 vi.mock('@/features/operations/stores/applicationOperationStore', () => ({
