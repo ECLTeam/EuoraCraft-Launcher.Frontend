@@ -2031,6 +2031,39 @@
       "completed": "Завершено",
       "error": "Ошибка",
       "canceled": "Отменено"
+    },
+    "installation": {
+      "step": "Шаг {current} / {total}",
+      "transferred": "Передано {amount}",
+      "unknownSize": "Общий размер неизвестен",
+      "stages": {
+        "resolve_metadata": "Получение данных установки",
+        "download_client": "Загрузка клиента игры",
+        "download_loader": "Загрузка установщика загрузчика",
+        "download_loader_libraries": "Загрузка зависимостей загрузчика",
+        "install_loader": "Установка загрузчика",
+        "check_resources": "Проверка ресурсов игры",
+        "resolve_fabric_api": "Получение данных Fabric API",
+        "download_game_files": "Загрузка файлов игры",
+        "finalize_install": "Завершение установки"
+      },
+      "states": {
+        "pending": "Ожидание",
+        "running": "Выполняется",
+        "completed": "Завершено",
+        "skipped": "Пропущено",
+        "error": "Ошибка",
+        "canceled": "Отменено"
+      },
+      "actions": {
+        "working": "Обработка",
+        "checking": "Проверка существующих файлов",
+        "asset_index": "Получение индекса ресурсов",
+        "preflight": "Проверка размеров файлов",
+        "downloading": "Загрузка",
+        "retrying": "Ожидание повтора",
+        "fallback": "Загрузка из запасного источника"
+      }
     }
   },
   "terminal": {

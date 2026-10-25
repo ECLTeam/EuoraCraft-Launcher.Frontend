@@ -515,3 +515,17 @@
   text-align: right;
   white-space: nowrap;
 }
+
+.tq-stage-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-sm);
+  padding: 0 var(--s-lg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.tq-subtask--skipped,
+.tq-subtask--pending {
+  color: var(--text-secondary);
+}

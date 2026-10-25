@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pinia } from '@/app/stores'
 import { useTaskQueueStore } from '@/composables/useTaskQueue'
+import { installationFixture } from '@/types/installation.fixture'
 import { useApplicationOperationStore } from './applicationOperationStore'
 
 const mocks = vi.hoisted(() => ({ command: vi.fn() }))
@@ -19,6 +20,21 @@ describe('应用任务归属与查询', () => {
   afterEach(() => {
     useApplicationOperationStore().stop()
     vi.useRealTimers()
+  })
+
+  it('基础安装完成不结束整合包任务，后续步骤清除安装明细', () => {
+    const installation = installationFixture({ status: 'completed' })
+    installation.stages.forEach((stage) => {
+      stage.status = 'completed'
+    })
+    const store = useApplicationOperationStore()
+    store.accept({ operationId: 'pack-install', kind: 'instance_import', status: 'running', installation })
+    const queue = useTaskQueueStore(pinia)
+    expect(queue.tasks[0]?.status).toBe('running')
+    expect(queue.tasks[0]?.installation?.status).toBe('completed')
+    store.accept({ operationId: 'pack-install', status: 'running', percent: 70, installation: null })
+    expect(queue.tasks[0]?.installation).toBeNull()
+    expect(queue.tasks[0]?.progress).toBe(70)
   })
 
   it('事件早于回执只登记一次，终态拒绝迟到进度且清理后不重现', async () => {

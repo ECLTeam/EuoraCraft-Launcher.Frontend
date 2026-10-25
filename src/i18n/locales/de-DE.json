@@ -2034,6 +2034,39 @@
       "completed": "Abgeschlossen",
       "error": "Fehlgeschlagen",
       "canceled": "Abgebrochen"
+    },
+    "installation": {
+      "step": "Schritt {current} / {total}",
+      "transferred": "{amount} übertragen",
+      "unknownSize": "Gesamtgröße unbekannt",
+      "stages": {
+        "resolve_metadata": "Installationsinformationen abrufen",
+        "download_client": "Spielclient herunterladen",
+        "download_loader": "Loader-Installationsdatei herunterladen",
+        "download_loader_libraries": "Loader-Abhängigkeiten herunterladen",
+        "install_loader": "Loader installieren",
+        "check_resources": "Spielressourcen prüfen",
+        "resolve_fabric_api": "Fabric-API-Informationen abrufen",
+        "download_game_files": "Spieldateien herunterladen",
+        "finalize_install": "Installation abschließen"
+      },
+      "states": {
+        "pending": "Ausstehend",
+        "running": "Wird ausgeführt",
+        "completed": "Abgeschlossen",
+        "skipped": "Übersprungen",
+        "error": "Fehlgeschlagen",
+        "canceled": "Abgebrochen"
+      },
+      "actions": {
+        "working": "Verarbeitung",
+        "checking": "Vorhandene Dateien prüfen",
+        "asset_index": "Ressourcenindex abrufen",
+        "preflight": "Dateigrößen prüfen",
+        "downloading": "Herunterladen",
+        "retrying": "Warten auf Wiederholung",
+        "fallback": "Download von Ersatzquelle"
+      }
     }
   },
   "terminal": {

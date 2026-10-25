@@ -1,3 +1,4 @@
+import type { InstallationSnapshot } from './installation'
 export type InstallPhase = 'install' | 'download' | 'done' | 'error'
 /**
  * 领域类型定义。
@@ -319,7 +320,7 @@ export interface LaunchInstanceResult {
 //  账户
 // ═══════════════════════════════════════════════════════════════════
 
-export interface InstallProgress {
+export interface DownloadProgress {
   phase: InstallPhase
   task_id?: string
   /** 任务显示名（供未预先创建任务时前端自动建条目，如启动期补下载） */
@@ -339,7 +340,13 @@ export interface InstallProgress {
   errorCode?: string
 }
 
-export type DownloadProgress = InstallProgress
+export type InstallProgress =
+  | DownloadProgress
+  | {
+      kind: 'installation'
+      task_id: string
+      installation: InstallationSnapshot
+    }
 
 export type LaunchPhase =
   | 'preparing'

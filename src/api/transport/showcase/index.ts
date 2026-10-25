@@ -1,6 +1,7 @@
 import type { MinecraftAccount, WardrobeItem } from '@/types/accounts'
 import type { ApiResponse, BackendEvents } from '@/types/api'
 import type { ConnectorStatus } from '@/types/connect'
+import type { InstallationSnapshot } from '@/types/installation'
 import type { CrashAnalysisResult, GameInstance, GameResource, VersionRunStats } from '@/types/instances'
 import type { ApplicationOperation } from '@/types/operations'
 import type { PluginInfo } from '@/types/plugins'
@@ -157,62 +158,46 @@ export function createShowcaseTransport(): BackendTransport {
   }
 
   const emitInstallProgress = (taskId: string) => {
-    // 模拟真实下载指标（字节进度/文件数/速度），便于演示实时下载卡。
-    const totalBytes = 400 * 1024 * 1024
-    const totalFiles = 50
-    const steps: BackendEvents['game:install_progress'][] = [
-      { phase: 'install', task_id: taskId, message: '正在准备展示安装任务', done: 0, total: 1 },
-      {
-        phase: 'download',
-        task_id: taskId,
-        message: '正在下载展示文件 assets/minecraft/textures/block.png',
-        done: 48 * 1024 * 1024,
-        total: totalBytes,
-        progress_type: 'bytes',
-        total_files: totalFiles,
-        downloaded_files: 6,
-        speed: 6 * 1024 * 1024,
-        subtask: 'download_assets',
-      },
-      {
-        phase: 'download',
-        task_id: taskId,
-        message: '正在下载展示文件 libraries/net/minecraft/server.jar',
-        done: 236 * 1024 * 1024,
-        total: totalBytes,
-        progress_type: 'bytes',
-        total_files: totalFiles,
-        downloaded_files: 31,
-        speed: 13 * 1024 * 1024,
-        subtask: 'download_assets',
-      },
-      {
-        phase: 'download',
-        task_id: taskId,
-        message: '正在校验展示文件',
-        done: totalBytes,
-        total: totalBytes,
-        subtask: 'check_files',
-        downloaded_files: totalFiles,
-        total_files: totalFiles,
-      },
-      {
-        phase: 'done',
-        task_id: taskId,
-        message: '展示安装完成',
-        done: 1,
-        total: 1,
-        total_files: totalFiles,
-        downloaded_files: totalFiles,
-        speed: 0,
-      },
-    ]
-    steps.forEach((step, index) =>
+    const stageIds = ['resolve_metadata', 'check_resources', 'download_game_files', 'finalize_install'] as const
+    const events = [0, 1, 2, 2, 3, 4]
+    events.forEach((current, revision) => {
       setTimeout(
-        () => emit('game:install_progress', { ...step, task_id: taskId } as BackendEvents['game:install_progress']),
-        480 * (index + 1)
+        () => {
+          const completed = current === 4
+          const installation: InstallationSnapshot = {
+            revision,
+            status: completed ? 'completed' : 'running',
+            cancellationRequested: false,
+            currentStageId: stageIds[Math.min(current, 3)]!,
+            errorCode: null,
+            message: '',
+            stages: stageIds.map((id, index) => ({
+              id,
+              status: completed || index < current ? 'completed' : index === current ? 'running' : 'pending',
+              action: id === 'download_game_files' ? 'downloading' : 'working',
+              progress: {
+                unit: id === 'download_game_files' ? 'bytes' : 'unknown',
+                completed: (revision === 2 ? 48 : 236) * 1024 * 1024,
+                total: id === 'download_game_files' ? 400 * 1024 * 1024 : null,
+              },
+              download:
+                id === 'download_game_files'
+                  ? {
+                      completedFiles: revision === 2 ? 6 : 31,
+                      totalFiles: 50,
+                      transferredBytes: (revision === 2 ? 48 : 236) * 1024 * 1024,
+                      speedBytesPerSecond: index === current ? 8 * 1024 * 1024 : 0,
+                    }
+                  : null,
+              startedAt: Date.now(),
+              updatedAt: Date.now(),
+            })),
+          }
+          emit('game:install_progress', { kind: 'installation', task_id: taskId, installation })
+        },
+        480 * (revision + 1)
       )
-    )
+    })
   }
 
   const emitLaunchProgress = () => {

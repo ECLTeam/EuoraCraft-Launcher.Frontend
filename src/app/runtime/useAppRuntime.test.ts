@@ -5,6 +5,7 @@ import type * as AppData from '@/app/data'
 import { pinia } from '@/app/stores'
 import { globalTaskQueue, useTaskQueueStore } from '@/composables/useTaskQueue'
 import { i18n } from '@/i18n'
+import { installationFixture } from '@/types/installation.fixture'
 import type { InstallProgress } from '@/types/instances'
 import { useAppRuntime } from './useAppRuntime'
 
@@ -61,6 +62,16 @@ async function startRuntime() {
 }
 
 describe('安装进度事件与任务队列集成', () => {
+  it('结构化安装事件更新阶段，非法快照不能覆盖当前状态', async () => {
+    const handle = await startRuntime()
+    const id = globalTaskQueue.addTask({ type: 'install', name: 'Minecraft', versionId: '', loaderType: '' })
+    handle({ kind: 'installation', task_id: id, installation: installationFixture() })
+    expect(globalTaskQueue.tasks.value[0]?.installation?.currentStageId).toBe('download_game_files')
+    handle({ kind: 'installation', task_id: id, installation: installationFixture({ revision: NaN }) })
+    expect(globalTaskQueue.tasks.value[0]?.installation?.revision).toBe(1)
+    expect(globalTaskQueue.tasks.value[0]?.status).toBe('running')
+  })
+
   it.each([
     ['done', undefined, 'completed'],
     ['error', 'GAME_DOWNLOAD_FAILED', 'error'],

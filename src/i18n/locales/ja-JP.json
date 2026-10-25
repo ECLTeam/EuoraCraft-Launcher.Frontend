@@ -2034,6 +2034,39 @@
       "completed": "完了",
       "error": "失敗",
       "canceled": "キャンセル済み"
+    },
+    "installation": {
+      "step": "ステップ {current} / {total}",
+      "transferred": "転送済み {amount}",
+      "unknownSize": "合計サイズ不明",
+      "stages": {
+        "resolve_metadata": "インストール情報を取得",
+        "download_client": "ゲーム本体をダウンロード",
+        "download_loader": "ローダーのインストーラーをダウンロード",
+        "download_loader_libraries": "ローダーの依存ファイルをダウンロード",
+        "install_loader": "ローダーをインストール",
+        "check_resources": "ゲームリソースを確認",
+        "resolve_fabric_api": "Fabric API 情報を取得",
+        "download_game_files": "ゲームファイルをダウンロード",
+        "finalize_install": "インストールを完了"
+      },
+      "states": {
+        "pending": "待機中",
+        "running": "実行中",
+        "completed": "完了",
+        "skipped": "スキップ",
+        "error": "失敗",
+        "canceled": "キャンセル済み"
+      },
+      "actions": {
+        "working": "処理中",
+        "checking": "既存ファイルを確認中",
+        "asset_index": "アセットインデックスを取得中",
+        "preflight": "ファイルサイズを確認中",
+        "downloading": "ダウンロード中",
+        "retrying": "再試行を待機中",
+        "fallback": "代替ソースからダウンロード中"
+      }
     }
   },
   "terminal": {

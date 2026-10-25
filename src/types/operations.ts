@@ -1,5 +1,8 @@
+import type { InstallationSnapshot } from './installation'
+
 /** 应用后台操作；IPC 保留原有 game 命令和事件名称。 */
 export interface ApplicationOperation {
+  installation?: InstallationSnapshot | null
   operationId: string
   kind?: string
   name?: string

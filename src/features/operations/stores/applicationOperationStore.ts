@@ -4,6 +4,7 @@ import backend from '@/api/client'
 import { pinia } from '@/app/stores'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { i18n } from '@/i18n'
+import { parseInstallation } from '@/types/installation'
 import type { InstanceTargetPayload } from '@/types/instances'
 import { isFinishedOperation, type ApplicationOperation } from '@/types/operations'
 import { getErrorMessage } from '@/utils/error'
@@ -19,6 +20,11 @@ const defineApplicationOperationStore = defineStore('applicationOperations', () 
   let generation = 0
 
   function accept(operation: ApplicationOperation, displayName?: string): ApplicationOperation {
+    if (operation.installation != null) {
+      const installation = parseInstallation(operation.installation)
+      if (!installation) throw new TypeError('Invalid installation progress')
+      operation = { ...operation, installation }
+    }
     const previous = operations.value[operation.operationId]
     if (previous && isFinishedOperation(previous)) return previous
     if (previous?.revision !== undefined && operation.revision !== undefined && operation.revision < previous.revision)
@@ -43,6 +49,7 @@ const defineApplicationOperationStore = defineStore('applicationOperations', () 
     globalTaskQueue.updateTask(taskId, {
       status:
         confirmed.status === 'failed' ? 'error' : confirmed.status === 'cancelled' ? 'canceled' : confirmed.status,
+      installation: confirmed.installation,
       progress: confirmed.percent,
       message: confirmed.error || confirmed.message,
       done: confirmed.done,

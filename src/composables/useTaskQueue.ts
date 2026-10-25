@@ -2,6 +2,7 @@ import { defineStore, storeToRefs } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { pinia } from '@/app/stores'
 import { i18n } from '@/i18n'
+import { parseInstallation, type InstallationSnapshot } from '@/types/installation'
 
 export interface Subtask {
   id: string
@@ -11,6 +12,7 @@ export interface Subtask {
 }
 
 export interface TaskItem {
+  installation?: InstallationSnapshot | null
   id: string
   type: 'install' | 'download' | 'operation'
   operationId?: string
@@ -86,6 +88,7 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     updates: Partial<
       Pick<
         TaskItem,
+        | 'installation'
         | 'status'
         | 'progress'
         | 'message'
@@ -102,6 +105,11 @@ export const useTaskQueueStore = defineStore('taskQueue', () => {
     const task = tasks.value.find((t) => t.id === taskId)
     if (!task) return
     if (['completed', 'error', 'canceled'].includes(task.status)) return
+    if (updates.installation != null) {
+      const installation = parseInstallation(updates.installation)
+      if (!installation || (task.installation && installation.revision < task.installation.revision)) return
+      task.installation = installation
+    } else if (updates.installation === null) task.installation = null
     if (updates.status !== undefined) task.status = updates.status
     if (updates.status === 'error') task.expanded = true
     if (updates.progress !== undefined) task.progress = Math.min(100, Math.max(0, updates.progress))

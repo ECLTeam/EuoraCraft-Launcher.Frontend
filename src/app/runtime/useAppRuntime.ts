@@ -25,6 +25,7 @@ import { globalProcessInstances } from '@/features/terminal/composables/useProce
 import { defaultLocale, i18n, isSimplifiedChinese, supportedLocales } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
+import { parseInstallation } from '@/types/installation'
 import type { InstallProgress } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
 import { launcherErrorQueue } from './errorPresentation'
@@ -167,6 +168,20 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   function handleInstallProgress(payload: InstallProgress): void {
     const taskId = payload.task_id
     if (!taskId) return
+
+    if ('kind' in payload && payload.kind === 'installation') {
+      const installation = parseInstallation(payload.installation)
+      if (!installation) return
+      globalTaskQueue.updateTask(taskId, {
+        installation,
+        status: installation.status,
+        message: installation.message,
+        speedBytesPerSecond: 0,
+      })
+      return
+    }
+
+    if (!('phase' in payload)) return
 
     // 任务尚未创建（如启动期由后端上报的内置下载）且带显示名时，自动建队列条目。
     if (!globalTaskQueue.tasks.value.some((t) => t.id === taskId)) {

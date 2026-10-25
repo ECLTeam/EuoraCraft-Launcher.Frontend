@@ -1919,6 +1919,39 @@
       "completed": "已完成",
       "error": "失败",
       "canceled": "已取消"
+    },
+    "installation": {
+      "step": "步骤 {current} / {total}",
+      "transferred": "已传输 {amount}",
+      "unknownSize": "总大小未知",
+      "stages": {
+        "resolve_metadata": "获取安装信息",
+        "download_client": "下载游戏本体",
+        "download_loader": "下载加载器安装器",
+        "download_loader_libraries": "下载加载器依赖",
+        "install_loader": "执行加载器安装",
+        "check_resources": "检查游戏资源",
+        "resolve_fabric_api": "获取 Fabric API 信息",
+        "download_game_files": "下载游戏文件",
+        "finalize_install": "完成安装"
+      },
+      "states": {
+        "pending": "待执行",
+        "running": "进行中",
+        "completed": "已完成",
+        "skipped": "已跳过",
+        "error": "失败",
+        "canceled": "已取消"
+      },
+      "actions": {
+        "working": "正在处理",
+        "checking": "检查已有文件",
+        "asset_index": "获取资源索引",
+        "preflight": "获取文件大小",
+        "downloading": "正在下载",
+        "retrying": "等待重试",
+        "fallback": "备用源补下载"
+      }
     }
   },
   "terminal": {

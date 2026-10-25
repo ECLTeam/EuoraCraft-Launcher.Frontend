@@ -1917,6 +1917,39 @@
       "completed": "已完成",
       "error": "失敗",
       "canceled": "已取消"
+    },
+    "installation": {
+      "step": "步驟 {current} / {total}",
+      "transferred": "已傳輸 {amount}",
+      "unknownSize": "總大小未知",
+      "stages": {
+        "resolve_metadata": "取得安裝資訊",
+        "download_client": "下載遊戲本體",
+        "download_loader": "下載載入器安裝程式",
+        "download_loader_libraries": "下載載入器相依項目",
+        "install_loader": "執行載入器安裝",
+        "check_resources": "檢查遊戲資源",
+        "resolve_fabric_api": "取得 Fabric API 資訊",
+        "download_game_files": "下載遊戲檔案",
+        "finalize_install": "完成安裝"
+      },
+      "states": {
+        "pending": "待執行",
+        "running": "進行中",
+        "completed": "已完成",
+        "skipped": "已略過",
+        "error": "失敗",
+        "canceled": "已取消"
+      },
+      "actions": {
+        "working": "正在處理",
+        "checking": "檢查現有檔案",
+        "asset_index": "取得資源索引",
+        "preflight": "取得檔案大小",
+        "downloading": "正在下載",
+        "retrying": "等待重試",
+        "fallback": "從備用來源補下載"
+      }
     }
   },
   "terminal": {

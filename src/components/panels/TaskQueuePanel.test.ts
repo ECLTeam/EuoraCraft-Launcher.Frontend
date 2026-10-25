@@ -4,6 +4,7 @@ import { pinia } from '@/app/stores'
 import { globalTaskQueue, useTaskQueueStore } from '@/composables/useTaskQueue'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import { i18n } from '@/i18n'
+import { installationFixture } from '@/types/installation.fixture'
 import TaskQueuePanel from './TaskQueuePanel.vue'
 
 vi.mock('@/composables/useLauncherMessage', () => ({
@@ -19,6 +20,46 @@ beforeEach(() => {
 })
 
 afterEach(() => vi.restoreAllMocks())
+
+it('安装步骤的字节比例在两张卡一致，未知总量持续显示传输量', async () => {
+  const id = globalTaskQueue.addTask({ type: 'install', name: 'NeoForge', versionId: '', loaderType: '' })
+  const installation = installationFixture()
+  globalTaskQueue.updateTask(id, { status: 'running', installation })
+  const wrapper = render()
+  expect(wrapper.get('.tq-progress-text').text()).toBe('60%')
+  expect(wrapper.get('.tq-live-pct').text()).toBe('60%')
+  expect(wrapper.get('.tq-task-phase').text()).toBe('下载游戏文件')
+  installation.revision++
+  installation.stages[1]!.progress = { unit: 'unknown', completed: 60, total: null }
+  globalTaskQueue.updateTask(id, { installation })
+  await flushPromises()
+  expect(wrapper.get('.tq-progress-text').text()).toBe('—')
+  expect(wrapper.get('.tq-task-stats').text()).toContain('已传输')
+  expect(wrapper.get('.tq-task-progress [role="progressbar"]').attributes('aria-valuenow')).toBeUndefined()
+  installation.revision++
+  installation.currentStageId = 'finalize_install'
+  installation.stages[1]!.status = 'completed'
+  installation.stages[1]!.download!.speedBytesPerSecond = 0
+  installation.stages[2]!.status = 'running'
+  installation.stages[2]!.progress = { unit: 'unknown', completed: 0, total: null }
+  globalTaskQueue.updateTask(id, { installation })
+  await flushPromises()
+  expect(wrapper.find('.tq-live').exists()).toBe(false)
+  expect(wrapper.get('.tq-task-phase').text()).toBe('完成安装')
+})
+
+it('旧快照不能覆盖新步骤，终态后迟到事件无效', () => {
+  const id = globalTaskQueue.addTask({ type: 'install', name: 'Minecraft', versionId: '', loaderType: '' })
+  globalTaskQueue.updateTask(id, { status: 'running', installation: installationFixture({ revision: 3 }) })
+  globalTaskQueue.updateTask(id, { status: 'running', installation: installationFixture({ revision: 2 }) })
+  expect(globalTaskQueue.tasks.value[0]?.installation?.revision).toBe(3)
+  globalTaskQueue.updateTask(id, {
+    status: 'completed',
+    installation: installationFixture({ revision: 4, status: 'completed' }),
+  })
+  globalTaskQueue.updateTask(id, { status: 'running', installation: installationFixture({ revision: 5 }) })
+  expect(globalTaskQueue.tasks.value[0]?.status).toBe('completed')
+})
 
 function render() {
   return mount(TaskQueuePanel, {

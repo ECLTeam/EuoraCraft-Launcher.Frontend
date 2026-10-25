@@ -58,8 +58,8 @@
                       <span
                         v-if="task.status === 'running' || task.status === 'pending'"
                         class="tq-task-phase"
-                        :title="task.message"
-                        >{{ task.message }}</span
+                        :title="taskMessage(task)"
+                        >{{ taskMessage(task) }}</span
                       >
                     </div>
                   </div>
@@ -111,13 +111,13 @@
                 </button>
               </div>
             </div>
+            <div v-if="task.installation" class="tq-stage-summary">
+              <span>{{ stagePosition(task) }}</span>
+              <span v-if="stageAction(task)">{{ stageAction(task) }}</span>
+            </div>
             <div class="tq-task-progress">
-              <UiProgress
-                :percentage="taskProgress(task)"
-                :processing="(task.status === 'pending' || task.status === 'running') && taskProgress(task) <= 0"
-                :height="4"
-              />
-              <span class="tq-progress-text">{{ taskProgress(task) > 0 ? taskProgress(task) + '%' : '...' }}</span>
+              <UiProgress :percentage="taskProgress(task)" :processing="taskIndeterminate(task)" :height="4" />
+              <span class="tq-progress-text">{{ progressText(task) }}</span>
             </div>
             <div
               v-if="showTaskStats(task) || (task.operationId && operationStore.queryErrors[task.operationId])"
@@ -129,6 +129,15 @@
               </span>
               <span v-if="task.progressType === 'bytes' && task.total" class="tq-stat tq-stat-bytes">
                 {{ formatBytes(task.done ?? 0) }} / {{ formatBytes(task.total) }}
+              </span>
+              <span
+                v-if="task.installation && task.progressType !== 'bytes' && task.transferredBytes != null"
+                class="tq-stat tq-stat-bytes"
+              >
+                {{ t('taskQueue.installation.transferred', { amount: formatBytes(task.transferredBytes) }) }}
+              </span>
+              <span v-if="task.installation && task.isDownloading && task.progressType !== 'bytes'" class="tq-stat">
+                {{ t('taskQueue.installation.unknownSize') }}
               </span>
               <span v-if="task.status === 'running' && task.speedBytesPerSecond" class="tq-stat tq-stat-speed">
                 <UiIcon name="download" :size="12" />
@@ -146,10 +155,29 @@
               <div v-if="task.expanded" class="tq-task-detail">
                 <div class="tq-task-message">
                   <span class="tq-msg-label">{{ t('taskQueue.currentStatus') }}</span>
-                  <span>{{ task.message }}</span>
+                  <span>{{ taskMessage(task) }}</span>
                 </div>
 
-                <div v-if="task.subtasks.length > 0" class="tq-subtasks">
+                <div v-if="task.installation" class="tq-subtasks">
+                  <div
+                    v-for="stage in task.installation.stages"
+                    :key="stage.id"
+                    :class="['tq-subtask', `tq-subtask--${stage.status}`]"
+                  >
+                    <UiLoading v-if="stage.status === 'running'" mode="inline" size="xs" decorative />
+                    <UiIcon v-else-if="stage.status === 'completed'" name="check" :size="12" class="tq-icon-success" />
+                    <UiIcon
+                      v-else-if="stage.status === 'error' || stage.status === 'canceled'"
+                      name="x-mark"
+                      :size="12"
+                      class="tq-icon-error"
+                    />
+                    <UiIcon v-else name="circle" :size="8" class="tq-icon-muted" />
+                    <span class="tq-subtask-name">{{ t(`taskQueue.installation.stages.${stage.id}`) }}</span>
+                    <span class="tq-subtask-msg">{{ t(`taskQueue.installation.states.${stage.status}`) }}</span>
+                  </div>
+                </div>
+                <div v-else-if="task.subtasks.length > 0" class="tq-subtasks">
                   <div v-for="sub in task.subtasks" :key="sub.id" :class="['tq-subtask', `tq-subtask--${sub.status}`]">
                     <UiLoading v-if="sub.status === 'running'" mode="inline" size="xs" decorative />
                     <UiIcon v-else-if="sub.status === 'completed'" name="check" :size="12" class="tq-icon-success" />
@@ -189,7 +217,7 @@
             </div>
 
             <div class="tq-live-name">{{ activeDownload.name }}</div>
-            <div class="tq-live-msg">{{ activeDownload.message }}</div>
+            <div class="tq-live-msg">{{ taskMessage(activeDownload) }}</div>
 
             <!-- 实时网速曲线图 -->
             <div class="tq-live-chart">
@@ -224,9 +252,14 @@
             </div>
 
             <div class="tq-live-progress">
-              <UiProgress class="tq-live-bar" :percentage="livePct" :processing="livePct <= 0" :height="6" />
+              <UiProgress
+                class="tq-live-bar"
+                :percentage="livePct"
+                :processing="taskIndeterminate(activeDownload)"
+                :height="6"
+              />
               <span class="tq-live-pct">
-                {{ livePct > 0 ? livePct + '%' : '...' }}
+                {{ progressText(activeDownload) }}
               </span>
             </div>
           </div>
@@ -249,6 +282,7 @@ import { getLoaderLabel } from '@/config/version'
 import { useModpackImportStore } from '@/features/instances/stores/modpackImportStore'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
+import { currentInstallationStage, installationPercentage } from '@/types/installation'
 
 defineOptions({ name: 'TaskQueuePanel' })
 
@@ -261,16 +295,77 @@ const showModpackResult = (operationId: string) => {
   void useModpackImportStore().openResult(operationId)
 }
 
-const { tasks, panelVisible, activeCount, removeTask, clearFinishedTasks: queueClearFinishedTasks } = globalTaskQueue
+const {
+  tasks: queueTasks,
+  panelVisible,
+  activeCount,
+  removeTask,
+  clearFinishedTasks: queueClearFinishedTasks,
+} = globalTaskQueue
+
+function taskView(task: TaskItem) {
+  if (!task.installation) return { ...task, isDownloading: undefined, transferredBytes: undefined }
+  const stage = currentInstallationStage(task.installation)
+  const download = stage?.status === 'running' ? stage.download : null
+  return {
+    ...task,
+    progress: installationPercentage(task.installation) ?? 0,
+    progressType: stage?.progress.unit === 'bytes' ? ('bytes' as const) : undefined,
+    done: stage?.progress.completed,
+    total: stage?.progress.total ?? undefined,
+    totalFiles: download?.totalFiles ?? undefined,
+    downloadedFiles: download?.completedFiles,
+    speedBytesPerSecond: download?.speedBytesPerSecond ?? 0,
+    transferredBytes: download?.transferredBytes,
+    isDownloading: !!download && stage?.action !== 'preflight',
+  }
+}
+const tasks = computed(() => queueTasks.value.map(taskView))
+
+function taskMessage(task: TaskItem): string {
+  const installation = task.installation
+  if (!installation) return task.message
+  if (installation.cancellationRequested && installation.status === 'running') return t('operations.cancelRequested')
+  if (installation.status === 'error' || installation.status === 'canceled') return installation.message
+  const stage = currentInstallationStage(installation)
+  return stage ? t(`taskQueue.installation.stages.${stage.id}`) : task.message
+}
+function stagePosition(task: TaskItem): string {
+  const installation = task.installation
+  if (!installation) return ''
+  return t('taskQueue.installation.step', {
+    current: Math.max(1, installation.stages.findIndex((stage) => stage.id === installation.currentStageId) + 1),
+    total: installation.stages.length,
+  })
+}
+function stageAction(task: TaskItem): string {
+  const stage = currentInstallationStage(task.installation)
+  if (!stage || stage.status !== 'running' || stage.action === 'working') return ''
+  return t(`taskQueue.installation.actions.${stage.action}`)
+}
+function taskIndeterminate(task: TaskItem): boolean {
+  if (task.status !== 'pending' && task.status !== 'running') return false
+  return task.installation ? installationPercentage(task.installation) === null : taskProgress(task) <= 0
+}
+function progressText(task: TaskItem): string {
+  if (task.installation) {
+    if (task.status === 'completed') return '100%'
+    const percentage = installationPercentage(task.installation)
+    return percentage === null ? '—' : `${percentage}%`
+  }
+  return taskProgress(task) > 0 ? `${taskProgress(task)}%` : '...'
+}
 
 const finishedCount = computed(
   () => tasks.value.filter((t) => t.status === 'completed' || t.status === 'error' || t.status === 'canceled').length
 )
 
 /** 正在下载且携带下载指标（字节/速度优先，其次文件数）的任务，作为实时下载卡的数据源 */
+const preferredDownloadId = ref<string | null>(null)
 const activeDownload = computed(() => {
-  const running = tasks.value.filter((t) => t.status === 'running')
+  const running = tasks.value.filter((t) => t.status === 'running' && (!t.installation || t.isDownloading))
   return (
+    running.find((task) => task.id === preferredDownloadId.value) ??
     running.find((t) => t.progressType === 'bytes' || (t.speedBytesPerSecond != null && t.speedBytesPerSecond > 0)) ??
     running.find((t) => t.totalFiles != null || t.downloadedFiles != null) ??
     null
@@ -309,11 +404,12 @@ function formatDuration(seconds: number): string {
 const livePct = computed(() => {
   const task = activeDownload.value
   if (!task) return 0
-  if (task.totalFiles != null && task.totalFiles > 0) {
-    return normalizeProgress(((task.downloadedFiles ?? 0) / task.totalFiles) * 100)
-  }
+  if (task.installation) return taskProgress(task)
   if (task.progressType === 'bytes' && task.total) {
     return normalizeProgress(((task.done ?? 0) / task.total) * 100)
+  }
+  if (task.totalFiles != null && task.totalFiles > 0) {
+    return normalizeProgress(((task.downloadedFiles ?? 0) / task.totalFiles) * 100)
   }
   return taskProgress(task)
 })
@@ -326,25 +422,28 @@ let liveTimer: ReturnType<typeof setInterval> | null = null
 
 function updateTick(): void {
   const task = activeDownload.value
-  elapsed.value = task ? Math.floor((Date.now() - task.timestamp) / 1000) : 0
+  elapsed.value = task
+    ? Math.floor((Date.now() - (currentInstallationStage(task.installation)?.startedAt ?? task.timestamp)) / 1000)
+    : 0
   const speed = task?.speedBytesPerSecond != null && task.speedBytesPerSecond > 0 ? task.speedBytesPerSecond : 0
   speedSamples.value.push(speed)
   if (speedSamples.value.length > MAX_SAMPLES) speedSamples.value.shift()
 }
 
-watch(activeDownload, (task) => {
-  if (liveTimer) {
-    clearInterval(liveTimer)
+watch(
+  () => [panelVisible.value, activeDownload.value?.id, activeDownload.value?.installation?.currentStageId] as const,
+  ([visible]) => {
+    if (liveTimer) clearInterval(liveTimer)
     liveTimer = null
-  }
-  speedSamples.value = []
-  if (task) {
-    updateTick()
-    liveTimer = setInterval(updateTick, 1000)
-  } else {
-    elapsed.value = 0
-  }
-})
+    speedSamples.value = []
+    preferredDownloadId.value = activeDownload.value?.id ?? null
+    if (visible && activeDownload.value) {
+      updateTick()
+      liveTimer = setInterval(updateTick, 1000)
+    } else elapsed.value = 0
+  },
+  { immediate: true }
+)
 
 onBeforeUnmount(() => {
   if (liveTimer) clearInterval(liveTimer)
@@ -383,13 +482,15 @@ const remainingText = computed(() => {
   const task = activeDownload.value
   const speed = task?.speedBytesPerSecond ?? 0
   if (task?.progressType === 'bytes' && task.total && speed > 0) {
-    return formatDuration((task.total - (task.done ?? 0)) / speed)
+    return formatDuration(Math.max(0, task.total - (task.done ?? 0)) / speed)
   }
   return '—'
 })
 
 function showTaskStats(task: TaskItem): boolean {
   return (
+    (currentInstallationStage(task.installation)?.status === 'running' &&
+      !!currentInstallationStage(task.installation)?.download) ||
     task.totalFiles != null ||
     (task.progressType === 'bytes' && !!task.total) ||
     (task.status === 'running' && !!task.speedBytesPerSecond)

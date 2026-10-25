@@ -2024,6 +2024,39 @@
       "completed": "Completed",
       "error": "Failed",
       "canceled": "Cancelled"
+    },
+    "installation": {
+      "step": "Step {current} / {total}",
+      "transferred": "Transferred {amount}",
+      "unknownSize": "Total size unknown",
+      "stages": {
+        "resolve_metadata": "Get installation information",
+        "download_client": "Download game client",
+        "download_loader": "Download loader installer",
+        "download_loader_libraries": "Download loader dependencies",
+        "install_loader": "Run loader installation",
+        "check_resources": "Check game resources",
+        "resolve_fabric_api": "Get Fabric API information",
+        "download_game_files": "Download game files",
+        "finalize_install": "Finish installation"
+      },
+      "states": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "skipped": "Skipped",
+        "error": "Failed",
+        "canceled": "Canceled"
+      },
+      "actions": {
+        "working": "Processing",
+        "checking": "Checking existing files",
+        "asset_index": "Fetching asset index",
+        "preflight": "Checking file sizes",
+        "downloading": "Downloading",
+        "retrying": "Waiting to retry",
+        "fallback": "Downloading from alternate source"
+      }
     }
   },
   "terminal": {
