@@ -2,7 +2,9 @@
   <div class="about-pane">
     <!-- 关于 -->
     <div class="about-card">
-      <div class="card-title">{{ t('settings.about') }}</div>
+      <div class="card-title">
+        <UiIcon name="info" :size="16" /><span>{{ t('settings.about') }}</span>
+      </div>
       <div class="card-body">
         <div class="launcher-summary">
           <div class="launcher-summary__logo-cell">
@@ -49,7 +51,9 @@
 
     <!-- ECLTeam -->
     <div class="about-card">
-      <div class="card-title">{{ t('settings.aboutTab.sections.team') }}</div>
+      <div class="card-title">
+        <UiIcon name="users" :size="16" /><span>{{ t('settings.aboutTab.sections.team') }}</span>
+      </div>
       <div class="card-body">
         <AboutEntryRow v-for="member in teamMembers" :key="member.id" :entry="member" />
       </div>
@@ -57,7 +61,9 @@
 
     <!-- 特别鸣谢 -->
     <div class="about-card">
-      <div class="card-title">{{ t('settings.aboutTab.sections.specialThanks') }}</div>
+      <div class="card-title">
+        <UiIcon name="star" :size="16" /><span>{{ t('settings.aboutTab.sections.specialThanks') }}</span>
+      </div>
       <div class="card-body">
         <AboutEntryRow
           v-for="entry in specialThanksEntries"
@@ -71,7 +77,9 @@
 
     <!-- 社区贡献者 -->
     <div class="about-card community-contributors">
-      <div class="card-title">{{ t('settings.aboutTab.sections.contributors') }}</div>
+      <div class="card-title">
+        <UiIcon name="user" :size="16" /><span>{{ t('settings.aboutTab.sections.contributors') }}</span>
+      </div>
       <div class="card-body">
         <p class="contributors-message">{{ t('settings.aboutTab.contributors.description') }}</p>
         <img
@@ -102,7 +110,9 @@
 
     <!-- 技术栈 -->
     <div class="about-card">
-      <div class="card-title">{{ t('settings.aboutTab.sections.technologyStack') }}</div>
+      <div class="card-title">
+        <UiIcon name="layers" :size="16" /><span>{{ t('settings.aboutTab.sections.technologyStack') }}</span>
+      </div>
       <div class="card-body">
         <div v-for="category in technologyCategories" :key="category.id" class="technology-category">
           <button class="technology-category__toggle" @click="toggleTechnologyCategory(category.id)">
@@ -131,7 +141,9 @@
 
     <!-- 法律信息 -->
     <div class="about-card">
-      <div class="card-title">{{ t('settings.aboutTab.sections.legal') }}</div>
+      <div class="card-title">
+        <UiIcon name="shield" :size="16" /><span>{{ t('settings.aboutTab.sections.legal') }}</span>
+      </div>
       <div class="card-body">
         <p class="legal-text">
           Copyright &copy; 2026 ECLTeam. All Rights Reserved.<br />

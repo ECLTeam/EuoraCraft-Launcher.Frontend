@@ -52,6 +52,21 @@ function mountAboutTab() {
   })
 }
 
+it('六张卡片标题均使用对应的本地图标并保留标题文字', () => {
+  const wrapper = mountAboutTab()
+  const titles = wrapper.findAll('.about-card > .card-title')
+  expect(titles).toHaveLength(6)
+  expect(titles.map((title) => title.get('ui-icon-stub').attributes('name'))).toEqual([
+    'info',
+    'users',
+    'star',
+    'user',
+    'layers',
+    'shield',
+  ])
+  expect(titles.every((title) => title.text().trim().length > 0)).toBe(true)
+})
+
 it('关于页文档入口使用集中定义的文档链接及原外部打开方式', async () => {
   const wrapper = mountAboutTab()
   await flushPromises()
