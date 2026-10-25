@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { useDebugToolsWindowStore } from './debugToolsWindowStore'
 
 beforeEach(() => {
@@ -11,6 +12,55 @@ beforeEach(() => {
 })
 
 describe('调试工具会话窗口', () => {
+  it('圆形可拖到右边缘，切换矩形后按新宽度收敛', () => {
+    const settings = useSettingsStore()
+    settings.ui.debugTools = { minimizedShape: 'circle' }
+    const store = useDebugToolsWindowStore()
+    store.setBounds({ left: 16, top: 64, right: 944, bottom: 584 })
+    store.activate()
+    store.move(9999, 9999)
+    expect(store.minimizedPosition).toEqual({ x: 884, y: 476 })
+    settings.ui.debugTools.minimizedShape = 'rectangle'
+    expect(store.minimizedPosition).toEqual({ x: 668, y: 476 })
+  })
+
+  it('加载的关闭偏好禁止激活，临时禁用不覆盖偏好', () => {
+    const settings = useSettingsStore()
+    settings.ui.debugTools = { visible: false, minimizedShape: 'circle' }
+    const store = useDebugToolsWindowStore()
+    store.activate()
+    store.open()
+    expect(store.mode).toBe('closed')
+    settings.ui.debugTools.visible = true
+    store.activate()
+    store.close()
+    expect(settings.ui.debugTools.visible).toBe(true)
+  })
+
+  it('保存失败保留可见状态，允许重试，执行期间拒绝重复提交', async () => {
+    const settings = useSettingsStore()
+    const store = useDebugToolsWindowStore()
+    store.activate()
+    const patch = vi.spyOn(settings, 'patchUiDebugTools').mockRejectedValueOnce(new Error('写入失败'))
+    await expect(store.savePreferences({ visible: false })).rejects.toThrow('写入失败')
+    expect(store.mode).toBe('minimized')
+    expect(store.isSavingPreferences).toBe(false)
+    let finish!: () => void
+    patch.mockImplementationOnce(async (next) => {
+      await new Promise<void>((resolve) => {
+        finish = resolve
+      })
+      settings.ui.debugTools = next
+    })
+    const saving = store.savePreferences({ visible: false })
+    expect(store.isSavingPreferences).toBe(true)
+    expect(await store.savePreferences({ visible: true })).toBe(false)
+    finish()
+    await saving
+    expect(store.mode).toBe('closed')
+    expect(settings.ui.debugTools?.visible).toBe(false)
+    expect(patch).toHaveBeenCalledTimes(2)
+  })
   it('收起条和展开面板分别保存位置，宿主缩小时收敛收起条边界', () => {
     const store = useDebugToolsWindowStore()
     store.setBounds({ left: 80, top: 72, right: 940, bottom: 580 })

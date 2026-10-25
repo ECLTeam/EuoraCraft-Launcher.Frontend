@@ -4,16 +4,28 @@
       v-show="!isBlocked"
       ref="windowRef"
       class="debug-tools-window"
-      :class="{ 'is-minimized': store.mode === 'minimized' }"
+      :class="{ 'is-minimized': store.mode === 'minimized', 'is-circle': isCircle }"
       :style="windowStyle"
       :inert="isBlocked || undefined"
       :aria-hidden="isBlocked || undefined"
-      :aria-labelledby="titleId"
+      :aria-labelledby="isCircle ? undefined : titleId"
+      :aria-label="isCircle ? t('dev.title') : undefined"
       role="region"
       tabindex="-1"
       @keydown.esc="onEscape"
     >
-      <header class="debug-window-header" @pointerdown="startGesture($event, 'move')">
+      <button
+        v-if="isCircle"
+        type="button"
+        class="debug-circle-button"
+        :aria-label="t('dev.window.restore')"
+        :title="t('dev.window.restore')"
+        @pointerdown="startGesture($event, 'move')"
+        @click="restoreCircle"
+      >
+        <UiIcon name="bug" :size="20" />
+      </button>
+      <header v-else class="debug-window-header" @pointerdown="startGesture($event, 'move')">
         <UiIcon name="bug" :size="16" />
         <span :id="titleId" class="debug-window-title">{{ t('dev.title') }}</span>
         <div class="debug-window-actions" @pointerdown.stop>
@@ -27,6 +39,14 @@
           </button>
           <button v-else :aria-label="t('dev.window.minimize')" :title="t('dev.window.minimize')" @click="minimize">
             <UiIcon name="minimize" :size="16" />
+          </button>
+          <button
+            :aria-label="t('dev.window.close')"
+            :title="t('dev.window.close')"
+            :disabled="store.isSavingPreferences"
+            @click="close"
+          >
+            <UiIcon name="close" :size="16" />
           </button>
         </div>
       </header>
@@ -51,6 +71,7 @@
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiIcon from '@/components/ui/Icon.vue'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { modalParentKey } from '@/composables/useModalInteraction'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
@@ -58,6 +79,8 @@ import DevToolsPanel from './DevToolsPanel.vue'
 
 const { t } = useI18n()
 const store = useDebugToolsWindowStore()
+const { run } = useAsyncAction({ showSuccess: false, showError: true })
+const isCircle = computed(() => store.mode === 'minimized' && store.minimizedShape === 'circle')
 const stack = useGlobalModalStack()
 provide(
   modalParentKey,
@@ -85,7 +108,7 @@ const hostPosition = ref({ left: 0, top: 0, width: 260, insetX: 0, insetY: 0, sc
 const windowStyle = computed(() => ({
   left: `${(store.mode === 'minimized' ? hostPosition.value.insetX + store.minimizedPosition.x : store.layout.x - hostPosition.value.left) + hostPosition.value.scrollX}px`,
   top: `${(store.mode === 'minimized' ? hostPosition.value.insetY + store.minimizedPosition.y : store.layout.y - hostPosition.value.top) + hostPosition.value.scrollY}px`,
-  width: `${store.mode === 'minimized' ? Math.min(260, hostPosition.value.width) : store.layout.width}px`,
+  width: `${store.mode === 'minimized' ? Math.min(store.minimizedWidth, hostPosition.value.width) : store.layout.width}px`,
   height: store.mode === 'minimized' ? '44px' : `${store.layout.height}px`,
 }))
 
@@ -148,7 +171,9 @@ let gesture: {
   y: number
   width: number
   height: number
+  moved: boolean
 } | null = null
+let suppressCircleClick = false
 
 function stopGesture(): void {
   const previous = gesture
@@ -166,9 +191,10 @@ function stopGesture(): void {
 function startGesture(event: PointerEvent, kind: 'move' | 'resize'): void {
   if (isBlocked.value || event.button !== 0 || store.mode === 'closed') return
   if (kind === 'resize' && store.mode !== 'floating') return
-  if (kind === 'move' && (event.target as Element).closest('button')) return
+  if (kind === 'move' && !isCircle.value && (event.target as Element).closest('button')) return
   stopGesture()
-  event.preventDefault()
+  if (!isCircle.value) event.preventDefault()
+  suppressCircleClick = false
   const element = event.currentTarget as HTMLElement
   gesture = {
     kind,
@@ -178,6 +204,7 @@ function startGesture(event: PointerEvent, kind: 'move' | 'resize'): void {
     clientY: event.clientY,
     ...store.layout,
     ...(store.mode === 'minimized' ? store.minimizedPosition : {}),
+    moved: false,
   }
   element.setPointerCapture(event.pointerId)
   element.addEventListener('lostpointercapture', stopGesture)
@@ -190,12 +217,37 @@ function onPointerMove(event: PointerEvent): void {
   if (!gesture || event.pointerId !== gesture.pointerId) return
   const dx = event.clientX - gesture.clientX
   const dy = event.clientY - gesture.clientY
+  if (isCircle.value && !gesture.moved && Math.hypot(dx, dy) < 4) return
+  gesture.moved = true
   if (gesture.kind === 'move') store.move(gesture.x + dx, gesture.y + dy)
   else store.resize(gesture.width + dx, gesture.height + dy)
 }
 
 function onPointerEnd(event: PointerEvent): void {
-  if (event.pointerId === gesture?.pointerId) stopGesture()
+  if (event.pointerId !== gesture?.pointerId) return
+  suppressCircleClick = isCircle.value && gesture.moved && event.type === 'pointerup'
+  stopGesture()
+}
+
+function restoreCircle(event: MouseEvent): void {
+  // 拖动结束后浏览器仍会派发 click；键盘 click 的 detail 为 0，不受上次拖动影响。
+  if (suppressCircleClick && event.detail !== 0) {
+    suppressCircleClick = false
+    return
+  }
+  suppressCircleClick = false
+  restore()
+}
+
+async function close(): Promise<void> {
+  if (isBlocked.value) return
+  stopGesture()
+  await run(async () => {
+    if (!(await store.savePreferences({ visible: false }))) return
+    if (!store.restoreFocus()) {
+      host.value?.querySelector<HTMLElement>('button, a[href], input, [tabindex="0"]')?.focus()
+    }
+  })
 }
 
 function resizeWithKeyboard(event: KeyboardEvent): void {
@@ -235,6 +287,7 @@ function onEscape(event: KeyboardEvent): void {
 watch(isBlocked, (blocked) => {
   if (blocked) stopGesture()
 })
+watch(() => store.minimizedShape, stopGesture)
 watch(
   () => store.mode,
   (mode) => {

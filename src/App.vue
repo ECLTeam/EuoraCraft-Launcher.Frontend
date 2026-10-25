@@ -183,6 +183,7 @@ import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import UpdateResultModal from '@/features/settings/components/UpdateResultModal.vue'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { rememberShownUpdate } from '@/features/settings/model/updateNotice'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import FloatingLauncherLog from '@/features/terminal/components/FloatingLauncherLog.vue'
 import { getErrorMessage } from '@/utils/error'
 import { openExternalUrl } from '@/utils/openExternal'
@@ -366,7 +367,11 @@ const {
   dismissActivePopup,
 } = appRuntime
 
-const canUseDebugTools = computed(() => appRuntime.isDevMode.value && isAgreementAccepted.value)
+const debugSettings = useSettingsStore()
+const hasLoadedDebugSettings = ref(false)
+const canUseDebugTools = computed(
+  () => hasLoadedDebugSettings.value && appRuntime.isDevMode.value && isAgreementAccepted.value && debugWindow.isVisible
+)
 watch(
   canUseDebugTools,
   (available) => {
@@ -410,6 +415,8 @@ onMounted(async () => {
   fullscreenModal.reset()
   try {
     await appRuntime.start()
+    await debugSettings.load()
+    hasLoadedDebugSettings.value = true
   } catch (error) {
     console.error('[App] 应用运行层初始化失败:', error)
     notifyLauncherPopup({

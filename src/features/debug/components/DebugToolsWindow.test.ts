@@ -4,10 +4,14 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { h, ref } from 'vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
 import DebugToolsWindow from './DebugToolsWindow.vue'
 
 enableAutoUnmount(afterEach)
+vi.mock('@/composables/useLauncherMessage', () => ({
+  useLauncherMessage: () => ({ error: vi.fn(), success: vi.fn() }),
+}))
 beforeEach(() => {
   setActivePinia(createPinia())
   const host = document.createElement('div')
@@ -87,6 +91,63 @@ it('收起恢复保留内部输入，Esc 回到常驻浮条', async () => {
   expect((windowElement().get('input').element as HTMLInputElement).value).toBe('保留当前调试内容')
   await windowElement().trigger('keydown', { key: 'Escape' })
   expect(useDebugToolsWindowStore().mode).toBe('minimized')
+})
+
+it('圆形拖动不误展开，下一次点击与键盘点击仍可恢复面板', async () => {
+  useSettingsStore().ui.debugTools = { minimizedShape: 'circle' }
+  const store = useDebugToolsWindowStore()
+  store.minimize()
+  render()
+  await flushPromises()
+  const button = windowElement().get('.debug-circle-button')
+  expect(windowElement().element.style.width).toBe('44px')
+  pointer('pointerdown', 30, 80, button.element)
+  pointer('pointermove', 55, 100)
+  pointer('pointerup', 55, 100)
+  button.element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }))
+  await flushPromises()
+  expect(store.mode).toBe('minimized')
+  expect(store.minimizedPosition).toEqual({ x: 25, y: 20 })
+  button.element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }))
+  await flushPromises()
+  expect(store.mode).toBe('floating')
+  store.minimize()
+  await flushPromises()
+  windowElement()
+    .get('.debug-circle-button')
+    .element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }))
+  await flushPromises()
+  expect(store.mode).toBe('floating')
+})
+
+it('关闭保存显示偏好并恢复焦点，保存期间禁止重复关闭', async () => {
+  const opener = document.createElement('button')
+  document.body.append(opener)
+  opener.focus()
+  const store = useDebugToolsWindowStore()
+  store.close()
+  store.open()
+  const settings = useSettingsStore()
+  let finish!: () => void
+  const save = vi.spyOn(settings, 'patchUiDebugTools').mockImplementation(async (patch) => {
+    await new Promise<void>((resolve) => {
+      finish = resolve
+    })
+    settings.ui.debugTools = patch
+  })
+  render()
+  await flushPromises()
+  const button = windowElement().get('[aria-label="关闭调试工具"]')
+  await button.trigger('click')
+  expect(button.attributes('disabled')).toBeDefined()
+  await button.trigger('click')
+  expect(save).toHaveBeenCalledTimes(1)
+  finish()
+  await flushPromises()
+  expect(store.mode).toBe('closed')
+  expect(settings.ui.debugTools?.visible).toBe(false)
+  expect(document.activeElement).toBe(opener)
+  opener.remove()
 })
 
 it('模态确认期间暂停浮层交互，关闭确认后恢复', async () => {
@@ -194,7 +255,7 @@ it('自动常驻默认左上角，收起条可拖动并保留位置，展开独�
   render()
   await flushPromises()
   expect(document.activeElement).toBe(opener)
-  expect(windowElement().find('[aria-label="关闭"]').exists()).toBe(false)
+  expect(windowElement().find('[aria-label="关闭调试工具"]').exists()).toBe(true)
   pointer('pointerdown', 200, 100, windowElement().get('.debug-window-header').element)
   const before = { ...store.layout }
   pointer('pointermove', 220, 120)

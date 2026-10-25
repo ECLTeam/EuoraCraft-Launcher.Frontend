@@ -1,8 +1,10 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { toRaw } from 'vue'
 import { queryClient } from '@/app/queryClient'
 import { javaApi } from '@/features/java/api/javaApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
+import { parseSettingsSnapshot } from '@/features/settings/model/settingsSnapshot'
 import { javaInventory, javaRuntime } from '@/test/javaFixtures'
 import { useSettingsStore } from './settingsStore'
 
@@ -25,6 +27,37 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
 }))
 
 describe('settingsStore', () => {
+  it('并发修改调试显示、形态及其他 UI 偏好时合并保存，重新加载保留结果', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    store.ui = { locale: 'zh-CN', debugTools: { minimizedShape: 'circle' } }
+    vi.mocked(settingsApi.saveUi).mockImplementation(async (ui) => ui)
+    await Promise.all([
+      store.patchUiDebugTools({ visible: false }),
+      store.patchUi({ flowDebug: true }),
+      store.patchUiDebugTools({ minimizedShape: 'rectangle' }),
+    ])
+    expect(store.ui).toEqual({
+      locale: 'zh-CN',
+      flowDebug: true,
+      debugTools: { visible: false, minimizedShape: 'rectangle' },
+    })
+    const saved = structuredClone(toRaw(store.ui))
+    vi.mocked(settingsApi.load).mockResolvedValue(
+      parseSettingsSnapshot({
+        ui: saved,
+        game: { minecraft_paths: [] },
+        launcher: {},
+        download: { mirror_source: 'official' },
+        connector: { mode: 'automatic', nodes: [] },
+      })
+    )
+    const reloaded = useSettingsStore(createPinia())
+    await reloaded.load(true)
+    expect(reloaded.ui.debugTools).toEqual(saved.debugTools)
+    vi.mocked(settingsApi.saveUi).mockReset()
+  })
+
   it('后台配置刷新等待本地写入完成，再读取最新配置', async () => {
     const store = useSettingsStore()
     await store.load()

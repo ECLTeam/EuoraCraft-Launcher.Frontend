@@ -142,7 +142,25 @@
         <NSwitch :value="debugMode" @update:value="handleDebugModeChange" />
       </SettingRow>
       <SettingRow v-if="debugMode" :label="t('dev.title')" :description="t('dev.desc')">
-        <NButton @click="debugWindow.open()">{{ t('dev.window.open') }}</NButton>
+        <NButton :loading="debugWindow.isSavingPreferences" @click="run(() => debugWindow.show())">
+          {{ t('dev.window.open') }}
+        </NButton>
+      </SettingRow>
+      <SettingRow v-if="debugMode" :label="t('dev.window.visible')" :description="t('dev.window.visibleHint')">
+        <NSwitch
+          :value="debugWindow.isVisible"
+          :disabled="debugWindow.isSavingPreferences"
+          @update:value="(value) => run(() => debugWindow.savePreferences({ visible: value }))"
+        />
+      </SettingRow>
+      <SettingRow v-if="debugMode" :label="t('dev.window.shape')">
+        <NSelect
+          class="setting-select"
+          :value="debugWindow.minimizedShape"
+          :options="debugShapeOptions"
+          :disabled="debugWindow.isSavingPreferences"
+          @update:value="handleDebugShapeChange"
+        />
       </SettingRow>
       <SettingRow :label="t('settings.debugLogLevel')" :description="t('settings.debugLogLevelDesc')">
         <NSelect
@@ -236,6 +254,14 @@ const settingsStore = useSettingsStore()
 const debugWindow = useDebugToolsWindowStore()
 const { download: downloadSettings } = storeToRefs(settingsStore)
 const { debugMode, setDebugMode, debugLogLevel, setDebugLogLevel } = useDebugMode()
+const debugShapeOptions = computed(() => [
+  { value: 'rectangle', label: t('dev.window.rectangle') },
+  { value: 'circle', label: t('dev.window.circle') },
+])
+
+function handleDebugShapeChange(value: 'rectangle' | 'circle'): void {
+  void run(() => debugWindow.savePreferences({ minimizedShape: value }))
+}
 
 const currentLocale = computed(() => locale.value as LocaleCode)
 // 下载源、模组源与联机功能只面向简体中文用户，其他语言隐藏对应分区；

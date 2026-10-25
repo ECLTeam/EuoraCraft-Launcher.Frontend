@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { useSettingsStore } from '@/features/settings/stores/settingsStore'
+import type { UiConfig } from '@/types/config'
 
 export type DebugToolsWindowMode = 'closed' | 'floating' | 'minimized'
 
@@ -12,6 +14,11 @@ export interface DebugToolsBounds {
 }
 
 export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
+  const settings = useSettingsStore()
+  const isVisible = computed(() => settings.ui.debugTools?.visible ?? true)
+  const minimizedShape = computed(() => settings.ui.debugTools?.minimizedShape ?? 'rectangle')
+  const minimizedWidth = computed(() => (minimizedShape.value === 'circle' ? 44 : 260))
+  const isSavingPreferences = ref(false)
   const mode = ref<DebugToolsWindowMode>('closed')
   const layout = reactive({ x: 16, y: 64, width: 640, height: 440 })
   const minimizedPosition = reactive({ x: 0, y: 0 })
@@ -26,7 +33,10 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
     const bottom = bounds?.bottom ?? window.innerHeight - 16
     const maxWidth = Math.max(0, right - left)
     const maxHeight = Math.max(0, bottom - top)
-    minimizedPosition.x = Math.min(Math.max(0, minimizedPosition.x), Math.max(0, maxWidth - Math.min(260, maxWidth)))
+    minimizedPosition.x = Math.min(
+      Math.max(0, minimizedPosition.x),
+      Math.max(0, maxWidth - Math.min(minimizedWidth.value, maxWidth))
+    )
     minimizedPosition.y = Math.min(Math.max(0, minimizedPosition.y), Math.max(0, maxHeight - 44))
     layout.width = Math.min(maxWidth, Math.max(Math.min(420, maxWidth), layout.width))
     layout.height = Math.min(maxHeight, Math.max(Math.min(280, maxHeight), layout.height))
@@ -40,6 +50,7 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   }
 
   function activate(): void {
+    if (!isVisible.value) return
     if (mode.value === 'closed') {
       mode.value = 'minimized'
       constrain()
@@ -47,6 +58,7 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   }
 
   function open(): void {
+    if (!isVisible.value) return
     if (mode.value !== 'floating')
       returnFocusTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null
     if (!hasPosition) {
@@ -61,6 +73,25 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   function close(): void {
     mode.value = 'closed'
   }
+
+  async function savePreferences(patch: NonNullable<UiConfig['debugTools']>): Promise<boolean> {
+    if (isSavingPreferences.value) return false
+    isSavingPreferences.value = true
+    try {
+      await settings.patchUiDebugTools(patch)
+      if (!isVisible.value) close()
+      else activate()
+      return true
+    } finally {
+      isSavingPreferences.value = false
+    }
+  }
+
+  async function show(): Promise<void> {
+    if (await savePreferences({ visible: true })) open()
+  }
+
+  watch(minimizedShape, constrain, { flush: 'sync' })
 
   function minimize(): void {
     mode.value = 'minimized'
@@ -96,6 +127,12 @@ export const useDebugToolsWindowStore = defineStore('debugToolsWindow', () => {
   }
 
   return {
+    isVisible,
+    minimizedShape,
+    minimizedWidth,
+    isSavingPreferences,
+    savePreferences,
+    show,
     mode,
     layout,
     minimizedPosition,

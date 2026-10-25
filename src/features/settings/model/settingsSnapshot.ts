@@ -1,14 +1,17 @@
 import {
   array,
   boolean,
+  check,
   looseObject,
   number,
   optional,
   picklist,
+  pipe,
   record,
   safeParse,
   string,
   union,
+  unknown,
   type InferOutput,
 } from 'valibot'
 import { i18n } from '@/i18n'
@@ -69,6 +72,13 @@ const ui = looseObject({
   locale: optionalString,
   debug: optionalBoolean,
   flowDebug: optionalBoolean,
+  debugTools: optional(
+    pipe(
+      unknown(),
+      check((value) => typeof value === 'object' && value !== null && !Array.isArray(value)),
+      looseObject({ visible: optionalBoolean, minimizedShape: optional(picklist(['rectangle', 'circle'])) })
+    )
+  ),
   theme: optional(theme),
   background: optional(background),
   windows: optional(

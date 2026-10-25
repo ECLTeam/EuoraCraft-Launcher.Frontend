@@ -84,6 +84,45 @@ describe('添加账户弹窗', () => {
     expect(account.startMicrosoftLogin).not.toHaveBeenCalled()
   })
 
+  it('UUID 自动预览直接显示在输入框内，手动修改与清空保持独立语义', async () => {
+    const generated = '5627dd98-e6be-3c21-b8a8-e92344183641'
+    const custom = '0123456789abcdef0123456789abcdef'
+    vi.spyOn(accountsApi, 'previewOfflineUuid').mockResolvedValue({ player_name: 'Steve', uuid: generated })
+    await openDialog()
+    choice(1).click()
+    await settle()
+    expect(activeDialog().querySelector('.offline-advanced-toggle')).toBeNull()
+    account.newOfflineUsername = 'Steve'
+    await vi.waitFor(() => expect(account.offlineUuidPreview).toBe(generated))
+    const input = () => activeDialog().querySelector<HTMLInputElement>('.offline-uuid-field input')!
+    expect(input().value).toBe(generated)
+    expect(account.newOfflineUuid).toBe('')
+    input().value = custom
+    input().dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    expect(account.newOfflineUuid).toBe(custom)
+    account.newOfflineUsername = 'Alex'
+    await settle()
+    expect(input().value).toBe(custom)
+    vi.mocked(accountsApi.previewOfflineUuid).mockResolvedValue({ player_name: 'Alex', uuid: generated })
+    input().value = ''
+    input().dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    await vi.waitFor(() => expect(input().value).toBe(generated))
+    expect(account.newOfflineUuid).toBe('')
+    input().value = 'invalid'
+    input().dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    expect(activeDialog().querySelector('.offline-uuid-field small.error')?.textContent).toContain(
+      'game.invalidOfflineUuid'
+    )
+    expect(
+      [...activeDialog().querySelectorAll('button')].find((button) =>
+        button.textContent?.includes(i18n.global.t('game.addOfflineAccount'))
+      )?.disabled
+    ).toBe(true)
+  })
+
   it('离线表单为独立弹窗，Esc 后恢复选择列表和触发按钮焦点', async () => {
     await openDialog()
     const selector = activeDialog()

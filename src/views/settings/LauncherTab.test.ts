@@ -1,5 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { NSelect } from 'naive-ui'
+import { NSelect, NSwitch } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -76,6 +76,10 @@ describe('LauncherTab 联机设置定位', () => {
     const { wrapper, router } = await mountSettings()
     expect(wrapper.findAll('button').some((button) => button.text() === '打开调试工具')).toBe(false)
     useSettingsStore().launcher.debug = true
+    vi.spyOn(useSettingsStore(), 'patchUiDebugTools').mockImplementation(async (patch) => {
+      const settings = useSettingsStore()
+      settings.ui = { ...settings.ui, debugTools: { ...settings.ui.debugTools, ...patch } }
+    })
     const debugWindow = useDebugToolsWindowStore()
     debugWindow.activate()
     await flushPromises()
@@ -83,11 +87,38 @@ describe('LauncherTab 联机设置定位', () => {
       .findAll('button')
       .find((button) => button.text() === '打开调试工具')!
       .trigger('click')
+    await flushPromises()
     expect(debugWindow.mode).toBe('floating')
     expect(router.currentRoute.value.path).toBe('/settings/launcher')
     useSettingsStore().launcher.debug = false
     await flushPromises()
     expect(wrapper.findAll('button').some((button) => button.text() === '打开调试工具')).toBe(false)
+  })
+
+  it('关闭后仍可从设置打开，收起形态与显示开关分别保存', async () => {
+    const { wrapper } = await mountSettings()
+    const settings = useSettingsStore()
+    settings.launcher.debug = true
+    settings.ui.debugTools = { visible: false, minimizedShape: 'circle' }
+    const patch = vi.spyOn(settings, 'patchUiDebugTools').mockImplementation(async (next) => {
+      settings.ui.debugTools = { ...settings.ui.debugTools, ...next }
+    })
+    await flushPromises()
+    const row = (label: string) => wrapper.findAll('.setting-item').find((item) => item.text().includes(label))!
+    await row(i18n.global.t('dev.window.shape')).getComponent(NSelect).vm.$emit('update:value', 'rectangle')
+    await flushPromises()
+    expect(patch).toHaveBeenLastCalledWith({ minimizedShape: 'rectangle' })
+    expect(useDebugToolsWindowStore().mode).toBe('closed')
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === '打开调试工具')!
+      .trigger('click')
+    await flushPromises()
+    expect(settings.ui.debugTools).toEqual({ visible: true, minimizedShape: 'rectangle' })
+    expect(useDebugToolsWindowStore().mode).toBe('floating')
+    await row(i18n.global.t('dev.window.visible')).getComponent(NSwitch).vm.$emit('update:value', false)
+    await flushPromises()
+    expect(useDebugToolsWindowStore().mode).toBe('closed')
   })
 
   it('挂载联机表单，普通进入和未知参数不滚动', async () => {

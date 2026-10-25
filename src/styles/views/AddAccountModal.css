@@ -49,91 +49,27 @@
   margin-bottom: 10px;
 }
 
-.offline-advanced-toggle {
-  display: flex;
-  width: 100%;
-  min-height: 34px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 10px;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  background: var(--ecl-surface-muted);
-  border: 1px solid var(--divider);
-  border-radius: var(--r-sm);
-  transition:
-    color var(--duration-fast) var(--ease-emphasized),
-    background var(--duration-fast) var(--ease-emphasized),
-    border-color var(--duration-fast) var(--ease-emphasized);
-}
-
-.offline-advanced-toggle:hover,
-.offline-advanced-toggle.expanded {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-}
-
-.offline-advanced-toggle .icon {
-  transition: transform var(--duration-fast) var(--ease-emphasized);
-}
-
-.offline-advanced-toggle.expanded .icon {
-  transform: rotate(180deg);
-}
-
-.offline-advanced-panel {
+.offline-skin-field,
+.offline-uuid-field {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  padding: 11px;
-  background: var(--ecl-surface-muted);
-  border-radius: var(--r-sm);
 }
 
-.offline-uuid-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 6px;
-  margin: 0;
+.offline-skin-field label,
+.offline-uuid-field label {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.offline-uuid-field small {
   color: var(--text-tertiary);
   font-size: 11px;
   line-height: 1.45;
 }
 
-.offline-uuid-preview code {
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  word-break: break-all;
-}
-
-.offline-skin-field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.offline-skin-field label {
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.offline-advanced-panel label {
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.offline-advanced-panel small {
-  color: var(--text-tertiary);
-  font-size: 10px;
-  line-height: 1.45;
-}
-
-.offline-advanced-panel small.error {
+.offline-uuid-field small.error {
   color: var(--error);
 }
 

@@ -84,6 +84,8 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
   }
 
   function scheduleDerivedOfflineUuid() {
+    derivedOfflineUuidRequestId += 1
+    derivedOfflineUuid.value = ''
     if (derivedOfflineUuidTimer !== undefined) {
       clearTimeout(derivedOfflineUuidTimer)
       derivedOfflineUuidTimer = undefined
@@ -91,8 +93,6 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
 
     const username = newOfflineUsername.value.trim()
     if (!username) {
-      derivedOfflineUuidRequestId += 1
-      derivedOfflineUuid.value = ''
       return
     }
 
@@ -102,7 +102,7 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     }, offlineUuidPreviewDelayMs)
   }
 
-  watch(newOfflineUsername, scheduleDerivedOfflineUuid)
+  watch(newOfflineUsername, scheduleDerivedOfflineUuid, { flush: 'sync' })
 
   // 自定义 UUID 有效时优先展示它，否则展示按用户名派生的结果。
   const offlineUuidPreview = computed(() => {

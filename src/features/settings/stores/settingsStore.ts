@@ -191,6 +191,17 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
+  async function patchUiDebugTools(patch: NonNullable<UiConfig['debugTools']>): Promise<void> {
+    await enqueueWrite('ui', async () => {
+      await ensureReady()
+      const next = { ...ui.value, debugTools: { ...ui.value.debugTools, ...patch } }
+      const saved = await settingsApi.saveUi(next)
+      ui.value = saved ?? next
+      if (!saved) void invalidateConfig()
+      configRevision += 1
+    })
+  }
+
   async function patchUiTheme(patch: NonNullable<UiConfig['theme']>): Promise<void> {
     await enqueueWrite('ui', async () => {
       await ensureReady()
@@ -322,6 +333,7 @@ export const useSettingsStore = defineStore('settings', () => {
     loadJavaInstallations,
     invalidateJavaInstallations,
     patchUi,
+    patchUiDebugTools,
     patchUiTheme,
     patchUiBackground,
     patchGame,

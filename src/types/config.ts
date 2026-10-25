@@ -231,6 +231,10 @@ export interface UiConfig {
   locale?: string
   debug?: boolean
   flowDebug?: boolean
+  debugTools?: {
+    visible?: boolean
+    minimizedShape?: 'rectangle' | 'circle'
+  }
   theme?: Partial<ThemeConfig>
   background?: Partial<BackgroundConfig>
   windows?: Record<string, WindowBounds>

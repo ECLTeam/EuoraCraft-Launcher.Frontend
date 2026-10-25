@@ -140,6 +140,7 @@ export const ICON_MAP: Record<string, string> = {
 
   // 账户
   user: 'user',
+  'user-circle': 'user-circle',
   users: 'users',
   'user-x': 'user-x',
   crown: 'crown',

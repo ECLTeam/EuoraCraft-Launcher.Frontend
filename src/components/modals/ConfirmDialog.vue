@@ -4,6 +4,7 @@
     type="confirm"
     :title="title"
     :danger="danger"
+    :icon="danger ? 'warning' : 'help'"
     :closable="!loading"
     :showCloseBtn="!loading"
     :priority="priority"

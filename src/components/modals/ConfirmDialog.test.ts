@@ -1,7 +1,9 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
+import UiIcon from '@/components/ui/Icon.vue'
 import { i18n } from '@/i18n'
 import ConfirmDialog from './ConfirmDialog.vue'
+import Modal from './Modal.vue'
 
 function mountDialog(overrides: Partial<InstanceType<typeof ConfirmDialog>['$props']> = {}) {
   return mount(ConfirmDialog, {
@@ -22,6 +24,11 @@ function mountDialog(overrides: Partial<InstanceType<typeof ConfirmDialog>['$pro
 }
 
 describe('ConfirmDialog', () => {
+  it.each([true, false])('危险状态 %s 使用符合操作含义的图标', (danger) => {
+    const wrapper = mountDialog({ danger })
+    expect(wrapper.getComponent(Modal).findComponent(UiIcon).props('name')).toBe(danger ? 'warning' : 'help')
+    wrapper.unmount()
+  })
   it('确认后发出操作事件并默认关闭', async () => {
     const wrapper = mountDialog()
     const buttons = document.body.querySelectorAll('button')

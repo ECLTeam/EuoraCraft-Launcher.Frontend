@@ -233,25 +233,6 @@
   transform: translateY(4px);
 }
 
-/* ── 离线高级设置折叠 ─────────────── */
-.offline-advanced-enter-active {
-  overflow: hidden;
-  transition:
-    opacity var(--duration-fast) var(--ease-emphasized-decelerate),
-    transform var(--duration-fast) var(--ease-emphasized-decelerate);
-}
-.offline-advanced-leave-active {
-  overflow: hidden;
-  transition:
-    opacity var(--duration-fast) var(--ease-emphasized-accelerate),
-    transform var(--duration-fast) var(--ease-emphasized-accelerate);
-}
-.offline-advanced-enter-from,
-.offline-advanced-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-
 /* ── 技术栈展开（关于页） ─────────── */
 .technology-expand-enter-active {
   transition: all var(--duration-normal) var(--ease-emphasized-decelerate);

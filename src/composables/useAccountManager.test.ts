@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import type { MicrosoftLoginStatusEvent } from '@/types/accounts'
 import { openExternalUrl } from '@/utils/openExternal'
@@ -206,6 +207,72 @@ describe('useAccountManager Microsoft login', () => {
 
       expect(accountsApi.previewOfflineUuid).toHaveBeenCalledWith('Steve')
       expect(account.offlineUuidPreview).toBe('5627dd98-e6be-3c21-b8a8-e92344183641')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('修改用户名后立即清除旧预览', async () => {
+    vi.useFakeTimers()
+    try {
+      const firstUuid = '5627dd98-e6be-3c21-b8a8-e92344183641'
+      vi.mocked(accountsApi.previewOfflineUuid).mockResolvedValueOnce({ player_name: 'Steve', uuid: firstUuid })
+      const account = useAccountManager((key) => key)
+      account.newOfflineUsername = 'Steve'
+      await vi.advanceTimersByTimeAsync(300)
+      expect(account.offlineUuidPreview).toBe(firstUuid)
+      account.newOfflineUsername = 'Alex'
+      await nextTick()
+      expect(account.offlineUuidPreview).toBe('')
+      account.reset()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('防抖期间切换再切回用户名，旧请求仍不能回填', async () => {
+    vi.useFakeTimers()
+    try {
+      let finish!: (value: { player_name: string; uuid: string }) => void
+      vi.mocked(accountsApi.previewOfflineUuid).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve
+          })
+      )
+      const account = useAccountManager((key) => key)
+      account.newOfflineUsername = 'Steve'
+      await vi.advanceTimersByTimeAsync(300)
+      account.newOfflineUsername = 'Alex'
+      account.newOfflineUsername = 'Steve'
+      finish({ player_name: 'Steve', uuid: '5627dd98-e6be-3c21-b8a8-e92344183641' })
+      await vi.advanceTimersByTimeAsync(0)
+      expect(account.offlineUuidPreview).toBe('')
+      account.reset()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('自动预览不作为自定义 UUID 提交，预览失败仍由后端完成派生', async () => {
+    vi.useFakeTimers()
+    try {
+      vi.mocked(accountsApi.previewOfflineUuid).mockRejectedValueOnce(new Error('预览不可用'))
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+      vi.mocked(accountsApi.addOffline).mockResolvedValue({
+        id: 'test',
+        alias: 'Steve',
+        type: 'offline',
+        isCurrent: false,
+      })
+      const account = useAccountManager((key) => key)
+      account.newOfflineUsername = 'Steve'
+      await vi.advanceTimersByTimeAsync(300)
+      expect(account.offlineUuidPreview).toBe('')
+      await account.addOfflineAccount()
+      expect(accountsApi.addOffline).toHaveBeenCalledWith('Steve', undefined, undefined)
+      account.reset()
+      warning.mockRestore()
     } finally {
       vi.useRealTimers()
     }

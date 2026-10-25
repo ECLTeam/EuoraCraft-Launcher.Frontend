@@ -53,12 +53,23 @@
         <NInput
           v-model:value="account.newOfflineUsername"
           :placeholder="t('game.enterUsername')"
+          :inputProps="{ 'aria-label': t('game.enterUsername') }"
           @keyup.enter="addOfflineFromModal"
         />
-        <p v-if="account.offlineUuidPreview" class="offline-uuid-preview">
-          <span>{{ t('game.offlineUuidPreview') }}</span>
-          <code>{{ account.offlineUuidPreview }}</code>
-        </p>
+        <div class="offline-uuid-field">
+          <label :for="uuidInputId">{{ t('game.customUuid') }}</label>
+          <NInput
+            v-model:value="offlineUuidInput"
+            :inputProps="{ id: uuidInputId, 'aria-describedby': `${uuidInputId}-hint` }"
+            :placeholder="t('game.customUuidPlaceholder')"
+            :status="account.offlineUuidError ? 'error' : undefined"
+            clearable
+            @keyup.enter="addOfflineFromModal"
+          />
+          <small :id="`${uuidInputId}-hint`" :class="{ error: account.offlineUuidError }" aria-live="polite">
+            {{ account.offlineUuidError || t('game.customUuidHint') }}
+          </small>
+        </div>
         <div v-if="account.offlineSkinOptions.length" class="offline-skin-field">
           <label for="offline-skin-select">{{ t('game.offlineSkinLabel') }}</label>
           <NSelect
@@ -71,31 +82,6 @@
             :loading="account.offlineSkinsLoading"
           />
         </div>
-        <button
-          type="button"
-          class="offline-advanced-toggle"
-          :class="{ expanded: showOfflineAdvanced }"
-          :aria-expanded="showOfflineAdvanced"
-          @click="showOfflineAdvanced = !showOfflineAdvanced"
-        >
-          <span>{{ t('game.advancedOptions') }}</span>
-          <UiIcon name="chevron-down" :size="16" />
-        </button>
-        <Transition name="offline-advanced">
-          <div v-if="showOfflineAdvanced" class="offline-advanced-panel">
-            <label for="offline-custom-uuid">{{ t('game.customUuid') }}</label>
-            <NInput
-              id="offline-custom-uuid"
-              v-model:value="account.newOfflineUuid"
-              :placeholder="t('game.customUuidPlaceholder')"
-              :status="account.offlineUuidError ? 'error' : undefined"
-              @keyup.enter="addOfflineFromModal"
-            />
-            <small :class="{ error: account.offlineUuidError }">
-              {{ account.offlineUuidError || t('game.customUuidHint') }}
-            </small>
-          </div>
-        </Transition>
         <NButton
           type="primary"
           block
@@ -178,7 +164,7 @@
           :placeholder="t('auth.passwordPlaceholder')"
           @keyup.enter="addAuthlibFromModal"
         />
-        <small class="authlib-server-hint">{{ t('auth.serverUrlHint') }}</small>
+        <!--<small class="authlib-server-hint">{{ t('auth.serverUrlHint') }}</small>-->
         <NAlert
           v-if="!account.authlibLoginConfig.available"
           class="authlib-unavailable-alert"
@@ -221,7 +207,7 @@
 
 <script setup lang="ts">
 import { NAlert, NAutoComplete, NButton, NInput, NSelect, NTag, type SelectOption } from 'naive-ui'
-import { computed, h, ref, watch } from 'vue'
+import { computed, h, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import Modal from '@/components/modals/Modal.vue'
@@ -237,13 +223,19 @@ const { t } = useI18n()
 const selectorModalRef = ref<InstanceType<typeof Modal> | null>(null)
 const showAccountFormModal = ref(false)
 const selectedAccountType = ref('offline')
-const showOfflineAdvanced = ref(false)
+const uuidInputId = `offline-uuid-${useId()}`
+const offlineUuidInput = computed({
+  get: () => account.value.newOfflineUuid || account.value.offlineUuidPreview,
+  set: (value: string) => {
+    account.value.newOfflineUuid = value
+  },
+})
 const isShowcaseMode = backend.runtime.isShowcase
 const isSubmitting = ref(false)
 const accountTypeOptions = computed(() => [
   { value: 'microsoft', label: t(getAccountTypeLabelKey('microsoft')), icon: 'microsoft' },
-  { value: 'offline', label: t(getAccountTypeLabelKey('offline')), icon: 'user' },
-  { value: 'authlib', label: t(getAccountTypeLabelKey('authlib')), icon: 'globe' },
+  { value: 'offline', label: t(getAccountTypeLabelKey('offline')), icon: 'user-circle' },
+  { value: 'authlib', label: t(getAccountTypeLabelKey('authlib')), icon: 'server' },
   ...account.value.authProviders.map((provider) => ({
     value: `plugin:${provider.id}`,
     label: provider.title,
@@ -263,7 +255,6 @@ watch(visible, (isVisible) => {
     showAccountFormModal.value = false
     return
   }
-  showOfflineAdvanced.value = false
   account.value.newOfflineUuid = ''
   account.value.selectedOfflineSkinId = ''
   void account.value.loadMicrosoftLoginConfig()
