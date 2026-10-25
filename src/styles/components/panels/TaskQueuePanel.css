@@ -307,13 +307,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--s-md);
-  padding: 0 0 var(--s-xs);
+  padding: var(--s-sm) var(--s-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--ecl-radius-card);
+  background: var(--bg-elevated);
 }
 
 .tq-status-text {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .tq-clear-btn {
@@ -336,6 +340,21 @@
 .tq-clear-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.tq-toolbar .tq-clear-btn {
+  background: var(--control-bg);
+  color: var(--text-primary);
+}
+
+.tq-toolbar .tq-clear-btn:disabled {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.tq-toolbar .tq-clear-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .tq-task-top--downloading {
