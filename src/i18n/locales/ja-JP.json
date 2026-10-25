@@ -2019,8 +2019,6 @@
     "currentStatus": "現在の状態：",
     "runningCount": "{count} 件のタスクが実行中",
     "files": "ファイル",
-    "liveTitle": "リアルタイムダウンロード",
-    "filesProgress": "{done} / {total} ファイル",
     "speedLabel": "速度",
     "elapsedLabel": "経過時間",
     "remainingLabel": "予想残り時間",
@@ -2067,7 +2065,8 @@
         "retrying": "再試行を待機中",
         "fallback": "代替ソースからダウンロード中"
       }
-    }
+    },
+    "speedDescription": "ダウンロード速度：{speed}"
   },
   "terminal": {
     "close": "閉じる",

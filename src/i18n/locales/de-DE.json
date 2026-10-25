@@ -2019,8 +2019,6 @@
     "currentStatus": "Aktueller Status:",
     "runningCount": "{count} Aufgaben laufen",
     "files": "Dateien",
-    "liveTitle": "Download in Echtzeit",
-    "filesProgress": "{done} / {total} Dateien",
     "speedLabel": "Netzgeschwindigkeit",
     "elapsedLabel": "Vergangene Zeit",
     "remainingLabel": "Voraussichtlich übrig",
@@ -2067,7 +2065,8 @@
         "retrying": "Warten auf Wiederholung",
         "fallback": "Download von Ersatzquelle"
       }
-    }
+    },
+    "speedDescription": "Downloadgeschwindigkeit: {speed}"
   },
   "terminal": {
     "close": "Schließen",

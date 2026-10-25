@@ -1904,8 +1904,6 @@
     "currentStatus": "当前状态：",
     "runningCount": "{count} 个任务进行中",
     "files": "文件",
-    "liveTitle": "实时下载",
-    "filesProgress": "{done} / {total} 个文件",
     "speedLabel": "网速",
     "elapsedLabel": "已用时",
     "remainingLabel": "预计剩余",
@@ -1952,7 +1950,8 @@
         "retrying": "等待重试",
         "fallback": "备用源补下载"
       }
-    }
+    },
+    "speedDescription": "下载速度：{speed}"
   },
   "terminal": {
     "close": "关闭",

@@ -1902,8 +1902,6 @@
     "currentStatus": "當前狀態：",
     "runningCount": "{count} 個任務進行中",
     "files": "檔案",
-    "liveTitle": "實時下載",
-    "filesProgress": "{done} / {total} 個檔案",
     "speedLabel": "網速",
     "elapsedLabel": "已用時",
     "remainingLabel": "預計剩餘",
@@ -1950,7 +1948,8 @@
         "retrying": "等待重試",
         "fallback": "從備用來源補下載"
       }
-    }
+    },
+    "speedDescription": "下載速度：{speed}"
   },
   "terminal": {
     "close": "關閉",

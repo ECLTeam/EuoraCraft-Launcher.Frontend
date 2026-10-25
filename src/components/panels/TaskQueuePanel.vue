@@ -31,7 +31,7 @@
             </button>
           </div>
           <div v-for="task in tasks" :key="task.id" :class="['tq-task', `tq-task--${task.status}`]">
-            <div class="tq-task-top">
+            <div class="tq-task-top" :class="{ 'tq-task-top--downloading': isDownloadTask(task) }">
               <div
                 class="tq-task-header"
                 role="button"
@@ -64,6 +64,26 @@
                     </div>
                   </div>
                 </div>
+              </div>
+              <div
+                v-if="isDownloadTask(task)"
+                class="tq-task-speed"
+                role="img"
+                :aria-label="t('taskQueue.speedDescription', { speed: speedText(task) })"
+              >
+                <svg class="tq-speed-graph" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
+                  <path v-if="task.chart.area" :d="task.chart.area" class="tq-speed-area" />
+                  <path v-if="task.chart.line" :d="task.chart.line" class="tq-speed-line" />
+                  <circle
+                    v-for="point in task.chart.dots"
+                    :key="point.x"
+                    :cx="point.x"
+                    :cy="point.y"
+                    r="1.5"
+                    class="tq-speed-dot"
+                  />
+                </svg>
+                <span class="tq-speed-value">{{ speedText(task) }}</span>
               </div>
               <div class="tq-task-actions">
                 <button
@@ -139,10 +159,10 @@
               <span v-if="task.installation && task.isDownloading && task.progressType !== 'bytes'" class="tq-stat">
                 {{ t('taskQueue.installation.unknownSize') }}
               </span>
-              <span v-if="task.status === 'running' && task.speedBytesPerSecond" class="tq-stat tq-stat-speed">
-                <UiIcon name="download" :size="12" />
-                {{ formatSpeed(task.speedBytesPerSecond) }}
-              </span>
+              <template v-if="isDownloadTask(task)">
+                <span class="tq-stat">{{ t('taskQueue.elapsedLabel') }} {{ elapsedText(task) }}</span>
+                <span class="tq-stat">{{ t('taskQueue.remainingLabel') }} {{ remainingText(task) }}</span>
+              </template>
               <span
                 v-if="task.operationId && operationStore.queryErrors[task.operationId]"
                 class="tq-query-error"
@@ -158,6 +178,12 @@
                   <span>{{ taskMessage(task) }}</span>
                 </div>
 
+                <div v-if="isDownloadTask(task)" class="tq-speed-details">
+                  <span>{{ t('taskQueue.chartWindow', { seconds: task.chart.sampleCount }) }}</span>
+                  <span
+                    >{{ t('taskQueue.peakLabel') }} {{ task.chart.hasSpeed ? formatSpeed(task.chart.peak) : '—' }}</span
+                  >
+                </div>
                 <div v-if="task.installation" class="tq-subtasks">
                   <div
                     v-for="stage in task.installation.stages"
@@ -197,73 +223,6 @@
             />
           </div>
         </div>
-
-        <!-- 实时下载详情卡：仅存在下载指标的任务时显示 -->
-        <Transition name="tq-fade">
-          <div v-if="activeDownload" class="tq-live">
-            <div class="tq-live-header">
-              <div class="tq-live-title">
-                <UiIcon name="download" :size="16" class="tq-live-title-icon" />
-                <span>{{ t('taskQueue.liveTitle') }}</span>
-              </div>
-              <span v-if="activeDownload.totalFiles != null" class="tq-live-filecount">
-                {{
-                  t('taskQueue.filesProgress', {
-                    done: activeDownload.downloadedFiles ?? 0,
-                    total: activeDownload.totalFiles,
-                  })
-                }}
-              </span>
-            </div>
-
-            <div class="tq-live-name">{{ activeDownload.name }}</div>
-            <div class="tq-live-msg">{{ taskMessage(activeDownload) }}</div>
-
-            <!-- 实时网速曲线图 -->
-            <div class="tq-live-chart">
-              <span class="tq-live-chart-badge">
-                {{
-                  activeDownload.speedBytesPerSecond && activeDownload.speedBytesPerSecond > 0
-                    ? formatSpeed(activeDownload.speedBytesPerSecond)
-                    : '—'
-                }}
-              </span>
-              <svg class="tq-live-chart-svg" viewBox="0 0 100 36" preserveAspectRatio="none" aria-hidden="true">
-                <polygon v-if="chartArea" :points="chartArea" class="tq-live-chart-area" />
-                <polyline v-if="chartLine" :points="chartLine" class="tq-live-chart-line" />
-              </svg>
-              <span class="tq-live-chart-window">
-                {{ t('taskQueue.chartWindow', { seconds: speedSamples.length }) }}
-              </span>
-              <span v-if="chartPeak" class="tq-live-chart-peak">
-                {{ t('taskQueue.peakLabel') }} {{ formatSpeed(chartPeak) }}
-              </span>
-            </div>
-
-            <div class="tq-live-metrics">
-              <div class="tq-live-metric">
-                <span class="tq-live-metric-label">{{ t('taskQueue.elapsedLabel') }}</span>
-                <span class="tq-live-metric-value">{{ formatDuration(elapsed) }}</span>
-              </div>
-              <div class="tq-live-metric">
-                <span class="tq-live-metric-label">{{ t('taskQueue.remainingLabel') }}</span>
-                <span class="tq-live-metric-value">{{ remainingText }}</span>
-              </div>
-            </div>
-
-            <div class="tq-live-progress">
-              <UiProgress
-                class="tq-live-bar"
-                :percentage="livePct"
-                :processing="taskIndeterminate(activeDownload)"
-                :height="6"
-              />
-              <span class="tq-live-pct">
-                {{ progressText(activeDownload) }}
-              </span>
-            </div>
-          </div>
-        </Transition>
       </div>
     </div>
   </FullscreenModal>
@@ -303,12 +262,67 @@ const {
   clearFinishedTasks: queueClearFinishedTasks,
 } = globalTaskQueue
 
+interface SpeedHistory {
+  stageId: string
+  samples: Array<number | null>
+}
+const speedHistoryByTask = ref(new Map<string, SpeedHistory>())
+const now = ref(Date.now())
+let sampleTimer: ReturnType<typeof setInterval> | null = null
+
+function downloadStageId(task: TaskItem): string {
+  return task.installation?.currentStageId ?? ''
+}
+
+function currentSpeed(task: TaskItem): number | null {
+  const speed = task.speedBytesPerSecond
+  return typeof speed === 'number' && Number.isFinite(speed) && speed >= 0 ? speed : null
+}
+
+function speedChart(task: TaskItem) {
+  const history = speedHistoryByTask.value.get(task.id)
+  const samples = history?.stageId === downloadStageId(task) ? history.samples : []
+  const speeds = samples.filter((speed): speed is number => speed !== null)
+  const peak = Math.max(0, ...speeds)
+  const segments: Array<Array<{ x: number; y: number }>> = []
+  let points: Array<{ x: number; y: number }> = []
+  samples.forEach((speed, index) => {
+    if (speed === null) {
+      if (points.length) segments.push(points)
+      points = []
+      return
+    }
+    const x = samples.length === 1 ? 98 : 2 + (index / (samples.length - 1)) * 96
+    const y = 33 - (speed / (peak || 1)) * 30
+    points.push({ x, y })
+  })
+  if (points.length) segments.push(points)
+  const lines = segments.filter((segment) => segment.length > 1)
+  const pathFor = (segment: Array<{ x: number; y: number }>) =>
+    segment.map((point, index) => `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)},${point.y.toFixed(2)}`).join(' ')
+  return {
+    line: lines.map(pathFor).join(' '),
+    area: lines
+      .map(
+        (segment) =>
+          `${pathFor(segment)} L${segment[segment.length - 1]!.x.toFixed(2)},36 L${segment[0]!.x.toFixed(2)},36 Z`
+      )
+      .join(' '),
+    dots: segments.filter((segment) => segment.length === 1).map((segment) => segment[0]!),
+    peak,
+    hasSpeed: speeds.length > 0,
+    sampleCount: samples.length,
+  }
+}
+
 function taskView(task: TaskItem) {
-  if (!task.installation) return { ...task, isDownloading: undefined, transferredBytes: undefined }
+  if (!task.installation)
+    return { ...task, chart: speedChart(task), isDownloading: undefined, transferredBytes: undefined }
   const stage = currentInstallationStage(task.installation)
   const download = stage?.status === 'running' ? stage.download : null
   return {
     ...task,
+    chart: speedChart(task),
     progress: installationPercentage(task.installation) ?? 0,
     progressType: stage?.progress.unit === 'bytes' ? ('bytes' as const) : undefined,
     done: stage?.progress.completed,
@@ -360,17 +374,66 @@ const finishedCount = computed(
   () => tasks.value.filter((t) => t.status === 'completed' || t.status === 'error' || t.status === 'canceled').length
 )
 
-/** 正在下载且携带下载指标（字节/速度优先，其次文件数）的任务，作为实时下载卡的数据源 */
-const preferredDownloadId = ref<string | null>(null)
-const activeDownload = computed(() => {
-  const running = tasks.value.filter((t) => t.status === 'running' && (!t.installation || t.isDownloading))
+function isDownloadTask(task: ReturnType<typeof taskView>): boolean {
+  if (task.status !== 'running') return false
+  if (task.installation) return task.isDownloading === true
   return (
-    running.find((task) => task.id === preferredDownloadId.value) ??
-    running.find((t) => t.progressType === 'bytes' || (t.speedBytesPerSecond != null && t.speedBytesPerSecond > 0)) ??
-    running.find((t) => t.totalFiles != null || t.downloadedFiles != null) ??
-    null
+    task.progressType === 'bytes' ||
+    task.speedBytesPerSecond != null ||
+    task.totalFiles != null ||
+    task.downloadedFiles != null
   )
-})
+}
+
+const downloadingTasks = computed(() => tasks.value.filter(isDownloadTask))
+
+function stopSampling(): void {
+  if (sampleTimer) clearInterval(sampleTimer)
+  sampleTimer = null
+  speedHistoryByTask.value.clear()
+}
+
+function sampleDownloads(): void {
+  now.value = Date.now()
+  for (const task of downloadingTasks.value) {
+    const history = speedHistoryByTask.value.get(task.id)
+    if (!history || history.stageId !== downloadStageId(task)) continue
+    history.samples.push(currentSpeed(task))
+    if (history.samples.length > 60) history.samples.shift()
+  }
+}
+
+watch(
+  () =>
+    panelVisible.value
+      ? JSON.stringify(downloadingTasks.value.map((task) => [task.id, downloadStageId(task)]).sort())
+      : '',
+  () => {
+    if (!panelVisible.value || downloadingTasks.value.length === 0) {
+      stopSampling()
+      return
+    }
+    const activeIds = new Set(downloadingTasks.value.map((task) => task.id))
+    for (const id of speedHistoryByTask.value.keys()) {
+      if (!activeIds.has(id)) speedHistoryByTask.value.delete(id)
+    }
+    now.value = Date.now()
+    for (const task of downloadingTasks.value) {
+      const history = speedHistoryByTask.value.get(task.id)
+      if (history?.stageId !== downloadStageId(task)) {
+        speedHistoryByTask.value.set(task.id, { stageId: downloadStageId(task), samples: [currentSpeed(task)] })
+      }
+    }
+    if (!sampleTimer) sampleTimer = setInterval(sampleDownloads, 1000)
+  },
+  { immediate: true }
+)
+onBeforeUnmount(stopSampling)
+
+function speedText(task: TaskItem): string {
+  const speed = currentSpeed(task)
+  return speed === null ? '—' : formatSpeed(speed)
+}
 
 function normalizeProgress(value: number): number {
   return Number.isFinite(value) ? Math.round(Math.min(100, Math.max(0, value))) : 0
@@ -401,94 +464,22 @@ function formatDuration(seconds: number): string {
   return h > 0 ? `${pad(h)}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`
 }
 
-const livePct = computed(() => {
-  const task = activeDownload.value
-  if (!task) return 0
-  if (task.installation) return taskProgress(task)
-  if (task.progressType === 'bytes' && task.total) {
-    return normalizeProgress(((task.done ?? 0) / task.total) * 100)
-  }
-  if (task.totalFiles != null && task.totalFiles > 0) {
-    return normalizeProgress(((task.downloadedFiles ?? 0) / task.totalFiles) * 100)
-  }
-  return taskProgress(task)
-})
-
-/** 下载中实时刷新经过时间与网速采样（从任务创建时刻起） */
-const elapsed = ref(0)
-const MAX_SAMPLES = 60
-const speedSamples = ref<number[]>([])
-let liveTimer: ReturnType<typeof setInterval> | null = null
-
-function updateTick(): void {
-  const task = activeDownload.value
-  elapsed.value = task
-    ? Math.floor((Date.now() - (currentInstallationStage(task.installation)?.startedAt ?? task.timestamp)) / 1000)
-    : 0
-  const speed = task?.speedBytesPerSecond != null && task.speedBytesPerSecond > 0 ? task.speedBytesPerSecond : 0
-  speedSamples.value.push(speed)
-  if (speedSamples.value.length > MAX_SAMPLES) speedSamples.value.shift()
+function elapsedText(task: TaskItem): string {
+  const startedAt = currentInstallationStage(task.installation)?.startedAt ?? task.timestamp
+  return formatDuration((now.value - startedAt) / 1000)
 }
 
-watch(
-  () => [panelVisible.value, activeDownload.value?.id, activeDownload.value?.installation?.currentStageId] as const,
-  ([visible]) => {
-    if (liveTimer) clearInterval(liveTimer)
-    liveTimer = null
-    speedSamples.value = []
-    preferredDownloadId.value = activeDownload.value?.id ?? null
-    if (visible && activeDownload.value) {
-      updateTick()
-      liveTimer = setInterval(updateTick, 1000)
-    } else elapsed.value = 0
-  },
-  { immediate: true }
-)
-
-onBeforeUnmount(() => {
-  if (liveTimer) clearInterval(liveTimer)
-})
-
-/** 网速曲线图几何：以窗口内最大速率归一化绘制折线与填充区域 */
-const CHART_W = 100
-const CHART_H = 36
-const chartPeak = computed(() => {
-  const peak = Math.max(0, ...speedSamples.value)
-  return peak > 0 ? peak : 0
-})
-const chartLine = computed(() => {
-  const n = speedSamples.value.length
-  if (n === 0) return ''
-  const max = chartPeak.value || 1
-  return speedSamples.value
-    .map((s, i) => {
-      const x = n === 1 ? 0 : (i / (n - 1)) * CHART_W
-      const y = CHART_H - Math.min(1, s / max) * (CHART_H - 4) - 2
-      return `${x.toFixed(2)},${y.toFixed(2)}`
-    })
-    .join(' ')
-})
-const chartArea = computed(() => {
-  const n = speedSamples.value.length
-  if (n < 2) return ''
-  const line = chartLine.value
-  if (!line) return ''
-  const lastX = n === 1 ? 0 : CHART_W
-  return `0,${CHART_H} ${line} ${lastX},${CHART_H}`
-})
-
-/** 字节进度依据实时速度估算剩余时间；文件/无量纲进度无剩余时间 */
-const remainingText = computed(() => {
-  const task = activeDownload.value
-  const speed = task?.speedBytesPerSecond ?? 0
-  if (task?.progressType === 'bytes' && task.total && speed > 0) {
+function remainingText(task: TaskItem): string {
+  const speed = currentSpeed(task)
+  if (task.progressType === 'bytes' && task.total && speed !== null && speed > 0) {
     return formatDuration(Math.max(0, task.total - (task.done ?? 0)) / speed)
   }
   return '—'
-})
+}
 
-function showTaskStats(task: TaskItem): boolean {
+function showTaskStats(task: ReturnType<typeof taskView>): boolean {
   return (
+    isDownloadTask(task) ||
     (currentInstallationStage(task.installation)?.status === 'running' &&
       !!currentInstallationStage(task.installation)?.download) ||
     task.totalFiles != null ||

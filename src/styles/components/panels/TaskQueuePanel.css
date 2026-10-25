@@ -224,14 +224,6 @@
   color: var(--text-tertiary);
 }
 
-.tq-stat-speed {
-  color: var(--primary);
-}
-
-.tq-stat-speed .ui-icon {
-  color: var(--primary);
-}
-
 .tq-remove-btn {
   display: flex;
   align-items: center;
@@ -346,116 +338,27 @@
   cursor: not-allowed;
 }
 
-/* ── 实时下载详情卡 ─────────────────────────────────────────── */
-.tq-live {
-  padding: var(--s-lg);
-  border: 1px solid var(--border);
-  border-radius: var(--ecl-radius-card);
-  background: var(--bg-surface);
-  box-shadow: var(--ecl-shadow-surface);
+.tq-task-top--downloading {
+  grid-template-columns: minmax(180px, 0.85fr) minmax(180px, 1.5fr) auto;
 }
 
-.tq-live-header {
+.tq-task-speed {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--s-md);
-  margin-bottom: var(--s-md);
+  min-width: 0;
+  height: 40px;
 }
 
-.tq-live-title {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-sm);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.tq-live-title-icon {
-  color: var(--primary);
-}
-
-.tq-live-filecount {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-
-.tq-live-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tq-live-msg {
-  margin-top: var(--s-xs);
-  font-size: 12px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tq-live-metrics {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--s-md);
-  margin-top: var(--s-md);
-}
-
-.tq-live-metric {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: var(--s-sm) var(--s-md);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: var(--ecl-surface-muted);
-}
-
-.tq-live-metric-label {
-  font-size: 11px;
-  color: var(--text-tertiary);
-}
-
-.tq-live-metric-value {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-/* ── 实时网速曲线图 ──────────────────────────────────────── */
-.tq-live-chart {
-  position: relative;
-  margin-top: var(--s-lg);
-  height: 120px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: var(--ecl-surface-muted);
-  overflow: hidden;
-}
-
-.tq-live-chart-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.tq-speed-graph {
   display: block;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: visible;
 }
 
-.tq-live-chart-area {
-  fill: var(--ecl-primary-alpha);
-}
-
-.tq-live-chart-line {
+.tq-speed-line {
   fill: none;
   stroke: var(--primary);
   stroke-width: 1.5;
@@ -464,56 +367,49 @@
   vector-effect: non-scaling-stroke;
 }
 
-.tq-live-chart-badge {
-  position: absolute;
-  top: 8px;
-  left: 10px;
-  z-index: 1;
-  padding: 2px 8px;
-  border-radius: var(--r-xs);
-  background: color-mix(in srgb, var(--ecl-surface) 72%, transparent);
+.tq-speed-area {
+  fill: var(--ecl-primary-alpha);
+}
+
+.tq-speed-dot {
+  fill: var(--primary);
+}
+
+.tq-speed-value {
+  flex-shrink: 0;
+  min-width: 9ch;
+  text-align: right;
+  color: var(--primary);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   font-weight: 600;
-  color: var(--primary);
-}
-
-.tq-live-chart-window {
-  position: absolute;
-  right: 10px;
-  bottom: 6px;
-  font-size: 10px;
-  color: var(--text-tertiary);
-}
-
-.tq-live-chart-peak {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 10px;
-  color: var(--text-tertiary);
-}
-
-.tq-live-progress {
-  display: flex;
-  align-items: center;
-  gap: var(--s-md);
-  margin-top: var(--s-lg);
-}
-
-.tq-live-bar {
-  flex: 1;
-}
-
-.tq-live-pct {
-  font-size: 12px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-  min-width: 36px;
-  text-align: right;
   white-space: nowrap;
+}
+
+.tq-speed-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-md);
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-bottom: var(--s-sm);
+}
+
+@media (max-width: 760px) {
+  .tq-task-top--downloading {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .tq-task-top--downloading .tq-task-speed {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .tq-task-top--downloading .tq-task-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 .tq-stage-summary {

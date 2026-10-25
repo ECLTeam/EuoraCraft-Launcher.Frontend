@@ -2016,8 +2016,6 @@
     "currentStatus": "Текущий статус: ",
     "runningCount": "Выполняется задач: {count}",
     "files": "файлов",
-    "liveTitle": "Загрузка в реальном времени",
-    "filesProgress": "Файлов: {done} / {total}",
     "speedLabel": "Скорость сети",
     "elapsedLabel": "Прошло времени",
     "remainingLabel": "Осталось (примерно)",
@@ -2064,7 +2062,8 @@
         "retrying": "Ожидание повтора",
         "fallback": "Загрузка из запасного источника"
       }
-    }
+    },
+    "speedDescription": "Скорость загрузки: {speed}"
   },
   "terminal": {
     "close": "Закрыть",

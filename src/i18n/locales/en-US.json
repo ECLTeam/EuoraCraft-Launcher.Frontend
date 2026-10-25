@@ -2009,8 +2009,6 @@
     "currentStatus": "Current status: ",
     "runningCount": "{count} task(s) running",
     "files": "files",
-    "liveTitle": "Live Download",
-    "filesProgress": "{done} / {total} files",
     "speedLabel": "Speed",
     "elapsedLabel": "Elapsed",
     "remainingLabel": "Remaining",
@@ -2057,7 +2055,8 @@
         "retrying": "Waiting to retry",
         "fallback": "Downloading from alternate source"
       }
-    }
+    },
+    "speedDescription": "Download speed: {speed}"
   },
   "terminal": {
     "close": "Close",
