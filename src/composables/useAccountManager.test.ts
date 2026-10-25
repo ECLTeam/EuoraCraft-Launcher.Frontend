@@ -466,9 +466,26 @@ describe('useAccountManager Microsoft login', () => {
     const account = useAccountManager((key) => key)
     account.showMicrosoftLoginModal = true
 
-    await account.cancelMicrosoftLogin()
+    expect(await account.cancelMicrosoftLogin()).toBe(true)
 
     expect(account.showMicrosoftLoginModal).toBe(false)
     expect(accountsApi.cancelMicrosoftLogin).toHaveBeenCalledOnce()
+  })
+
+  it('取消微软授权失败时保留会话并提示，返回失败结果以便界面重试', async () => {
+    vi.mocked(accountsApi.cancelMicrosoftLogin).mockRejectedValueOnce(new Error('取消失败'))
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    try {
+      const account = useAccountManager((key) => key)
+      account.showMicrosoftLoginModal = true
+      account.microsoftLoginStatus = 'error'
+      account.microsoftLoginError = '授权网络异常'
+      expect(await account.cancelMicrosoftLogin()).toBe(false)
+      expect(account.showMicrosoftLoginModal).toBe(true)
+      expect(account.microsoftLoginError).toBe('授权网络异常')
+      expect(mocks.error).toHaveBeenCalledWith('取消失败')
+    } finally {
+      warning.mockRestore()
+    }
   })
 })

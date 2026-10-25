@@ -507,16 +507,19 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     }
   }
 
-  async function cancelMicrosoftLogin() {
-    showMicrosoftLoginModal.value = false
-    microsoftLoginStatus.value = 'pending'
-    microsoftLoginStage.value = 'waiting_authorization'
-    microsoftLoginError.value = ''
+  async function cancelMicrosoftLogin(): Promise<boolean> {
     try {
       await accountStore.cancelMicrosoftLogin()
     } catch (reason) {
       console.warn('[MicrosoftLogin] 取消登录失败:', reason)
+      message.error(reason instanceof Error ? reason.message : t('game.login.failed'))
+      return false
     }
+    showMicrosoftLoginModal.value = false
+    microsoftLoginStatus.value = 'pending'
+    microsoftLoginStage.value = 'waiting_authorization'
+    microsoftLoginError.value = ''
+    return true
   }
 
   async function loadMicrosoftLoginConfig() {
