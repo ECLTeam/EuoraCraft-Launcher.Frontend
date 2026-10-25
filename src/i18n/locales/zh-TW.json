@@ -1990,7 +1990,8 @@
     "java_cleanup": "重試清理",
     "plugin_file_recovery": "檔案復原",
     "plugin_instance_profile_patch": "修改實例資料",
-    "plugin_instance_profile_recovery": "復原實例原資料"
+    "plugin_instance_profile_recovery": "復原實例原資料",
+    "instance_export_preview": "正在掃描可匯出檔案"
   },
   "more": {
     "nav": {
@@ -2324,6 +2325,61 @@
       "confirm": "確認安裝",
       "installing": "安裝進度",
       "result": "安裝結果"
+    }
+  },
+  "instanceExport": {
+    "title": "匯出",
+    "subtitle": "選擇實例內容，匯出為 Modrinth 整合包（.mrpack）。",
+    "scanFailed": "掃描匯出檔案失敗",
+    "invalidResponse": "匯出資訊無效，請重新讀取",
+    "exportFailed": "建立匯出工作失敗",
+    "cancelFailed": "取消請求失敗，請重試",
+    "cancelled": "掃描已取消",
+    "name": "整合包名稱",
+    "version": "整合包版本",
+    "summary": "簡介（選填）",
+    "resourceMode": "資源處理",
+    "references": "優先引用線上來源",
+    "bundled": "直接打包",
+    "referencesHint": "所選模組優先引用線上來源，匯入時需要下載；未識別檔案與其他內容直接打包。",
+    "bundledHint": "所選檔案直接打包，不查詢線上來源；整合包通常較大。",
+    "shared": "共用遊戲目錄",
+    "isolated": "獨立遊戲目錄",
+    "search": "搜尋檔案路徑",
+    "selectAll": "全選可選檔案",
+    "selectNone": "取消選取",
+    "recommended": "恢復建議",
+    "excludedHint": "日誌、快取、執行依賴、憑據及其他實例已排除。",
+    "modsHint": "取消必要模組可能使整合包無法執行。",
+    "noFiles": "沒有可選檔案，可僅匯出遊戲依賴。",
+    "personalHint": "所選存檔、截圖或伺服器清單可能包含個人資訊，將隨整合包分享。",
+    "scanning": "正在掃描可匯出檔案…",
+    "selected": "已選 {count} 個檔案 · 原始大小 {size}",
+    "dependenciesOnly": "未選附加檔案，僅匯出依賴",
+    "newExport": "重新設定",
+    "cancelExport": "取消匯出",
+    "output": "輸出檔案",
+    "resultCounts": "線上引用 {online} 個檔案，直接打包 {packed} 個檔案。",
+    "backgroundHint": "關閉此頁面後，匯出仍會在工作佇列繼續。",
+    "cancelRequested": "已請求取消，等待工作實際停止。",
+    "categories": {
+      "mods": "模組",
+      "disabledMods": "停用模組",
+      "config": "設定與腳本",
+      "settings": "遊戲設定",
+      "resources": "資源包與資源",
+      "shaders": "光影",
+      "saves": "存檔",
+      "screenshots": "截圖",
+      "servers": "伺服器清單",
+      "other": "其他檔案"
+    },
+    "status": {
+      "pending": "匯出工作已建立",
+      "running": "正在匯出",
+      "completed": "匯出完成",
+      "failed": "匯出失敗",
+      "cancelled": "匯出已取消"
     }
   }
 }

@@ -2018,7 +2018,8 @@
     "java_cleanup": "重试清理",
     "plugin_file_recovery": "文件恢复",
     "plugin_instance_profile_patch": "修改实例资料",
-    "plugin_instance_profile_recovery": "恢复实例原资料"
+    "plugin_instance_profile_recovery": "恢复实例原资料",
+    "instance_export_preview": "正在扫描可导出文件"
   },
   "more": {
     "nav": {
@@ -2353,6 +2354,61 @@
       "confirm": "确认安装",
       "installing": "安装进度",
       "result": "安装结果"
+    }
+  },
+  "instanceExport": {
+    "title": "导出",
+    "subtitle": "选择实例内容，导出为 Modrinth 整合包（.mrpack）。",
+    "scanFailed": "扫描导出文件失败",
+    "invalidResponse": "导出信息无效，请重新读取",
+    "exportFailed": "创建导出任务失败",
+    "cancelFailed": "取消请求失败，请重试",
+    "cancelled": "扫描已取消",
+    "name": "整合包名称",
+    "version": "整合包版本",
+    "summary": "简介（可选）",
+    "resourceMode": "资源处理",
+    "references": "优先引用在线来源",
+    "bundled": "直接打包",
+    "referencesHint": "已选模组优先引用在线来源，导入时需要下载；未识别文件和其他内容直接打包。",
+    "bundledHint": "所选文件直接打包，不查询在线来源；整合包通常更大。",
+    "shared": "共享游戏目录",
+    "isolated": "独立游戏目录",
+    "search": "搜索文件路径",
+    "selectAll": "全选可选文件",
+    "selectNone": "取消选择",
+    "recommended": "恢复推荐",
+    "excludedHint": "日志、缓存、运行依赖、凭据及其他实例已排除。",
+    "modsHint": "取消必需模组可能使整合包无法运行。",
+    "noFiles": "没有可选文件，可仅导出游戏依赖。",
+    "personalHint": "所选存档、截图或服务器列表可能含个人信息，将随整合包分享。",
+    "scanning": "正在扫描可导出文件…",
+    "selected": "已选 {count} 个文件 · 原始大小 {size}",
+    "dependenciesOnly": "未选择附加文件，仅导出依赖",
+    "newExport": "重新设置",
+    "cancelExport": "取消导出",
+    "output": "输出文件",
+    "resultCounts": "在线引用 {online} 个文件，直接打包 {packed} 个文件。",
+    "backgroundHint": "关闭此页面后，导出仍在任务队列中继续。",
+    "cancelRequested": "已请求取消，等待任务实际停止。",
+    "categories": {
+      "mods": "模组",
+      "disabledMods": "禁用模组",
+      "config": "配置与脚本",
+      "settings": "游戏设置",
+      "resources": "资源包与资源",
+      "shaders": "光影",
+      "saves": "存档",
+      "screenshots": "截图",
+      "servers": "服务器列表",
+      "other": "其他文件"
+    },
+    "status": {
+      "pending": "导出任务已创建",
+      "running": "正在导出",
+      "completed": "导出完成",
+      "failed": "导出失败",
+      "cancelled": "导出已取消"
     }
   }
 }

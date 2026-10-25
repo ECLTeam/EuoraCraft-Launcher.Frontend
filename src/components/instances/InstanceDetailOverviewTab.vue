@@ -80,7 +80,7 @@
       </NButton>
       <NButton secondary @click="emit('action', 'export')">
         <template #icon><UiIcon name="archive" :size="15" /></template>
-        导出实例
+        {{ t('instanceExport.title') }}
       </NButton>
       <NButton type="error" secondary @click="emit('delete')">
         <template #icon><UiIcon name="trash" :size="15" /></template>

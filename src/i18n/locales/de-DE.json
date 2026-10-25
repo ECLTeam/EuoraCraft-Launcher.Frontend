@@ -2107,7 +2107,8 @@
     "java_cleanup": "Bereinigung wiederholen",
     "plugin_file_recovery": "Dateiwiederherstellung",
     "plugin_instance_profile_patch": "Instanzprofil ändern",
-    "plugin_instance_profile_recovery": "Ursprüngliches Instanzprofil wiederherstellen"
+    "plugin_instance_profile_recovery": "Ursprüngliches Instanzprofil wiederherstellen",
+    "instance_export_preview": "Verfügbare Dateien werden gesucht"
   },
   "more": {
     "nav": {
@@ -2441,6 +2442,61 @@
       "confirm": "Installation bestätigen",
       "installing": "Installationsfortschritt",
       "result": "Installationsergebnis"
+    }
+  },
+  "instanceExport": {
+    "title": "Exportieren",
+    "subtitle": "Inhalte auswählen und als Modrinth-Modpack (.mrpack) exportieren.",
+    "scanFailed": "Exportdateien konnten nicht gelesen werden",
+    "invalidResponse": "Ungültige Exportdaten. Dateiliste neu laden.",
+    "exportFailed": "Exportaufgabe konnte nicht erstellt werden",
+    "cancelFailed": "Abbruch konnte nicht angefordert werden. Erneut versuchen.",
+    "cancelled": "Dateisuche abgebrochen",
+    "name": "Modpack-Name",
+    "version": "Modpack-Version",
+    "summary": "Beschreibung (optional)",
+    "resourceMode": "Ressourcen",
+    "references": "Online-Quellen bevorzugen",
+    "bundled": "Dateien einpacken",
+    "referencesHint": "Ausgewählte Mods verwenden verfügbare Online-Quellen und werden beim Import geladen. Unbekannte Dateien und andere Inhalte werden eingepackt.",
+    "bundledHint": "Ausgewählte Dateien ohne Online-Suche einpacken. Das Modpack wird normalerweise größer.",
+    "shared": "Gemeinsames Spielverzeichnis",
+    "isolated": "Isoliertes Spielverzeichnis",
+    "search": "Dateipfade durchsuchen",
+    "selectAll": "Alle verfügbaren Dateien wählen",
+    "selectNone": "Auswahl aufheben",
+    "recommended": "Empfehlung wiederherstellen",
+    "excludedHint": "Protokolle, Caches, Laufzeitdateien, Zugangsdaten und andere Instanzen sind ausgeschlossen.",
+    "modsHint": "Ohne erforderliche Mods kann das Modpack möglicherweise nicht starten.",
+    "noFiles": "Keine verfügbaren Dateien. Nur Spielabhängigkeiten können exportiert werden.",
+    "personalHint": "Ausgewählte Welten, Screenshots oder Serverlisten können persönliche Daten enthalten und werden mit dem Modpack geteilt.",
+    "scanning": "Verfügbare Dateien werden gesucht…",
+    "selected": "{count} Dateien gewählt · ursprüngliche Größe {size}",
+    "dependenciesOnly": "Keine zusätzlichen Dateien; nur Abhängigkeiten",
+    "newExport": "Neu konfigurieren",
+    "cancelExport": "Export abbrechen",
+    "output": "Ausgabedatei",
+    "resultCounts": "{online} Online-Verweise und {packed} eingepackte Dateien.",
+    "backgroundHint": "Nach dem Schließen läuft der Export in der Aufgabenwarteschlange weiter.",
+    "cancelRequested": "Abbruch angefordert. Auf das tatsächliche Ende warten.",
+    "categories": {
+      "mods": "Mods",
+      "disabledMods": "Deaktivierte Mods",
+      "config": "Konfiguration und Skripte",
+      "settings": "Spieleinstellungen",
+      "resources": "Ressourcenpakete und Dateien",
+      "shaders": "Shader",
+      "saves": "Welten",
+      "screenshots": "Screenshots",
+      "servers": "Serverliste",
+      "other": "Andere Dateien"
+    },
+    "status": {
+      "pending": "Exportaufgabe erstellt",
+      "running": "Export läuft",
+      "completed": "Export abgeschlossen",
+      "failed": "Export fehlgeschlagen",
+      "cancelled": "Export abgebrochen"
     }
   }
 }

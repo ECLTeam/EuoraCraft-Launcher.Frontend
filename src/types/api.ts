@@ -35,6 +35,7 @@ import type {
   WindowMetadata,
 } from '@/types/config'
 import type { ConnectorStatus, NatTypeResult } from '@/types/connect'
+import type { InstanceExportRequest } from '@/types/instanceExport'
 import type {
   CrashAnalysisResult,
   CrashCandidateFile,
@@ -422,10 +423,8 @@ export interface CommandPayloadMap {
   game_instance_mod_remove: InstanceTargetPayload & { filename: string }
   game_instance_mods_folder_open: InstanceTargetPayload
   game_instance_clone: InstanceTargetPayload & { new_version_id: string }
-  game_instance_export: InstanceTargetPayload & {
-    output_path: string
-    pack_format: 'modrinth'
-  }
+  game_instance_export_preview: InstanceTargetPayload
+  game_instance_export: InstanceExportRequest
   game_modpack_prepare: ModpackPrepareInput
   game_modpack_preparation_get: { preparation_id: string }
   game_modpack_preparation_release: { preparation_id: string }
@@ -820,6 +819,7 @@ export const COMMAND_NAMES = {
   game_instance_mods_folder_open: 'game_instance_mods_folder_open',
   game_instance_clone: 'game_instance_clone',
   game_instance_export: 'game_instance_export',
+  game_instance_export_preview: 'game_instance_export_preview',
   game_modpack_prepare: 'game_modpack_prepare',
   game_modpack_preparation_get: 'game_modpack_preparation_get',
   game_modpack_preparation_release: 'game_modpack_preparation_release',
@@ -1086,6 +1086,7 @@ export interface CommandResponseMap {
   game_instance_mods_folder_open: { path: string }
   game_instance_clone: GameOperation
   game_instance_export: GameOperation
+  game_instance_export_preview: GameOperation
   game_modpack_prepare: GameOperation & { preparationId: string }
   game_modpack_preparation_get: ModpackPreparation
   game_modpack_preparation_release: boolean

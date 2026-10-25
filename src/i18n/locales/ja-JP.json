@@ -2107,7 +2107,8 @@
     "java_cleanup": "整理を再試行",
     "plugin_file_recovery": "ファイルの復元",
     "plugin_instance_profile_patch": "インスタンスのプロフィールを変更",
-    "plugin_instance_profile_recovery": "元のインスタンスプロフィールを復元"
+    "plugin_instance_profile_recovery": "元のインスタンスプロフィールを復元",
+    "instance_export_preview": "出力可能なファイルをスキャン中"
   },
   "more": {
     "nav": {
@@ -2441,6 +2442,61 @@
       "confirm": "インストールを確認",
       "installing": "インストール状況",
       "result": "インストール結果"
+    }
+  },
+  "instanceExport": {
+    "title": "エクスポート",
+    "subtitle": "内容を選択し、Modrinth パック（.mrpack）として出力します。",
+    "scanFailed": "ファイルをスキャンできませんでした",
+    "invalidResponse": "出力情報が無効です。ファイル一覧を再読み込みしてください。",
+    "exportFailed": "出力タスクを作成できませんでした",
+    "cancelFailed": "キャンセル要求に失敗しました。再試行してください。",
+    "cancelled": "スキャンをキャンセルしました",
+    "name": "パック名",
+    "version": "パックのバージョン",
+    "summary": "概要（任意）",
+    "resourceMode": "リソースの処理",
+    "references": "オンライン参照を優先",
+    "bundled": "ファイルを同梱",
+    "referencesHint": "選択した Mod は可能な場合オンライン参照となり、インポート時にダウンロードされます。未識別ファイルとその他の内容は同梱します。",
+    "bundledHint": "オンライン参照を検索せず、選択したファイルを同梱します。通常はサイズが大きくなります。",
+    "shared": "共有ゲームフォルダー",
+    "isolated": "独立ゲームフォルダー",
+    "search": "ファイルパスを検索",
+    "selectAll": "選択可能な全ファイルを選択",
+    "selectNone": "選択を解除",
+    "recommended": "推奨に戻す",
+    "excludedHint": "ログ、キャッシュ、実行依存ファイル、認証情報、他のインスタンスは除外します。",
+    "modsHint": "必要な Mod を除くと、パックが起動しない場合があります。",
+    "noFiles": "選択可能なファイルはありません。ゲームの依存情報のみ出力できます。",
+    "personalHint": "選択したワールド、スクリーンショット、サーバー一覧には個人情報が含まれる場合があり、パックと一緒に共有されます。",
+    "scanning": "出力可能なファイルをスキャン中…",
+    "selected": "{count} ファイル選択 · 元のサイズ {size}",
+    "dependenciesOnly": "追加ファイルなし・依存情報のみ",
+    "newExport": "再設定",
+    "cancelExport": "出力をキャンセル",
+    "output": "出力ファイル",
+    "resultCounts": "{online} ファイルをオンライン参照、{packed} ファイルを同梱しました。",
+    "backgroundHint": "ページを閉じてもタスクキューで出力を続けます。",
+    "cancelRequested": "キャンセル要求済み。実際の停止を待っています。",
+    "categories": {
+      "mods": "Mod",
+      "disabledMods": "無効な Mod",
+      "config": "設定とスクリプト",
+      "settings": "ゲーム設定",
+      "resources": "リソースパックと素材",
+      "shaders": "シェーダー",
+      "saves": "ワールド",
+      "screenshots": "スクリーンショット",
+      "servers": "サーバー一覧",
+      "other": "その他"
+    },
+    "status": {
+      "pending": "出力タスクを作成しました",
+      "running": "出力中",
+      "completed": "出力完了",
+      "failed": "出力失敗",
+      "cancelled": "出力をキャンセルしました"
     }
   }
 }

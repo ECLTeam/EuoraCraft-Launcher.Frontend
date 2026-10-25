@@ -2123,7 +2123,8 @@
     "java_cleanup": "Retry cleanup",
     "plugin_file_recovery": "File recovery",
     "plugin_instance_profile_patch": "Edit instance profile",
-    "plugin_instance_profile_recovery": "Recover original instance profile"
+    "plugin_instance_profile_recovery": "Recover original instance profile",
+    "instance_export_preview": "Scanning eligible files"
   },
   "more": {
     "nav": {
@@ -2458,6 +2459,61 @@
       "confirm": "Confirm installation",
       "installing": "Installation progress",
       "result": "Installation result"
+    }
+  },
+  "instanceExport": {
+    "title": "Export",
+    "subtitle": "Choose instance content to export as a Modrinth pack (.mrpack).",
+    "scanFailed": "Could not scan export files",
+    "invalidResponse": "Invalid export data. Reload the file list.",
+    "exportFailed": "Could not create the export task",
+    "cancelFailed": "Cancellation request failed. Try again.",
+    "cancelled": "Scan cancelled",
+    "name": "Pack name",
+    "version": "Pack version",
+    "summary": "Summary (optional)",
+    "resourceMode": "Resources",
+    "references": "Prefer online references",
+    "bundled": "Bundle files",
+    "referencesHint": "Selected mods use online sources when available and need downloading on import. Unidentified files and other content are bundled.",
+    "bundledHint": "Bundle selected files without looking up online sources. The pack is usually larger.",
+    "shared": "Shared game directory",
+    "isolated": "Isolated game directory",
+    "search": "Search file paths",
+    "selectAll": "Select all eligible files",
+    "selectNone": "Clear selection",
+    "recommended": "Restore recommended",
+    "excludedHint": "Logs, caches, runtime dependencies, credentials and other instances are excluded.",
+    "modsHint": "Removing required mods may prevent the pack from running.",
+    "noFiles": "No eligible files. You can export game dependencies only.",
+    "personalHint": "Selected worlds, screenshots or server lists may contain personal information and will be shared with the pack.",
+    "scanning": "Scanning eligible files…",
+    "selected": "{count} files selected · original size {size}",
+    "dependenciesOnly": "No additional files selected; dependencies only",
+    "newExport": "Start a new export",
+    "cancelExport": "Cancel export",
+    "output": "Output file",
+    "resultCounts": "Referenced {online} files online and bundled {packed} files.",
+    "backgroundHint": "Closing this page keeps the export running in the task queue.",
+    "cancelRequested": "Cancellation requested. Waiting for the task to stop.",
+    "categories": {
+      "mods": "Mods",
+      "disabledMods": "Disabled mods",
+      "config": "Configuration and scripts",
+      "settings": "Game settings",
+      "resources": "Resource packs and assets",
+      "shaders": "Shaders",
+      "saves": "Worlds",
+      "screenshots": "Screenshots",
+      "servers": "Server list",
+      "other": "Other files"
+    },
+    "status": {
+      "pending": "Export task created",
+      "running": "Exporting",
+      "completed": "Export complete",
+      "failed": "Export failed",
+      "cancelled": "Export cancelled"
     }
   }
 }

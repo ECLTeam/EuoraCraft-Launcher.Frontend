@@ -124,6 +124,7 @@
       @updated="handleProfileChanged"
       @action="handleDetailAction"
     />
+    <InstanceExportModal />
   </div>
 </template>
 
@@ -147,8 +148,10 @@ import { LAUNCH_PROGRESS, LAUNCH_SUCCESS_HIDE_DELAY, LAUNCH_ERROR_HIDE_DELAY } f
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instancePathConfigApi } from '@/features/instances/api/instancePathConfigApi'
 import { instanceWorkspaceApi, workspaceTarget } from '@/features/instances/api/instanceWorkspaceApi'
+import InstanceExportModal from '@/features/instances/components/InstanceExportModal.vue'
 import { findGamePathIndex, type GamePath } from '@/features/instances/model/gamePath'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
+import { useInstanceExportStore } from '@/features/instances/stores/instanceExportStore'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
@@ -163,6 +166,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useLauncherMessage()
+const instanceExport = useInstanceExportStore()
 const instanceStore = useInstanceStore()
 const settingsStore = useSettingsStore()
 
@@ -755,15 +759,8 @@ async function handleInstanceAction(action: string, version: ScannedVersion, ori
     return
   }
   if (action === 'export') {
-    const selected = await backend.command('select_save_file', { purpose: 'instance-export' })
-    if (!selected.success || !selected.data?.path) return
-    const response = await backend.command('game_instance_export', {
-      ...workspaceTarget(version),
-      output_path: selected.data.path,
-      pack_format: 'modrinth',
-    })
-    if (!response.success) throw new Error(response.message)
-    message.success('实例导出任务已创建')
+    if (origin && !origin.isCurrent()) return
+    await instanceExport.open(workspaceTarget(version), instanceDisplayName(version))
     return
   }
 }

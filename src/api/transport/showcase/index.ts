@@ -2,6 +2,7 @@ import type { MinecraftAccount, WardrobeItem } from '@/types/accounts'
 import type { ApiResponse, BackendEvents } from '@/types/api'
 import type { ConnectorStatus } from '@/types/connect'
 import type { CrashAnalysisResult, GameInstance, GameResource, VersionRunStats } from '@/types/instances'
+import type { ApplicationOperation } from '@/types/operations'
 import type { PluginInfo } from '@/types/plugins'
 import { loadShowcaseConfig, persistShowcaseConfig } from './configPersistence'
 import {
@@ -87,6 +88,7 @@ export function createShowcaseTransport(): BackendTransport {
   const packPreparationId = 'c'.repeat(32)
   const packPrepareOperationId = 'a'.repeat(32)
   const packInstallOperationId = 'b'.repeat(32)
+  const exportOperations = new Map<string, ApplicationOperation>()
   let portScanCount = 0
   let connectorStartTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -1062,8 +1064,75 @@ export function createShowcaseTransport(): BackendTransport {
         return success({ issues: [], downloadBytes: 0, canRepair: false })
       case 'game_instance_files_repair':
       case 'game_instance_clone':
-      case 'game_instance_export':
         return success(demoOperation('instance_maintenance'))
+      case 'game_instance_export_preview': {
+        const operationId = crypto.randomUUID().replaceAll('-', '')
+        const operation: ApplicationOperation = {
+          operationId,
+          kind: 'instance_export_preview',
+          status: 'completed',
+          percent: 100,
+          result: {
+            sourceRevision: 'a'.repeat(64),
+            versionId: String(payload.version_id),
+            isolated: true,
+            dependencies: { minecraft: '1.21.1', 'fabric-loader': '0.16.14' },
+            excludedCount: 3,
+            files: [
+              {
+                fileId: '1'.repeat(64),
+                path: 'mods/fabric-api.jar',
+                size: 2500000,
+                category: 'mods',
+                recommended: true,
+              },
+              { fileId: '2'.repeat(64), path: 'mods/sodium.jar', size: 1200000, category: 'mods', recommended: true },
+              { fileId: '3'.repeat(64), path: 'config/options.json', size: 512, category: 'config', recommended: true },
+              {
+                fileId: '4'.repeat(64),
+                path: 'saves/Example World/level.dat',
+                size: 4096,
+                category: 'saves',
+                recommended: false,
+              },
+              {
+                fileId: '5'.repeat(64),
+                path: 'resourcepacks/Example.zip',
+                size: 120000,
+                category: 'resources',
+                recommended: true,
+              },
+              { fileId: '6'.repeat(64), path: 'servers.dat', size: 80, category: 'servers', recommended: false },
+            ],
+          },
+        }
+        exportOperations.set(operationId, operation)
+        return success(operation)
+      }
+      case 'game_instance_export': {
+        const operationId = crypto.randomUUID().replaceAll('-', '')
+        const selected = Array.isArray(payload.selected_file_ids) ? payload.selected_file_ids : []
+        const referenced =
+          payload.resource_mode === 'references'
+            ? selected.filter((id) => ['1'.repeat(64), '2'.repeat(64)].includes(String(id))).length
+            : 0
+        const operation: ApplicationOperation = {
+          operationId,
+          kind: 'instance_export',
+          status: 'completed',
+          percent: 100,
+          result: {
+            path: String(payload.output_path),
+            format: 'modrinth',
+            onlineFiles: referenced,
+            packedFiles: selected.length - referenced,
+            selectedBytes: 3700512,
+            warnings: [],
+          },
+        }
+        exportOperations.set(operationId, operation)
+        return success(operation)
+      }
       case 'game_instance_delete':
       case 'game_instance_icon_set':
       case 'game_instance_pin_order_set':
@@ -1107,6 +1176,8 @@ export function createShowcaseTransport(): BackendTransport {
         packExcludedCount = Array.isArray(payload.excluded_file_ids) ? payload.excluded_file_ids.length : 0
         return success({ operationId: packInstallOperationId, status: 'pending' })
       case 'game_operation_get':
+        if (exportOperations.has(String(payload.operation_id)))
+          return success(exportOperations.get(String(payload.operation_id)))
         if (payload.operation_id === packPrepareOperationId)
           return success({
             operationId: packPrepareOperationId,

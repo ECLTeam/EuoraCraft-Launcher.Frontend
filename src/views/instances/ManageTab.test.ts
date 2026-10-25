@@ -7,6 +7,7 @@ import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import { globalModalStack } from '@/composables/useGlobalModalStack'
 import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspaceApi'
+import { useInstanceExportStore } from '@/features/instances/stores/instanceExportStore'
 import { i18n } from '@/i18n'
 import type { CommandResponseMap } from '@/types/api'
 import type { ScannedVersion } from '@/types/instances'
@@ -77,6 +78,7 @@ const fixture = {
 } as ScannedVersion
 
 async function mountConfirmFlow() {
+  const pinia = createPinia()
   const detailStub = defineComponent({
     name: 'InstanceDetailModal',
     components: { FullscreenModal },
@@ -97,7 +99,7 @@ async function mountConfirmFlow() {
   const wrapper = mount(ManageTab, {
     attachTo: document.body,
     global: {
-      plugins: [createPinia(), i18n],
+      plugins: [pinia, i18n],
       stubs: {
         InstancePathSidebar: true,
         InstalledInstanceList: true,
@@ -111,8 +113,21 @@ async function mountConfirmFlow() {
   const list = wrapper.findComponent({ name: 'InstalledInstanceList' })
   list.vm.$emit('detail', fixture)
   await flushPromises()
-  return { wrapper, list, detail: wrapper.findComponent(detailStub) }
+  return { wrapper, list, detail: wrapper.findComponent(detailStub), pinia }
 }
+
+it('导出动作打开该实例的设置流程，不直接提交打包请求', async () => {
+  const { wrapper, list, pinia } = await mountConfirmFlow()
+  const exporter = useInstanceExportStore(pinia)
+  const open = vi.spyOn(exporter, 'open').mockResolvedValue(undefined)
+  const command = vi.spyOn(backend, 'command')
+  list.vm.$emit('action', 'export', fixture)
+  await flushPromises()
+  expect(open).toHaveBeenCalledWith({ game_path: '/A', version_id: 'fixture' }, 'Fixture')
+  expect(command.mock.calls.some(([name]) => name === 'game_instance_export')).toBe(false)
+  wrapper.unmount()
+  vi.restoreAllMocks()
+})
 
 it.each(['list', 'menu', 'detail'] as const)('从 %s 启动前同步选中实例和目录', async (source) => {
   settings.game.last_manage_path = '/B'
