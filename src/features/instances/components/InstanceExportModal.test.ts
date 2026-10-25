@@ -57,7 +57,8 @@ function render() {
       plugins: [i18n],
       stubs: {
         FullscreenModal: { props: ['visible'], template: '<section v-if="visible" role="dialog"><slot /></section>' },
-        NTree: {
+        // naive-ui 的树组件名是 Tree，按导入名 NTree 声明 stub 不会命中；保留组件名以便按 NTree 查找。
+        Tree: {
           name: 'NTree',
           props: ['data', 'checkedKeys'],
           emits: ['update:checkedKeys'],

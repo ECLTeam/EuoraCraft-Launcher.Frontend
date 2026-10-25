@@ -21,6 +21,12 @@ function activeDialog(): HTMLElement {
   return dialog!
 }
 
+/** 重新打开要等上一次退场动画真正结束，模态框栈才会把新展示链放回页面。 */
+async function reopenedDialog(): Promise<HTMLElement> {
+  await vi.waitFor(() => expect(document.querySelector('.modal-overlay[aria-modal="true"]')).not.toBeNull())
+  return activeDialog()
+}
+
 function choice(index: number): HTMLButtonElement {
   return document.querySelectorAll<HTMLButtonElement>('.account-type-option')[index]!
 }
@@ -175,7 +181,7 @@ describe('添加账户弹窗', () => {
     expect(wrapper.props('visible')).toBe(false)
     await wrapper.setProps({ visible: true })
     await settle()
-    expect(activeDialog().querySelector('.account-type-options')).not.toBeNull()
+    expect((await reopenedDialog()).querySelector('.account-type-options')).not.toBeNull()
     expect(account.newOfflineUuid).toBe('')
   })
 
@@ -287,8 +293,9 @@ describe('添加账户弹窗', () => {
     await settle()
     expect(account.cancelMicrosoftLogin).toHaveBeenCalledOnce()
     expect(wrapper.props('visible')).toBe(true)
-    expect(activeDialog().querySelector('.account-type-options')).not.toBeNull()
-    expect(activeDialog().querySelector('.microsoft-login-content')).toBeNull()
+    const reopened = await reopenedDialog()
+    expect(reopened.querySelector('.account-type-options')).not.toBeNull()
+    expect(reopened.querySelector('.microsoft-login-content')).toBeNull()
   })
 
   it('缺少微软配置时禁用入口并保留配置提示', async () => {
@@ -355,7 +362,7 @@ describe('添加账户弹窗', () => {
     finish()
     await settle()
     expect(wrapper.props('visible')).toBe(true)
-    expect(activeDialog().querySelector('.account-type-options')).not.toBeNull()
+    expect((await reopenedDialog()).querySelector('.account-type-options')).not.toBeNull()
   })
 
   it('Authlib 需要选择角色时保留弹窗，角色确认后关闭', async () => {
