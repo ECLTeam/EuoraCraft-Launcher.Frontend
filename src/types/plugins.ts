@@ -8,6 +8,7 @@ export interface PluginInfo {
   installation_id?: string
   content_digest?: string
   review_required?: boolean
+  requested_permissions?: PluginBusinessCapability[]
   required_satisfied?: boolean
   cleanup_state?: string
   title: string
@@ -162,6 +163,7 @@ export interface PluginResourceCandidate {
   version_id: string | null
   available: boolean
   selected: boolean
+  is_default: boolean
 }
 
 export interface PluginResourcePage {
@@ -170,8 +172,8 @@ export interface PluginResourcePage {
   next_cursor: string | null
 }
 
-export type PluginInstanceCapability =
-  'instances.read' | 'instances.write' | 'instances.install' | 'instances.launch' | 'instances.stop'
+export type PluginInstanceCapability = 'instances.read' | 'instances.manage'
+export type PluginBusinessCapability = PluginInstanceCapability | 'network.read'
 
 export interface PluginResourceQuery {
   installation_id: string

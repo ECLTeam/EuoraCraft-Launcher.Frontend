@@ -81,7 +81,18 @@ export const pluginManagementApi = {
   },
 
   async list(): Promise<PluginInfo[]> {
-    return assertSuccess(await backend.command('plugin_list'), '读取插件列表') ?? []
+    const plugins = assertSuccess(await backend.command('plugin_list'), '读取插件列表') ?? []
+    for (const plugin of plugins) {
+      if (
+        plugin.installation_id &&
+        (!Array.isArray(plugin.requested_permissions) ||
+          plugin.requested_permissions.some(
+            (permission) => !['instances.read', 'instances.manage', 'network.read'].includes(permission)
+          ))
+      )
+        throw new Error('PLUGIN_SCHEMA_INVALID')
+    }
+    return plugins
   },
 
   async enable(pluginName: string): Promise<void> {

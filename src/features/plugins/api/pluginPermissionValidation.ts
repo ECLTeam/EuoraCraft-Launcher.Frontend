@@ -42,6 +42,7 @@ function parseItem(value: unknown): PluginPermissionItem {
   if (
     !record(value) ||
     typeof value.capability !== 'string' ||
+    !['instances.read', 'instances.manage', 'network.read'].includes(value.capability) ||
     typeof value.required !== 'boolean' ||
     (value.decision !== 'allow' && value.decision !== 'deny') ||
     !strings(value.resource_refs) ||
@@ -86,7 +87,8 @@ export function parseResourcePage(value: unknown): PluginResourcePage {
       !(item.parent_ref === null || typeof item.parent_ref === 'string') ||
       !(item.version_id === null || typeof item.version_id === 'string') ||
       typeof item.available !== 'boolean' ||
-      typeof item.selected !== 'boolean'
+      typeof item.selected !== 'boolean' ||
+      typeof item.is_default !== 'boolean'
     )
       throw new Error('PLUGIN_SCHEMA_INVALID')
     return {
@@ -97,6 +99,7 @@ export function parseResourcePage(value: unknown): PluginResourcePage {
       version_id: item.version_id,
       available: item.available,
       selected: item.selected,
+      is_default: item.is_default,
     }
   })
   return { catalog_revision: value.catalog_revision, items, next_cursor: value.next_cursor }

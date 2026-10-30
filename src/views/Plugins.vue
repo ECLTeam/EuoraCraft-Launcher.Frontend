@@ -276,6 +276,13 @@ async function togglePlugin(plugin: PluginInfo) {
     plugin.installation_id &&
     (plugin.review_required || !plugin.required_satisfied)
   ) {
+    if (plugin.requested_permissions?.length === 0) {
+      await runResult(() => pluginStore.enableBasic(plugin), {
+        showError: true,
+        errorMessage: t('plugins.enableFailed'),
+      })
+      return
+    }
     openPermissions(plugin)
     return
   }

@@ -15,6 +15,8 @@ vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
     inspectPackage: vi.fn(),
     installPackage: vi.fn(),
     onStatusChanged: vi.fn(() => vi.fn()),
+    permissions: vi.fn(),
+    updatePermissions: vi.fn(),
   },
 }))
 
@@ -33,6 +35,71 @@ const plugin = {
 }
 
 describe('pluginStore', () => {
+  it('基础插件确认当前内容后直接启用，并在整个流程中拒绝重复执行', async () => {
+    let finish!: () => void
+    vi.mocked(pluginManagementApi.permissions).mockResolvedValue({
+      installation_id: 'a'.repeat(32),
+      content_digest: 'b'.repeat(64),
+      revision: 0,
+      grant_epoch: 1,
+      required_satisfied: true,
+      error_code: null,
+      items: [],
+    })
+    vi.mocked(pluginManagementApi.updatePermissions).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = () =>
+            resolve({
+              revision: 1,
+              grant_epoch: 2,
+              persisted: true,
+              required_satisfied: true,
+              cleanup_state: 'complete',
+            })
+        })
+    )
+    const store = usePluginStore()
+    const target = { ...plugin, status: 'disabled', installation_id: 'a'.repeat(32), review_required: true }
+    const first = store.enableBasic(target)
+    await Promise.resolve()
+    await expect(store.enableBasic(target)).resolves.toEqual({ status: 'skipped' })
+    expect(pluginManagementApi.enable).not.toHaveBeenCalled()
+    finish()
+    await expect(first).resolves.toMatchObject({ status: 'success' })
+    expect(pluginManagementApi.updatePermissions).toHaveBeenCalledWith(expect.objectContaining({ revision: 0 }), [])
+    expect(pluginManagementApi.enable).toHaveBeenCalledExactlyOnceWith('demo')
+  })
+
+  it('基础启用入口遇到业务权限时不擅自授予或执行', async () => {
+    vi.mocked(pluginManagementApi.permissions).mockResolvedValue({
+      installation_id: 'a'.repeat(32),
+      content_digest: 'b'.repeat(64),
+      revision: 0,
+      grant_epoch: 1,
+      required_satisfied: false,
+      error_code: null,
+      items: [
+        {
+          capability: 'instances.manage',
+          required: true,
+          decision: 'deny',
+          resource_refs: [],
+          selected_resource_refs: [],
+          requested_resource_refs: [],
+          implemented: true,
+          expires_at: null,
+          grant_epoch: 1,
+        },
+      ],
+    })
+    const store = usePluginStore()
+    await expect(
+      store.enableBasic({ ...plugin, status: 'disabled', installation_id: 'a'.repeat(32) })
+    ).rejects.toThrow()
+    expect(pluginManagementApi.updatePermissions).not.toHaveBeenCalled()
+    expect(pluginManagementApi.enable).not.toHaveBeenCalled()
+  })
   it('同一插件的重复或冲突动作返回 skipped，不产生第二次执行', async () => {
     let finish!: () => void
     vi.mocked(pluginManagementApi.reload).mockImplementationOnce(

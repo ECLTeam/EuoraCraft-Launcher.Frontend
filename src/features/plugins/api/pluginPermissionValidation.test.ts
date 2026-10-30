@@ -10,7 +10,7 @@ const valid = {
   error_code: null,
   items: [
     {
-      capability: 'settings.read',
+      capability: 'instances.read',
       required: true,
       decision: 'deny',
       implemented: true,
@@ -32,6 +32,7 @@ describe('plugin permission boundary', () => {
     version_id: null,
     available: true,
     selected: false,
+    is_default: false,
   }
   it('projects resource candidates without passing additional host fields to the selector', () => {
     const page = parseResourcePage({

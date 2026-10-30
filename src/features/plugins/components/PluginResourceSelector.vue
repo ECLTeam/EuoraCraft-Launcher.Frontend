@@ -1,11 +1,8 @@
 <template>
-  <section class="resource-selector" :aria-label="t('plugins.resourcesTitle')">
-    <strong>{{ t(scopeText[capability].title) }}</strong>
-    <p>{{ t(scopeText[capability].note) }}</p>
+  <section class="resource-selector" :aria-label="t('plugins.gameDirectories')">
+    <strong>{{ t('plugins.gameDirectories') }}</strong>
+    <p>{{ t(capability === 'instances.manage' ? 'plugins.manageScopeNote' : 'plugins.readScopeNote') }}</p>
     <div class="resource-toolbar">
-      <NButton v-if="parent" size="small" :disabled="disabled" @click="open(null)">{{
-        t('plugins.resourcesBack')
-      }}</NButton>
       <NInput
         v-model:value="search"
         :disabled="disabled"
@@ -17,41 +14,23 @@
         t('common.refresh')
       }}</NButton>
     </div>
-    <NCheckbox
-      v-if="parent && capability === 'instances.read'"
-      :checked="selected.includes(parent.resource_id)"
-      :disabled="disabled || !parent.available"
-      @update:checked="parent && select(parent, $event)"
-      >{{ t('plugins.resourcesEntireRoot', { name: parent.label }) }}</NCheckbox
-    >
-    <NAlert v-if="selectionFull" type="warning" :showIcon="false">{{ t('plugins.resourcesLimitReached') }}</NAlert>
-    <NAlert v-if="error" type="error" :showIcon="false">
-      {{ t('plugins.resourcesLoadFailed') }}
+    <NAlert v-if="error" type="error" :showIcon="false"
+      >{{ t('plugins.resourcesLoadFailed') }}
       <NButton text :disabled="disabled" @click="load(false)">{{ t('common.retry') }}</NButton>
     </NAlert>
     <UiLoading v-if="loading && !items.length" mode="inline" />
-    <NEmpty v-else-if="!items.length && !error" :description="t('plugins.resourcesEmpty')" />
+    <NEmpty v-else-if="!items.length && !error" :description="t('plugins.gameDirectoriesEmpty')" />
     <ul v-else class="resource-list">
       <li v-for="item in items" :key="item.resource_id" class="resource-row">
-        <div class="resource-choice">
-          <span v-if="selectsInstances && item.kind === 'instance_root'" :title="item.label">{{ item.label }}</span>
-          <NCheckbox
-            v-else
-            :checked="selected.includes(item.resource_id)"
-            :disabled="disabled || !item.available || covered(item)"
-            @update:checked="select(item, $event)"
-          >
-            <span :title="item.label">{{ item.kind === 'instance_root' ? rootLabel(item) : item.label }}</span>
-          </NCheckbox>
-          <small>{{ resourceHint(item) }}</small>
-        </div>
-        <NButton
-          v-if="item.kind === 'instance_root' && item.available && capability !== 'instances.install'"
-          size="small"
-          :disabled="disabled || loading"
-          @click="open(item)"
-          >{{ t('plugins.resourcesBrowse') }}</NButton
+        <NCheckbox
+          :checked="selected.includes(item.resource_id)"
+          :disabled="disabled || !item.available"
+          @update:checked="select(item, $event)"
         >
+          <span :title="item.label">{{ item.label }}</span>
+          <small v-if="!item.available">{{ t('plugins.resourcesUnavailable') }}</small>
+          <small v-else-if="item.is_default">{{ t('plugins.currentGameDirectory') }}</small>
+        </NCheckbox>
       </li>
     </ul>
     <div class="resource-footer">
@@ -65,16 +44,14 @@
     </div>
   </section>
 </template>
-
 <script setup lang="ts">
 import { NAlert, NButton, NCheckbox, NEmpty, NInput } from 'naive-ui'
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type { PluginPermissions, PluginResourceCandidate, PluginInstanceCapability } from '@/types/plugins'
-
 const props = defineProps<{
   view: PluginPermissions
   selected: string[]
@@ -87,74 +64,23 @@ const emit = defineEmits<{
   busy: [value: boolean]
 }>()
 const { t } = useI18n()
-const scopeText: Record<PluginInstanceCapability, { title: string; note: string }> = {
-  'instances.read': { title: 'plugins.readResourcesTitle', note: 'plugins.resourcesNote' },
-  'instances.write': { title: 'plugins.writeResourcesTitle', note: 'plugins.writeResourcesNote' },
-  'instances.install': { title: 'plugins.installResourcesTitle', note: 'plugins.installResourcesNote' },
-  'instances.launch': { title: 'plugins.launchResourcesTitle', note: 'plugins.launchResourcesNote' },
-  'instances.stop': { title: 'plugins.stopResourcesTitle', note: 'plugins.stopResourcesNote' },
-}
-const selectsInstances = computed(() =>
-  ['instances.write', 'instances.launch', 'instances.stop'].includes(props.capability)
-)
-const parent = ref<PluginResourceCandidate | null>(null)
 const search = ref('')
 const items = ref<PluginResourceCandidate[]>([])
 const cursor = ref<string | null>(null)
 const loading = ref(false)
 const error = ref(false)
-const selectionFull = ref(false)
+let initializedSelection = false
 const scope = useRequestScope(
-  () =>
-    `${props.view.installation_id}:${props.view.content_digest}:${props.capability}:${parent.value?.resource_id ?? ''}`
+  () => props.view.installation_id + ':' + props.view.content_digest + ':' + props.capability
 )
-
-function covered(item: PluginResourceCandidate): boolean {
-  return (
-    props.capability === 'instances.read' &&
-    item.kind === 'instance' &&
-    !!parent.value &&
-    props.selected.includes(parent.value.resource_id)
-  )
-}
-
-function resourceHint(item: PluginResourceCandidate): string {
-  if (!item.available) return t('plugins.resourcesUnavailable')
-  if (covered(item)) return t('plugins.resourcesCovered')
-  if (item.kind === 'instance') {
-    if (props.capability === 'instances.write') return t('plugins.writeResourcesInstanceHint')
-    if (props.capability === 'instances.launch') return t('plugins.launchResourcesInstanceHint')
-    if (props.capability === 'instances.stop') return t('plugins.stopResourcesInstanceHint')
-    return t('plugins.resourcesInstanceHint')
-  }
-  if (props.capability === 'instances.install') return t('plugins.installResourcesRootHint')
-  return t(selectsInstances.value ? 'plugins.writeResourcesRootHint' : 'plugins.resourcesRootHint')
-}
-
-function rootLabel(item: PluginResourceCandidate): string {
-  return t(
-    props.capability === 'instances.install' ? 'plugins.installResourcesRootLabel' : 'plugins.resourcesEntireRoot',
-    { name: item.label }
-  )
-}
-
 function select(item: PluginResourceCandidate, checked: boolean): void {
-  if (props.disabled || !item.available || (selectsInstances.value && item.kind === 'instance_root')) return
+  if (props.disabled || !item.available) return
   const selected = checked
     ? [...new Set([...props.selected, item.resource_id])]
     : props.selected.filter((id) => id !== item.resource_id)
-  selectionFull.value = selected.length > 128
   if (selected.length <= 128) emit('update:selected', selected)
 }
-
-function open(item: PluginResourceCandidate | null): void {
-  parent.value = item
-  search.value = ''
-  void load(false)
-}
-
 async function load(more: boolean): Promise<void> {
-  if (props.disabled) return
   const current = scope.begin()
   loading.value = true
   error.value = false
@@ -169,7 +95,6 @@ async function load(more: boolean): Promise<void> {
       installation_id: props.view.installation_id,
       content_digest: props.view.content_digest,
       capability: props.capability,
-      parent_ref: parent.value?.resource_id ?? null,
       search: search.value,
       cursor: more ? cursor.value : null,
       limit: 25,
@@ -182,6 +107,12 @@ async function load(more: boolean): Promise<void> {
         ]
       : page.items
     cursor.value = page.next_cursor
+    if (!initializedSelection && !search.value) {
+      initializedSelection = true
+      const recommended = page.items.find((item) => item.available && item.is_default)
+      if (props.view.revision === 0 && !props.selected.length && recommended)
+        emit('update:selected', [recommended.resource_id])
+    }
     emit('revision', page.catalog_revision)
   } catch {
     if (current()) error.value = true
@@ -192,14 +123,16 @@ async function load(more: boolean): Promise<void> {
     }
   }
 }
-
+watch(
+  () => [props.view.installation_id, props.view.content_digest] as const,
+  () => {
+    initializedSelection = false
+    search.value = ''
+  }
+)
 watch(
   () => [props.view.installation_id, props.view.content_digest, props.capability] as const,
-  () => {
-    parent.value = null
-    search.value = ''
-    void load(false)
-  },
+  () => void load(false),
   { immediate: true }
 )
 onUnmounted(() => {
@@ -207,7 +140,6 @@ onUnmounted(() => {
   emit('busy', false)
 })
 </script>
-
 <style scoped>
 .resource-selector {
   display: grid;
@@ -236,24 +168,14 @@ onUnmounted(() => {
   list-style: none;
 }
 .resource-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  min-width: 0;
   padding: 8px 0;
   border-bottom: 1px solid var(--ecl-border);
-}
-.resource-choice {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
   overflow-wrap: anywhere;
 }
-.resource-choice small {
+.resource-row small {
+  display: block;
   color: var(--ecl-text-secondary);
-}
-.resource-choice :deep(.n-checkbox__label) {
-  overflow-wrap: anywhere;
 }
 .resource-footer > span {
   flex: 1;

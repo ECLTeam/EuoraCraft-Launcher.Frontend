@@ -7,6 +7,7 @@ import type {
   PluginPackageInstallResult,
   PluginPackageSelection,
   PluginSettingsData,
+  PluginPermissions,
 } from '@/types/plugins'
 
 export const usePluginStore = defineStore('plugins', () => {
@@ -79,6 +80,27 @@ export const usePluginStore = defineStore('plugins', () => {
       ? pluginManagementApi.disable
       : pluginManagementApi.enable
     return runOperation(`toggle:${plugin.name}`, () => action(plugin.name))
+  }
+
+  function enableBasic(plugin: PluginInfo): Promise<ActionResult<void>> {
+    return runOperation(`enable:${plugin.name}`, async () => {
+      if (!plugin.installation_id) throw new Error('PLUGIN_SCHEMA_INVALID')
+      const view = await pluginManagementApi.permissions(plugin.installation_id)
+      if (plugin.content_digest && plugin.content_digest !== view.content_digest)
+        throw new Error('PLUGIN_CONTENT_CHANGED')
+      if (view.installation_id !== plugin.installation_id || view.error_code || view.items.length)
+        throw new Error('PLUGIN_GRANT_REVIEW_REQUIRED')
+      if (!view.revision) await pluginManagementApi.updatePermissions(view, [])
+      await pluginManagementApi.enable(plugin.name)
+    })
+  }
+
+  function enableReviewed(plugin: PluginInfo, view: PluginPermissions): Promise<ActionResult<void>> {
+    return runOperation(`enable:${plugin.name}`, async () => {
+      if (plugin.installation_id !== view.installation_id || !view.required_satisfied || view.error_code)
+        throw new Error('PLUGIN_REQUIRED_PERMISSION_DENIED')
+      await pluginManagementApi.enable(plugin.name)
+    })
   }
 
   function reload(pluginName: string): Promise<ActionResult<void>> {
@@ -163,6 +185,8 @@ export const usePluginStore = defineStore('plugins', () => {
     isListStale,
     load,
     toggle,
+    enableBasic,
+    enableReviewed,
     reload,
     unload,
     install,
