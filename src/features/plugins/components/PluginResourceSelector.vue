@@ -1,9 +1,7 @@
 <template>
   <section class="resource-selector" :aria-label="t('plugins.resourcesTitle')">
-    <strong>{{
-      t(capability === 'instances.write' ? 'plugins.writeResourcesTitle' : 'plugins.readResourcesTitle')
-    }}</strong>
-    <p>{{ t(capability === 'instances.write' ? 'plugins.writeResourcesNote' : 'plugins.resourcesNote') }}</p>
+    <strong>{{ t(scopeText[capability].title) }}</strong>
+    <p>{{ t(scopeText[capability].note) }}</p>
     <div class="resource-toolbar">
       <NButton v-if="parent" size="small" :disabled="disabled" @click="open(null)">{{
         t('plugins.resourcesBack')
@@ -36,23 +34,19 @@
     <ul v-else class="resource-list">
       <li v-for="item in items" :key="item.resource_id" class="resource-row">
         <div class="resource-choice">
-          <span v-if="capability === 'instances.write' && item.kind === 'instance_root'" :title="item.label">{{
-            item.label
-          }}</span>
+          <span v-if="selectsInstances && item.kind === 'instance_root'" :title="item.label">{{ item.label }}</span>
           <NCheckbox
             v-else
             :checked="selected.includes(item.resource_id)"
             :disabled="disabled || !item.available || covered(item)"
             @update:checked="select(item, $event)"
           >
-            <span :title="item.label">{{
-              item.kind === 'instance_root' ? t('plugins.resourcesEntireRoot', { name: item.label }) : item.label
-            }}</span>
+            <span :title="item.label">{{ item.kind === 'instance_root' ? rootLabel(item) : item.label }}</span>
           </NCheckbox>
           <small>{{ resourceHint(item) }}</small>
         </div>
         <NButton
-          v-if="item.kind === 'instance_root' && item.available"
+          v-if="item.kind === 'instance_root' && item.available && capability !== 'instances.install'"
           size="small"
           :disabled="disabled || loading"
           @click="open(item)"
@@ -74,18 +68,18 @@
 
 <script setup lang="ts">
 import { NAlert, NButton, NCheckbox, NEmpty, NInput } from 'naive-ui'
-import { onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
-import type { PluginPermissions, PluginResourceCandidate } from '@/types/plugins'
+import type { PluginPermissions, PluginResourceCandidate, PluginInstanceCapability } from '@/types/plugins'
 
 const props = defineProps<{
   view: PluginPermissions
   selected: string[]
   disabled: boolean
-  capability: 'instances.read' | 'instances.write'
+  capability: PluginInstanceCapability
 }>()
 const emit = defineEmits<{
   'update:selected': [value: string[]]
@@ -93,6 +87,16 @@ const emit = defineEmits<{
   busy: [value: boolean]
 }>()
 const { t } = useI18n()
+const scopeText: Record<PluginInstanceCapability, { title: string; note: string }> = {
+  'instances.read': { title: 'plugins.readResourcesTitle', note: 'plugins.resourcesNote' },
+  'instances.write': { title: 'plugins.writeResourcesTitle', note: 'plugins.writeResourcesNote' },
+  'instances.install': { title: 'plugins.installResourcesTitle', note: 'plugins.installResourcesNote' },
+  'instances.launch': { title: 'plugins.launchResourcesTitle', note: 'plugins.launchResourcesNote' },
+  'instances.stop': { title: 'plugins.stopResourcesTitle', note: 'plugins.stopResourcesNote' },
+}
+const selectsInstances = computed(() =>
+  ['instances.write', 'instances.launch', 'instances.stop'].includes(props.capability)
+)
 const parent = ref<PluginResourceCandidate | null>(null)
 const search = ref('')
 const items = ref<PluginResourceCandidate[]>([])
@@ -117,13 +121,25 @@ function covered(item: PluginResourceCandidate): boolean {
 function resourceHint(item: PluginResourceCandidate): string {
   if (!item.available) return t('plugins.resourcesUnavailable')
   if (covered(item)) return t('plugins.resourcesCovered')
-  if (item.kind === 'instance') return t('plugins.resourcesInstanceHint')
-  return t(props.capability === 'instances.write' ? 'plugins.writeResourcesRootHint' : 'plugins.resourcesRootHint')
+  if (item.kind === 'instance') {
+    if (props.capability === 'instances.write') return t('plugins.writeResourcesInstanceHint')
+    if (props.capability === 'instances.launch') return t('plugins.launchResourcesInstanceHint')
+    if (props.capability === 'instances.stop') return t('plugins.stopResourcesInstanceHint')
+    return t('plugins.resourcesInstanceHint')
+  }
+  if (props.capability === 'instances.install') return t('plugins.installResourcesRootHint')
+  return t(selectsInstances.value ? 'plugins.writeResourcesRootHint' : 'plugins.resourcesRootHint')
+}
+
+function rootLabel(item: PluginResourceCandidate): string {
+  return t(
+    props.capability === 'instances.install' ? 'plugins.installResourcesRootLabel' : 'plugins.resourcesEntireRoot',
+    { name: item.label }
+  )
 }
 
 function select(item: PluginResourceCandidate, checked: boolean): void {
-  if (props.disabled || !item.available || (props.capability === 'instances.write' && item.kind === 'instance_root'))
-    return
+  if (props.disabled || !item.available || (selectsInstances.value && item.kind === 'instance_root')) return
   const selected = checked
     ? [...new Set([...props.selected, item.resource_id])]
     : props.selected.filter((id) => id !== item.resource_id)

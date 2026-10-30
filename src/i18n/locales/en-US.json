@@ -772,7 +772,11 @@
       "filesystem_delete": "Delete own private files (local NTFS only; successful deletion is irreversible)",
       "network_read": "Read approved sites",
       "filesystem_replace": "Replace own private files (local NTFS only; previous version is irrecoverable after success)",
-      "instances_write": "Edit selected instance profiles (alias, description, favorite and tags)"
+      "instances_write": "Edit selected instance profiles (alias, description, favorite and tags)",
+      "game_catalog_read": "Query game version catalogs",
+      "instances_install": "Install games in selected folders",
+      "instances_launch": "Launch selected instances",
+      "instances_stop": "Stop selected instances started by this plugin"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -790,7 +794,15 @@
       "PLUGIN_INSTANCE_PROFILE_CONFLICT": "The instance profile changed. Read it again before submitting.",
       "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "The instance profile could not be saved. Original data was retained.",
       "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "The instance profile is busy or needs recovery. Open File recovery.",
-      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "The recovery objects could not be verified. Files were retained."
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "The recovery objects could not be verified. Files were retained.",
+      "PLUGIN_INSTALL_BUSY": "This instance is already being installed. Wait for the installation to finish.",
+      "PLUGIN_LAUNCH_BUSY": "Another game launch is in progress. Try again later.",
+      "PLUGIN_HOST_NOT_READY": "The launcher is not ready to launch games yet. Try again later.",
+      "PLUGIN_ACCOUNT_REQUIRED": "Select a game account in the launcher first.",
+      "PLUGIN_ACCOUNT_CHANGED": "The selected account changed. Start the launch again.",
+      "PLUGIN_GAME_VERSION_INVALID": "The game version is not in the launcher's catalog.",
+      "PLUGIN_OWNER_MISMATCH": "This game process does not belong to the plugin's current run.",
+      "PLUGIN_GAME_STOP_TIMEOUT": "Game shutdown has not been confirmed. Check the running instances."
     },
     "runtimeError": "The plugin operation did not complete. Check permissions or retry.",
     "resourcesTitle": "Allowed instances",
@@ -804,6 +816,9 @@
     "resourcesCovered": "Covered by directory permission",
     "resourcesRootHint": "Allows reading every instance in this directory",
     "resourcesInstanceHint": "Allows reading only this instance",
+    "writeResourcesInstanceHint": "Allows changing only this instance's profile",
+    "launchResourcesInstanceHint": "Allows launching only this instance",
+    "stopResourcesInstanceHint": "Allows stopping only this instance's processes started by this plugin in its current run",
     "resourcesBrowse": "Choose instances",
     "resourcesSelected": "{count} resources selected",
     "resourcesClear": "Clear all selections",
@@ -838,7 +853,15 @@
     "fileRecoveryPrivate": "Private files",
     "fileRecoveryProfile": "Instance profiles",
     "profileRecoverySuffix": "Save-as suffix (file name: recovered-profile-suffix.json)",
-    "profileRecoveryInvalidSuffix": "Use 1–64 letters, digits, underscores or hyphens."
+    "profileRecoveryInvalidSuffix": "Use 1–64 letters, digits, underscores or hyphens.",
+    "installResourcesTitle": "Game folders for installation",
+    "installResourcesNote": "Allow new instances only in the selected folders. Launch and stop permissions are granted separately.",
+    "installResourcesRootLabel": "Install in {name}",
+    "installResourcesRootHint": "Allow new instances in this game folder, excluding other folders.",
+    "launchResourcesTitle": "Instances allowed to launch",
+    "launchResourcesNote": "Launch only the selected instances using the launcher's currently selected account.",
+    "stopResourcesTitle": "Instances allowed to stop",
+    "stopResourcesNote": "Only selected instances started by this plugin in its current run can be stopped."
   },
   "settings": {
     "title": "Settings",
@@ -2158,7 +2181,16 @@
     "plugin_file_recovery": "File recovery",
     "plugin_instance_profile_patch": "Edit instance profile",
     "plugin_instance_profile_recovery": "Recover original instance profile",
-    "instance_export_preview": "Scanning eligible files"
+    "instance_export_preview": "Scanning eligible files",
+    "plugin_game_install": "Install game (plugin)",
+    "plugin_game_launch": "Launch game (plugin)",
+    "plugin_game_stop": "Stop game (plugin)",
+    "pluginPhases": {
+      "preparing": "Preparing game launch",
+      "checking": "Checking and completing game files",
+      "creating": "Creating the game process",
+      "stopping": "Waiting for the game to exit"
+    }
   },
   "more": {
     "nav": {

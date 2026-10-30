@@ -768,7 +768,11 @@
       "filesystem_delete": "Eigene private Dateien löschen (nur lokales NTFS; erfolgreiches Löschen ist unwiderruflich)",
       "network_read": "Genehmigte Websites lesen",
       "filesystem_replace": "Eigene private Dateien ersetzen (nur lokales NTFS; die vorherige Version ist danach nicht wiederherstellbar)",
-      "instances_write": "Profile ausgewählter Instanzen ändern (Alias, Beschreibung, Favorit und Tags)"
+      "instances_write": "Profile ausgewählter Instanzen ändern (Alias, Beschreibung, Favorit und Tags)",
+      "game_catalog_read": "Spielversionskataloge abfragen",
+      "instances_install": "Spiele in gewählten Ordnern installieren",
+      "instances_launch": "Gewählte Instanzen starten",
+      "instances_stop": "Eigene gestartete Instanzen beenden"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
@@ -786,7 +790,15 @@
       "PLUGIN_INSTANCE_PROFILE_CONFLICT": "Das Instanzprofil wurde geändert. Lesen Sie es vor dem Speichern erneut.",
       "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "Das Profil konnte nicht gespeichert werden. Die Originaldaten bleiben erhalten.",
       "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "Das Profil wird bearbeitet oder muss wiederhergestellt werden. Öffnen Sie die Dateiwiederherstellung.",
-      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "Die Wiederherstellungsobjekte konnten nicht geprüft werden. Dateien bleiben erhalten."
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "Die Wiederherstellungsobjekte konnten nicht geprüft werden. Dateien bleiben erhalten.",
+      "PLUGIN_INSTALL_BUSY": "Diese Instanz wird bereits installiert. Warten Sie auf den Abschluss.",
+      "PLUGIN_LAUNCH_BUSY": "Ein anderer Spielstart läuft bereits. Versuchen Sie es später erneut.",
+      "PLUGIN_HOST_NOT_READY": "Der Launcher ist noch nicht zum Starten bereit. Versuchen Sie es später erneut.",
+      "PLUGIN_ACCOUNT_REQUIRED": "Wählen Sie zuerst ein Spielkonto im Launcher.",
+      "PLUGIN_ACCOUNT_CHANGED": "Das gewählte Konto hat sich geändert. Starten Sie den Vorgang erneut.",
+      "PLUGIN_GAME_VERSION_INVALID": "Die Spielversion ist nicht im Katalog des Launchers.",
+      "PLUGIN_OWNER_MISMATCH": "Dieser Spielprozess gehört nicht zum aktuellen Lauf dieses Plugins.",
+      "PLUGIN_GAME_STOP_TIMEOUT": "Das Beenden des Spiels ist noch nicht bestätigt. Prüfen Sie die laufenden Instanzen."
     },
     "runtimeError": "Pluginvorgang nicht abgeschlossen. Berechtigungen prüfen oder erneut versuchen.",
     "resourcesTitle": "Erlaubte Instanzen",
@@ -800,6 +812,9 @@
     "resourcesCovered": "Durch Verzeichnisberechtigung abgedeckt",
     "resourcesRootHint": "Lesen aller Instanzen in diesem Verzeichnis erlauben",
     "resourcesInstanceHint": "Nur diese Instanz lesen",
+    "writeResourcesInstanceHint": "Nur das Profil dieser Instanz ändern",
+    "launchResourcesInstanceHint": "Nur diese Instanz starten",
+    "stopResourcesInstanceHint": "Nur Prozesse dieser Instanz beenden, die dieses Plugin im aktuellen Lauf gestartet hat",
     "resourcesBrowse": "Instanzen auswählen",
     "resourcesSelected": "{count} Ressourcen ausgewählt",
     "resourcesClear": "Auswahl löschen",
@@ -834,7 +849,15 @@
     "fileRecoveryPrivate": "Private Dateien",
     "fileRecoveryProfile": "Instanzprofile",
     "profileRecoverySuffix": "Namenszusatz (Datei: recovered-profile-Zusatz.json)",
-    "profileRecoveryInvalidSuffix": "Verwenden Sie 1–64 Buchstaben, Ziffern, Unter- oder Bindestriche."
+    "profileRecoveryInvalidSuffix": "Verwenden Sie 1–64 Buchstaben, Ziffern, Unter- oder Bindestriche.",
+    "installResourcesTitle": "Spielordner für Installationen",
+    "installResourcesNote": "Neue Instanzen nur in den gewählten Ordnern installieren. Starten und Beenden benötigen eigene Berechtigungen.",
+    "installResourcesRootLabel": "In {name} installieren",
+    "installResourcesRootHint": "Neue Instanzen in diesem Spielordner installieren; andere Ordner sind ausgeschlossen.",
+    "launchResourcesTitle": "Zum Starten freigegebene Instanzen",
+    "launchResourcesNote": "Nur gewählte Instanzen mit dem aktuell im Launcher gewählten Konto starten.",
+    "stopResourcesTitle": "Zum Beenden freigegebene Instanzen",
+    "stopResourcesNote": "Nur gewählte Instanzen beenden, die dieses Plugin während seines aktuellen Laufs gestartet hat."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2142,7 +2165,16 @@
     "plugin_file_recovery": "Dateiwiederherstellung",
     "plugin_instance_profile_patch": "Instanzprofil ändern",
     "plugin_instance_profile_recovery": "Ursprüngliches Instanzprofil wiederherstellen",
-    "instance_export_preview": "Verfügbare Dateien werden gesucht"
+    "instance_export_preview": "Verfügbare Dateien werden gesucht",
+    "plugin_game_install": "Spiel durch Plugin installieren",
+    "plugin_game_launch": "Spiel durch Plugin starten",
+    "plugin_game_stop": "Spiel durch Plugin beenden",
+    "pluginPhases": {
+      "preparing": "Spielstart vorbereiten",
+      "checking": "Spieldateien prüfen und vervollständigen",
+      "creating": "Spielprozess erstellen",
+      "stopping": "Auf das Beenden des Spiels warten"
+    }
   },
   "more": {
     "nav": {

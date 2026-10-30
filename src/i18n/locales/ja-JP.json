@@ -768,7 +768,11 @@
       "filesystem_delete": "自身の専用ファイルを削除する（ローカル NTFS のみ、削除成功後は復元不可）",
       "network_read": "承認済みサイトの読み取り",
       "filesystem_replace": "自身の専用ファイルを置換する（ローカル NTFS のみ、成功後の旧版は復元不可）",
-      "instances_write": "選択したインスタンスのプロフィールを変更（別名、説明、お気に入り、タグ）"
+      "instances_write": "選択したインスタンスのプロフィールを変更（別名、説明、お気に入り、タグ）",
+      "game_catalog_read": "ゲームバージョン一覧の取得",
+      "instances_install": "選択フォルダーへのゲームインストール",
+      "instances_launch": "選択したインスタンスの起動",
+      "instances_stop": "自身が起動した選択済みインスタンスの停止"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",
@@ -786,7 +790,15 @@
       "PLUGIN_INSTANCE_PROFILE_CONFLICT": "プロフィールが変更されています。再読み込みしてから送信してください。",
       "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "プロフィールを保存できませんでした。元のデータは保持されています。",
       "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "プロフィールは処理中か復元待ちです。ファイルの復元を開いてください。",
-      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "復元対象を確認できませんでした。ファイルは保持されています。"
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "復元対象を確認できませんでした。ファイルは保持されています。",
+      "PLUGIN_INSTALL_BUSY": "このインスタンスはインストール中です。完了をお待ちください。",
+      "PLUGIN_LAUNCH_BUSY": "別のゲーム起動処理が進行中です。後でもう一度お試しください。",
+      "PLUGIN_HOST_NOT_READY": "ランチャーの起動準備が完了していません。後でもう一度お試しください。",
+      "PLUGIN_ACCOUNT_REQUIRED": "先にランチャーでゲームアカウントを選択してください。",
+      "PLUGIN_ACCOUNT_CHANGED": "選択中のアカウントが変更されました。起動をやり直してください。",
+      "PLUGIN_GAME_VERSION_INVALID": "ゲームバージョンがランチャーの一覧にありません。",
+      "PLUGIN_OWNER_MISMATCH": "このゲームプロセスは、このプラグインの今回の実行に属していません。",
+      "PLUGIN_GAME_STOP_TIMEOUT": "ゲームの停止をまだ確認できません。実行中のインスタンスを確認してください。"
     },
     "runtimeError": "操作が完了していません。権限を確認するか再試行してください。",
     "resourcesTitle": "アクセスを許可するインスタンス",
@@ -800,6 +812,9 @@
     "resourcesCovered": "ディレクトリの許可に含まれます",
     "resourcesRootHint": "このディレクトリの全インスタンスを読み取る",
     "resourcesInstanceHint": "このインスタンスのみ読み取る",
+    "writeResourcesInstanceHint": "このインスタンスのプロファイルのみ変更できます",
+    "launchResourcesInstanceHint": "このインスタンスのみ起動できます",
+    "stopResourcesInstanceHint": "このプラグインの今回の実行で起動した、このインスタンスのプロセスのみ停止できます",
     "resourcesBrowse": "インスタンスを選択",
     "resourcesSelected": "{count} 件を選択中",
     "resourcesClear": "すべて選択解除",
@@ -834,7 +849,15 @@
     "fileRecoveryPrivate": "プライベートファイル",
     "fileRecoveryProfile": "インスタンスのプロフィール",
     "profileRecoverySuffix": "別名保存の接尾辞（ファイル名: recovered-profile-接尾辞.json）",
-    "profileRecoveryInvalidSuffix": "英字、数字、アンダースコア、ハイフンを1〜64文字で入力してください。"
+    "profileRecoveryInvalidSuffix": "英字、数字、アンダースコア、ハイフンを1〜64文字で入力してください。",
+    "installResourcesTitle": "インストール先のゲームフォルダー",
+    "installResourcesNote": "選択したフォルダーへの新規インスタンスのインストールのみ許可します。起動と停止には個別の許可が必要です。",
+    "installResourcesRootLabel": "{name} にインストール",
+    "installResourcesRootHint": "このゲームフォルダーへの新規インストールを許可します。他のフォルダーは含みません。",
+    "launchResourcesTitle": "起動を許可するインスタンス",
+    "launchResourcesNote": "選択したインスタンスのみ、ランチャーで現在選択中のアカウントを使用して起動します。",
+    "stopResourcesTitle": "停止を許可するインスタンス",
+    "stopResourcesNote": "このプラグインの今回の実行で起動した、選択済みインスタンスのみ停止できます。"
   },
   "settings": {
     "title": "設定",
@@ -2142,7 +2165,16 @@
     "plugin_file_recovery": "ファイルの復元",
     "plugin_instance_profile_patch": "インスタンスのプロフィールを変更",
     "plugin_instance_profile_recovery": "元のインスタンスプロフィールを復元",
-    "instance_export_preview": "出力可能なファイルをスキャン中"
+    "instance_export_preview": "出力可能なファイルをスキャン中",
+    "plugin_game_install": "プラグインによるゲームインストール",
+    "plugin_game_launch": "プラグインによるゲーム起動",
+    "plugin_game_stop": "プラグインによるゲーム停止",
+    "pluginPhases": {
+      "preparing": "ゲーム起動の準備中",
+      "checking": "ゲームファイルの確認と補完中",
+      "creating": "ゲームプロセスを作成中",
+      "stopping": "ゲームの終了を待機中"
+    }
   },
   "more": {
     "nav": {

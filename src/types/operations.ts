@@ -5,6 +5,7 @@ export interface ApplicationOperation {
   installation?: InstallationSnapshot | null
   operationId: string
   kind?: string
+  stage?: string
   name?: string
   path?: string
   done?: number

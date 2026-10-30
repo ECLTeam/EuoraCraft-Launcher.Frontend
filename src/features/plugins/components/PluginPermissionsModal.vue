@@ -79,7 +79,7 @@ import Modal from '@/components/modals/Modal.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
-import type { PluginInfo, PluginPermissions, PluginPermissionItem } from '@/types/plugins'
+import type { PluginInfo, PluginPermissions, PluginPermissionItem, PluginInstanceCapability } from '@/types/plugins'
 import PluginResourceSelector from './PluginResourceSelector.vue'
 
 const props = defineProps<{ visible: boolean; plugin: PluginInfo | null }>()
@@ -87,11 +87,16 @@ const emit = defineEmits<{ (e: 'update:visible', value: boolean): void; (e: 'sav
 const { t, te } = useI18n()
 const view = ref<PluginPermissions | null>(null)
 const allowed = ref<string[]>([])
-const instanceCapabilities = ['instances.read', 'instances.write'] as const
-type InstanceCapability = (typeof instanceCapabilities)[number]
-const selectedResources = ref<Record<InstanceCapability, string[]>>({ 'instances.read': [], 'instances.write': [] })
-const resourceRevisions = ref<Partial<Record<InstanceCapability, number>>>({})
-const resourceLoading = ref<Record<InstanceCapability, boolean>>({ 'instances.read': false, 'instances.write': false })
+const instanceCapabilities = [
+  'instances.read',
+  'instances.write',
+  'instances.install',
+  'instances.launch',
+  'instances.stop',
+] as const
+const selectedResources = ref<Record<PluginInstanceCapability, string[]>>(emptySelections())
+const resourceRevisions = ref<Partial<Record<PluginInstanceCapability, number>>>({})
+const resourceLoading = ref<Partial<Record<PluginInstanceCapability, boolean>>>({})
 const resourcesBusy = computed(() => Object.values(resourceLoading.value).some(Boolean))
 const resourceRevision = computed(() => {
   const revisions = Object.values(resourceRevisions.value).filter((value): value is number => value !== undefined)
@@ -110,8 +115,22 @@ const resultMessage = ref('')
 const scope = useRequestScope(() => `${props.visible}:${props.plugin?.installation_id ?? ''}`)
 
 function capabilityLabel(capability: string): string {
-  const key = `plugins.capabilities.${capability.replace('.', '_')}`
+  const key = `plugins.capabilities.${capability.replaceAll('.', '_')}`
   return te(key) ? t(key) : capability
+}
+
+function emptySelections(): Record<PluginInstanceCapability, string[]> {
+  return {
+    'instances.read': [],
+    'instances.write': [],
+    'instances.install': [],
+    'instances.launch': [],
+    'instances.stop': [],
+  }
+}
+
+function isInstanceCapability(capability: string): capability is PluginInstanceCapability {
+  return instanceCapabilities.some((value) => value === capability)
 }
 
 function toggle(capability: string, checked: boolean): void {
@@ -125,8 +144,7 @@ function displayOrigin(reference: string): string {
 
 function decisionResources(item: PluginPermissionItem, revoke: boolean): string[] {
   if (revoke || !item.implemented || !allowed.value.includes(item.capability)) return []
-  if (item.capability === 'instances.read' || item.capability === 'instances.write')
-    return selectedResources.value[item.capability]
+  if (isInstanceCapability(item.capability)) return selectedResources.value[item.capability]
   if (item.capability === 'network.read') return item.requested_resource_refs
   return item.resource_refs
 }
@@ -189,7 +207,7 @@ async function save(revoke: boolean): Promise<void> {
     }
     if (revoke) {
       allowed.value = []
-      selectedResources.value = { 'instances.read': [], 'instances.write': [] }
+      selectedResources.value = emptySelections()
     }
     resultMessage.value = t(
       result.cleanup_state === 'pending' ? 'plugins.permissionsCleanupPending' : 'plugins.permissionsSaved'

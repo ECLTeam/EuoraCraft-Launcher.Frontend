@@ -772,7 +772,11 @@
       "filesystem_delete": "删除自身私有文件（仅本地 NTFS，成功删除不可恢复）",
       "network_read": "读取已批准站点",
       "filesystem_replace": "替换自身私有文件（仅本地 NTFS，成功后旧版本不可恢复）",
-      "instances_write": "修改所选实例资料（别名、描述、收藏及标签）"
+      "instances_write": "修改所选实例资料（别名、描述、收藏及标签）",
+      "game_catalog_read": "查询游戏版本目录",
+      "instances_install": "安装游戏到所选目录",
+      "instances_launch": "启动所选实例",
+      "instances_stop": "停止自身启动的所选实例"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -790,7 +794,15 @@
       "PLUGIN_INSTANCE_PROFILE_CONFLICT": "实例资料已变化，请重新读取后再提交。",
       "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "实例资料未能保存，原资料已保留。",
       "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "实例资料正在处理或等待恢复，请先查看文件恢复。",
-      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "无法核实实例资料恢复对象，文件已保留。"
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "无法核实实例资料恢复对象，文件已保留。",
+      "PLUGIN_INSTALL_BUSY": "该实例正在安装，请等待安装结束。",
+      "PLUGIN_LAUNCH_BUSY": "已有游戏启动流程正在执行，请稍后重试。",
+      "PLUGIN_HOST_NOT_READY": "启动器尚未准备好启动游戏，请稍后重试。",
+      "PLUGIN_ACCOUNT_REQUIRED": "请先在启动器中选择游戏账户。",
+      "PLUGIN_ACCOUNT_CHANGED": "选中账户已变化，请重新启动。",
+      "PLUGIN_GAME_VERSION_INVALID": "游戏版本不在启动器提供的目录中。",
+      "PLUGIN_OWNER_MISMATCH": "此游戏进程不属于该插件的当前运行。",
+      "PLUGIN_GAME_STOP_TIMEOUT": "尚未确认游戏已停止，请查看运行实例。"
     },
     "runtimeError": "插件运行未完成，请检查权限或重试。",
     "resourcesTitle": "允许访问的实例",
@@ -804,6 +816,9 @@
     "resourcesCovered": "已由目录授权覆盖",
     "resourcesRootHint": "批准后可读取此目录的全部实例",
     "resourcesInstanceHint": "仅允许读取此实例",
+    "writeResourcesInstanceHint": "仅允许修改此实例资料",
+    "launchResourcesInstanceHint": "仅允许启动此实例",
+    "stopResourcesInstanceHint": "仅允许停止该插件本次运行启动的此实例进程",
     "resourcesBrowse": "选择实例",
     "resourcesSelected": "已选择 {count} 个资源",
     "resourcesClear": "清除全部选择",
@@ -838,7 +853,15 @@
     "fileRecoveryPrivate": "私有文件",
     "fileRecoveryProfile": "实例资料",
     "profileRecoverySuffix": "另存后缀（文件名为 recovered-profile-后缀.json）",
-    "profileRecoveryInvalidSuffix": "后缀须为1—64个字母、数字、下划线或连字符。"
+    "profileRecoveryInvalidSuffix": "后缀须为1—64个字母、数字、下划线或连字符。",
+    "installResourcesTitle": "允许安装的游戏目录",
+    "installResourcesNote": "只允许在所选目录安装新实例；启动和停止权限需要单独授予。",
+    "installResourcesRootLabel": "安装到 {name}",
+    "installResourcesRootHint": "允许在此游戏目录安装新实例，不包含其他目录。",
+    "launchResourcesTitle": "允许启动的实例",
+    "launchResourcesNote": "只允许启动所选实例，使用启动器当前选中的账户。",
+    "stopResourcesTitle": "允许停止的实例",
+    "stopResourcesNote": "只允许停止该插件本次运行启动的所选实例。"
   },
   "settings": {
     "title": "设置",
@@ -2053,7 +2076,16 @@
     "plugin_file_recovery": "文件恢复",
     "plugin_instance_profile_patch": "修改实例资料",
     "plugin_instance_profile_recovery": "恢复实例原资料",
-    "instance_export_preview": "正在扫描可导出文件"
+    "instance_export_preview": "正在扫描可导出文件",
+    "plugin_game_install": "插件安装游戏",
+    "plugin_game_launch": "插件启动游戏",
+    "plugin_game_stop": "插件停止游戏",
+    "pluginPhases": {
+      "preparing": "准备启动游戏",
+      "checking": "检查并补全游戏文件",
+      "creating": "创建游戏进程",
+      "stopping": "等待游戏实际退出"
+    }
   },
   "more": {
     "nav": {

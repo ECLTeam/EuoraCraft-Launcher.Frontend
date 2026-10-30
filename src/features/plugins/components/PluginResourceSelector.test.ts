@@ -47,6 +47,58 @@ describe('instance resource selection', () => {
     mocks.permissionResources.mockResolvedValue({ catalog_revision: 2, items: [root], next_cursor: null })
   })
 
+  it('installation selects only a game root and does not offer browsing or implied read scope', async () => {
+    const wrapper = mount(PluginResourceSelector, {
+      props: { view, selected: [], disabled: false, capability: 'instances.install' },
+      global: { plugins: [i18n] },
+    })
+    try {
+      await flushPromises()
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.installResourcesNote'))
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.installResourcesRootLabel', { name: root.label }))
+      expect(
+        wrapper.findAll('button').some((button) => button.text() === i18n.global.t('plugins.resourcesBrowse'))
+      ).toBe(false)
+      await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', true)
+      expect(wrapper.emitted('update:selected')?.[0]).toEqual([[root.resource_id]])
+      expect(mocks.permissionResources.mock.calls[0]?.[0].capability).toBe('instances.install')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it.each(['instances.write', 'instances.launch', 'instances.stop'] as const)(
+    '%s requires an explicit instance and cannot select the parent folder',
+    async (capability) => {
+      const wrapper = mount(PluginResourceSelector, {
+        props: { view, selected: [], disabled: false, capability },
+        global: { plugins: [i18n] },
+      })
+      try {
+        await flushPromises()
+        expect(wrapper.findAllComponents(NCheckbox)).toHaveLength(0)
+        mocks.permissionResources.mockResolvedValue({ catalog_revision: 3, items: [child], next_cursor: null })
+        await wrapper
+          .findAll('button')
+          .find((button) => button.text() === i18n.global.t('plugins.resourcesBrowse'))!
+          .trigger('click')
+        await flushPromises()
+        expect(wrapper.findAllComponents(NCheckbox)).toHaveLength(1)
+        const hintByCapability = {
+          'instances.write': 'plugins.writeResourcesInstanceHint',
+          'instances.launch': 'plugins.launchResourcesInstanceHint',
+          'instances.stop': 'plugins.stopResourcesInstanceHint',
+        }
+        expect(wrapper.text()).toContain(i18n.global.t(hintByCapability[capability]))
+        expect(wrapper.text()).not.toContain(i18n.global.t('plugins.resourcesInstanceHint'))
+        await wrapper.getComponent(NCheckbox).vm.$emit('update:checked', true)
+        expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([[child.resource_id]])
+      } finally {
+        wrapper.unmount()
+      }
+    }
+  )
+
   it('starts unselected and choosing one item preserves choices on other pages', async () => {
     const wrapper = open(['e'.repeat(32)])
     try {

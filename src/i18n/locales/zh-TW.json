@@ -768,7 +768,11 @@
       "filesystem_delete": "刪除自身私有檔案（僅本機 NTFS，成功刪除無法復原）",
       "network_read": "讀取已核准網站",
       "filesystem_replace": "替換自身私有檔案（僅本機 NTFS，成功後舊版本無法復原）",
-      "instances_write": "修改所選實例資料（別名、描述、收藏及標籤）"
+      "instances_write": "修改所選實例資料（別名、描述、收藏及標籤）",
+      "game_catalog_read": "查詢遊戲版本目錄",
+      "instances_install": "安裝遊戲至所選目錄",
+      "instances_launch": "啟動所選實例",
+      "instances_stop": "停止自己啟動的所選實例"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -786,7 +790,15 @@
       "PLUGIN_INSTANCE_PROFILE_CONFLICT": "實例資料已變更，請重新讀取後再提交。",
       "PLUGIN_INSTANCE_PROFILE_WRITE_FAILED": "無法儲存實例資料，原資料已保留。",
       "PLUGIN_INSTANCE_PROFILE_RECOVERY_REQUIRED": "實例資料正在處理或等待復原，請先查看檔案復原。",
-      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "無法核實實例資料復原對象，檔案已保留。"
+      "PLUGIN_INSTANCE_PROFILE_RECOVERY_INVALID": "無法核實實例資料復原對象，檔案已保留。",
+      "PLUGIN_INSTALL_BUSY": "此實例正在安裝，請等待安裝結束。",
+      "PLUGIN_LAUNCH_BUSY": "已有遊戲啟動流程正在執行，請稍後重試。",
+      "PLUGIN_HOST_NOT_READY": "啟動器尚未準備好啟動遊戲，請稍後重試。",
+      "PLUGIN_ACCOUNT_REQUIRED": "請先在啟動器中選擇遊戲帳戶。",
+      "PLUGIN_ACCOUNT_CHANGED": "所選帳戶已變更，請重新啟動。",
+      "PLUGIN_GAME_VERSION_INVALID": "遊戲版本不在啟動器提供的目錄中。",
+      "PLUGIN_OWNER_MISMATCH": "此遊戲程序不屬於此外掛目前的執行。",
+      "PLUGIN_GAME_STOP_TIMEOUT": "尚未確認遊戲已停止，請查看執行中的實例。"
     },
     "runtimeError": "外掛執行未完成，請檢查權限或重試。",
     "resourcesTitle": "允許存取的實例",
@@ -800,6 +812,9 @@
     "resourcesCovered": "已由目錄授權涵蓋",
     "resourcesRootHint": "核准後可讀取此目錄的全部實例",
     "resourcesInstanceHint": "僅允許讀取此實例",
+    "writeResourcesInstanceHint": "僅允許修改此實例資料",
+    "launchResourcesInstanceHint": "僅允許啟動此實例",
+    "stopResourcesInstanceHint": "僅允許停止此外掛本次執行啟動的此實例程序",
     "resourcesBrowse": "選擇實例",
     "resourcesSelected": "已選擇 {count} 個資源",
     "resourcesClear": "清除全部選擇",
@@ -834,7 +849,15 @@
     "fileRecoveryPrivate": "私有檔案",
     "fileRecoveryProfile": "實例資料",
     "profileRecoverySuffix": "另存後綴（檔名為 recovered-profile-後綴.json）",
-    "profileRecoveryInvalidSuffix": "後綴須為1—64個字母、數字、底線或連字號。"
+    "profileRecoveryInvalidSuffix": "後綴須為1—64個字母、數字、底線或連字號。",
+    "installResourcesTitle": "允許安裝的遊戲目錄",
+    "installResourcesNote": "僅允許在所選目錄安裝新實例；啟動與停止權限須分別授予。",
+    "installResourcesRootLabel": "安裝至 {name}",
+    "installResourcesRootHint": "允許在此遊戲目錄安裝新實例，不包含其他目錄。",
+    "launchResourcesTitle": "允許啟動的實例",
+    "launchResourcesNote": "僅允許啟動所選實例，使用啟動器目前選取的帳戶。",
+    "stopResourcesTitle": "允許停止的實例",
+    "stopResourcesNote": "僅允許停止此外掛本次執行啟動的所選實例。"
   },
   "settings": {
     "title": "設定",
@@ -2025,7 +2048,16 @@
     "plugin_file_recovery": "檔案復原",
     "plugin_instance_profile_patch": "修改實例資料",
     "plugin_instance_profile_recovery": "復原實例原資料",
-    "instance_export_preview": "正在掃描可匯出檔案"
+    "instance_export_preview": "正在掃描可匯出檔案",
+    "plugin_game_install": "外掛安裝遊戲",
+    "plugin_game_launch": "外掛啟動遊戲",
+    "plugin_game_stop": "外掛停止遊戲",
+    "pluginPhases": {
+      "preparing": "準備啟動遊戲",
+      "checking": "檢查並補齊遊戲檔案",
+      "creating": "建立遊戲程序",
+      "stopping": "等待遊戲實際退出"
+    }
   },
   "more": {
     "nav": {

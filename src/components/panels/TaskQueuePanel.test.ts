@@ -227,6 +227,33 @@ it('Java 任务使用中文名称，分数进度显示为整数，速度在顶�
   expect(wrapper.get('.tq-task-progress [role="progressbar"]').attributes('aria-valuenow')).toBe('6')
 })
 
+it('插件安装使用统一任务与真实安装阶段，不另建下载卡', () => {
+  useApplicationOperationStore().accept({
+    operationId: 'plugin-game-install',
+    kind: 'plugin_game_install',
+    status: 'running',
+    canCancel: true,
+    installation: installationFixture(),
+  })
+  const wrapper = render()
+  expect(wrapper.get('.tq-task-name').text()).toBe('插件安装游戏')
+  expect(wrapper.get('.tq-task-phase').text()).toBe('下载游戏文件')
+  expect(wrapper.get('.tq-progress-text').text()).toBe('60%')
+  expect(wrapper.get('.tq-speed-value').text()).toBe('30.0 B/s')
+  expect(wrapper.findAll('[role="progressbar"]')).toHaveLength(1)
+  expect(wrapper.findAll('button').some((button) => button.text() === '取消')).toBe(true)
+})
+
+it.each([
+  ['plugin_game_launch', 'downloading', '检查并补全游戏文件'],
+  ['plugin_game_launch', 'launching', '创建游戏进程'],
+  ['plugin_game_stop', 'stopping', '等待游戏实际退出'],
+])('插件任务 %s 将阶段 %s 显示为本地化说明', (kind, stage, expected) => {
+  useApplicationOperationStore().accept({ operationId: 'plugin-game-action', kind, stage, status: 'running' })
+  const wrapper = render()
+  expect(wrapper.get('.tq-task-phase').text()).toBe(expected)
+})
+
 it.each([
   ['running', 99.99, '100%'],
   ['pending', 0, '...'],

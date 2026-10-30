@@ -170,10 +170,13 @@ export interface PluginResourcePage {
   next_cursor: string | null
 }
 
+export type PluginInstanceCapability =
+  'instances.read' | 'instances.write' | 'instances.install' | 'instances.launch' | 'instances.stop'
+
 export interface PluginResourceQuery {
   installation_id: string
   content_digest: string
-  capability: 'instances.read' | 'instances.write'
+  capability: PluginInstanceCapability
   parent_ref?: string | null
   search?: string
   cursor?: string | null

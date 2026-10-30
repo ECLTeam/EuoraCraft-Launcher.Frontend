@@ -245,7 +245,7 @@ import { currentInstallationStage, installationPercentage } from '@/types/instal
 
 defineOptions({ name: 'TaskQueuePanel' })
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const operationStore = useApplicationOperationStore()
 const { run } = useAsyncAction()
 const cancelOperation = (operationId: string) => run(() => operationStore.cancel(operationId))
@@ -338,6 +338,31 @@ const tasks = computed(() => queueTasks.value.map(taskView))
 
 function taskMessage(task: TaskItem): string {
   const installation = task.installation
+  if (task.operationKind?.startsWith('plugin_game_') && !installation) {
+    const operation = task.operationId ? operationStore.operations[task.operationId] : undefined
+    if (task.status !== 'running') {
+      const errorKey = `plugins.errors.${operation?.errorCode}`
+      if (task.status === 'error' && te(errorKey)) return t(errorKey)
+      if (task.status !== 'error') return t(`taskQueue.states.${task.status}`)
+    }
+    if (task.status === 'running' && task.operationKind === 'plugin_game_stop')
+      return t('operations.pluginPhases.stopping')
+    if (task.status === 'running' && task.operationKind === 'plugin_game_launch') {
+      switch (operation?.stage) {
+        case 'checking':
+        case 'inherited_version':
+        case 'files_checked':
+        case 'downloading':
+          return t('operations.pluginPhases.checking')
+        case 'launching':
+        case 'about_to_launch':
+        case 'launched':
+          return t('operations.pluginPhases.creating')
+        default:
+          return t('operations.pluginPhases.preparing')
+      }
+    }
+  }
   if (!installation) return task.message
   if (installation.cancellationRequested && installation.status === 'running') return t('operations.cancelRequested')
   if (installation.status === 'error' || installation.status === 'canceled') return installation.message

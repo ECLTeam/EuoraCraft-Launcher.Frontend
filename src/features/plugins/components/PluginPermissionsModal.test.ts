@@ -257,4 +257,51 @@ describe('plugin permission review', () => {
       wrapper.unmount()
     }
   })
+
+  it('keeps installation, launch, stop and read permissions independent and translates catalog access', async () => {
+    const capabilities = ['instances.read', 'instances.install', 'instances.launch', 'instances.stop']
+    mocks.permissions.mockResolvedValue({
+      ...view,
+      items: [...capabilities, 'game.catalog.read'].map((capability) => ({
+        ...view.items[0],
+        capability,
+        decision: 'allow',
+      })),
+    })
+    mocks.permissionResources.mockResolvedValue({ catalog_revision: 2, items: [], next_cursor: null })
+    mocks.updatePermissions.mockResolvedValue({
+      revision: 2,
+      grant_epoch: 3,
+      persisted: true,
+      required_satisfied: true,
+      cleanup_state: 'completed',
+    })
+    const wrapper = open()
+    try {
+      await flushPromises()
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.capabilities.game_catalog_read'))
+      const selectors = wrapper.findAllComponents(PluginResourceSelector)
+      expect(selectors).toHaveLength(4)
+      for (const [index, selector] of selectors.entries()) {
+        expect(selector.props('capability')).toBe(capabilities[index])
+        await selector.vm.$emit('update:selected', [String(index + 1).repeat(32)])
+      }
+      await wrapper
+        .findAll('button')
+        .find((button) => button.text() === i18n.global.t('plugins.permissionsSave'))!
+        .trigger('click')
+      await flushPromises()
+      expect(mocks.updatePermissions.mock.calls[0]?.[1]).toEqual([
+        ...capabilities.map((capability, index) => ({
+          capability,
+          resource_refs: [String(index + 1).repeat(32)],
+          decision: 'allow',
+          lifetime: 'permanent',
+        })),
+        { capability: 'game.catalog.read', resource_refs: [], decision: 'allow', lifetime: 'permanent' },
+      ])
+    } finally {
+      wrapper.unmount()
+    }
+  })
 })
