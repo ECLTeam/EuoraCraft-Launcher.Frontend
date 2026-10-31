@@ -1,4 +1,9 @@
-// vite.config.ts
+/*
+ * EuoraCraft Launcher
+ * ECLTeam © 2026 GPL-3.0 License
+ * https://github.com/ECLTeam/EuoraCraft-Launcher
+ * 文件作用：配置前端开发服务器、插件和生产构建。
+ */
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
