@@ -35,6 +35,15 @@
   --ecl-card-shadow-hover: var(--ecl-shadow-pop);
   /* --glass-highlight 本身是完整的 inset 阴影值，直接引用而不再拼接前缀 */
   --ecl-card-highlight: var(--glass-highlight);
+
+  /* 控件风格预设：填充三态、描边三态与悬停发光，同样由主题写入内联变量 */
+  --ecl-control-fill: var(--ecl-control-surface);
+  --ecl-control-fill-hover: var(--ecl-hover);
+  --ecl-control-fill-active: var(--bg-active);
+  --ecl-control-border-color: var(--ecl-border);
+  --ecl-control-border-color-hover: var(--border-hover);
+  --ecl-control-border-color-focus: var(--border-focus);
+  --ecl-control-glow: none;
   --ecl-card-backdrop: var(--ecl-surface-backdrop);
 
   /* 生效值：外观设置写入同名内联变量时覆盖主题预设 */
@@ -58,10 +67,15 @@
   --card-bg: var(--ecl-surface);
   --bg-elevated: var(--ecl-control-surface);
   --bg-base-alt: var(--ecl-surface-muted);
-  --control-bg: var(--ecl-control-surface);
   --bg-hover: var(--ecl-hover);
   --glass-item-hover: var(--ecl-hover);
-  --control-bg-hover: var(--ecl-hover);
+  --control-bg: var(--ecl-control-fill);
+  --control-bg-hover: var(--ecl-control-fill-hover);
+  --control-bg-active: var(--ecl-control-fill-active);
+  --control-border: var(--ecl-control-border-color);
+  --control-border-hover: var(--ecl-control-border-color-hover);
+  --control-border-focus: var(--ecl-control-border-color-focus);
+  --control-glow: var(--ecl-control-glow);
   --text-primary: var(--ecl-text);
   --text-secondary: var(--ecl-text-secondary);
   --text-tertiary: var(--ecl-text-tertiary);

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { CATPPUCCIN_PALETTES } from './catppuccin'
 import {
   CATPPUCCIN_SURFACE_STYLE,
   CLASSIC_SURFACE_STYLE,
@@ -12,7 +13,10 @@ describe('主题表面风格', () => {
     expect(surfaceStyleOf('classic')).toBe(CLASSIC_SURFACE_STYLE)
     expect(surfaceStyleOf('folia')).toBe(CLASSIC_SURFACE_STYLE)
     for (const flavor of ['latte', 'frappe', 'macchiato', 'mocha'] as const) {
-      expect(surfaceStyleOf(`catppuccin-${flavor}`)).toBe(CATPPUCCIN_SURFACE_STYLE)
+      const style = surfaceStyleOf(`catppuccin-${flavor}`)
+      expect(style.cardRadius).toBe(CATPPUCCIN_SURFACE_STYLE.cardRadius)
+      expect(style.controlRadius).toBe(CATPPUCCIN_SURFACE_STYLE.controlRadius)
+      expect(style.shadow).toBe(CATPPUCCIN_SURFACE_STYLE.shadow)
     }
   })
 
@@ -33,11 +37,39 @@ describe('主题表面风格', () => {
     expect(CLASSIC_SURFACE_STYLE.borderColor).toBe('var(--ecl-border)')
   })
 
+  it('Catppuccin 控件用该风味的 surface0/1/2 做三态填充', () => {
+    const style = surfaceStyleOf('catppuccin-mocha')
+    expect(style.control.fill).toBe(CATPPUCCIN_PALETTES.mocha.surface0)
+    expect(style.control.fillHover).toBe(CATPPUCCIN_PALETTES.mocha.surface1)
+    expect(style.control.fillActive).toBe(CATPPUCCIN_PALETTES.mocha.surface2)
+    expect(style.control.borderColorFocus).toBe('var(--primary)')
+    expect(style.control.glow).toBe('none')
+
+    expect(surfaceStyleOf('catppuccin-latte').control.fill).toBe(CATPPUCCIN_PALETTES.latte.surface0)
+  })
+
+  it('经典控件沿用现有令牌，不改变既有观感', () => {
+    expect(CLASSIC_SURFACE_STYLE.control.fill).toBe('var(--ecl-control-surface)')
+    expect(CLASSIC_SURFACE_STYLE.control.fillHover).toBe('var(--ecl-hover)')
+    expect(CLASSIC_SURFACE_STYLE.control.borderColorHover).toBe('var(--border-hover)')
+    expect(CLASSIC_SURFACE_STYLE.control.borderColorFocus).toBe('var(--border-focus)')
+  })
+
   it('表面风格映射到完整的内联变量清单', () => {
-    const variables = surfaceStyleVariables(CATPPUCCIN_SURFACE_STYLE)
+    const variables = surfaceStyleVariables(surfaceStyleOf('catppuccin-mocha'))
     expect(Object.keys(variables).sort()).toEqual([...surfaceVariableNames].sort())
     expect(variables['--ecl-card-radius']).toBe('12px')
     expect(variables['--ecl-control-radius']).toBe('8px')
     expect(variables['--ecl-card-shadow']).toBe('none')
+    expect(variables['--ecl-control-fill']).toBe(CATPPUCCIN_PALETTES.mocha.surface0)
+  })
+
+  it('控件风格缺省字段不写入变量表', () => {
+    const variables = surfaceStyleVariables({
+      ...CATPPUCCIN_SURFACE_STYLE,
+      control: { borderColor: 'var(--ecl-border)' },
+    })
+    expect(variables['--ecl-control-border-color']).toBe('var(--ecl-border)')
+    expect(variables['--ecl-control-fill']).toBeUndefined()
   })
 })

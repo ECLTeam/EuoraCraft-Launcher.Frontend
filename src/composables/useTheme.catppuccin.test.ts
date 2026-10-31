@@ -96,6 +96,18 @@ describe('Catppuccin 主题风格', () => {
     expect(root.style.getPropertyValue('--ecl-card-shadow')).toBe('var(--ecl-shadow-surface)')
   })
 
+  it('控件填充随主题切换，切回经典时恢复原令牌', () => {
+    const theme = createTheme()
+    const root = document.documentElement
+
+    theme.setThemeId('catppuccin-mocha', false)
+    expect(root.style.getPropertyValue('--ecl-control-fill')).toBe(CATPPUCCIN_PALETTES.mocha.surface0)
+    expect(root.style.getPropertyValue('--ecl-control-fill-hover')).toBe(CATPPUCCIN_PALETTES.mocha.surface1)
+
+    theme.setThemeId('classic', false)
+    expect(root.style.getPropertyValue('--ecl-control-fill')).toBe('var(--ecl-control-surface)')
+  })
+
   it('未自定义的圆角随主题切换，用户显式设置的圆角保留', () => {
     const theme = createTheme()
     const root = document.documentElement

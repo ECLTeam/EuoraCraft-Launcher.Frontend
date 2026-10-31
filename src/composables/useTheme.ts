@@ -28,7 +28,7 @@ import {
   type CatppuccinFlavor,
   type CatppuccinPalette,
 } from '@/config/catppuccin'
-import { surfaceStyleOf, surfaceStyleVariables, type ThemeSurfaceStyle } from '@/config/surface'
+import { surfaceStyleOf, surfaceStyleVariables, surfaceVariableNames, type ThemeSurfaceStyle } from '@/config/surface'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
 import {
   BACKGROUND_INTERVAL_DEFAULT,
@@ -610,13 +610,13 @@ function createThemeOverrides(
       textColorHoverPrimary: textOnColor(primaryScale.primaryHover),
       textColorPressedPrimary: textOnColor(primaryScale.primaryPressed),
       textColorFocusPrimary: textOnColor(primaryScale.primary),
-      color: 'var(--ecl-control-surface)',
-      colorHover: 'var(--ecl-hover)',
-      colorPressed: 'var(--ecl-hover)',
+      color: 'var(--ecl-control-fill)',
+      colorHover: 'var(--ecl-control-fill-hover)',
+      colorPressed: 'var(--ecl-control-fill-active)',
       textColor: baseColors.text,
       textColorHover: primaryScale.primary,
-      border: `1px solid ${baseColors.border}`,
-      borderHover: `1px solid ${primaryScale.primary}`,
+      border: '1px solid var(--ecl-control-border-color)',
+      borderHover: '1px solid var(--ecl-control-border-color-hover)',
       heightMedium: 'var(--ecl-control-height, 36px)',
       heightSmall: 'var(--ecl-control-height-sm, 32px)',
       heightLarge: 'var(--ecl-control-height-lg, 40px)',
@@ -630,17 +630,17 @@ function createThemeOverrides(
     },
     Card: {
       color: 'var(--ecl-surface)',
-      borderColor: baseColors.border,
-      borderRadius: 'var(--ecl-radius-card, 8px)',
-      boxShadow: 'var(--ecl-shadow-surface, 0 1px 2px rgba(29, 36, 51, 0.04))',
+      borderColor: 'var(--ecl-card-border-color)',
+      borderRadius: 'var(--ecl-card-radius, 8px)',
+      boxShadow: 'var(--ecl-card-shadow)',
       paddingMedium: '16px',
     },
     Input: {
-      color: 'var(--ecl-control-surface)',
-      colorFocus: 'var(--ecl-control-surface)',
-      border: `1px solid ${baseColors.border}`,
-      borderHover: `1px solid ${primaryScale.primary}`,
-      borderFocus: `1px solid ${primaryScale.primary}`,
+      color: 'var(--ecl-control-fill)',
+      colorFocus: 'var(--ecl-control-fill)',
+      border: '1px solid var(--ecl-control-border-color)',
+      borderHover: '1px solid var(--ecl-control-border-color-hover)',
+      borderFocus: '1px solid var(--ecl-control-border-color-focus)',
       textColor: baseColors.text,
       placeholderColor: baseColors.textSecondary,
       heightMedium: 'var(--ecl-control-height, 36px)',
@@ -663,11 +663,11 @@ function createThemeOverrides(
           fontSizeLarge: '14px',
         },
       },
-      color: 'var(--ecl-control-surface)',
-      colorActive: 'var(--ecl-hover)',
-      border: `1px solid ${baseColors.border}`,
-      borderHover: `1px solid ${primaryScale.primary}`,
-      borderActive: `1px solid ${primaryScale.primary}`,
+      color: 'var(--ecl-control-fill)',
+      colorActive: 'var(--ecl-control-fill-hover)',
+      border: '1px solid var(--ecl-control-border-color)',
+      borderHover: '1px solid var(--ecl-control-border-color-hover)',
+      borderActive: '1px solid var(--ecl-control-border-color-focus)',
     },
     Switch: {
       railColor: baseColors.textSecondary,
@@ -678,12 +678,12 @@ function createThemeOverrides(
       railColor: baseColors.border,
     },
     Tooltip: {
-      color: 'var(--ecl-control-surface)',
+      color: 'var(--ecl-control-fill)',
       textColor: baseColors.text,
     },
     Dropdown: {
-      color: 'var(--ecl-control-surface)',
-      optionColorHover: 'var(--ecl-hover)',
+      color: 'var(--ecl-control-fill)',
+      optionColorHover: 'var(--ecl-control-fill-hover)',
     },
     Menu: {
       color: 'transparent',
@@ -694,7 +694,7 @@ function createThemeOverrides(
       itemTextColorActive: baseColors.text,
       itemIconColorActive: primaryScale.primary,
       itemHeight: '40px',
-      itemBorderRadius: '6px',
+      itemBorderRadius: 'var(--ecl-radius-control)',
     },
     Dialog: {
       borderRadius: 'var(--ecl-radius-dialog, 10px)',
@@ -702,11 +702,11 @@ function createThemeOverrides(
       padding: '20px',
     },
     Tabs: {
-      tabBorderRadius: '6px',
+      tabBorderRadius: 'var(--ecl-radius-control)',
       tabColorSegment: baseColors.backgroundHover,
     },
     Tag: {
-      borderRadius: '5px',
+      borderRadius: 'var(--ecl-radius-control)',
     },
   }
 }
@@ -900,9 +900,14 @@ export const useThemeStore = defineStore('theme', () => {
     else style.removeProperty(variable)
   }
 
-  /** 应用当前主题的表面风格：卡片圆角、描边、阴影、内高光与玻璃层。 */
+  /**
+   * 应用当前主题的表面风格：卡片圆角、描边、阴影、内高光、玻璃层与控件风格。
+   *
+   * 先按清单清除上一主题写入的内联值，避免主题未覆盖的字段残留旧值。
+   */
   function applySurfaceVariables(): void {
     const style = document.documentElement.style
+    for (const name of surfaceVariableNames) style.removeProperty(name)
     for (const [name, value] of Object.entries(surfaceStyleVariables(surfaceStyle.value))) {
       style.setProperty(name, value)
     }
