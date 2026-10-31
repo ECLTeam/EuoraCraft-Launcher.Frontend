@@ -29,18 +29,28 @@ function createStateSlice<T>(initial: T, refreshFn?: (state: Ref<T>) => Promise<
 
 // ---- 同步函数 ----
 
-interface ThemeConfigPayload {
-  mode?: 'light' | 'dark' | 'system'
-  primary_color?: string
-  background_opacity?: number
+/** 主题同步只依赖 ui.theme 的三个字段，不把完整设置模型耦合进插件 SDK。 */
+interface ThemeSource {
+  theme?: {
+    mode?: 'light' | 'dark' | 'system'
+    primary_color?: string
+    background_opacity?: number
+  }
 }
 
-function syncTheme(state: Ref<ThemeState>, ui: ThemeConfigPayload): void {
-  if (ui.mode) state.value.mode = ui.mode
-  if (ui.primary_color) state.value.primaryColor = ui.primary_color
-  if (typeof ui.background_opacity === 'number') state.value.backgroundOpacity = ui.background_opacity
+/**
+ * 把宿主 ui 分区同步为插件可见的主题状态。
+ *
+ * 主题字段位于 `ui.theme` 分支，`ui` 顶层只有 locale 与窗口偏好；读取顶层会把
+ * 插件主题固定成默认值。模式缺省时沿用当前状态，避免局部更新重置已生效模式。
+ */
+function syncTheme(state: Ref<ThemeState>, ui: ThemeSource): void {
+  const theme = ui.theme
+  if (theme?.mode) state.value.mode = theme.mode
+  if (theme?.primary_color) state.value.primaryColor = theme.primary_color
+  if (typeof theme?.background_opacity === 'number') state.value.backgroundOpacity = theme.background_opacity
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  state.value.isDark = ui.mode === 'dark' || (ui.mode === 'system' && prefersDark)
+  state.value.isDark = state.value.mode === 'dark' || (state.value.mode === 'system' && prefersDark)
 }
 
 function syncLauncher(state: Ref<LauncherState>, launcher: LauncherConfig): void {
@@ -75,8 +85,7 @@ const themeSlice = createStateSlice<ThemeState>(
   },
   async (state) => {
     try {
-      // 传入原始 UI 分区对象，保持插件可见的主题同步字段解析方式不变。
-      syncTheme(state, (await configQuery()).ui as unknown as ThemeConfigPayload)
+      syncTheme(state, (await configQuery()).ui)
     } catch {
       /* 读取失败时保留默认主题状态 */
     }
@@ -130,7 +139,7 @@ export function initPluginState(): () => void {
       syncLauncher(launcherSlice.state, payload.launcher as LauncherConfig)
     }
     if (payload.ui) {
-      syncTheme(themeSlice.state, payload.ui as ThemeConfigPayload)
+      syncTheme(themeSlice.state, payload.ui)
     }
   })
 
@@ -147,6 +156,8 @@ export function initPluginState(): () => void {
 
   unlistenFns.push(unlistenConfig, unlistenAccount, unlistenUpdates)
 
+  themeSlice.refresh()
+  launcherSlice.refresh()
   accountSlice.refresh()
 
   return () => {

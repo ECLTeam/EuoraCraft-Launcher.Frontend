@@ -63,6 +63,9 @@ export default defineConfig(({ mode }) => {
         '@': resolve(configDirectory, './src'),
         vue: 'vue/dist/vue.esm-bundler.js',
       },
+      // skinview3d 锁 three ^0.156，主包使用 ^0.186；不去重会在两个页面各打一份
+      // WebGLRenderer。统一到根依赖，避免重复打包与多份 WebGL 运行时状态。
+      dedupe: ['three'],
     },
     server: {
       port: 5173,

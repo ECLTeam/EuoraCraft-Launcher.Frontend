@@ -398,6 +398,7 @@
       "selectDirFailed": "Не удалось выбрать каталог",
       "pathUpdated": "Путь обновлён",
       "pathAdded": "Путь добавлен",
+      "duplicatePath": "Эта папка уже есть в списке",
       "saveFailed": "Не удалось сохранить",
       "keepOnePath": "Должен остаться хотя бы один путь",
       "updateConfigFailed": "Не удалось обновить конфигурацию",
@@ -875,6 +876,7 @@
     "accountResourcesEmpty": "Нет аккаунтов. Сначала добавьте аккаунт в лаунчере."
   },
   "settings": {
+    "loadFailed": "Не удалось загрузить настройки",
     "title": "Настройки",
     "general": "Общие",
     "launcherSettings": "Лаунчер",

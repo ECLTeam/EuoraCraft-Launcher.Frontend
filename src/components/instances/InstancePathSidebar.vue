@@ -15,7 +15,12 @@
         v-for="(item, index) in paths"
         :key="item.path"
         :class="['path-item', { active: selectedIndex === index }]"
+        role="button"
+        tabindex="0"
+        :aria-current="selectedIndex === index ? 'true' : undefined"
         @click="emit('select', index)"
+        @keydown.enter.prevent="emit('select', index)"
+        @keydown.space.prevent="emit('select', index)"
       >
         <div class="path-indicator"></div>
         <UiIcon name="folder" :size="16" class="path-icon" />
@@ -32,16 +37,23 @@
           <button
             class="path-action-btn"
             :title="t('versions.manage.openFolder')"
+            :aria-label="t('versions.manage.openFolder')"
             @click.stop="emit('open-folder', index)"
           >
             <UiIcon name="folder-open" :size="14" />
           </button>
-          <button class="path-action-btn" :title="t('common.edit')" @click.stop="emit('edit', index)">
+          <button
+            class="path-action-btn"
+            :title="t('common.edit')"
+            :aria-label="t('common.edit')"
+            @click.stop="emit('edit', index)"
+          >
             <UiIcon name="settings" :size="14" />
           </button>
           <button
             class="path-action-btn path-action-delete"
             :title="t('common.delete')"
+            :aria-label="t('common.delete')"
             @click.stop="emit('remove', index)"
           >
             <UiIcon name="trash" :size="14" />

@@ -206,53 +206,67 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
       }
     })
 
-    // 确保 Tauri 事件监听已经落地，再让后端开始执行；否则启动较快时会漏掉前几个真实阶段。
-    await backend.waitForEventListeners()
+    try {
+      // 确保 Tauri 事件监听已经落地，再让后端开始执行；否则启动较快时会漏掉前几个真实阶段。
+      await backend.waitForEventListeners()
 
-    setLaunchProgress(0, 'prepare', `正在准备启动 ${selectedVersion.value}...`)
+      setLaunchProgress(0, 'prepare', `正在准备启动 ${selectedVersion.value}...`)
 
-    const launchResult = await backend.command('game_launch', {
-      version_id: selectedVersion.value,
-      game_path: currentGamePath.value,
-    })
+      const launchResult = await backend.command('game_launch', {
+        version_id: selectedVersion.value,
+        game_path: currentGamePath.value,
+      })
 
-    unlisten()
-    launching.value = false
-
-    if (!launchResult.success) {
-      if (
-        ['JAVA_NOT_FOUND', 'JAVA_VERSION_NOT_FOUND', 'JAVA_DISABLED', 'JAVA_INVALID_RUNTIME'].includes(
-          launchResult.errorCode || ''
-        )
-      ) {
-        const requirement = selected?.requiredJava
-          ? t('javaRecovery.requiredMajor', { major: selected.requiredJava })
-          : t('javaRecovery.unknownRequirement')
-        javaRecoveryMessage.value = `${launchResult.message || t('javaRecovery.missing')} · ${requirement}`
+      if (!launchResult.success) {
+        if (
+          ['JAVA_NOT_FOUND', 'JAVA_VERSION_NOT_FOUND', 'JAVA_DISABLED', 'JAVA_INVALID_RUNTIME'].includes(
+            launchResult.errorCode || ''
+          )
+        ) {
+          const requirement = selected?.requiredJava
+            ? t('javaRecovery.requiredMajor', { major: selected.requiredJava })
+            : t('javaRecovery.unknownRequirement')
+          javaRecoveryMessage.value = `${launchResult.message || t('javaRecovery.missing')} · ${requirement}`
+        }
+        const isCanceled = launchResult.message === '启动已取消'
+        if (isCanceled) {
+          setLaunchProgress(0, 'error', '已取消')
+        } else if (!globalLaunchProgress.progress.value.canceled) {
+          setLaunchProgress(0, 'error', launchResult.message || '启动失败')
+          // 启动失败直接阻断核心功能，使用高优先级弹窗确保用户知晓。
+          notifyLauncherPopup({
+            id: `game-launch-failed-${selectedVersion.value}`,
+            title: '游戏启动失败',
+            content: launchResult.message || '启动失败，请检查实例配置与日志后重试。',
+            level: 'critical',
+            priority: 80,
+          })
+        }
+        setTimeout(hideLaunchProgress, 2000)
+        return
       }
-      const isCanceled = launchResult.message === '启动已取消'
-      if (isCanceled) {
-        setLaunchProgress(0, 'error', '已取消')
-      } else if (!globalLaunchProgress.progress.value.canceled) {
-        setLaunchProgress(0, 'error', launchResult.message || '启动失败')
-        // 启动失败直接阻断核心功能，使用高优先级弹窗确保用户知晓。
-        notifyLauncherPopup({
-          id: `game-launch-failed-${selectedVersion.value}`,
-          title: '游戏启动失败',
-          content: launchResult.message || '启动失败，请检查实例配置与日志后重试。',
-          level: 'critical',
-          priority: 80,
-        })
+
+      if (!globalLaunchProgress.progress.value.canceled) {
+        setLaunchProgress(100, 'launched', `游戏 ${selectedVersion.value} 已启动`)
+        message.success(`游戏 ${selectedVersion.value} 已启动`)
       }
+      setTimeout(hideLaunchProgress, LAUNCH_SUCCESS_HIDE_DELAY)
+    } catch (error) {
+      // 请求本身失败时同样要释放启动锁，否则启动按钮会一直禁用。
+      const reason = error instanceof Error ? error.message : '启动请求未能送达后端，请重试。'
+      setLaunchProgress(0, 'error', reason)
+      notifyLauncherPopup({
+        id: `game-launch-failed-${selectedVersion.value}`,
+        title: '游戏启动失败',
+        content: reason,
+        level: 'critical',
+        priority: 80,
+      })
       setTimeout(hideLaunchProgress, 2000)
-      return
+    } finally {
+      unlisten()
+      launching.value = false
     }
-
-    if (!globalLaunchProgress.progress.value.canceled) {
-      setLaunchProgress(100, 'launched', `游戏 ${selectedVersion.value} 已启动`)
-      message.success(`游戏 ${selectedVersion.value} 已启动`)
-    }
-    setTimeout(hideLaunchProgress, LAUNCH_SUCCESS_HIDE_DELAY)
   }
 
   let statusId = 0

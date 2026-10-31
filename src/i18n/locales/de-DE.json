@@ -398,6 +398,7 @@
       "selectDirFailed": "Verzeichnis konnte nicht gewählt werden",
       "pathUpdated": "Pfad aktualisiert",
       "pathAdded": "Pfad hinzugefügt",
+      "duplicatePath": "Dieser Ordner ist bereits in der Liste",
       "saveFailed": "Speichern fehlgeschlagen",
       "keepOnePath": "Mindestens ein Pfad muss erhalten bleiben",
       "updateConfigFailed": "Konfiguration konnte nicht aktualisiert werden",
@@ -875,6 +876,7 @@
     "accountResourcesEmpty": "Keine Konten. Füge zuerst ein Konto im Launcher hinzu."
   },
   "settings": {
+    "loadFailed": "Einstellungen konnten nicht geladen werden",
     "title": "Einstellungen",
     "general": "Allgemein",
     "launcherSettings": "Launcher",

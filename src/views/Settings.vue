@@ -21,10 +21,12 @@
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionLayout from '@/components/layout/SectionLayout.vue'
+import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 
 const { t } = useI18n()
+const message = useLauncherMessage()
 const settingsStore = useSettingsStore()
 
 const navItems = computed(() => [
@@ -36,6 +38,9 @@ const navItems = computed(() => [
 ])
 
 onMounted(() => {
-  void settingsStore.load().catch(() => {})
+  void settingsStore.load().catch((error: unknown) => {
+    // 读取失败时各分区会退回默认值，必须提示，否则用户会以为设置被重置了。
+    message.error(error instanceof Error ? error.message : t('settings.loadFailed'))
+  })
 })
 </script>

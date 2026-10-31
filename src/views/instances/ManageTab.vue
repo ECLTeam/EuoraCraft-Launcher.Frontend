@@ -319,6 +319,7 @@ const fetchGamePaths = async () => {
     }
   } catch (error) {
     console.error(t('versions.manage.fetchConfigFailed'), error)
+    message.error(t('versions.manage.fetchConfigFailed'))
   }
 }
 
@@ -436,6 +437,7 @@ const browseForPath = async () => {
     }
   } catch (error) {
     console.error(t('versions.manage.selectDirFailed'), error)
+    message.error(t('versions.manage.selectDirFailed'))
   }
 }
 
@@ -447,6 +449,17 @@ const isDefaultPath = computed(() => {
 
 const savePath = async () => {
   if (!pathForm.value.name || !pathForm.value.path || pathSaving.value) return
+
+  // 重复路径会让列表出现重复 key，删除时还可能删错条目，保存前按规范化身份拦截。
+  const identity = gamePathIdentity(pathForm.value.path)
+  const isDuplicated = gamePaths.value.some(
+    (item, index) => (!isEditing.value || index !== editingIndex.value) && gamePathIdentity(item.path) === identity
+  )
+  if (isDuplicated) {
+    pathFormError.value = t('versions.manage.duplicatePath')
+    message.error(t('versions.manage.duplicatePath'), 3000)
+    return
+  }
 
   pathSaving.value = true
   pathFormError.value = ''
@@ -701,6 +714,21 @@ const handleDelete = async (version: ScannedVersion, origin?: DetailModalOrigin)
   )
 }
 
+/**
+ * 执行工作区操作并把失败转换成可见提示。
+ *
+ * 打开目录、校验文件、导出这类操作没有确认弹窗兜底，直接 await 会让失败静默，
+ * 用户只会看到"点了没反应"。返回 null 表示失败且已经提示过。
+ */
+async function runWorkspaceAction<T>(action: () => Promise<T>, fallback: string): Promise<T | null> {
+  try {
+    return await action()
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : fallback)
+    return null
+  }
+}
+
 async function handleInstanceAction(action: string, version: ScannedVersion, origin?: DetailModalOrigin) {
   if (action === 'launch') return handleLaunch(version)
   if (
@@ -719,15 +747,23 @@ async function handleInstanceAction(action: string, version: ScannedVersion, ori
     return handleOpenDetail(version, action as DetailTab)
   }
   if (action.startsWith('folder-')) {
-    await instanceWorkspaceApi.folders(
-      workspaceTarget(version),
-      action.slice(7) as 'instance' | 'mods' | 'saves' | 'screenshots' | 'logs' | 'crash-reports'
+    await runWorkspaceAction(
+      () =>
+        instanceWorkspaceApi.folders(
+          workspaceTarget(version),
+          action.slice(7) as 'instance' | 'mods' | 'saves' | 'screenshots' | 'logs' | 'crash-reports'
+        ),
+      '打开实例文件夹失败'
     )
     return
   }
   if (action === 'delete') return handleDelete(version, origin)
   if (action === 'repair') {
-    const report = await instanceWorkspaceApi.checkFiles(workspaceTarget(version))
+    const report = await runWorkspaceAction(
+      () => instanceWorkspaceApi.checkFiles(workspaceTarget(version)),
+      '检查实例文件失败'
+    )
+    if (!report) return
     if (origin && !origin.isCurrent()) return
     if (!report.issues.length) return message.success('实例文件完整')
     openConfirm(
@@ -760,7 +796,10 @@ async function handleInstanceAction(action: string, version: ScannedVersion, ori
   }
   if (action === 'export') {
     if (origin && !origin.isCurrent()) return
-    await instanceExport.open(workspaceTarget(version), instanceDisplayName(version))
+    await runWorkspaceAction(
+      () => instanceExport.open(workspaceTarget(version), instanceDisplayName(version)),
+      '导出实例失败'
+    )
     return
   }
 }

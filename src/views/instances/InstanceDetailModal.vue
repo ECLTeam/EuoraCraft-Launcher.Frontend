@@ -314,7 +314,12 @@ const iconChoices = [
 async function setProfileIcon(type: 'auto' | 'builtin' | 'loader', value?: string) {
   const version = props.version
   if (!version) return
-  await instanceProfileApi.setIcon(targetFromVersion(version), type, { value })
+  try {
+    await instanceProfileApi.setIcon(targetFromVersion(version), type, { value })
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '设置实例图标失败')
+    return
+  }
   iconPickerVisible.value = false
   emit('updated')
 }
@@ -322,9 +327,14 @@ async function setProfileIcon(type: 'auto' | 'builtin' | 'loader', value?: strin
 async function chooseLocalProfileIcon() {
   const version = props.version
   if (!version) return
-  const sourcePath = await instanceProfileApi.chooseLocalIcon()
-  if (!sourcePath) return
-  await instanceProfileApi.setIcon(targetFromVersion(version), 'local', { sourcePath })
+  try {
+    const sourcePath = await instanceProfileApi.chooseLocalIcon()
+    if (!sourcePath) return
+    await instanceProfileApi.setIcon(targetFromVersion(version), 'local', { sourcePath })
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '设置实例图标失败')
+    return
+  }
   iconPickerVisible.value = false
   emit('updated')
 }

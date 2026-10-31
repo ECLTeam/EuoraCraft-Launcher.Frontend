@@ -245,9 +245,25 @@ const message = useLauncherMessage()
 async function checkForUpdates(): Promise<void> {
   if (checking.value) return
   const loadingMessage = message.loading(t('settings.aboutTab.update.checking'))
-  const result = await checkUpdate()
-  loadingMessage.destroy()
-  if (result) showCheckResult(result)
+  let isDismissed = false
+  const dismissLoading = () => {
+    if (isDismissed) return
+    isDismissed = true
+    loadingMessage.destroy()
+  }
+  try {
+    const result = await checkUpdate()
+    dismissLoading()
+    if (result) showCheckResult(result)
+  } catch {
+    // 检查更新失败时不能让常驻 loading 一直挂着，改为一次性错误提示。
+    message.error(t('settings.aboutTab.update.failed'), {
+      title: t('settings.aboutTab.update.title'),
+      duration: 6000,
+    })
+  } finally {
+    dismissLoading()
+  }
 }
 
 function showCheckResult(result: UpdateCheckResult): void {

@@ -398,6 +398,7 @@
       "selectDirFailed": "選擇目錄失敗",
       "pathUpdated": "路徑已更新",
       "pathAdded": "路徑已新增",
+      "duplicatePath": "該目錄已經在清單中",
       "saveFailed": "儲存失敗",
       "keepOnePath": "至少保留一個路徑",
       "updateConfigFailed": "更新配置失敗",
@@ -875,6 +876,7 @@
     "accountResourcesEmpty": "目前沒有帳戶，請先在啟動器中新增帳戶。"
   },
   "settings": {
+    "loadFailed": "讀取設定失敗",
     "title": "設定",
     "general": "通用",
     "launcherSettings": "啟動器",
