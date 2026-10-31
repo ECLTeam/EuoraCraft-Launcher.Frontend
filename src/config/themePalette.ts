@@ -35,6 +35,10 @@ export interface ThemePaletteTokens {
   info: string
   /** 浮起表面填充（悬停底色、滑杆轨道等） */
   raisedFill: string
+  /** 卡片与面板底色不透明度，缺省 0.88；浅色高对比主题可压到接近实色 */
+  surfaceOpacity?: number
+  /** 控件底色不透明度，缺省 0.94 */
+  controlOpacity?: number
   /** 模组加载器徽标配色 */
   badgeFabric: string
   badgeForge: string
@@ -107,12 +111,14 @@ export function themePaletteVariables(tokens: ThemePaletteTokens, isDark: boolea
   const shadowScale = isDark ? [0.35, 0.4, 0.45, 0.5, 0.55, 0.45] : [0.05, 0.07, 0.09, 0.12, 0.15, 0.1]
   const semanticAlpha = isDark ? 0.16 : 0.12
   const shadowTint = tokens.shadowTint
+  const surfaceOpacity = tokens.surfaceOpacity ?? 0.88
+  const controlOpacity = tokens.controlOpacity ?? 0.94
 
   return {
     '--ecl-canvas': tokens.canvas,
-    '--ecl-surface': rgbaSurface(tokens.base, 0.88),
-    '--ecl-surface-muted': rgbaSurface(tokens.mutedBase, 0.88),
-    '--ecl-control-surface': rgbaSurface(tokens.base, 0.94),
+    '--ecl-surface': rgbaSurface(tokens.base, surfaceOpacity),
+    '--ecl-surface-muted': rgbaSurface(tokens.mutedBase, surfaceOpacity),
+    '--ecl-control-surface': rgbaSurface(tokens.base, controlOpacity),
     '--ecl-text': tokens.text,
     '--ecl-text-secondary': tokens.textSecondary,
     '--ecl-text-tertiary': tokens.textTertiary,
@@ -127,7 +133,7 @@ export function themePaletteVariables(tokens: ThemePaletteTokens, isDark: boolea
     '--ecl-badge-neoforge-fg': tokens.badgeNeoForge,
     '--ecl-badge-quilt-fg': tokens.badgeQuilt,
     '--bg-surface-solid': tokens.base,
-    '--glass-bg': rgbaSurface(tokens.base, 0.92),
+    '--glass-bg': rgbaSurface(tokens.base, Math.min(1, surfaceOpacity + 0.04)),
     '--glass-bg-sidebar': rgbaSurface(isDark ? tokens.mutedBase : tokens.base, 0.96),
     '--glass-border': tokens.border,
     '--glass-divider': tokens.divider,

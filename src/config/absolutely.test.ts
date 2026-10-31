@@ -44,6 +44,12 @@ describe('Absolutely 色板', () => {
     expect(tokens.shadowTint).toBe('#000000')
   })
 
+  it('浅色档把表面压到接近实色，深色沿用默认不透明度', () => {
+    expect(absolutelyPaletteTokens(ABSOLUTELY_LIGHT, false).surfaceOpacity).toBe(0.98)
+    expect(absolutelyPaletteTokens(ABSOLUTELY_LIGHT, false).controlOpacity).toBe(1)
+    expect(absolutelyPaletteTokens(ABSOLUTELY_DARK, true).surfaceOpacity).toBe(0.88)
+  })
+
   it('浅色外观的阴影基色取文字色，避免纯黑阴影发灰', () => {
     const tokens = absolutelyPaletteTokens(ABSOLUTELY_LIGHT, false)
     expect(tokens.shadowTint).toBe(ABSOLUTELY_LIGHT.text)

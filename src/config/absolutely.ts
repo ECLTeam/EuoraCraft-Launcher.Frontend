@@ -138,6 +138,9 @@ export function absolutelyPaletteTokens(palette: AbsolutelyPalette, isDark: bool
     error: palette.error,
     info: palette.accent,
     raisedFill: palette.controlFillHover,
+    // 浅色档把表面压到接近实色：88% 白叠在灰底上会被染灰、发闷
+    surfaceOpacity: isDark ? 0.88 : 0.98,
+    controlOpacity: isDark ? 0.94 : 1,
     // 徽标沿用语义色，保持「一条强调色 + 语义色」的克制
     badgeFabric: palette.warning,
     badgeForge: mix(palette.textSecondary, palette.accent, 0.55),
