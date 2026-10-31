@@ -56,10 +56,12 @@ describe('主题表面风格', () => {
     expect(dark.control.fillHover).toBe(ABSOLUTELY_DARK.controlFillHover)
     expect(light.control.fill).toBe(ABSOLUTELY_LIGHT.controlFill)
     expect(light.control.fillHover).toBe(ABSOLUTELY_LIGHT.controlFillHover)
-    // 绝对几何：中等圆角、无投影
+    // 绝对几何：中等圆角；深色靠描边分层，浅色灰底白卡补一条发丝阴影
     expect(dark.cardRadius).toBe(10)
     expect(dark.controlRadius).toBe(8)
     expect(dark.shadow).toBe('none')
+    expect(light.shadow).toContain('0 1px 2px')
+    expect(light.shadowHover).toContain('0 2px 6px')
   })
 
   it('经典控件沿用现有令牌，不改变既有观感', () => {

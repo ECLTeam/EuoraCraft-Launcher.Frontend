@@ -59,21 +59,23 @@ export const ABSOLUTELY_DARK: AbsolutelyPalette = {
 }
 
 export const ABSOLUTELY_LIGHT: AbsolutelyPalette = {
-  canvas: '#fafafa',
+  // 灰底白卡：画布压到明显的中性灰，白色卡片才有边界，避免和经典亮色混淆
+  canvas: '#e7e7ea',
   surface: '#ffffff',
-  surfaceMuted: '#f4f4f5',
+  surfaceMuted: '#f2f2f4',
   controlFill: '#ffffff',
-  controlFillHover: '#f4f4f5',
-  controlFillActive: '#e4e4e7',
+  controlFillHover: '#f1f1f3',
+  controlFillActive: '#e3e3e6',
   text: '#0a0a0a',
-  textSecondary: '#52525b',
-  textTertiary: '#a1a1aa',
-  border: '#e4e4e7',
-  borderStrong: '#d4d4d8',
-  divider: '#ededed',
+  textSecondary: '#46464e',
+  textTertiary: '#7c7c86',
+  // 描边比经典亮色更实，扁平风格下承担主要分层
+  border: '#d5d5da',
+  borderStrong: '#bdbdc4',
+  divider: '#e6e6e9',
   accent: '#2563eb',
-  success: '#16a34a',
-  warning: '#d97706',
+  success: '#15803d',
+  warning: '#b45309',
   error: '#dc2626',
 }
 

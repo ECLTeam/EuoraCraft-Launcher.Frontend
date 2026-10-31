@@ -16,9 +16,10 @@ describe('Absolutely 色板', () => {
         expect(value).toMatch(hexPattern)
       }
     }
-    // 深色以近黑为底，浅色以近白为底
+    // 深色以近黑为底，浅色用中性灰画布衬出白卡
     expect(ABSOLUTELY_DARK.canvas).toBe('#0a0a0a')
-    expect(ABSOLUTELY_LIGHT.canvas).toBe('#fafafa')
+    expect(ABSOLUTELY_LIGHT.canvas).toBe('#e7e7ea')
+    expect(ABSOLUTELY_LIGHT.surface).toBe('#ffffff')
   })
 
   it('按亮暗取对应色板', () => {

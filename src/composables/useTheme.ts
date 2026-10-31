@@ -859,7 +859,10 @@ export const useThemeStore = defineStore('theme', () => {
     // 极光开关及派生色：光斑显隐、模糊层显隐，色板由主色动态派生
     document.documentElement.dataset.aurora = auroraEnabled.value ? '1' : '0'
     document.documentElement.dataset.auroraBlur = blurLayerEnabled.value ? '1' : '0'
-    const aurora = createAuroraColors(primaryScale.value.primary, isDark.value)
+    // Absolutely 追求绝对中性：光斑取灰阶，避免彩色光晕把中性底染成偏紫/偏蓝
+    const auroraBase =
+      themeId.value === 'absolutely' ? (isDark.value ? '#3a3a3a' : '#8a8a92') : primaryScale.value.primary
+    const aurora = createAuroraColors(auroraBase, isDark.value)
     document.documentElement.style.setProperty('--aurora-c1', aurora.c1)
     document.documentElement.style.setProperty('--aurora-c2', aurora.c2)
     document.documentElement.style.setProperty('--aurora-c3', aurora.c3)

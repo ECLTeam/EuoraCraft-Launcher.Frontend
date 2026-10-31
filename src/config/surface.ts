@@ -118,8 +118,9 @@ function absolutelySurfaceStyle(isDark: boolean): ThemeSurfaceStyle {
     borderWidth: '1px',
     borderColor: 'var(--ecl-border)',
     borderColorHover: 'var(--ecl-border-strong)',
-    shadow: 'none',
-    shadowHover: 'none',
+    // 深色靠描边即可分层；浅色灰底白卡需要一条发丝阴影，否则卡片像贴纸
+    shadow: isDark ? 'none' : '0 1px 2px rgba(10, 10, 10, 0.05)',
+    shadowHover: isDark ? 'none' : '0 2px 6px rgba(10, 10, 10, 0.08)',
     highlight: 'inset 0 0 0 0 transparent',
     backdrop: 'none',
     control: {
