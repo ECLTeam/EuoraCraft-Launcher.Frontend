@@ -8,6 +8,17 @@ import { darkTheme, type GlobalTheme, type GlobalThemeOverrides } from 'naive-ui
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, readonly, ref } from 'vue'
 import { pinia } from '@/app/stores'
+import { absolutelyAccentPresets, absolutelyPalette, absolutelyPaletteTokens } from '@/config/absolutely'
+import {
+  CATPPUCCIN_PALETTES,
+  catppuccinAccentPresets,
+  catppuccinFlavorOfThemeId,
+  catppuccinPaletteTokens,
+  translateAccentColor,
+  type CatppuccinFlavor,
+} from '@/config/catppuccin'
+import { hexToRgb, mix, normalizeHex, rgba, rgbToHex } from '@/config/color'
+import { surfaceStyleOf, surfaceStyleVariables, surfaceVariableNames, type ThemeSurfaceStyle } from '@/config/surface'
 import {
   CARD_OPACITY_DEFAULT,
   DEFAULT_PRIMARY_COLOR,
@@ -20,18 +31,7 @@ import {
   type BuiltinThemeId,
   type ThemeColorPalette,
 } from '@/config/theme'
-import {
-  CATPPUCCIN_PALETTES,
-  catppuccinAccentPresets,
-  catppuccinFlavorOfThemeId,
-  catppuccinPaletteTokens,
-  translateAccentColor,
-  type CatppuccinFlavor,
-} from '@/config/catppuccin'
-import { surfaceStyleOf, surfaceStyleVariables, surfaceVariableNames, type ThemeSurfaceStyle } from '@/config/surface'
-import { absolutelyAccentPresets, absolutelyPalette, absolutelyPaletteTokens } from '@/config/absolutely'
 import { themePaletteVariables, themePaletteVariableNames, type ThemePaletteTokens } from '@/config/themePalette'
-import { hexToRgb, mix, normalizeHex, rgba, rgbToHex } from '@/config/color'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
 import {
   BACKGROUND_INTERVAL_DEFAULT,

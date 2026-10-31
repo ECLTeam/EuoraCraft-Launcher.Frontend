@@ -1,6 +1,6 @@
-import type { BuiltinThemeId } from './theme'
-import { CATPPUCCIN_PALETTES, catppuccinFlavorOfThemeId, type CatppuccinFlavor } from './catppuccin'
 import { absolutelyPalette } from './absolutely'
+import { CATPPUCCIN_PALETTES, catppuccinFlavorOfThemeId, type CatppuccinFlavor } from './catppuccin'
+import type { BuiltinThemeId } from './theme'
 
 /**
  * 控件风格：按钮、输入框、选择器等交互控件的填充、描边与反馈。
