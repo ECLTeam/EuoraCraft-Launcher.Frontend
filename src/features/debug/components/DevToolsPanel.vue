@@ -138,6 +138,18 @@
         </div>
       </div>
 
+      <div class="tool-row">
+        <div class="tool-info">
+          <div class="tool-label-row">
+            <div class="tool-label">{{ t('dev.pluginUiInjection') }}</div>
+          </div>
+          <div class="tool-desc">{{ t('dev.pluginUiInjectionDesc') }}</div>
+        </div>
+        <div class="tool-control">
+          <NSwitch :value="uiInjectionAllowed" :loading="uiInjectionBusy" @update:value="setUiInjectionAllowed" />
+        </div>
+      </div>
+
       <div class="tool-row" :class="{ 'tool-row--disabled': !debugMode }">
         <div class="tool-info">
           <div class="tool-label-row">
@@ -390,6 +402,7 @@ import { NSwitch } from 'naive-ui'
 import { computed, inject, onMounted, ref, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import backend from '@/api/client'
 import { pinia } from '@/app/stores'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
@@ -432,6 +445,32 @@ const showDangerConfirm = ref(false)
 const pendingAction = ref<'reset' | 'plugins' | null>(null)
 const processingAction = ref<'reset' | 'plugins' | null>(null)
 const spawning = ref(false)
+
+// ── 插件界面注入总开关：关闭立即撤销注入内容，重新打开会重载已获准注入的插件 ──
+const uiInjectionAllowed = ref(true)
+const uiInjectionBusy = ref(false)
+
+async function loadUiInjection(): Promise<void> {
+  try {
+    const result = await backend.config.get<{ allow_ui_injection?: boolean }>('plugins')
+    if (result.success && result.data) uiInjectionAllowed.value = result.data.allow_ui_injection !== false
+  } catch {
+    uiInjectionAllowed.value = true
+  }
+}
+
+async function setUiInjectionAllowed(value: boolean): Promise<void> {
+  uiInjectionBusy.value = true
+  const previous = uiInjectionAllowed.value
+  uiInjectionAllowed.value = value
+  try {
+    await backend.config.set('plugins', { allow_ui_injection: value })
+  } catch {
+    uiInjectionAllowed.value = previous
+  } finally {
+    uiInjectionBusy.value = false
+  }
+}
 
 const { flowDebug, setFlowDebug } = useFlowDebug()
 
@@ -594,6 +633,7 @@ function refreshComponents(): void {
 }
 
 onMounted(() => {
+  void loadUiInjection()
   refreshComponents()
   if (devMode) vueDevtoolsOpen.value = readVueDevToolsOpen()
 })
