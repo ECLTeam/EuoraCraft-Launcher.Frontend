@@ -9,6 +9,8 @@ import {
   type PluginPermissionDecision,
   type PluginPackageInstallResult,
   type PluginPackagePreflight,
+  type PluginPanelData,
+  type PluginPanelDefinition,
   type PluginSettingsData,
   type PluginResourceQuery,
 } from '@/types/plugins'
@@ -163,6 +165,29 @@ export const pluginManagementApi = {
   async getSettings(pluginName: string): Promise<PluginSettingsData> {
     const result = await backend.command('plugin_get_settings', { plugin_name: pluginName })
     return assertSuccess(result, '读取插件设置')
+  },
+
+  async getPanels(pluginName: string): Promise<PluginPanelDefinition[]> {
+    const result = assertSuccess(
+      await backend.command('plugin_panels_get', { plugin_name: pluginName }),
+      '读取插件面板'
+    ) as { panels?: PluginPanelDefinition[] } | undefined
+    return Array.isArray(result?.panels) ? result.panels : []
+  },
+
+  async getPanelData(pluginName: string, key: string): Promise<PluginPanelData> {
+    const result = assertSuccess(
+      await backend.command('plugin_panel_data', { plugin_name: pluginName, key }),
+      '读取面板数据'
+    ) as Partial<PluginPanelData> | undefined
+    return { lists: result?.lists ?? {}, tasks: result?.tasks ?? {} }
+  },
+
+  async runPanelAction(pluginName: string, command: string, args: Record<string, unknown>) {
+    return assertSuccess(
+      await backend.command('plugin_panel_action', { plugin_name: pluginName, command, args }),
+      '执行面板动作'
+    )
   },
 
   async updateSetting(pluginName: string, key: string, value: unknown, expectedRevision?: number) {

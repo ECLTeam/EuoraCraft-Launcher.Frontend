@@ -85,6 +85,15 @@
                   {{ t('plugins.permissions') }}
                 </NButton>
                 <NButton
+                  v-if="plugin.status === 'enabled' && !plugin.is_system"
+                  quaternary
+                  size="tiny"
+                  :title="t('plugins.panel')"
+                  @click="openPanel(plugin)"
+                >
+                  {{ t('plugins.panel') }}
+                </NButton>
+                <NButton
                   v-if="plugin.settings?.length"
                   quaternary
                   size="tiny"
@@ -150,6 +159,7 @@
       :plugin="settingsTarget"
       @close="settingsModalVisible = false"
     />
+    <PluginPanelModal :visible="panelVisible" :plugin="panelTarget" @close="panelVisible = false" />
     <PluginPackageInstallModal
       v-model:visible="packageModalVisible"
       :selection="packageSelection"
@@ -183,6 +193,7 @@ import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
 import PluginFileRecoveryModal from '@/features/plugins/components/PluginFileRecoveryModal.vue'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
+import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
 import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
@@ -201,6 +212,8 @@ const searchQuery = ref('')
 const activeFilter = ref('all')
 const settingsModalVisible = ref(false)
 const settingsTarget = ref<PluginInfo | null>(null)
+const panelVisible = ref(false)
+const panelTarget = ref<PluginInfo | null>(null)
 const packageModalVisible = ref(false)
 const packageSelection = ref<PluginPackageSelection | null>(null)
 
@@ -341,6 +354,11 @@ function handleInstallSelect(key: string | number) {
 function openSettings(plugin: PluginInfo) {
   settingsTarget.value = plugin
   settingsModalVisible.value = true
+}
+
+function openPanel(plugin: PluginInfo) {
+  panelTarget.value = plugin
+  panelVisible.value = true
 }
 
 onMounted(() => void pluginStore.start().catch(() => {}))

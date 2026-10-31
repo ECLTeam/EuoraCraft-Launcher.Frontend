@@ -76,6 +76,8 @@ import type {
   PluginPermissionUpdateResult,
   PluginRuntimeInfo,
   PluginPackagePreflight,
+  PluginPanelData,
+  PluginPanelDefinition,
   PluginRoute,
   PluginSettingsData,
   PluginSlotItem,
@@ -611,6 +613,9 @@ export interface CommandPayloadMap {
   plugin_call_command: { command: string; params?: Record<string, unknown> }
   plugin_get_settings: { plugin_name: string }
   plugin_update_setting: { plugin_name: string; key: string; value: unknown; expected_revision?: number }
+  plugin_panels_get: { plugin_name: string }
+  plugin_panel_data: { plugin_name: string; key: string }
+  plugin_panel_action: { plugin_name: string; command: string; args: Record<string, unknown> }
   plugin_notify_sidebar_state: { collapsed: boolean }
 
   // Mod 管理（主框架）
@@ -909,6 +914,9 @@ export const COMMAND_NAMES = {
   plugin_call_command: 'plugin_call_command',
   plugin_get_settings: 'plugin_get_settings',
   plugin_update_setting: 'plugin_update_setting',
+  plugin_panels_get: 'plugin_panels_get',
+  plugin_panel_data: 'plugin_panel_data',
+  plugin_panel_action: 'plugin_panel_action',
   plugin_notify_sidebar_state: 'plugin_notify_sidebar_state',
   get_mods: 'get_mods',
   toggle_mod: 'toggle_mod',
@@ -1202,6 +1210,9 @@ export interface CommandResponseMap {
   plugin_call_command: unknown
   plugin_get_settings: PluginSettingsData
   plugin_update_setting: { revision: number } | undefined
+  plugin_panels_get: { panels: PluginPanelDefinition[] }
+  plugin_panel_data: PluginPanelData
+  plugin_panel_action: Record<string, unknown>
   plugin_notify_sidebar_state: void
 
   get_mods: ModItem[]

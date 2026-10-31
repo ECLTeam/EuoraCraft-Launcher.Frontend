@@ -93,6 +93,74 @@ export interface PluginSettingsData {
   values: Record<string, unknown>
 }
 
+export type PluginPanelTone = 'default' | 'primary' | 'danger'
+
+export interface PluginPanelTextNode {
+  type: 'text'
+  text: string
+  tone?: 'default' | 'muted' | 'warning'
+}
+
+export interface PluginPanelGroupNode {
+  type: 'group'
+  title?: string
+  children: PluginPanelNode[]
+}
+
+export interface PluginPanelButtonNode {
+  type: 'button'
+  label: string
+  command: string
+  args?: Record<string, string | number | boolean>
+  tone?: PluginPanelTone
+  confirm?: string
+}
+
+export interface PluginPanelSettingNode {
+  type: 'setting'
+  key: string
+}
+
+export interface PluginPanelListNode {
+  type: 'list'
+  source: string
+  columns: Array<{ key: string; label: string }>
+  empty_text?: string
+}
+
+export interface PluginPanelTaskNode {
+  type: 'task'
+  source: string
+}
+
+export type PluginPanelNode =
+  | PluginPanelTextNode
+  | PluginPanelGroupNode
+  | PluginPanelButtonNode
+  | PluginPanelSettingNode
+  | PluginPanelListNode
+  | PluginPanelTaskNode
+
+export interface PluginPanelDefinition {
+  key: string
+  title: string
+  description?: string
+  nodes: PluginPanelNode[]
+}
+
+export type PluginPanelTaskState = 'pending' | 'running' | 'succeeded' | 'failed'
+
+export interface PluginPanelTask {
+  state: PluginPanelTaskState
+  percent: number
+  detail?: string
+}
+
+export interface PluginPanelData {
+  lists: Record<string, Array<Record<string, string>>>
+  tasks: Record<string, PluginPanelTask>
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  进度事件
 // ═══════════════════════════════════════════════════════════════════
