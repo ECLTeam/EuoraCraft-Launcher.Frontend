@@ -588,6 +588,8 @@ export interface CommandPayloadMap {
     expected_revision: number
     decisions: PluginPermissionDecision[]
     resource_revision?: number
+    java_resource_revision?: number
+    account_resource_revision?: number
   }
   plugin_runtime_info: { installation_id: string }
   plugin_list: undefined

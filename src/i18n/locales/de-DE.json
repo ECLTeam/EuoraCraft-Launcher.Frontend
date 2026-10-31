@@ -759,7 +759,12 @@
     "capabilities": {
       "instances_read": "Spiele anzeigen",
       "network_read": "Netzwerkzugriff",
-      "instances_manage": "Spiele verwalten"
+      "instances_manage": "Spiele verwalten",
+      "java_read": "Java-Übersichten lesen",
+      "java_use": "Java prüfen und verwenden",
+      "java_catalog_read": "Offiziellen Java-Katalog lesen",
+      "java_install": "Offizielle Java-Laufzeiten installieren und verwenden",
+      "accounts_read": "Ausgewählte Kontozusammenfassungen lesen"
     },
     "settingLoadFailed": "Einstellungen konnten nicht geladen werden. Erneut versuchen.",
     "settingSaveFailed": "Einstellungen nicht gespeichert. Aktuelle Werte vor dem Wiederholen neu laden.",
@@ -858,7 +863,16 @@
     "permissionOptions": "Weitere Optionen",
     "agreeAndEnable": "Zustimmen und aktivieren",
     "retryEnable": "Aktivierung wiederholen",
-    "savedButEnableFailed": "Die Berechtigungen wurden gespeichert, aber die Aktivierung ist fehlgeschlagen. Sie können sie direkt wiederholen."
+    "savedButEnableFailed": "Die Berechtigungen wurden gespeichert, aber die Aktivierung ist fehlgeschlagen. Sie können sie direkt wiederholen.",
+    "javaReadTitle": "Zum Lesen freigegebene Java-Laufzeiten",
+    "javaUseTitle": "Java für Prüfung und Spielstarts",
+    "javaReadNote": "Zeigt die zuletzt registrierten Informationen der ausgewählten Java-Laufzeiten, ohne sie zu suchen oder auszuführen.",
+    "javaUseNote": "Erlaubt Versionsprüfungen und die Auswahl für Spiele, die dieses Plugin startet. Das Lesen desselben Java muss ebenfalls erlaubt sein. Die Launcher-Standardwerte bleiben erhalten.",
+    "javaResourcesEmpty": "Keine Java-Laufzeiten registriert. In der Java-Verwaltung suchen oder hinzufügen und dann aktualisieren.",
+    "javaManage": "Java-Verwaltung öffnen",
+    "accountReadTitle": "Freigegebene Konten auswählen",
+    "accountReadNote": "Gibt nur Spielernamen, UUIDs, Kontotypen und die aktuelle Auswahl frei. E-Mail-Adressen, Tokens und Anmeldedaten werden nicht weitergegeben.",
+    "accountResourcesEmpty": "Keine Konten. Füge zuerst ein Konto im Launcher hinzu."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2175,7 +2189,15 @@
       "checking": "Spieldateien prüfen und vervollständigen",
       "creating": "Spielprozess erstellen",
       "stopping": "Auf das Beenden des Spiels warten"
-    }
+    },
+    "plugin_java_install": "Java installieren (Plugin)",
+    "plugin_resource_install": "Plugin-Ressourceninstallation",
+    "plugin_resource_delete": "Plugin-Ressourcenentfernung",
+    "plugin_mod_enabled": "Plugin-Modstatusänderung",
+    "plugin_modpack_prepare": "Plugin-Modpack-Vorbereitung",
+    "plugin_modpack_install": "Plugin-Modpack-Installation",
+    "plugin_modpack_export_preview": "Plugin-Modpack-Exportvorschau",
+    "plugin_modpack_export": "Plugin-Modpack-Export"
   },
   "more": {
     "nav": {

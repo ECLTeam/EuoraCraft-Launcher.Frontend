@@ -1,15 +1,16 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
-import type {
-  PluginInfo,
-  PluginFileRecoveryChoice,
-  PluginInstanceProfileRecoveryChoice,
-  PluginPermissions,
-  PluginPermissionDecision,
-  PluginPackageInstallResult,
-  PluginPackagePreflight,
-  PluginSettingsData,
-  PluginResourceQuery,
+import {
+  pluginBusinessCapabilities,
+  type PluginInfo,
+  type PluginFileRecoveryChoice,
+  type PluginInstanceProfileRecoveryChoice,
+  type PluginPermissions,
+  type PluginPermissionDecision,
+  type PluginPackageInstallResult,
+  type PluginPackagePreflight,
+  type PluginSettingsData,
+  type PluginResourceQuery,
 } from '@/types/plugins'
 import { parseFileRecoveryPage, parseFileRecoveryReceipt } from './pluginFileRecoveryValidation'
 import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
@@ -60,12 +61,23 @@ export const pluginManagementApi = {
   },
 
   async permissionResources(query: PluginResourceQuery) {
-    return parseResourcePage(
-      assertSuccess(await backend.command('plugin_permission_resources', query), '查询可审阅实例资源')
+    const page = parseResourcePage(
+      assertSuccess(await backend.command('plugin_permission_resources', query), '查询可审阅资源')
     )
+    const isJava = query.capability === 'java.read' || query.capability === 'java.use'
+    const isAccount = query.capability === 'accounts.read'
+    if (page.items.some((item) => (item.kind === 'java_runtime') !== isJava || (item.kind === 'account') !== isAccount))
+      throw new Error('PLUGIN_SCHEMA_INVALID')
+    return page
   },
 
-  async updatePermissions(view: PluginPermissions, decisions: PluginPermissionDecision[], resourceRevision?: number) {
+  async updatePermissions(
+    view: PluginPermissions,
+    decisions: PluginPermissionDecision[],
+    resourceRevision?: number,
+    javaResourceRevision?: number,
+    accountResourceRevision?: number
+  ) {
     return parsePermissionUpdate(
       assertSuccess(
         await backend.command('plugin_permissions_update', {
@@ -74,6 +86,8 @@ export const pluginManagementApi = {
           expected_revision: view.revision,
           decisions,
           resource_revision: resourceRevision,
+          java_resource_revision: javaResourceRevision,
+          account_resource_revision: accountResourceRevision,
         }),
         '保存插件权限'
       )
@@ -87,7 +101,7 @@ export const pluginManagementApi = {
         plugin.installation_id &&
         (!Array.isArray(plugin.requested_permissions) ||
           plugin.requested_permissions.some(
-            (permission) => !['instances.read', 'instances.manage', 'network.read'].includes(permission)
+            (permission) => !pluginBusinessCapabilities.some((capability) => capability === permission)
           ))
       )
         throw new Error('PLUGIN_SCHEMA_INVALID')

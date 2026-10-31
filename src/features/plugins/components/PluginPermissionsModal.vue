@@ -49,6 +49,35 @@
             </li>
           </ul>
         </section>
+        <section v-for="capability in declaredJava" :key="capability" class="java-access">
+          <NCheckbox v-model:checked="allowJava[capability]" :disabled="saving">
+            {{ t('plugins.capabilities.' + capability.replaceAll('.', '_')) }}
+          </NCheckbox>
+          <PluginLocalResourceSelector
+            v-if="allowJava[capability] && (capability === 'java.read' || capability === 'java.use')"
+            v-model:selected="javaResources[capability]"
+            :capability="capability"
+            :view="view"
+            :disabled="saving"
+            @revision="javaRevisions[capability] = $event"
+            @busy="javaBusy[capability] = $event"
+            @manage="openJavaManager"
+          />
+        </section>
+        <section v-if="accountPermission?.implemented" class="account-access">
+          <NCheckbox v-model:checked="allowAccounts" :disabled="saving">{{
+            t('plugins.capabilities.accounts_read')
+          }}</NCheckbox>
+          <PluginLocalResourceSelector
+            v-if="allowAccounts"
+            v-model:selected="accountResources"
+            capability="accounts.read"
+            :view="view"
+            :disabled="saving"
+            @revision="accountRevision = $event"
+            @busy="accountsBusy = $event"
+          />
+        </section>
         <p v-if="requiredMissing" role="status">{{ t('plugins.requiredAccessMissing') }}</p>
         <details v-if="view.items.length">
           <summary>{{ t('plugins.permissionOptions') }}</summary>
@@ -85,16 +114,55 @@
 import { NAlert, NButton, NCheckbox, NRadio, NRadioGroup } from 'naive-ui'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import Modal from '@/components/modals/Modal.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import type { PluginInfo, PluginPermissions, PluginPermissionDecision, PluginInstanceCapability } from '@/types/plugins'
+import PluginLocalResourceSelector from './PluginLocalResourceSelector.vue'
 import PluginResourceSelector from './PluginResourceSelector.vue'
 const props = defineProps<{ visible: boolean; plugin: PluginInfo | null }>()
 const emit = defineEmits<{ (e: 'update:visible', value: boolean): void; (e: 'saved'): void }>()
 const { t } = useI18n()
+const router = useRouter()
+const javaCapabilities = ['java.read', 'java.use', 'java.catalog.read', 'java.install'] as const
+type JavaCapability = (typeof javaCapabilities)[number]
+const allowJava = ref<Record<JavaCapability, boolean>>({
+  'java.read': false,
+  'java.use': false,
+  'java.catalog.read': false,
+  'java.install': false,
+})
+const javaResources = ref<Record<'java.read' | 'java.use', string[]>>({ 'java.read': [], 'java.use': [] })
+const javaRevisions = ref<Record<'java.read' | 'java.use', number | undefined>>({
+  'java.read': undefined,
+  'java.use': undefined,
+})
+const javaBusy = ref<Record<'java.read' | 'java.use', boolean>>({ 'java.read': false, 'java.use': false })
+const declaredJava = computed(() =>
+  javaCapabilities.filter((capability) =>
+    view.value?.items.some((item) => item.capability === capability && item.implemented)
+  )
+)
+const selectedJavaCapabilities = computed(() =>
+  (['java.read', 'java.use'] as const).filter(
+    (capability) => declaredJava.value.includes(capability) && allowJava.value[capability]
+  )
+)
+const javaReady = computed(
+  () =>
+    selectedJavaCapabilities.value.every(
+      (capability) =>
+        !javaBusy.value[capability] &&
+        javaResources.value[capability].length > 0 &&
+        javaRevisions.value[capability] !== undefined
+    ) && new Set(selectedJavaCapabilities.value.map((capability) => javaRevisions.value[capability])).size <= 1
+)
+const javaRevision = computed(() =>
+  selectedJavaCapabilities.value.length ? javaRevisions.value[selectedJavaCapabilities.value[0]!] : undefined
+)
 const store = usePluginStore()
 const view = ref<PluginPermissions | null>(null)
 const gameAccess = ref<'deny' | 'read' | 'manage'>('deny')
@@ -102,6 +170,11 @@ const selectedResources = ref<string[]>([])
 const resourceRevision = ref<number>()
 const resourcesBusy = ref(false)
 const allowNetwork = ref(false)
+const allowAccounts = ref(false)
+const accountResources = ref<string[]>([])
+const accountRevision = ref<number>()
+const accountsBusy = ref(false)
+const accountPermission = computed(() => view.value?.items.find((item) => item.capability === 'accounts.read'))
 const lifetime = ref<'session' | 'permanent'>('permanent')
 const loading = ref(false)
 const saving = ref(false)
@@ -134,10 +207,18 @@ const decisions = computed<PluginPermissionDecision[]>(() =>
     let allow = false
     let refs: string[] = []
     if (item.implemented) {
-      if (item.capability === 'network.read') {
+      if (item.capability === 'accounts.read') {
+        allow = allowAccounts.value
+        refs = accountResources.value
+      } else if (item.capability === 'network.read') {
         allow = allowNetwork.value
         refs = item.requested_resource_refs
-      } else {
+      } else if (item.capability === 'java.read' || item.capability === 'java.use') {
+        allow = allowJava.value[item.capability]
+        refs = javaResources.value[item.capability]
+      } else if (item.capability === 'java.catalog.read' || item.capability === 'java.install') {
+        allow = allowJava.value[item.capability]
+      } else if (item.capability === 'instances.read' || item.capability === 'instances.manage') {
         allow = gameAccess.value === 'manage' || (item.capability === 'instances.read' && gameAccess.value === 'read')
         refs = selectedResources.value
       }
@@ -166,6 +247,9 @@ const canSave = computed(
     !loadError.value &&
     !saving.value &&
     !resourcesBusy.value &&
+    javaReady.value &&
+    (!allowAccounts.value ||
+      (!accountsBusy.value && accountResources.value.length > 0 && accountRevision.value !== undefined)) &&
     !requiredMissing.value &&
     (!needsRoots.value || (selectedResources.value.length > 0 && resourceRevision.value !== undefined))
 )
@@ -175,6 +259,11 @@ function displayOrigin(reference: string): string {
 }
 function close(visible: boolean): void {
   if (!saving.value) emit('update:visible', visible)
+}
+function openJavaManager(): void {
+  if (saving.value) return
+  emit('update:visible', false)
+  void router.push('/settings/java')
 }
 async function load(): Promise<void> {
   const id = props.plugin?.installation_id
@@ -191,6 +280,21 @@ async function load(): Promise<void> {
     const result = await pluginManagementApi.permissions(id)
     if (!current()) return
     view.value = result
+    const accounts = result.items.find((item) => item.capability === 'accounts.read')
+    allowAccounts.value = accounts?.decision === 'allow'
+    accountResources.value = accounts?.selected_resource_refs ?? []
+    accountRevision.value = undefined
+    accountsBusy.value = false
+    for (const capability of javaCapabilities) {
+      const item = result.items.find((permission) => permission.capability === capability)
+      allowJava.value[capability] = item?.decision === 'allow'
+    }
+    for (const capability of ['java.read', 'java.use'] as const) {
+      javaResources.value[capability] =
+        result.items.find((item) => item.capability === capability)?.selected_resource_refs ?? []
+      javaRevisions.value[capability] = undefined
+      javaBusy.value[capability] = false
+    }
     const management = result.items.find((item) => item.capability === 'instances.manage')
     const read = result.items.find((item) => item.capability === 'instances.read')
     if (management?.decision === 'allow') gameAccess.value = 'manage'
@@ -234,7 +338,13 @@ async function save(revoke: boolean): Promise<void> {
       : decisions.value
     const signature = JSON.stringify(choices)
     if (!enable || savedSignature !== signature) {
-      const result = await pluginManagementApi.updatePermissions(view.value, choices, resourceRevision.value)
+      const result = await pluginManagementApi.updatePermissions(
+        view.value,
+        choices,
+        resourceRevision.value,
+        javaRevision.value,
+        accountRevision.value
+      )
       if (!current()) return
       view.value = {
         ...view.value,
@@ -250,7 +360,10 @@ async function save(revoke: boolean): Promise<void> {
     if (revoke) {
       gameAccess.value = 'deny'
       allowNetwork.value = false
+      allowAccounts.value = false
+      accountResources.value = []
       selectedResources.value = []
+      for (const capability of javaCapabilities) allowJava.value[capability] = false
     }
     if (enable) {
       const result = await store.enableReviewed(target, view.value)
@@ -286,7 +399,9 @@ watch(
 <style scoped>
 .plugin-permissions,
 .game-access,
-.network-access {
+.network-access,
+.java-access,
+.account-access {
   display: grid;
   gap: 14px;
   min-width: 0;

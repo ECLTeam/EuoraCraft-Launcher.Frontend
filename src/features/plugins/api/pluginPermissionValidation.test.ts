@@ -56,6 +56,23 @@ describe('plugin permission boundary', () => {
   it('accepts a reviewed installation and preserves explicit denial', () => {
     expect(parsePermissions(valid).items[0]?.decision).toBe('deny')
   })
+  it.each(['java.read', 'java.use', 'java.catalog.read', 'java.install', 'accounts.read'])(
+    'accepts the current declared domain capability %s',
+    (capability) => {
+      expect(parsePermissions({ ...valid, items: [{ ...valid.items[0], capability }] }).items[0]?.capability).toBe(
+        capability
+      )
+    }
+  )
+  it('accepts account candidates and rejects hierarchy fields', () => {
+    const account = { ...candidate, kind: 'account', label: 'Player (offline)' }
+    expect(parseResourcePage({ catalog_revision: 2, items: [account], next_cursor: null }).items[0]?.kind).toBe(
+      'account'
+    )
+    expect(() =>
+      parseResourcePage({ catalog_revision: 2, items: [{ ...account, parent_ref: 'a'.repeat(32) }], next_cursor: null })
+    ).toThrow('PLUGIN_SCHEMA_INVALID')
+  })
   it.each([
     { ...valid, revision: true },
     { ...valid, installation_id: '../other' },
@@ -77,4 +94,24 @@ describe('plugin permission boundary', () => {
       })
     ).toThrow()
   })
+})
+
+it('rejects Java candidates carrying instance hierarchy fields', () => {
+  const candidate = {
+    resource_id: 'c'.repeat(32),
+    kind: 'java_runtime',
+    is_default: false,
+    label: 'Java 21',
+    parent_ref: 'a'.repeat(32),
+    version_id: null,
+    available: true,
+    selected: false,
+  }
+  expect(() => parseResourcePage({ catalog_revision: 7, items: [candidate], next_cursor: null })).toThrow(
+    'PLUGIN_SCHEMA_INVALID'
+  )
+  expect(
+    parseResourcePage({ catalog_revision: 7, items: [{ ...candidate, parent_ref: null }], next_cursor: null }).items[0]
+      ?.kind
+  ).toBe('java_runtime')
 })

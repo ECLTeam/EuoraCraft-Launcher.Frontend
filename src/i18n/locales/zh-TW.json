@@ -759,7 +759,12 @@
     "capabilities": {
       "instances_read": "查看遊戲",
       "network_read": "連線",
-      "instances_manage": "管理遊戲"
+      "instances_manage": "管理遊戲",
+      "java_read": "讀取 Java 摘要",
+      "java_use": "驗證並選用 Java",
+      "java_catalog_read": "讀取 Java 官方目錄",
+      "java_install": "安裝並使用官方 Java",
+      "accounts_read": "檢視所選帳戶摘要"
     },
     "settingLoadFailed": "設定讀取失敗，請重試。",
     "settingSaveFailed": "設定未儲存。請重新讀取目前值後重試。",
@@ -858,7 +863,16 @@
     "permissionOptions": "更多選項",
     "agreeAndEnable": "同意並啟用",
     "retryEnable": "重試啟用",
-    "savedButEnableFailed": "授權已儲存，外掛啟用失敗。可以直接重試啟用。"
+    "savedButEnableFailed": "授權已儲存，外掛啟用失敗。可以直接重試啟用。",
+    "javaReadTitle": "可讀取的 Java",
+    "javaUseTitle": "可驗證並選用的 Java",
+    "javaReadNote": "僅列出所選 Java 的最後登記資訊，不掃描或執行程式。",
+    "javaUseNote": "允許對所選 Java 執行版本探測，並用於此外掛啟動的遊戲；同時需要允許讀取該 Java。不會修改啟動器預設設定。",
+    "javaResourcesEmpty": "尚無已登記的 Java，請在 Java 管理中掃描或新增後重新整理。",
+    "javaManage": "開啟 Java 管理",
+    "accountReadTitle": "選擇允許檢視的帳戶",
+    "accountReadNote": "僅提供所選帳戶的玩家名稱、UUID、類型與目前選取狀態，不提供電子郵件、權杖或登入憑證。",
+    "accountResourcesEmpty": "目前沒有帳戶，請先在啟動器中新增帳戶。"
   },
   "settings": {
     "title": "設定",
@@ -2058,7 +2072,15 @@
       "checking": "檢查並補齊遊戲檔案",
       "creating": "建立遊戲程序",
       "stopping": "等待遊戲實際退出"
-    }
+    },
+    "plugin_java_install": "外掛安裝 Java",
+    "plugin_resource_install": "外掛安裝遊戲資源",
+    "plugin_resource_delete": "外掛刪除遊戲資源",
+    "plugin_mod_enabled": "外掛調整模組狀態",
+    "plugin_modpack_prepare": "外掛辨識整合包",
+    "plugin_modpack_install": "外掛安裝整合包",
+    "plugin_modpack_export_preview": "外掛預覽整合包匯出",
+    "plugin_modpack_export": "外掛匯出整合包"
   },
   "more": {
     "nav": {

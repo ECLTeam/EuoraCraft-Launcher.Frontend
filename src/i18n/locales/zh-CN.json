@@ -763,7 +763,12 @@
     "capabilities": {
       "instances_read": "查看游戏",
       "network_read": "联网",
-      "instances_manage": "管理游戏"
+      "instances_manage": "管理游戏",
+      "java_read": "读取 Java 摘要",
+      "java_use": "校验并选用 Java",
+      "java_catalog_read": "读取 Java 官方目录",
+      "java_install": "安装并使用官方 Java",
+      "accounts_read": "查看所选账户摘要"
     },
     "settingLoadFailed": "设置读取失败，请重试。",
     "settingSaveFailed": "设置未保存。请重新读取当前值后重试。",
@@ -862,7 +867,16 @@
     "permissionOptions": "更多选项",
     "agreeAndEnable": "同意并启用",
     "retryEnable": "重试启用",
-    "savedButEnableFailed": "授权已保存，插件启用失败。可以直接重试启用。"
+    "savedButEnableFailed": "授权已保存，插件启用失败。可以直接重试启用。",
+    "javaReadTitle": "可读取的 Java",
+    "javaUseTitle": "可校验并选用的 Java",
+    "javaReadNote": "仅列出所选 Java 的最后登记信息，不扫描或执行程序。",
+    "javaUseNote": "允许对所选 Java 执行版本探测，并用于本插件启动的游戏；同时需要允许读取该 Java。不会修改启动器默认设置。",
+    "javaResourcesEmpty": "暂无已登记的 Java，请在 Java 管理中扫描或添加后刷新。",
+    "javaManage": "打开 Java 管理",
+    "accountReadTitle": "选择允许查看的账户",
+    "accountReadNote": "仅提供所选账户的玩家名称、UUID、类型和当前选择状态，不提供邮箱、令牌或登录凭据。",
+    "accountResourcesEmpty": "暂无账户，请先在启动器中添加账户。"
   },
   "settings": {
     "title": "设置",
@@ -2086,7 +2100,15 @@
       "checking": "检查并补全游戏文件",
       "creating": "创建游戏进程",
       "stopping": "等待游戏实际退出"
-    }
+    },
+    "plugin_java_install": "插件安装 Java",
+    "plugin_resource_install": "插件安装游戏资源",
+    "plugin_resource_delete": "插件删除游戏资源",
+    "plugin_mod_enabled": "插件调整模组状态",
+    "plugin_modpack_prepare": "插件识别整合包",
+    "plugin_modpack_install": "插件安装整合包",
+    "plugin_modpack_export_preview": "插件预览整合包导出",
+    "plugin_modpack_export": "插件导出整合包"
   },
   "more": {
     "nav": {

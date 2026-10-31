@@ -155,16 +155,19 @@ export interface PluginRuntimeInfo {
   last_error: { code: string; message: string } | null
 }
 
-export interface PluginResourceCandidate {
+interface PluginResourceFields {
   resource_id: string
-  kind: 'instance_root' | 'instance'
   label: string
-  parent_ref: string | null
-  version_id: string | null
   available: boolean
   selected: boolean
   is_default: boolean
 }
+
+export type PluginResourceCandidate = PluginResourceFields &
+  (
+    | { kind: 'instance_root' | 'instance'; parent_ref: string | null; version_id: string | null }
+    | { kind: 'java_runtime' | 'account'; parent_ref: null; version_id: null }
+  )
 
 export interface PluginResourcePage {
   catalog_revision: number
@@ -173,12 +176,22 @@ export interface PluginResourcePage {
 }
 
 export type PluginInstanceCapability = 'instances.read' | 'instances.manage'
-export type PluginBusinessCapability = PluginInstanceCapability | 'network.read'
+export const pluginBusinessCapabilities = [
+  'instances.read',
+  'instances.manage',
+  'network.read',
+  'java.read',
+  'java.use',
+  'java.catalog.read',
+  'java.install',
+  'accounts.read',
+] as const
+export type PluginBusinessCapability = (typeof pluginBusinessCapabilities)[number]
 
 export interface PluginResourceQuery {
   installation_id: string
   content_digest: string
-  capability: PluginInstanceCapability
+  capability: PluginInstanceCapability | 'java.read' | 'java.use' | 'accounts.read'
   parent_ref?: string | null
   search?: string
   cursor?: string | null

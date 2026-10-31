@@ -1,9 +1,10 @@
-import type {
-  PluginPermissionItem,
-  PluginPermissions,
-  PluginPermissionUpdateResult,
-  PluginResourcePage,
-  PluginResourceCandidate,
+import {
+  pluginBusinessCapabilities,
+  type PluginPermissionItem,
+  type PluginPermissions,
+  type PluginPermissionUpdateResult,
+  type PluginResourcePage,
+  type PluginResourceCandidate,
 } from '@/types/plugins'
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -42,7 +43,7 @@ function parseItem(value: unknown): PluginPermissionItem {
   if (
     !record(value) ||
     typeof value.capability !== 'string' ||
-    !['instances.read', 'instances.manage', 'network.read'].includes(value.capability) ||
+    !pluginBusinessCapabilities.some((capability) => capability === value.capability) ||
     typeof value.required !== 'boolean' ||
     (value.decision !== 'allow' && value.decision !== 'deny') ||
     !strings(value.resource_refs) ||
@@ -81,16 +82,32 @@ export function parseResourcePage(value: unknown): PluginResourcePage {
       !record(item) ||
       typeof item.resource_id !== 'string' ||
       !/^[0-9a-f]{32}$/.test(item.resource_id) ||
-      (item.kind !== 'instance_root' && item.kind !== 'instance') ||
+      (item.kind !== 'instance_root' &&
+        item.kind !== 'instance' &&
+        item.kind !== 'java_runtime' &&
+        item.kind !== 'account') ||
       typeof item.label !== 'string' ||
       item.label.length > 120 ||
       !(item.parent_ref === null || typeof item.parent_ref === 'string') ||
       !(item.version_id === null || typeof item.version_id === 'string') ||
+      ((item.kind === 'java_runtime' || item.kind === 'account') &&
+        (item.parent_ref !== null || item.version_id !== null)) ||
       typeof item.available !== 'boolean' ||
       typeof item.selected !== 'boolean' ||
       typeof item.is_default !== 'boolean'
     )
       throw new Error('PLUGIN_SCHEMA_INVALID')
+    if (item.kind === 'java_runtime' || item.kind === 'account')
+      return {
+        resource_id: item.resource_id,
+        kind: item.kind,
+        label: item.label,
+        parent_ref: null,
+        version_id: null,
+        available: item.available,
+        selected: item.selected,
+        is_default: item.is_default,
+      }
     return {
       resource_id: item.resource_id,
       kind: item.kind,

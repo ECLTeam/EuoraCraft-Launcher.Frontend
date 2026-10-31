@@ -1,8 +1,9 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { NRadioGroup } from 'naive-ui'
+import { NCheckbox, NRadioGroup } from 'naive-ui'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { i18n } from '@/i18n'
 import type { PluginInfo, PluginPermissions } from '@/types/plugins'
+import PluginLocalResourceSelector from './PluginLocalResourceSelector.vue'
 import PluginPermissionsModal from './PluginPermissionsModal.vue'
 import PluginResourceSelector from './PluginResourceSelector.vue'
 const mocks = vi.hoisted(() => ({
@@ -10,7 +11,9 @@ const mocks = vi.hoisted(() => ({
   updatePermissions: vi.fn(),
   permissionResources: vi.fn(),
   enableReviewed: vi.fn(),
+  navigate: vi.fn(),
 }))
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: mocks.navigate }) }))
 vi.mock('@/features/plugins/api/pluginManagementApi', () => ({ pluginManagementApi: mocks }))
 vi.mock('@/features/plugins/stores/pluginStore', () => ({
   usePluginStore: () => ({ enableReviewed: mocks.enableReviewed }),
@@ -71,6 +74,46 @@ function primary(wrapper: ReturnType<typeof open>) {
     )!
 }
 describe('simplified plugin permission review', () => {
+  it('keeps game, Java and account selection revisions independent and requires explicit account choices', async () => {
+    mocks.permissions.mockResolvedValue({
+      ...view,
+      items: [...view.items, { ...item, capability: 'java.read' }, { ...item, capability: 'accounts.read' }],
+    })
+    const wrapper = open()
+    try {
+      await flushPromises()
+      expect(wrapper.findAllComponents(PluginLocalResourceSelector)).toHaveLength(0)
+      for (const key of ['java_read', 'accounts_read']) {
+        const checkbox = wrapper
+          .findAllComponents(NCheckbox)
+          .find((control) => control.text() === i18n.global.t('plugins.capabilities.' + key))!
+        await checkbox.vm.$emit('update:checked', true)
+      }
+      await flushPromises()
+      const selectors = wrapper.findAllComponents(PluginLocalResourceSelector)
+      const java = selectors.find((selector) => selector.props('capability') === 'java.read')!
+      const account = selectors.find((selector) => selector.props('capability') === 'accounts.read')!
+      await java.vm.$emit('update:selected', ['d'.repeat(32)])
+      await java.vm.$emit('revision', 7)
+      await account.vm.$emit('revision', 29)
+      expect(primary(wrapper).attributes('disabled')).toBeDefined()
+      await account.vm.$emit('update:selected', ['e'.repeat(32)])
+      await account.vm.$emit('busy', true)
+      expect(primary(wrapper).attributes('disabled')).toBeDefined()
+      await account.vm.$emit('busy', false)
+      await primary(wrapper).trigger('click')
+      await flushPromises()
+      expect(mocks.updatePermissions.mock.lastCall?.slice(2)).toEqual([2, 7, 29])
+      expect(mocks.updatePermissions.mock.lastCall?.[1]).toContainEqual({
+        capability: 'accounts.read',
+        decision: 'allow',
+        resource_refs: ['e'.repeat(32)],
+        lifetime: 'permanent',
+      })
+    } finally {
+      wrapper.unmount()
+    }
+  })
   beforeEach(() => {
     vi.resetAllMocks()
     mocks.permissions.mockResolvedValue(view)
@@ -191,7 +234,9 @@ describe('simplified plugin permission review', () => {
         expect.arrayContaining([
           expect.objectContaining({ capability: 'instances.manage', decision: 'deny', resource_refs: [] }),
         ]),
-        expect.anything()
+        expect.anything(),
+        undefined,
+        undefined
       )
       expect(wrapper.text()).toContain(i18n.global.t('plugins.permissionsCleanupPending'))
       expect(mocks.enableReviewed).not.toHaveBeenCalled()

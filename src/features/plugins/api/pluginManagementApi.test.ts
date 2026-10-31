@@ -13,6 +13,26 @@ const { mocks } = mock.state!
 
 describe('pluginManagementApi 归档安装', () => {
   beforeEach(() => mocks.command.mockReset())
+  it('lists installations declaring Java and selected account capabilities', async () => {
+    const plugin = {
+      installation_id: 'a'.repeat(32),
+      requested_permissions: [
+        'instances.manage',
+        'java.read',
+        'java.use',
+        'java.catalog.read',
+        'java.install',
+        'accounts.read',
+      ],
+    }
+    mocks.command.mockResolvedValueOnce({ success: true, data: [plugin] })
+    await expect(pluginManagementApi.list()).resolves.toEqual([plugin])
+    mocks.command.mockResolvedValueOnce({
+      success: true,
+      data: [{ ...plugin, requested_permissions: ['filesystem.write'] }],
+    })
+    await expect(pluginManagementApi.list()).rejects.toThrow('PLUGIN_SCHEMA_INVALID')
+  })
 
   it('使用专用文件过滤器，取消选择后不发送预检', async () => {
     mocks.command.mockResolvedValueOnce({ success: true, data: { path: '' } })

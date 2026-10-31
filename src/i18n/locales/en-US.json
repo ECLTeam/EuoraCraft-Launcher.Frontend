@@ -763,7 +763,12 @@
     "capabilities": {
       "instances_read": "View games",
       "network_read": "Network access",
-      "instances_manage": "Manage games"
+      "instances_manage": "Manage games",
+      "java_read": "Read Java summaries",
+      "java_use": "Validate and use Java",
+      "java_catalog_read": "Read the official Java catalog",
+      "java_install": "Install and use official Java runtimes",
+      "accounts_read": "Read selected account summaries"
     },
     "settingLoadFailed": "Could not load settings. Please retry.",
     "settingSaveFailed": "Settings were not saved. Reload current values before retrying.",
@@ -862,7 +867,16 @@
     "permissionOptions": "More options",
     "agreeAndEnable": "Agree and enable",
     "retryEnable": "Retry enabling",
-    "savedButEnableFailed": "Permissions were saved, but enabling failed. You can retry enabling directly."
+    "savedButEnableFailed": "Permissions were saved, but enabling failed. You can retry enabling directly.",
+    "javaReadTitle": "Java available for reading",
+    "javaUseTitle": "Java allowed for validation and game launches",
+    "javaReadNote": "Shows the last registered information for selected Java runtimes without scanning or running them.",
+    "javaUseNote": "Allows version probes and selection for games started by this plugin. Reading the same Java must also be allowed. Does not change launcher defaults.",
+    "javaResourcesEmpty": "No Java runtimes are registered. Scan or add one in Java management, then refresh.",
+    "javaManage": "Open Java management",
+    "accountReadTitle": "Select accounts to share",
+    "accountReadNote": "Shares only player names, UUIDs, account types and current selection. Email addresses, tokens and login credentials are excluded.",
+    "accountResourcesEmpty": "No accounts. Add an account in the launcher first."
   },
   "settings": {
     "title": "Settings",
@@ -2191,7 +2205,15 @@
       "checking": "Checking and completing game files",
       "creating": "Creating the game process",
       "stopping": "Waiting for the game to exit"
-    }
+    },
+    "plugin_java_install": "Install Java (plugin)",
+    "plugin_resource_install": "Plugin resource installation",
+    "plugin_resource_delete": "Plugin resource removal",
+    "plugin_mod_enabled": "Plugin mod state change",
+    "plugin_modpack_prepare": "Plugin modpack preparation",
+    "plugin_modpack_install": "Plugin modpack installation",
+    "plugin_modpack_export_preview": "Plugin modpack export preview",
+    "plugin_modpack_export": "Plugin modpack export"
   },
   "more": {
     "nav": {

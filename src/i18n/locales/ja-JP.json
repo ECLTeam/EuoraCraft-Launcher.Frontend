@@ -759,7 +759,12 @@
     "capabilities": {
       "instances_read": "ゲームを表示",
       "network_read": "ネットワークアクセス",
-      "instances_manage": "ゲームを管理"
+      "instances_manage": "ゲームを管理",
+      "java_read": "Java の概要を読む",
+      "java_use": "Java を検証して使用",
+      "java_catalog_read": "Java 公式カタログを読む",
+      "java_install": "公式 Java をインストールして使用",
+      "accounts_read": "選択したアカウントの概要を参照"
     },
     "settingLoadFailed": "設定を読み込めませんでした。再試行してください。",
     "settingSaveFailed": "設定は保存されていません。現在の値を再読み込みしてから再試行してください。",
@@ -858,7 +863,16 @@
     "permissionOptions": "その他のオプション",
     "agreeAndEnable": "同意して有効にする",
     "retryEnable": "有効化を再試行",
-    "savedButEnableFailed": "権限は保存されましたが、有効化に失敗しました。そのまま再試行できます。"
+    "savedButEnableFailed": "権限は保存されましたが、有効化に失敗しました。そのまま再試行できます。",
+    "javaReadTitle": "読み取りを許可する Java",
+    "javaUseTitle": "検証とゲーム起動に使用できる Java",
+    "javaReadNote": "選択した Java の最終登録情報のみ表示します。スキャンや実行は行いません。",
+    "javaUseNote": "選択した Java のバージョン検証と、このプラグインが起動するゲームでの使用を許可します。同じ Java の参照許可も必要です。ランチャーの既定設定は変更しません。",
+    "javaResourcesEmpty": "登録済みの Java がありません。Java 管理でスキャンまたは追加してから更新してください。",
+    "javaManage": "Java 管理を開く",
+    "accountReadTitle": "共有するアカウントを選択",
+    "accountReadNote": "選択したアカウントのプレイヤー名、UUID、種類、現在の選択状態のみ共有します。メールアドレス、トークン、ログイン認証情報は含みません。",
+    "accountResourcesEmpty": "アカウントがありません。先にランチャーで追加してください。"
   },
   "settings": {
     "title": "設定",
@@ -2175,7 +2189,15 @@
       "checking": "ゲームファイルの確認と補完中",
       "creating": "ゲームプロセスを作成中",
       "stopping": "ゲームの終了を待機中"
-    }
+    },
+    "plugin_java_install": "プラグインによる Java インストール",
+    "plugin_resource_install": "プラグインのリソースインストール",
+    "plugin_resource_delete": "プラグインのリソース削除",
+    "plugin_mod_enabled": "プラグインの MOD 状態変更",
+    "plugin_modpack_prepare": "プラグインの MOD パック準備",
+    "plugin_modpack_install": "プラグインの MOD パックインストール",
+    "plugin_modpack_export_preview": "プラグインの MOD パック出力プレビュー",
+    "plugin_modpack_export": "プラグインの MOD パック出力"
   },
   "more": {
     "nav": {
