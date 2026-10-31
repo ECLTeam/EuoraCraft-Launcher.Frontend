@@ -699,29 +699,46 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
   )
 
   unlistenFns.push(
-    pluginHostApi.subscribe('plugin:status_changed', (payload) => {
-      if (payload.action === 'disabled' || payload.action === 'unloaded') {
-        void invalidatePluginRegistry()
-        void fullCleanupPlugin(payload.name, router)
+    pluginHostApi.subscribe('plugin:status_changed', async (payload) => {
+      // 宿主发布的载荷是 {plugin, status}；兼容旧字段名，避免任一字段改名后静默失效。
+      const name = payload.plugin ?? payload.name
+      const status = payload.status ?? payload.action
+      if (!name) return
+      if (status === 'disabled' || status === 'unloaded') {
+        await invalidatePluginRegistry()
+        await fullCleanupPlugin(name, router)
+        return
+      }
+      // 启用发生在运行期：插槽内容由插件在加载钩子中注册，必须重取注册表，
+      // 否则界面要等到下一次刷新才会出现这些内容。失效必须完成后才能查询，
+      // 否则会命中启用前的缓存。
+      if (status === 'enabled') {
+        await invalidatePluginRegistry()
+        await loadPluginRegistry(router)
       }
     })
   )
 
-  pluginRegistryQuery()
-    .then(({ routes, slots, vueSlots, vueComponents }) => {
-      pluginRoutes.value = routes
-      pluginSlots.value = slots
-      pluginVueSlots.value = vueSlots
-      vueComponentRegistry.value = vueComponents
-      setupRoutes(router)
-      for (const slot of Object.keys(slots)) {
-        renderSlot(slot)
-      }
-      for (const slotId of Object.keys(vueSlots)) {
-        renderVueSlot(slotId)
-      }
-    })
-    .catch(() => {})
+  void loadPluginRegistry(router)
+}
+
+async function loadPluginRegistry(router: ReturnType<typeof useRouter>): Promise<void> {
+  try {
+    const { routes, slots, vueSlots, vueComponents } = await pluginRegistryQuery()
+    pluginRoutes.value = routes
+    pluginSlots.value = slots
+    pluginVueSlots.value = vueSlots
+    vueComponentRegistry.value = vueComponents
+    setupRoutes(router)
+    for (const slot of Object.keys(slots)) {
+      renderSlot(slot)
+    }
+    for (const slotId of Object.keys(vueSlots)) {
+      renderVueSlot(slotId)
+    }
+  } catch {
+    // 注册表暂时不可用时保留上一次渲染结果，不阻断启动。
+  }
 }
 
 export function destroyPluginBridge() {
