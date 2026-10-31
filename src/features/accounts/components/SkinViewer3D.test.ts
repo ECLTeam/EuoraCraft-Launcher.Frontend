@@ -11,6 +11,7 @@ const viewerMocks = vi.hoisted(() => ({
   resetSkin: vi.fn(),
   resetCape: vi.fn(),
   dispose: vi.fn(),
+  fxaaQuadDispose: vi.fn(),
   playerRotation: { y: 0 },
   current: null as { autoRotate: boolean; animation: unknown; nameTag: unknown } | null,
 }))
@@ -28,6 +29,8 @@ vi.mock('skinview3d', () => ({
     animation: unknown = null
     nameTag: unknown = null
     playerObject = { rotation: viewerMocks.playerRotation }
+    // three 0.186 把 ShaderPass.fsQuad 改成私有的 _fsQuad，skinview3d 3.4.2 仍按旧字段释放
+    fxaaPass = { _fsQuad: { dispose: viewerMocks.fxaaQuadDispose } }
     loadSkin = viewerMocks.loadSkin
     loadCape = viewerMocks.loadCape
     loadPanorama = viewerMocks.loadPanorama
@@ -79,6 +82,30 @@ describe('SkinViewer3D', () => {
 
     wrapper.unmount()
     expect(viewerMocks.dispose).toHaveBeenCalledOnce()
+  })
+
+  it('卸载时补齐 three 0.186 改名的 FXAA 字段，正常释放且不抛错', async () => {
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe() {}
+        disconnect() {}
+      }
+    )
+    // 还原 skinview3d 3.4.2 的 dispose 末行：读取 fxaaPass.fsQuad 并释放
+    viewerMocks.dispose.mockImplementationOnce(function (this: { fxaaPass: { fsQuad?: { dispose: () => void } } }) {
+      this.fxaaPass.fsQuad!.dispose()
+    })
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    const wrapper = mount(SkinViewer3D)
+    await nextTick()
+    await nextTick()
+    wrapper.unmount()
+
+    expect(viewerMocks.fxaaQuadDispose).toHaveBeenCalledOnce()
+    expect(warn).not.toHaveBeenCalled()
+    warn.mockRestore()
   })
 
   it('开启鞘翅渲染时以鞘翅方式加载披风纹理', async () => {

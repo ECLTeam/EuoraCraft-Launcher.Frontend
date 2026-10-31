@@ -170,8 +170,17 @@ watch(() => props.nameTag, applyNameTag)
 onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   resizeObserver = null
-  // skinview3d 持有 WebGL 纹理和动画帧，组件退出时必须显式释放。
-  viewer?.dispose()
+  // skinview3d 3.4.2 的 dispose() 仍按 three 0.156 的公开字段 fxaaPass.fsQuad 释放 FXAA，
+  // 而项目使用的 three 0.186 已把它改成私有的 _fsQuad，直接释放会在最后一行抛 TypeError。
+  // 这里把旧字段指向同一实例，让上游既能正常释放，也不至于把卸载流程炸掉。
+  const fxaaPass = viewer?.fxaaPass as { fsQuad?: unknown; _fsQuad?: unknown } | undefined
+  if (fxaaPass && !fxaaPass.fsQuad && fxaaPass._fsQuad) fxaaPass.fsQuad = fxaaPass._fsQuad
+  try {
+    viewer?.dispose()
+  } catch (disposeError) {
+    // 释放失败只影响显存回收，不应阻断组件卸载或触发 ErrorBoundary
+    console.warn('[SkinViewer3D] 释放 3D 预览失败', disposeError)
+  }
   viewer = null
 })
 </script>
