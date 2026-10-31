@@ -3,8 +3,6 @@ import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation
 import {
   pluginBusinessCapabilities,
   type PluginInfo,
-  type PluginFileRecoveryChoice,
-  type PluginInstanceProfileRecoveryChoice,
   type PluginPermissions,
   type PluginPermissionDecision,
   type PluginPackageInstallResult,
@@ -14,45 +12,9 @@ import {
   type PluginSettingsData,
   type PluginResourceQuery,
 } from '@/types/plugins'
-import { parseFileRecoveryPage, parseFileRecoveryReceipt } from './pluginFileRecoveryValidation'
 import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 
 export const pluginManagementApi = {
-  async profileRecoveries(cursor?: string) {
-    return parseFileRecoveryPage(
-      assertSuccess(
-        await backend.command('plugin_instance_profile_recoveries_list', {
-          ...(cursor ? { cursor } : {}),
-          limit: 50,
-        }),
-        '查询实例资料恢复'
-      )
-    )
-  },
-
-  async resolveProfileRecovery(choice: PluginInstanceProfileRecoveryChoice) {
-    return parseFileRecoveryReceipt(
-      assertSuccess(await backend.command('plugin_instance_profile_recovery_resolve', choice), '恢复实例原资料')
-    )
-  },
-
-  async fileRecoveries(cursor?: string) {
-    return parseFileRecoveryPage(
-      assertSuccess(
-        await backend.command('plugin_file_recoveries_list', {
-          ...(cursor ? { cursor } : {}),
-          limit: 50,
-        }),
-        '查询插件文件恢复'
-      )
-    )
-  },
-
-  async resolveFileRecovery(choice: PluginFileRecoveryChoice) {
-    return parseFileRecoveryReceipt(
-      assertSuccess(await backend.command('plugin_file_recovery_resolve', choice), '恢复插件私有文件')
-    )
-  },
   async permissions(installationId: string): Promise<PluginPermissions> {
     return parsePermissions(
       assertSuccess(

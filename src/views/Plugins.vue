@@ -30,7 +30,6 @@
           >
             {{ t('plugins.allowUiInjection') }}
           </NCheckbox>
-          <NButton size="small" @click="recoveryVisible = true">{{ t('plugins.fileRecoveryTitle') }}</NButton>
           <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
             <NButton type="primary" size="small">
               <template #icon><UiIcon name="add" :size="14" /></template>
@@ -156,7 +155,6 @@
       </div>
     </section>
 
-    <PluginFileRecoveryModal v-model:visible="recoveryVisible" @resolved="refreshPermissions" />
     <PluginPermissionsModal
       v-model:visible="permissionsVisible"
       :plugin="permissionsTarget"
@@ -201,7 +199,6 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
-import PluginFileRecoveryModal from '@/features/plugins/components/PluginFileRecoveryModal.vue'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
 import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
@@ -216,7 +213,6 @@ const { run, runResult } = useAsyncAction({ showSuccess: false, showError: false
 const pluginStore = usePluginStore()
 const { plugins, loading, error: listError, reloadingPlugins } = storeToRefs(pluginStore)
 const permissionsVisible = ref(false)
-const recoveryVisible = ref(false)
 const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
