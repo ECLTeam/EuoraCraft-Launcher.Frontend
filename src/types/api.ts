@@ -158,6 +158,7 @@ export interface BackendEvents {
   accounts_changed: AccountChangedEvent
   accounts_microsoft_login_status: MicrosoftLoginStatusEvent
   'plugin:status_changed': { name: string; action: string; result: string }
+  'plugin:slots_cleared': { plugin: string }
   'plugin:installed': { name: string }
   'plugin:css_injected': { plugin: string; css: string; key?: string | null }
   'plugin:script_injected': { plugin: string; script: string }

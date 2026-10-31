@@ -22,6 +22,14 @@
         </NRadioGroup>
 
         <div class="plugins-toolbar-actions">
+          <NCheckbox
+            v-model:checked="allowUiInjection"
+            :disabled="uiToggleBusy"
+            :title="t('plugins.allowUiInjectionHint')"
+            @update:checked="saveUiInjection"
+          >
+            {{ t('plugins.allowUiInjection') }}
+          </NCheckbox>
           <NButton size="small" @click="recoveryVisible = true">{{ t('plugins.fileRecoveryTitle') }}</NButton>
           <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
             <NButton type="primary" size="small">
@@ -172,6 +180,7 @@
 import {
   NAlert,
   NButton,
+  NCheckbox,
   NDropdown,
   NEmpty,
   NInput,
@@ -187,6 +196,7 @@ import {
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import backend from '@/api/client'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
@@ -214,6 +224,8 @@ const settingsModalVisible = ref(false)
 const settingsTarget = ref<PluginInfo | null>(null)
 const panelVisible = ref(false)
 const panelTarget = ref<PluginInfo | null>(null)
+const allowUiInjection = ref(true)
+const uiToggleBusy = ref(false)
 const packageModalVisible = ref(false)
 const packageSelection = ref<PluginPackageSelection | null>(null)
 
@@ -361,7 +373,28 @@ function openPanel(plugin: PluginInfo) {
   panelVisible.value = true
 }
 
-onMounted(() => void pluginStore.start().catch(() => {}))
+async function loadUiInjection(): Promise<void> {
+  try {
+    const result = await backend.config.get<{ allow_ui_injection?: boolean }>('plugins')
+    if (result.success && result.data) allowUiInjection.value = result.data.allow_ui_injection !== false
+  } catch {
+    allowUiInjection.value = true
+  }
+}
+
+async function saveUiInjection(value: boolean): Promise<void> {
+  uiToggleBusy.value = true
+  try {
+    await backend.config.set('plugins', { allow_ui_injection: value })
+  } finally {
+    uiToggleBusy.value = false
+  }
+}
+
+onMounted(() => {
+  void pluginStore.start().catch(() => {})
+  void loadUiInjection()
+})
 onUnmounted(() => pluginStore.stop())
 </script>
 

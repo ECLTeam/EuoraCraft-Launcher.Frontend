@@ -695,6 +695,8 @@
     "days": "天"
   },
   "plugins": {
+    "allowUiInjection": "允許外掛修改介面",
+    "allowUiInjectionHint": "關閉後不再顯示任何第三方外掛注入的介面內容，已安裝外掛不受影響。",
     "permissionUiInjectNote": "此外掛可以在啟動器主視窗顯示自己的介面內容。內容與啟動器同頁執行，可讀取頁面上已顯示的資訊，只在你信任此外掛時開啟。",
     "panel": "面板",
     "panelTitle": "外掛面板",

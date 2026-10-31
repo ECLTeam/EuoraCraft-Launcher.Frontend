@@ -695,6 +695,8 @@
     "days": "Tage"
   },
   "plugins": {
+    "allowUiInjection": "Plugins dürfen die Oberfläche ändern",
+    "allowUiInjectionHint": "Wenn aus, wird kein eingefügter Inhalt von Drittanbieter-Plugins angezeigt. Installierte Plugins bleiben unberührt.",
     "permissionUiInjectNote": "Dieses Plugin kann eigene Oberflächeninhalte im Launcher-Fenster anzeigen. Diese laufen auf derselben Seite und können bereits angezeigte Daten lesen. Nur für vertrauenswürdige Plugins aktivieren.",
     "panel": "Panel",
     "panelTitle": "Plugin-Panel",

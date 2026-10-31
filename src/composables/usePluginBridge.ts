@@ -693,6 +693,12 @@ export function initPluginBridge(router: ReturnType<typeof useRouter>) {
   )
 
   unlistenFns.push(
+    pluginHostApi.subscribe('plugin:slots_cleared', (payload) => {
+      void fullCleanupPlugin(payload.plugin, router)
+    })
+  )
+
+  unlistenFns.push(
     pluginHostApi.subscribe('plugin:status_changed', (payload) => {
       if (payload.action === 'disabled' || payload.action === 'unloaded') {
         void invalidatePluginRegistry()

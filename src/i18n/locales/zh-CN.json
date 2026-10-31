@@ -699,6 +699,8 @@
     "days": "天"
   },
   "plugins": {
+    "allowUiInjection": "允许插件修改界面",
+    "allowUiInjectionHint": "关闭后不再渲染任何第三方插件注入的界面内容，已安装插件不受影响。",
     "permissionUiInjectNote": "该插件可以在启动器主窗口显示自己的界面内容。内容与启动器同页运行，可读取页面上已显示的信息，只在你信任该插件时开启。",
     "panel": "面板",
     "panelTitle": "插件面板",

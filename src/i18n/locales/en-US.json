@@ -699,6 +699,8 @@
     "days": "days"
   },
   "plugins": {
+    "allowUiInjection": "Allow plugins to modify the interface",
+    "allowUiInjectionHint": "When off, no third-party plugin content is rendered. Installed plugins are not affected.",
     "permissionUiInjectNote": "This plugin can render its own interface inside the launcher window. That content runs in the same page and can read what is already displayed. Enable it only for plugins you trust.",
     "panel": "Panel",
     "panelTitle": "Plugin panel",
