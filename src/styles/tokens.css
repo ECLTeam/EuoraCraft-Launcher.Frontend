@@ -24,9 +24,23 @@
   --ecl-control-height: 36px;
   --ecl-control-height-sm: 32px;
   --ecl-control-height-lg: 40px;
-  --ecl-radius-control: 6px;
-  --ecl-radius-sm: 6px;
-  --ecl-radius-card: 8px;
+
+  /* 主题表面预设：由 useTheme 按主题写入内联变量，主题可整体替换卡片几何与层次 */
+  --ecl-card-radius: 8px;
+  --ecl-control-radius: 6px;
+  --ecl-card-border-width: 1px;
+  --ecl-card-border-color: var(--ecl-border);
+  --ecl-card-border-color-hover: var(--ecl-border-strong);
+  --ecl-card-shadow: var(--ecl-shadow-surface);
+  --ecl-card-shadow-hover: var(--ecl-shadow-pop);
+  /* --glass-highlight 本身是完整的 inset 阴影值，直接引用而不再拼接前缀 */
+  --ecl-card-highlight: var(--glass-highlight);
+  --ecl-card-backdrop: var(--ecl-surface-backdrop);
+
+  /* 生效值：外观设置写入同名内联变量时覆盖主题预设 */
+  --ecl-radius-control: var(--ecl-control-radius);
+  --ecl-radius-sm: var(--ecl-control-radius);
+  --ecl-radius-card: var(--ecl-card-radius);
   --ecl-radius-dialog: 10px;
   --ecl-page-gap: 16px;
   --ecl-page-padding: 20px;
@@ -54,6 +68,9 @@
   --border: var(--ecl-border);
   --r-sm: var(--ecl-radius-control);
   --r-md: var(--ecl-radius-control);
+  /* 面板级圆角跟随卡片预设，避免同一主题下卡片与面板圆角不一致 */
+  --r-lg: var(--ecl-radius-card);
+  --r-xl: var(--ecl-radius-card);
   --card-radius: var(--ecl-radius-card);
   --shadow-card: var(--ecl-shadow-surface);
 }

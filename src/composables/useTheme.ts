@@ -28,6 +28,7 @@ import {
   type CatppuccinFlavor,
   type CatppuccinPalette,
 } from '@/config/catppuccin'
+import { surfaceStyleOf, surfaceStyleVariables, type ThemeSurfaceStyle } from '@/config/surface'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
 import {
   BACKGROUND_INTERVAL_DEFAULT,
@@ -469,8 +470,9 @@ function buildCatppuccinVariables(palette: CatppuccinPalette, isDark: boolean): 
     '--ecl-text': palette.text,
     '--ecl-text-secondary': palette.subtext0,
     '--ecl-text-tertiary': textMuted,
-    '--ecl-border': rgba(palette.text, isDark ? 0.1 : 0.12),
-    '--ecl-border-strong': rgba(palette.text, isDark ? 0.18 : 0.2),
+    // Catppuccin 用 surface1/surface2 作为描边层级，比半透明文字色更清晰
+    '--ecl-border': palette.surface1,
+    '--ecl-border-strong': palette.surface2,
     '--ecl-hover': rgba(palette.text, 0.06),
     '--ecl-hover-strong': rgba(palette.text, 0.1),
     '--ecl-shadow-surface': `0 1px 2px ${rgba(shadowColor, shadowScale[0]!)}`,
@@ -482,11 +484,11 @@ function buildCatppuccinVariables(palette: CatppuccinPalette, isDark: boolean): 
     '--bg-surface-solid': palette.base,
     '--glass-bg': rgbaSurface(palette.base, 0.92),
     '--glass-bg-sidebar': rgbaSurface(isDark ? palette.mantle : palette.base, 0.96),
-    '--glass-border': rgba(palette.text, isDark ? 0.1 : 0.12),
-    '--glass-divider': rgba(palette.text, isDark ? 0.1 : 0.12),
-    '--divider': rgba(palette.text, isDark ? 0.1 : 0.12),
+    '--glass-border': palette.surface1,
+    '--glass-divider': palette.surface0,
+    '--divider': palette.surface0,
     '--text-disabled': palette.overlay0,
-    '--border-strong': rgba(palette.text, isDark ? 0.18 : 0.2),
+    '--border-strong': palette.surface2,
     '--shadow-xs': `0 1px 2px ${rgba(shadowColor, shadowScale[0]!)}`,
     '--shadow-sm': `0 2px 6px ${rgba(shadowColor, shadowScale[1]!)}`,
     '--shadow-md': `0 8px 24px ${rgba(shadowColor, shadowScale[2]!)}`,
@@ -501,14 +503,14 @@ function buildCatppuccinVariables(palette: CatppuccinPalette, isDark: boolean): 
     '--error': palette.red,
     '--error-alpha': rgba(palette.red, semanticAlpha),
     '--slider-track': isDark ? palette.surface1 : palette.surface0,
-    '--window-border': rgba(palette.text, isDark ? 0.1 : 0.12),
-    '--window-btn-border': rgba(palette.text, isDark ? 0.09 : 0.1),
+    '--window-border': palette.surface1,
+    '--window-btn-border': palette.surface0,
     '--bg-overlay-tint': rgba(canvas, 0.12),
   }
 }
 
 /** 由 Catppuccin 色板生成 naive-ui 语义色，保持与设计令牌同源。 */
-function catppuccinSemanticColors(palette: CatppuccinPalette, isDark: boolean): ThemeColorPalette {
+function catppuccinSemanticColors(palette: CatppuccinPalette): ThemeColorPalette {
   return {
     success: palette.green,
     warning: palette.yellow,
@@ -520,7 +522,7 @@ function catppuccinSemanticColors(palette: CatppuccinPalette, isDark: boolean): 
     cardBackground: rgba(palette.base, 0.88),
     text: palette.text,
     textSecondary: palette.subtext0,
-    border: rgba(palette.text, isDark ? 0.1 : 0.12),
+    border: palette.surface1,
   }
 }
 
@@ -832,7 +834,7 @@ export const useThemeStore = defineStore('theme', () => {
   /** 当前皮肤语义色：Catppuccin 风格取对应风味，否则取经典亮/暗色板。 */
   const baseColors = computed<ThemeColorPalette>(() => {
     const flavor = themeFlavor.value
-    if (flavor) return catppuccinSemanticColors(CATPPUCCIN_PALETTES[flavor], flavor !== 'latte')
+    if (flavor) return catppuccinSemanticColors(CATPPUCCIN_PALETTES[flavor])
     return isDark.value ? DARK_THEME_COLORS : LIGHT_THEME_COLORS
   })
 
@@ -854,6 +856,9 @@ export const useThemeStore = defineStore('theme', () => {
     }
     return createPrimaryScale(activePrimaryColor.value, isDark.value)
   })
+
+  /** 当前主题的表面风格：卡片圆角、描边、阴影与玻璃层由主题预设决定。 */
+  const surfaceStyle = computed<ThemeSurfaceStyle>(() => surfaceStyleOf(themeId.value))
 
   const themeOverrides = computed<GlobalThemeOverrides>(() => {
     return createThemeOverrides(isDark.value, primaryScale.value, baseColors.value, appearance.value)
@@ -880,13 +885,36 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   /** 写入用户级外观覆盖变量；未设置的字段不写，交由默认值决定。 */
+  /**
+   * 写入圆角覆盖值。
+   *
+   * 用户值与当前主题预设一致时视为未自定义，移除内联覆盖让主题值生效；
+   * 只有用户显式改过圆角才由用户值优先。
+   * @param variable - 生效圆角变量名
+   * @param value - 外观设置中的用户值
+   * @param themeValue - 当前主题预设的圆角
+   */
+  function applyRadiusOverride(variable: string, value: number | undefined, themeValue: number): void {
+    const style = document.documentElement.style
+    if (typeof value === 'number' && value !== themeValue) style.setProperty(variable, `${value}px`)
+    else style.removeProperty(variable)
+  }
+
+  /** 应用当前主题的表面风格：卡片圆角、描边、阴影、内高光与玻璃层。 */
+  function applySurfaceVariables(): void {
+    const style = document.documentElement.style
+    for (const [name, value] of Object.entries(surfaceStyleVariables(surfaceStyle.value))) {
+      style.setProperty(name, value)
+    }
+  }
+
   function applyAppearanceVars(): void {
     const el = document.documentElement
     const conf = appearance.value
     if (typeof conf.radius_window === 'number') el.style.setProperty('--ecl-radius-window', `${conf.radius_window}px`)
-    if (typeof conf.radius_control === 'number')
-      el.style.setProperty('--ecl-radius-control', `${conf.radius_control}px`)
-    if (typeof conf.radius_card === 'number') el.style.setProperty('--ecl-radius-card', `${conf.radius_card}px`)
+    // 圆角：用户值与当前主题预设一致时视为未自定义，交由主题决定；否则写入内联覆盖
+    applyRadiusOverride('--ecl-radius-control', conf.radius_control, surfaceStyle.value.controlRadius)
+    applyRadiusOverride('--ecl-radius-card', conf.radius_card, surfaceStyle.value.cardRadius)
     if (typeof conf.radius_dialog === 'number') el.style.setProperty('--ecl-radius-dialog', `${conf.radius_dialog}px`)
     const fontVariables = [
       ['--ecl-font-body', conf.font_family, 'var(--font-body)'],
@@ -960,6 +988,7 @@ export const useThemeStore = defineStore('theme', () => {
     document.documentElement.setAttribute('data-navigation-mode', navigationMode.value)
     document.documentElement.setAttribute('data-titlebar-hidden', titlebarHidden.value ? '1' : '0')
 
+    applySurfaceVariables()
     applyAppearanceVars()
     saveSnapshot()
 
@@ -1015,8 +1044,10 @@ export const useThemeStore = defineStore('theme', () => {
     if (!isBuiltinThemeId(id)) return
     const previousFlavor = catppuccinFlavorOfThemeId(themeId.value)
     const nextFlavor = catppuccinFlavorOfThemeId(id)
+    const previousSurface = surfaceStyle.value
 
     themeId.value = id
+    releaseThemeRadius(previousSurface)
 
     if (nextFlavor) {
       themeMode.value = nextFlavor === 'latte' ? 'light' : 'dark'
@@ -1029,6 +1060,22 @@ export const useThemeStore = defineStore('theme', () => {
     }
 
     if (persist) saveThemeConfig()
+  }
+
+  /**
+   * 切换主题时释放未自定义的圆角。
+   *
+   * 圆角配置值等于旧主题预设说明用户没动过滑杆，清空后交由新主题的表面预设
+   * 决定；用户显式调过的圆角保持不变。
+   * @param previous - 切换前的表面风格
+   */
+  function releaseThemeRadius(previous: ThemeSurfaceStyle): void {
+    const conf = appearance.value
+    const released: ThemeAppearanceConfig = { ...conf }
+    if (conf.radius_card === previous.cardRadius) released.radius_card = undefined
+    if (conf.radius_control === previous.controlRadius) released.radius_control = undefined
+    if (released.radius_card === conf.radius_card && released.radius_control === conf.radius_control) return
+    appearance.value = released
   }
 
   function setPrimaryColor(color: string, persist = true) {
@@ -1597,6 +1644,7 @@ export const useThemeStore = defineStore('theme', () => {
     colors,
     themeFlavor,
     accentPresets,
+    surfaceStyle,
     initSystemThemeListener,
     updateTheme,
     setThemeMode,
@@ -1679,6 +1727,7 @@ export function useTheme() {
     colors,
     themeFlavor,
     accentPresets,
+    surfaceStyle,
   } = storeToRefs(store)
   return {
     themeId: readonly(themeId),
@@ -1715,6 +1764,7 @@ export function useTheme() {
     colors,
     themeFlavor: readonly(themeFlavor),
     accentPresets: readonly(accentPresets),
+    surfaceStyle: readonly(surfaceStyle),
     setThemeMode: store.setThemeMode,
     setThemeId: store.setThemeId,
     setPrimaryColor: store.setPrimaryColor,

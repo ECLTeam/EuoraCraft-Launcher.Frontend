@@ -29,10 +29,10 @@
   height: 38px;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card);
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-card-radius);
   background: var(--ecl-surface);
-  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  box-shadow: var(--ecl-card-highlight);
   color: var(--primary);
 }
 
@@ -58,15 +58,18 @@
 }
 
 .ecl-surface {
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card);
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-card-radius);
   background: var(--ecl-surface);
-  backdrop-filter: var(--ecl-surface-backdrop);
-  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
-  box-shadow:
-    var(--ecl-shadow-surface),
-    inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--ecl-card-backdrop);
+  -webkit-backdrop-filter: var(--ecl-card-backdrop);
+  box-shadow: var(--ecl-card-shadow), var(--ecl-card-highlight);
+  transition:
+    border-color var(--duration-fast) var(--ease-emphasized),
+    box-shadow var(--duration-fast) var(--ease-emphasized);
 }
+
+/* 可点击卡片（如实例卡片）的悬停反馈统一取主题令牌，由主题决定抬升阴影或提亮描边 */
 
 .ecl-toolbar {
   display: flex;
@@ -75,12 +78,12 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card);
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-card-radius);
   background: var(--ecl-surface);
-  backdrop-filter: var(--ecl-surface-backdrop);
-  -webkit-backdrop-filter: var(--ecl-surface-backdrop);
-  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--ecl-card-backdrop);
+  -webkit-backdrop-filter: var(--ecl-card-backdrop);
+  box-shadow: var(--ecl-card-highlight);
 }
 
 .ecl-toolbar__group {

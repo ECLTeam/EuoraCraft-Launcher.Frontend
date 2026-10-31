@@ -490,6 +490,7 @@ const {
   schedule,
   themeFlavor,
   accentPresets,
+  surfaceStyle,
 } = useTheme()
 const { topNavEnabled, toggleTopNav } = useTopNav()
 
@@ -568,12 +569,13 @@ async function handleThemeChange(mode: ThemeMode) {
 function handleThemeIdChange(value: string | number | null) {
   if (!isBuiltinThemeId(value)) return
   setThemeId(value, false)
-  // 切换 Catppuccin 风味会同步亮暗与主色，需一并落库，避免重启后回退
+  // 切换 Catppuccin 风味会同步亮暗、主色与未自定义的圆角，需一并落库，避免重启后回退
   void run(async () =>
     settingsStore.patchUiTheme({
       theme_id: value,
       mode: currentSettings.value.mode,
       primary_color: currentSettings.value.primary_color,
+      appearance: appearance.value,
     })
   )
 }
@@ -594,8 +596,9 @@ async function handleDeriveModeChange(value: string | number) {
 const radiusWindow = computed(() =>
   windowChromePreference.value === 'custom' ? (appearance.value.radius_window ?? 12) : 0
 )
-const radiusCard = computed(() => appearance.value.radius_card ?? 8)
-const radiusControl = computed(() => appearance.value.radius_control ?? 6)
+// 未自定义时显示当前主题预设的圆角，拖动滑杆才写入用户覆盖值
+const radiusCard = computed(() => appearance.value.radius_card ?? surfaceStyle.value.cardRadius)
+const radiusControl = computed(() => appearance.value.radius_control ?? surfaceStyle.value.controlRadius)
 const radiusDialog = computed(() => appearance.value.radius_dialog ?? 10)
 const cardOpacity = computed(() => appearance.value.card_opacity ?? CARD_OPACITY_DEFAULT)
 const fontOverrideCount = computed(

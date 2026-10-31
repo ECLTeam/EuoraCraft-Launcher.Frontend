@@ -53,25 +53,27 @@
   flex-direction: column;
   min-height: 178px;
   padding: 13px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  /* 卡片几何与层次由主题表面预设决定 */
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-card-radius);
   background: var(--instance-cover, var(--bg-elevated));
   background-size: cover;
   background-position: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--ecl-card-shadow), var(--ecl-card-highlight);
   cursor: pointer;
   transition:
     border-color var(--duration-fast) var(--ease-emphasized),
     box-shadow var(--duration-fast) var(--ease-emphasized);
 }
 .instance-card:hover {
-  border-color: var(--border-hover);
-  box-shadow: var(--shadow-md);
+  border-color: var(--ecl-card-border-color-hover);
+  box-shadow: var(--ecl-card-shadow-hover), var(--ecl-card-highlight);
 }
 .instance-card.selected {
   box-shadow:
     inset 0 0 0 999px rgba(var(--primary-rgb), 0.08),
-    var(--shadow-sm);
+    var(--ecl-card-shadow),
+    var(--ecl-card-highlight);
 }
 .instance-card.selected::before {
   content: '';
