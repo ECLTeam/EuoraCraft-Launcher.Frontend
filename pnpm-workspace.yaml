@@ -7,9 +7,9 @@ allowBuilds:
 # 仅替换治理审计命中的版本；上游升级后移除对应失效覆盖。
 overrides:
   brace-expansion@5.0.9: 5.0.12
-  undici@8.11.2: 8.12.2
-  minimatch@10.2.6: 11.0.1
-  glob@13.0.6: 14.0.2
+  undici@8.11.2: 8.12.3
+  minimatch@10.2.6: 11.0.3
+  glob@13.0.6: 14.0.3
   # 已转用 import-x；移除 resolver 的旧可选 peer，避免重新引入 minimatch 3。
   eslint-import-resolver-typescript@4.4.5>eslint-plugin-import: '-'
 onlyBuiltDependencies:
