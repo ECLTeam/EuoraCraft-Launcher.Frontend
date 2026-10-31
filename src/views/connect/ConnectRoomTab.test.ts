@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, ref } from 'vue'
 import ConnectorPlayerAvatar from '@/components/connect/ConnectorPlayerAvatar.vue'
+import NatDetectModal from '@/components/connect/NatDetectModal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiSelect from '@/components/ui/Select.vue'
 import { provideConnector, type ConnectorContext } from '@/features/connect/connectorContext'
@@ -37,6 +38,19 @@ vi.mock('@/features/instances/api/instanceRuntimeApi', () => ({
     onChanged: mocks.onRunningChanged,
   },
 }))
+
+const natProbe = vi.hoisted(() =>
+  vi.fn(async () => ({
+    type: 'cone',
+    detailType: 'fullCone',
+    publicIp: null,
+    publicPort: null,
+    publicPortEnd: null,
+    supportsIpv6: false,
+  }))
+)
+
+vi.mock('@/features/connect/api/connectorApi', () => ({ connectorApi: { natType: natProbe } }))
 
 const runningInstance: GameInstance = {
   id: 'survival-1',
@@ -360,10 +374,19 @@ describe('ConnectRoomTab', () => {
     expect(wrapper.text()).toContain('Minecraft process exited before opening a LAN port')
   })
 
-  it('no longer exposes NAT detection inside the room flow', () => {
+  it('NAT 检测入口位于加入卡片标题内、联机设置左侧，点击打开弹窗', async () => {
     const wrapper = mountRoomTab(connectorState(idleStatus()))
+    const heading = wrapper.get('.connect-join-heading')
+    const buttons = heading.findAll('button')
+    const natIndex = buttons.findIndex((candidate) => candidate.text().includes('NAT 检测'))
+    const settingsIndex = buttons.findIndex((candidate) => candidate.text().includes('联机设置'))
 
-    expect(wrapper.findAll('button').some((candidate) => candidate.text().includes('NAT 检测'))).toBe(false)
+    expect(natIndex).toBeGreaterThanOrEqual(0)
+    expect(settingsIndex).toBe(natIndex + 1)
+    expect(wrapper.findComponent(NatDetectModal).props('visible')).toBe(false)
+
+    await buttons[natIndex]!.trigger('click')
+    expect(wrapper.findComponent(NatDetectModal).props('visible')).toBe(true)
   })
 
   it('selects a running instance and proceeds to port detection', async () => {

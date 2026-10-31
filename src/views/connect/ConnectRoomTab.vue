@@ -65,6 +65,15 @@
                         <UiButton
                           size="sm"
                           variant="ghost"
+                          icon="wifi"
+                          data-action="nat-detect"
+                          @click="natVisible = true"
+                        >
+                          {{ t('connect.nat.entry') }}
+                        </UiButton>
+                        <UiButton
+                          size="sm"
+                          variant="ghost"
                           icon="settings"
                           data-action="connector-settings"
                           :disabled="busy || status.mode === 'starting'"
@@ -379,6 +388,7 @@
         </div>
       </div>
     </section>
+    <NatDetectModal v-model:visible="natVisible" />
   </div>
 </template>
 
@@ -387,6 +397,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import ConnectorPlayerAvatar from '@/components/connect/ConnectorPlayerAvatar.vue'
+import NatDetectModal from '@/components/connect/NatDetectModal.vue'
 import PlayerList from '@/components/connect/PlayerList.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
@@ -409,6 +420,7 @@ const selectedInstanceKey = ref('')
 const port = ref('25565')
 const roomCode = ref('')
 const roomCodeField = ref<HTMLDivElement>()
+const natVisible = ref(false)
 const runningInstances = ref<GameInstance[]>([])
 let unsubscribeRunning: (() => void) | null = null
 

@@ -11,9 +11,13 @@
   flex: 1;
 }
 
-.connect-join-heading > [data-action='connector-settings'] {
+.connect-join-heading > [data-action='nat-detect'] {
   flex-shrink: 0;
   margin-left: auto;
+}
+
+.connect-join-heading > [data-action='connector-settings'] {
+  flex-shrink: 0;
 }
 
 .connect-workspace__body {

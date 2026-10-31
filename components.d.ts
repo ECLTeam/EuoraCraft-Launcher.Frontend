@@ -53,7 +53,7 @@ declare module 'vue' {
     Modal: typeof import('./src/components/modals/Modal.vue')['default']
     ModDiagnostics: typeof import('./src/components/instances/ModDiagnostics.vue')['default']
     ModpackImportModal: typeof import('./src/components/instances/ModpackImportModal.vue')['default']
-    NatToolCard: typeof import('./src/components/tools/NatToolCard.vue')['default']
+    NatDetectModal: typeof import('./src/components/connect/NatDetectModal.vue')['default']
     OnlineModSearch: typeof import('./src/components/mods/OnlineModSearch.vue')['default']
     PageHeader: typeof import('./src/components/layout/PageHeader.vue')['default']
     PlayerList: typeof import('./src/components/connect/PlayerList.vue')['default']

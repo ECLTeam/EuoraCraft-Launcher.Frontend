@@ -6,7 +6,6 @@
           <div class="tools-grid">
             <CustomDownloadCard />
             <SkinAvatarToolCard />
-            <NatToolCard />
           </div>
         </div>
       </div>
@@ -16,7 +15,6 @@
 
 <script setup lang="ts">
 import CustomDownloadCard from '@/components/tools/CustomDownloadCard.vue'
-import NatToolCard from '@/components/tools/NatToolCard.vue'
 import SkinAvatarToolCard from '@/components/tools/SkinAvatarToolCard.vue'
 </script>
 
