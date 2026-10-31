@@ -10,11 +10,11 @@ import { computed, ref, watch } from 'vue'
 import backend from '@/api/client'
 import UiIcon from '@/components/ui/Icon.vue'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
-import type { ScannedVersion } from '@/types/instances'
+import type { InstanceIconSource } from '@/types/instances'
 
 const props = withDefaults(
   defineProps<{
-    version: ScannedVersion
+    source: InstanceIconSource
     size?: number
   }>(),
   { size: 38 }
@@ -33,19 +33,19 @@ const builtInImages: Record<string, string> = {
 }
 
 const imageUrl = computed(() => {
-  const icon = props.version.icon
+  const icon = props.source.icon
   if (icon?.type === 'data') return icon.value
-  if (icon?.type === 'builtin') return builtInImages[icon.value] || getVersionImage(props.version.versionType)
+  if (icon?.type === 'builtin') return builtInImages[icon.value] || getVersionImage(props.source.versionType)
   if (icon?.type === 'loader')
     return getLoaderImage(icon.value) || (icon.value === 'vanilla' ? builtInImages.grass : '')
   if (icon?.type === 'local' || icon?.type === 'external') return localUrl.value
-  return getLoaderImage(props.version.primaryLoader) || getVersionImage(props.version.versionType)
+  return getLoaderImage(props.source.primaryLoader) || getVersionImage(props.source.versionType)
 })
 
-const fallbackIcon = computed(() => getLoaderIcon(props.version.primaryLoader || 'vanilla'))
+const fallbackIcon = computed(() => getLoaderIcon(props.source.primaryLoader || 'vanilla'))
 
 watch(
-  () => props.version.icon,
+  () => props.source.icon,
   async (icon) => {
     localUrl.value = ''
     const currentRequest = ++requestId

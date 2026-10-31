@@ -1,3 +1,9 @@
+/*
+ * EuoraCraft Launcher
+ * ECLTeam © 2026 GPL-3.0 License
+ * https://github.com/ECLTeam/EuoraCraft-Launcher
+ * 文件作用：初始化前端服务、主题和语言，并挂载启动器界面。
+ */
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import { create as createNaiveUI } from 'naive-ui'
 import { createApp } from 'vue'

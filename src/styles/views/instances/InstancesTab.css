@@ -22,7 +22,10 @@
 }
 
 .category-select {
-  width: 144px;
+  /* 宽度跟随当前选项文字自适应，避免窄窗口下省略号盖住版本类型和数量。 */
+  width: auto;
+  min-width: 144px;
+  max-width: 208px;
   flex-shrink: 0;
   height: var(--ecl-control-height-sm);
 }
@@ -89,7 +92,8 @@
     gap: 7px;
   }
   .category-select {
-    width: 117px;
+    min-width: 128px;
+    max-width: 176px;
   }
   .search-box {
     width: 144px;

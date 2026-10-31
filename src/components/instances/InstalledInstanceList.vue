@@ -53,7 +53,7 @@
           @keydown.space.prevent="emit('selectVersion', version)"
         >
           <div class="card-heading">
-            <InstanceIcon :version="version" :size="46" />
+            <InstanceIcon :source="version" :size="46" />
             <div class="card-title-copy">
               <strong>{{ instanceName(version) }}</strong>
               <span>{{ version.versionId }}</span>
@@ -119,7 +119,7 @@
             @keydown.enter.prevent="emit('selectVersion', version)"
             @keydown.space.prevent="emit('selectVersion', version)"
           >
-            <InstanceIcon class="list-icon" :version="version" :size="32" />
+            <InstanceIcon class="list-icon" :source="version" :size="32" />
             <div class="instance-copy">
               <div class="instance-heading">
                 <strong class="instance-name" :title="`${instanceName(version)}\n${version.versionId}`">{{

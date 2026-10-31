@@ -8,8 +8,12 @@ import {
   LAUNCH_PROGRESS,
   LAUNCH_SUCCESS_HIDE_DELAY,
   LAUNCH_ERROR_HIDE_DELAY,
+  LAUNCH_BUSY_RETRY_DELAY,
+  LAUNCH_BUSY_RETRY_LIMIT,
+  LAUNCH_CANCEL_GUARD_DELAY,
   STATUS_MESSAGE_AUTO_HIDE,
 } from '@/config/game'
+import { gameHomeApi } from '@/features/game-home/api/gameHomeApi'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
@@ -38,6 +42,7 @@ export interface InstanceManagerStateShape {
   loadVersions: () => Promise<void>
   selectVersion: (id: string, gamePath?: string) => void
   launchGame: (currentAccount: { id: string } | null) => Promise<void>
+  cancelLaunch: () => void
   setGamePath: (path: string) => void
   showStatus: (msg: string, type?: 'info' | 'success' | 'error') => void
 }
@@ -53,6 +58,10 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
 
   const loading = ref(false)
   const launching = ref(false)
+  // 每次启动分配一个会话号：取消或重新启动都会让旧会话失效，迟到的进度与结果不再影响界面。
+  let launchSession = 0
+  // 取消后进度卡消失，同一位置可能正是启动按钮；记录时间用于吞掉连点造成的误启动。
+  let lastCancelAt = 0
   const javaRecoveryMessage = ref('')
   const isRescanningJava = ref(false)
   async function rescanJava() {
@@ -109,6 +118,8 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
   async function launchGame(currentAccount: { id: string } | null) {
     // 防重入：启动进行中时忽略重复触发，避免并发 game_launch 与重复事件监听
     if (launching.value) return
+    // 刚点过取消时的连点忽略：取消按钮消失后同一位置就是启动按钮。
+    if (Date.now() - lastCancelAt < LAUNCH_CANCEL_GUARD_DELAY) return
     javaRecoveryMessage.value = ''
     // 启动可能持续数十秒，期间选中项会变化；记录本次真正启动的目标。
     const launchTarget = { versionId: selectedVersion.value, gamePath: currentGamePath.value }
@@ -135,13 +146,15 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     }
 
     launching.value = true
+    const sessionId = ++launchSession
+    const isCurrentSession = () => sessionId === launchSession
     showStatus(t('game.status.launching'), 'info')
 
     router.push({ name: 'game' })
     showLaunchProgress({ cancelable: true })
 
     const unlisten = backend.on('game:launch_progress', (payload: LaunchProgress) => {
-      if (globalLaunchProgress.progress.value.canceled) {
+      if (!isCurrentSession() || globalLaunchProgress.progress.value.canceled) {
         unlisten()
         return
       }
@@ -209,13 +222,12 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     try {
       // 确保 Tauri 事件监听已经落地，再让后端开始执行；否则启动较快时会漏掉前几个真实阶段。
       await backend.waitForEventListeners()
+      if (!isCurrentSession()) return
 
       setLaunchProgress(0, 'prepare', `正在准备启动 ${selectedVersion.value}...`)
 
-      const launchResult = await backend.command('game_launch', {
-        version_id: selectedVersion.value,
-        game_path: currentGamePath.value,
-      })
+      const launchResult = await requestLaunch(selectedVersion.value, currentGamePath.value, isCurrentSession)
+      if (!isCurrentSession()) return
 
       if (!launchResult.success) {
         if (
@@ -229,7 +241,11 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
           javaRecoveryMessage.value = `${launchResult.message || t('javaRecovery.missing')} · ${requirement}`
         }
         const isCanceled = launchResult.message === '启动已取消'
-        if (isCanceled) {
+        if (launchResult.errorCode === 'LAUNCH_ALREADY_RUNNING') {
+          // 取消后立刻重试会撞上仍在退出的上一次启动，这里给普通提示而不是启动失败弹窗。
+          message.warning(t('game.status.launchBusy'))
+          setLaunchProgress(0, 'error', t('game.status.launchBusy'))
+        } else if (isCanceled) {
           setLaunchProgress(0, 'error', '已取消')
         } else if (!globalLaunchProgress.progress.value.canceled) {
           setLaunchProgress(0, 'error', launchResult.message || '启动失败')
@@ -252,6 +268,7 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
       }
       setTimeout(hideLaunchProgress, LAUNCH_SUCCESS_HIDE_DELAY)
     } catch (error) {
+      if (!isCurrentSession()) return
       // 请求本身失败时同样要释放启动锁，否则启动按钮会一直禁用。
       const reason = error instanceof Error ? error.message : '启动请求未能送达后端，请重试。'
       setLaunchProgress(0, 'error', reason)
@@ -265,8 +282,55 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
       setTimeout(hideLaunchProgress, 2000)
     } finally {
       unlisten()
-      launching.value = false
+      if (isCurrentSession()) launching.value = false
     }
+  }
+
+  /**
+   * 发起启动请求；上一次启动仍在退出时短暂重试，避免取消后立刻重试直接失败。
+   *
+   * @param versionId 要启动的实例版本目录名
+   * @param gamePath 该实例所在游戏根目录
+   * @param isCurrentSession 判断本次启动会话是否仍然有效
+   * @returns 最后一次启动请求的响应
+   */
+  async function requestLaunch(
+    versionId: string,
+    gamePath: string,
+    isCurrentSession: () => boolean
+  ): Promise<Awaited<ReturnType<typeof backend.command>>> {
+    const body = { version_id: versionId, game_path: gamePath }
+    let result = await backend.command('game_launch', body)
+    for (let attempt = 0; attempt < LAUNCH_BUSY_RETRY_LIMIT; attempt += 1) {
+      if (result.success || result.errorCode !== 'LAUNCH_ALREADY_RUNNING' || !isCurrentSession()) break
+      await new Promise((resolve) => setTimeout(resolve, LAUNCH_BUSY_RETRY_DELAY))
+      if (!isCurrentSession()) break
+      result = await backend.command('game_launch', body)
+    }
+    return result
+  }
+
+  /**
+   * 立即取消当前启动：马上释放启动按钮与进度卡，取消信号在后台送达后端。
+   *
+   * 后端清理（文件校验、下载收尾）可能还要一小会儿，因此这里只作废本次启动会话，
+   * 迟到的进度与结果由会话号丢弃；用户若立刻重新启动，requestLaunch 会自动重试。
+   */
+  function cancelLaunch(): void {
+    if (!launching.value) return
+    launchSession += 1
+    lastCancelAt = Date.now()
+    launching.value = false
+    globalLaunchProgress.cancel()
+    void gameHomeApi
+      .cancelLaunch()
+      .then((canceled) => {
+        // 取消信号到达时启动已经完成，游戏进程已经创建，必须如实告知用户。
+        if (!canceled) message.warning(t('game.status.launchCancelMissed'))
+      })
+      .catch((error: unknown) => {
+        console.warn('[LaunchCancel] 取消请求异常:', error)
+      })
   }
 
   let statusId = 0
@@ -295,6 +359,7 @@ export function useInstanceManager(t: (key: string, ...args: unknown[]) => strin
     loadVersions,
     selectVersion,
     launchGame,
+    cancelLaunch,
     setGamePath,
     showStatus,
   }) as InstanceManagerState

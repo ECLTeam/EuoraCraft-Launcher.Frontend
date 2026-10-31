@@ -40,13 +40,20 @@
             v-model:value="sourceFilter"
             :options="sourceOptions"
             :placeholder="t('mods.allSources')"
+            :consistentMenuWidth="false"
             size="small"
             class="filter-item-small"
           />
         </div>
         <div class="filter-group">
           <span class="filter-label">{{ t('mods.sort') }}</span>
-          <NSelect v-model:value="sortFilter" :options="sortOptions" size="small" class="filter-item-small" />
+          <NSelect
+            v-model:value="sortFilter"
+            :options="sortOptions"
+            :consistentMenuWidth="false"
+            size="small"
+            class="filter-item-small"
+          />
         </div>
         <div class="filter-group">
           <span class="filter-label">{{ t('mods.version') }}</span>
@@ -54,6 +61,7 @@
             v-model:value="versionFilter"
             :options="gameVersionOptions"
             :placeholder="t('mods.allVersions')"
+            :consistentMenuWidth="false"
             size="small"
             class="filter-item"
           />
@@ -64,6 +72,7 @@
             v-model:value="loaderFilter"
             :options="loaderOptions"
             :placeholder="t('mods.allLoaders')"
+            :consistentMenuWidth="false"
             placement="bottom-end"
             size="small"
             class="filter-item"

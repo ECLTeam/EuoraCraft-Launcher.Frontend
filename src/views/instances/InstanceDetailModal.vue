@@ -11,7 +11,7 @@
       <aside class="vdm-nav ecl-surface">
         <div class="vdm-nav-identity">
           <button class="vdm-nav-icon-btn" title="更换实例图标" @click="iconPickerVisible = true">
-            <InstanceIcon v-if="version" :version="version" :size="36" />
+            <InstanceIcon v-if="version" :source="version" :size="36" />
           </button>
           <div class="vdm-nav-copy">
             <strong>{{ version?.displayName || version?.versionId || '...' }}</strong>

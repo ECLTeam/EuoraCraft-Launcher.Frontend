@@ -35,6 +35,7 @@ const runningInstance = {
   versionId: '1.21.5 Fabric',
   loader: 'Fabric',
   gamePath: 'D:/Games/.minecraft',
+  icon: null,
 }
 
 function mountTab() {
@@ -62,10 +63,27 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.text()).toContain('1.21.5 Fabric')
     expect(wrapper.text()).toContain('D:/Games/.minecraft')
     expect(wrapper.text()).toContain('24680')
-    expect(wrapper.get('.running-version-icon img').attributes('src')).toBe('/img/item/fabric.png')
+    expect(wrapper.get('.running-instance-row .instance-icon img').attributes('src')).toBe('/img/item/fabric.png')
     expect(wrapper.find('.running-instance-row').exists()).toBe(true)
     expect(wrapper.find('.running-instance-card').exists()).toBe(false)
     expect(wrapper.get('.running-instances-count').classes()).not.toContain('inactive')
+  })
+
+  it('renders the icon configured for the instance instead of the loader default', async () => {
+    mocks.list.mockResolvedValue([{ ...runningInstance, icon: { type: 'builtin', value: 'chest' } }])
+    const wrapper = mountTab()
+    await flushPromises()
+
+    expect(wrapper.get('.running-instance-row .instance-icon img').attributes('src')).toBe('/img/item/chest.png')
+  })
+
+  it('falls back to the loader icon when the instance has no image icon', async () => {
+    mocks.list.mockResolvedValue([{ ...runningInstance, loader: 'Vanilla', icon: null }])
+    const wrapper = mountTab()
+    await flushPromises()
+
+    expect(wrapper.find('.running-instance-row .instance-icon img').exists()).toBe(false)
+    expect(wrapper.find('.running-instance-row .instance-icon svg').exists()).toBe(true)
   })
 
   it('uses an inactive status badge when no instance is running', async () => {
@@ -76,7 +94,7 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.get('.running-instances-count').classes()).toContain('inactive')
   })
 
-  it('uses the standard empty box and retains the refresh action', async () => {
+  it('uses the standard empty box without a manual refresh action', async () => {
     mocks.list.mockResolvedValue([])
     const wrapper = mountTab()
     await flushPromises()
@@ -84,9 +102,8 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.getComponent(NEmpty).props('description')).toBe(i18n.global.t('versions.running.empty'))
     expect(wrapper.find('.n-empty__icon svg').exists()).toBe(true)
     expect(wrapper.find('.running-empty-icon').exists()).toBe(false)
-    await wrapper.get('.n-empty__extra button').trigger('click')
-    await flushPromises()
-    expect(mocks.list).toHaveBeenCalledTimes(2)
+    // 空状态跟随后端实例事件实时更新，不再提供单独刷新入口。
+    expect(wrapper.find('.n-empty__extra').exists()).toBe(false)
   })
 
   it('shows only the block loader while the initial request is pending', async () => {
@@ -105,17 +122,18 @@ describe('RunningInstancesTab', () => {
     expect(wrapper.findComponent(NEmpty).exists()).toBe(true)
   })
 
-  it('hides existing content and the empty box during refresh, then restores the list', async () => {
+  it('hides existing content and the empty box while a lifecycle event reloads the list', async () => {
     const wrapper = mountTab()
     await flushPromises()
+    const handler = mocks.onChanged.mock.calls[0]?.[0]
     let resolve!: (instances: (typeof runningInstance)[]) => void
     mocks.list.mockReturnValueOnce(new Promise((done) => (resolve = done)))
 
-    await wrapper.get('.running-refresh').trigger('click')
+    handler({ action: 'started', instanceId: 'instance-2' })
+    await flushPromises()
     expect(wrapper.find('.ui-loading--block').exists()).toBe(true)
     expect(wrapper.find('.running-instance-row').exists()).toBe(false)
     expect(wrapper.findComponent(NEmpty).exists()).toBe(false)
-    expect(wrapper.get('.running-refresh').attributes('disabled')).toBeDefined()
 
     resolve([runningInstance])
     await flushPromises()

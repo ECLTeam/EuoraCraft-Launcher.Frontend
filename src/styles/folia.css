@@ -1,8 +1,4 @@
-/*
- * Folia is deliberately scoped to an explicit UI skin.  Theme tokens remain
- * shared with the classic renderer, so a Folia copy can still be edited by the
- * existing theme studio without leaking its glass treatment into other skins.
- */
+/* Folia 样式限定于对应的界面皮肤，主题变量仍由两种皮肤共享。 */
 [data-ui-skin='folia'] {
   --bg-base-alt: var(--ecl-surface-muted);
   --bg-elevated: var(--ecl-control-surface);
@@ -179,39 +175,12 @@
   background: var(--control-bg-hover);
 }
 
-[data-ui-skin='folia'] .sidebar-item.active {
+[data-ui-skin='folia'] .sidebar-item.active:hover {
   background: transparent;
-  box-shadow: none;
-}
-
-[data-ui-skin='folia'] .sidebar-active-indicator {
-  display: none;
 }
 
 [data-ui-skin='folia'] .sidebar-active-bg {
-  display: block;
-  position: absolute;
-  right: 8px;
-  left: 8px;
-  border-radius: var(--r-sm);
-  /* 激活胶囊只由激活项驱动：不加描边，避免出现"框随鼠标移动"的观感。 */
   background: rgba(var(--primary-rgb, 91, 111, 245), 0.16);
-  transition:
-    top var(--duration-normal, 0.25s) var(--ease-emphasized),
-    height var(--duration-normal, 0.25s) var(--ease-emphasized),
-    opacity var(--duration-fast, 0.15s) var(--ease-emphasized);
-}
-
-/* 折叠态沿用同一个浮动胶囊：清掉行内高亮，避免出现第二套独立胶囊导致两态不同步。
-   选择器带上 .sidebar-nav 以提高特异性，稳定压过 scoped 的 .sidebar.collapsed .sidebar-item.active；
-   footer 项不在 nav 内，继续由它自身的 !important 规则提供高亮。 */
-[data-ui-skin='folia'] .sidebar.collapsed .sidebar-nav .sidebar-item.active {
-  background: transparent;
-  box-shadow: none;
-}
-
-[data-ui-skin='folia'] .sidebar-item.active::before {
-  display: none;
 }
 
 /* folia 下侧栏右缘白线（classic 的边框高光）在玻璃表面上是多余凸出线，移除 */

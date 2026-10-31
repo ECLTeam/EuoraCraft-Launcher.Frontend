@@ -19,7 +19,7 @@
     </button>
 
     <!-- 导航区域 -->
-    <nav class="sidebar-nav">
+    <nav ref="navRef" class="sidebar-nav">
       <!-- 插件：侧边栏顶部插槽 -->
       <PluginSlotHost slotId="plugin-slot-sidebar-top" class="plugin-slot-container sidebar-plugin-slot" />
       <!-- 折叠时也保留在 DOM 中（不切换 display，否则会掐断过渡）：
@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed, inject } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import UiIcon from '@/components/ui/Icon.vue'
@@ -132,6 +132,7 @@ const message = useLauncherMessage()
 const { t } = useI18n()
 const { topNavEnabled } = useTopNav()
 
+const navRef = ref<HTMLElement | null>(null)
 const indicatorRef = ref<HTMLElement | null>(null)
 const activeBgRef = ref<HTMLElement | null>(null)
 
@@ -239,117 +240,86 @@ const handleSubItemClick = (path: string) => {
   router.push(path)
 }
 
-/** 通过实际 DOM 测量获取目标菜单项位置并更新指示器 */
-const updateActivePosition = (targetPath: string) => {
-  // 折叠态同样定位这个胶囊：两态共用同一个元素，位置始终由激活项决定。
-  nextTick(() => {
-    const navEl = indicatorRef.value?.parentElement
-    const targetEl = navEl?.querySelector(`.sidebar-item[data-path="${targetPath}"]`) as HTMLElement | null
-    if (!targetEl || !indicatorRef.value || !activeBgRef.value) return
-    const top = targetEl.offsetTop
-    const height = targetEl.offsetHeight
-    // 激活背景块：隐藏状态先无过渡定位到目标再显示，避免从旧位置滑过来
-    const hidden = !activeBgRef.value.style.opacity || activeBgRef.value.style.opacity === '0'
-    if (hidden) {
-      activeBgRef.value.style.transition = 'none'
-      activeBgRef.value.style.top = `${top}px`
-      activeBgRef.value.style.height = `${height}px`
-      void activeBgRef.value.offsetHeight
-      activeBgRef.value.style.transition = ''
-      activeBgRef.value.style.opacity = '1'
-    } else {
-      activeBgRef.value.style.top = `${top}px`
-      activeBgRef.value.style.height = `${height}px`
-      activeBgRef.value.style.opacity = '1'
-    }
-    indicatorRef.value.style.top = `${top + 9}px`
-    indicatorRef.value.style.height = `${height - 18}px`
-    indicatorRef.value.style.opacity = '1'
-  })
-}
-
-const updateIndicator = (targetPath: string) => updateActivePosition(targetPath)
-const updateActiveBg = (targetPath: string) => updateActivePosition(targetPath)
-
+/** 找到当前可见的导航项；子页面沿用其所属父项。 */
 const getActivePath = (): string => {
   const path = route.path
-  // 子菜单项命中 → 返回父菜单 path（父项始终可见，激活胶囊定位到父项）
-  for (const parentPath of Object.keys(subItemsMap.value)) {
-    const sub = subItemsMap.value[parentPath]?.find((s) => s.path === path)
-    if (sub) return parentPath
-  }
-  // 精确匹配父菜单项
   const exact = menuItems.value.find((item) => item.path === path)
   if (exact) return exact.path
-  // 前缀匹配父菜单项
-  if (path !== '/') {
-    const prefix = menuItems.value.find((item) => item.path !== '/' && path.startsWith(item.path))
-    if (prefix) return prefix.path
+  const parent = menuItems.value.find((item) => item.path !== '/' && path.startsWith(`${item.path}/`))
+  if (parent) return parent.path
+  if (!isCollapsed.value) {
+    const plugin = pluginRoutesList.value.find((item) => path === `/plugin/${item.plugin}${item.path}`)
+    if (plugin) return path
   }
   return ''
 }
 
-watch(
-  () => route.path,
-  () => {
-    nextTick(() => {
-      const activePath = getActivePath()
-      if (activePath) {
-        updateIndicator(activePath)
-        updateActiveBg(activePath)
-      } else {
-        if (indicatorRef.value) indicatorRef.value.style.opacity = '0'
-        if (activeBgRef.value) activeBgRef.value.style.opacity = '0'
-      }
-    })
-  },
-  { immediate: true }
-)
+let resizeObserver: ResizeObserver | undefined
+let mutationObserver: MutationObserver | undefined
+let disposed = false
 
-// 子菜单展开/折叠时重新计算指示器位置
-watch(
-  () => [...expandedMenus.value],
-  () => {
-    nextTick(() => {
-      const activePath = getActivePath()
-      if (activePath) {
-        updateIndicator(activePath)
-        updateActiveBg(activePath)
-      }
-    })
-  },
-  { deep: true }
-)
-
-/**
- * 折叠与展开切换后重新定位胶囊。
- *
- * 折叠态与展开态共用同一个浮动胶囊；切换时菜单项的文字、插件项与子菜单会增减，
- * 激活项自身的 offsetTop/offsetHeight 随之变化。展开态还要等文字宽度过渡结束再测量，
- * 否则会按过渡中的中间值定位。
- */
-watch(isCollapsed, (collapsed) => {
-  const activePath = getActivePath()
-  if (!activePath) return
-  updateIndicator(activePath)
-  updateActiveBg(activePath)
-  if (!collapsed) {
-    // 文字与插件项在宽度过渡结束后才回到最终布局，过渡完成后补一次精确定位。
-    window.setTimeout(() => {
-      updateIndicator(activePath)
-      updateActiveBg(activePath)
-    }, 200)
+const updateActivePosition = () => {
+  const nav = navRef.value
+  const background = activeBgRef.value
+  const indicator = indicatorRef.value
+  if (!nav || !background || !indicator || disposed) return
+  const path = getActivePath()
+  const target = Array.from(nav.querySelectorAll<HTMLElement>('.sidebar-item[data-path]')).find(
+    (item) => item.dataset.path === path
+  )
+  if (!target) {
+    background.style.opacity = '0'
+    indicator.style.opacity = '0'
+    return
   }
-})
+
+  const hidden = background.style.opacity !== '1'
+  if (hidden) {
+    background.style.transition = 'none'
+    indicator.style.transition = 'none'
+  }
+  background.style.top = `${target.offsetTop}px`
+  background.style.height = `${target.offsetHeight}px`
+  indicator.style.top = `${target.offsetTop + 9}px`
+  indicator.style.height = `${Math.max(0, target.offsetHeight - 18)}px`
+  if (hidden) {
+    void background.offsetHeight
+    background.style.transition = ''
+    indicator.style.transition = ''
+  }
+  background.style.opacity = '1'
+  indicator.style.opacity = '1'
+}
+
+const schedulePositionUpdate = () => {
+  void nextTick(updateActivePosition)
+}
+
+watch([() => route.path, isCollapsed, pluginRoutesList, expandedMenus], schedulePositionUpdate, { flush: 'post' })
 
 onMounted(() => {
-  const activePath = getActivePath()
-  if (activePath) {
-    setTimeout(() => {
-      updateIndicator(activePath)
-      updateActiveBg(activePath)
-    }, 100)
+  const nav = navRef.value
+  if (!nav) return
+  const observeLayout = () => {
+    resizeObserver?.disconnect()
+    resizeObserver?.observe(nav)
+    for (const child of Array.from(nav.children)) {
+      if (child !== activeBgRef.value && child !== indicatorRef.value) resizeObserver?.observe(child)
+    }
+    schedulePositionUpdate()
   }
+  if (typeof ResizeObserver !== 'undefined') resizeObserver = new ResizeObserver(schedulePositionUpdate)
+  mutationObserver = new MutationObserver(observeLayout)
+  mutationObserver.observe(nav, { childList: true, subtree: true, characterData: true })
+  observeLayout()
+  window.addEventListener('resize', schedulePositionUpdate)
+})
+
+onBeforeUnmount(() => {
+  disposed = true
+  resizeObserver?.disconnect()
+  mutationObserver?.disconnect()
+  window.removeEventListener('resize', schedulePositionUpdate)
 })
 </script>
 

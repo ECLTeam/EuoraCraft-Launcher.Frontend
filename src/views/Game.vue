@@ -523,19 +523,9 @@ const launchVersionVisual = computed(() => {
   return { image: '', icon: getLoaderIcon(selected?.type) }
 })
 
-const launchCancelTimer = ref<ReturnType<typeof setTimeout> | null>(null)
-
-async function handleLaunchProgressCancel() {
-  globalLaunchProgress.cancel()
-  try {
-    await gameHomeStore.cancelLaunch()
-  } catch (error) {
-    console.warn('[LaunchCancel] 取消请求异常:', error)
-  }
-  launchCancelTimer.value = setTimeout(() => {
-    if (version.launching) version.launching = false
-    launchCancelTimer.value = null
-  }, 5000)
+function handleLaunchProgressCancel() {
+  // 立即释放进度卡与启动按钮，取消信号与后端清理在后台继续。
+  version.cancelLaunch()
 }
 
 function openVersionSettings() {
@@ -603,7 +593,6 @@ onBeforeUnmount(() => {
   stopInfoCard()
   stopListeningForRunningInstances?.()
   stopListeningForRunningInstances = null
-  if (launchCancelTimer.value) clearTimeout(launchCancelTimer.value)
 })
 </script>
 

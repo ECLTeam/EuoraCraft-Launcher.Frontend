@@ -35,7 +35,7 @@ export const useGameHomeStore = defineStore('game-home', () => {
     }
   }
 
-  function cancelLaunch(): Promise<void> {
+  function cancelLaunch(): Promise<boolean> {
     return gameHomeApi.cancelLaunch().finally(() => invalidateResource(queryKeys.gameHome.announcements))
   }
 

@@ -11,16 +11,7 @@
             <i></i>
             {{ t('versions.running.count', { count: instances.length }) }}
           </span>
-          <button
-            class="running-refresh"
-            :title="t('versions.running.refresh')"
-            :disabled="loading"
-            @click="loadInstances"
-          >
-            <UiIcon name="refresh" :size="14" :className="loading ? 'spin' : ''" />
-            {{ t('versions.running.refresh') }}
-          </button>
-
+          <!-- 实例列表由后端实例事件驱动实时更新，不提供手动刷新入口。 -->
           <button class="running-terminal" :title="t('versions.running.terminal')" @click="emit('openTerminal')">
             <UiIcon name="terminal" :size="14" />
             {{ t('versions.running.terminal') }}
@@ -47,9 +38,7 @@
           <TransitionGroup name="running-row" tag="div" class="running-table-body">
             <div v-for="instance in instances" :key="instance.id" class="running-instance-row">
               <div class="col-icon">
-                <div class="running-version-icon">
-                  <img :src="instanceImage(instance)" alt="" />
-                </div>
+                <InstanceIcon :source="iconSource(instance)" :size="30" />
               </div>
               <div class="col-name">
                 <span class="running-version-name" :title="instance.name || instance.versionId">
@@ -85,15 +74,6 @@
             </div>
           </TransitionGroup>
         </div>
-
-        <template #empty-actions>
-          <div class="running-empty-actions">
-            <NButton secondary size="small" @click="loadInstances">
-              <template #icon><UiIcon name="refresh" :size="14" /></template>
-              {{ t('versions.running.refresh') }}
-            </NButton>
-          </div>
-        </template>
       </InstanceContentState>
     </section>
     <ConfirmDialog
@@ -109,17 +89,16 @@
 </template>
 
 <script setup lang="ts">
-import { NButton } from 'naive-ui'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InstanceContentState from '@/components/instances/InstanceContentState.vue'
+import InstanceIcon from '@/components/instances/InstanceIcon.vue'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
-import { getLoaderImage } from '@/config/version'
 import { instanceRuntimeApi } from '@/features/instances/api/instanceRuntimeApi'
-import type { GameInstance } from '@/types/instances'
+import type { GameInstance, InstanceIconSource } from '@/types/instances'
 
 const emit = defineEmits<{ (e: 'openTerminal'): void }>()
 const { t } = useI18n()
@@ -130,11 +109,9 @@ const stoppingIds = ref(new Set<string>())
 let requestId = 0
 let stopListening: (() => void) | null = null
 
-function instanceImage(instance: GameInstance): string {
-  if (instance.loader) return getLoaderImage(instance.loader) || '/img/item/grass.png'
-  const name = `${instance.name} ${instance.versionId} ${instance.version ?? ''}`.toLowerCase()
-  const loader = ['neoforge', 'fabric', 'quilt', 'optifine', 'forge'].find((candidate) => name.includes(candidate))
-  return getLoaderImage(loader) || '/img/item/grass.png'
+/** 运行中实例只带加载器和图标，没有版本类型，图标缺失时按加载器回退。 */
+function iconSource(instance: GameInstance): InstanceIconSource {
+  return { icon: instance.icon ?? undefined, primaryLoader: instance.loader ?? 'vanilla' }
 }
 
 async function loadInstances(): Promise<void> {
@@ -305,31 +282,6 @@ async function handleConfirm() {
   box-shadow: none;
 }
 
-.running-refresh {
-  display: inline-flex;
-  height: 29px;
-  align-items: center;
-  gap: 4px;
-  padding: 0 9px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  background: var(--bg-elevated);
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 11px;
-  transition: all var(--duration-fast) var(--ease-emphasized);
-}
-
-.running-refresh:hover:not(:disabled) {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.running-refresh:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-
 .running-terminal {
   display: inline-flex;
   height: 29px;
@@ -448,22 +400,6 @@ async function handleConfirm() {
   justify-content: flex-end;
 }
 
-.running-version-icon {
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-}
-
-.running-version-icon img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
-
 .running-version-name {
   overflow: hidden;
   color: var(--text-primary);
@@ -537,21 +473,6 @@ async function handleConfirm() {
   opacity: 0.5;
 }
 
-.running-empty-actions {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: var(--s-sm);
-  text-align: center;
-}
-
-.running-empty-actions > span {
-  max-width: 360px;
-  color: var(--text-secondary);
-  font-size: 11px;
-  line-height: 1.6;
-}
-
 @media (max-width: 760px) {
   .col-path {
     display: none;
@@ -561,16 +482,6 @@ async function handleConfirm() {
 @media (max-width: 520px) {
   .running-instances-count {
     padding: 3px 6px;
-  }
-
-  .running-refresh {
-    width: 29px;
-    padding: 0;
-    justify-content: center;
-  }
-
-  .running-refresh:not(:disabled) {
-    font-size: 0;
   }
 
   .col-process {

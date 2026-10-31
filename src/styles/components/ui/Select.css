@@ -11,9 +11,13 @@
 }
 
 .ui-select-option-label {
+  white-space: nowrap;
+}
+
+/* 只有触发器内的标签需要省略号：下拉菜单已按内容宽度展开，不再截断选项文字。 */
+.ui-select .ui-select-option-label {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ui-select-option-description {

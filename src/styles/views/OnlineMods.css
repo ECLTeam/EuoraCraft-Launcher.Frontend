@@ -72,14 +72,14 @@
 
 .filter-item {
   flex: 0 1 auto;
-  min-width: 104px;
-  max-width: 160px;
+  min-width: 116px;
+  max-width: 184px;
 }
 
 .filter-item-small {
   flex: 0 1 auto;
-  min-width: 84px;
-  max-width: 120px;
+  min-width: 104px;
+  max-width: 152px;
 }
 
 .fixed-source-label {
@@ -869,7 +869,7 @@
   }
 
   .filter-item {
-    min-width: 110px;
+    min-width: 120px;
   }
 
   .mod-list {

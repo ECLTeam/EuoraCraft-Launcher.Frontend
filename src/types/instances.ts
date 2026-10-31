@@ -59,6 +59,13 @@ export interface InstanceIconConfig {
   source?: string
 }
 
+/** 渲染实例图标所需的最小信息，扫描结果与运行中实例都能提供。 */
+export interface InstanceIconSource {
+  icon?: InstanceIconConfig
+  primaryLoader?: string
+  versionType?: string
+}
+
 export interface InstanceCategory {
   id: string
   name: string
@@ -150,6 +157,8 @@ export interface GameInstance {
   versionId: string
   loader?: string | null
   gamePath: string
+  /** 实例资料中设置的图标；未设置时为 null，界面回退到加载器默认图标。 */
+  icon?: InstanceIconConfig | null
 }
 
 // ================================================================

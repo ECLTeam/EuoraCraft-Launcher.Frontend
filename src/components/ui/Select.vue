@@ -15,6 +15,7 @@
     :disabled="disabled"
     :inputProps="{ id, 'aria-label': ariaLabel || placeholder || t('common.selectPlaceholder') }"
     :renderLabel="renderLabel"
+    :consistentMenuWidth="false"
     to="#app"
     @update:value="select"
   >

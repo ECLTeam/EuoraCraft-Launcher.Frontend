@@ -59,6 +59,12 @@ export const LAUNCH_MIN_PROGRESS_DURATION = 5000
 export const LAUNCH_SUCCESS_HIDE_DELAY = 500
 /** 启动失败后关闭进度面板的延迟 (ms) */
 export const LAUNCH_ERROR_HIDE_DELAY = 2000
+/** 上一次启动仍在退出时，重新启动的重试间隔 (ms) */
+export const LAUNCH_BUSY_RETRY_DELAY = 700
+/** 上一次启动仍在退出时，重新启动的最大重试次数 */
+export const LAUNCH_BUSY_RETRY_LIMIT = 3
+/** 取消启动后忽略启动点击的时间窗口 (ms)，避免连点同一位置误触发新启动 */
+export const LAUNCH_CANCEL_GUARD_DELAY = 600
 /** 状态消息自动消失时间 (ms) */
 export const STATUS_MESSAGE_AUTO_HIDE = 5000
 

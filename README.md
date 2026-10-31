@@ -43,4 +43,4 @@ pnpm check
 - `pnpm build`：类型检查并构建生产版本。
 - `pnpm build:showcase`：类型检查并构建可独立展示的前端版本。
 
-目录、命名、Vue、TypeScript、样式和 Git 约定见 [CONTRIBUTING.md](./CONTRIBUTING.md)。后端接口见 [BACKEND_API.md](./BACKEND_API.md)。
+工程协作约定见主仓库的[贡献指南](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/CONTRIBUTING.md)和[项目规范](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/AGENTS.md)。项目文档见[文档索引](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/docs/README.md)。
