@@ -154,12 +154,12 @@ import { useCustomDownloadStore } from '@/features/download/stores/customDownloa
 import { getErrorMessage } from '@/utils/error'
 const { t } = useI18n()
 const namingTheme = {
-  buttonHeightMedium: '29px',
+  buttonHeightMedium: 'var(--ecl-control-height-sm, 32px)',
   fontSizeMedium: '12px',
   buttonBorderRadius: 'var(--r-sm)',
-  buttonColor: 'var(--control-bg)',
+  buttonColor: 'var(--ecl-control-fill)',
   buttonColorActive: 'var(--primary-alpha)',
-  buttonBorderColor: 'var(--control-border)',
+  buttonBorderColor: 'var(--border-strong)',
   buttonBorderColorActive: 'var(--primary)',
   buttonBorderColorHover: 'var(--control-border-hover)',
   buttonTextColor: 'var(--text-primary)',
@@ -300,6 +300,13 @@ onBeforeUnmount(() => {
 .custom-download-naming :deep(.n-radio-group) {
   justify-self: start;
   max-width: 100%;
+}
+/* 标签覆盖了 17px 行高，naive 依赖按钮行高的居中随之失效，
+   改为按钮内 flex 居中，单行与换行两种情况都保持垂直居中。 */
+.custom-download-naming :deep(.n-radio-button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .custom-download-naming :deep(.n-radio-button .n-radio__label) {
   white-space: normal;
