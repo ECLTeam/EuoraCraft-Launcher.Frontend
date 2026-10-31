@@ -49,18 +49,18 @@
             </li>
           </ul>
         </section>
-        <section v-for="capability in declaredJava" :key="capability" class="java-access">
-          <NCheckbox v-model:checked="allowJava[capability]" :disabled="saving">
-            {{ t('plugins.capabilities.' + capability.replaceAll('.', '_')) }}
+        <section v-if="declaredJava.length" class="java-access">
+          <NCheckbox :checked="allowJavaAny" :disabled="saving" @update:checked="toggleJava">
+            {{ t('plugins.capabilities.java') }}
           </NCheckbox>
           <PluginLocalResourceSelector
-            v-if="allowJava[capability] && (capability === 'java.read' || capability === 'java.use')"
-            v-model:selected="javaResources[capability]"
-            :capability="capability"
+            v-if="allowJavaAny && javaResourceCapability"
+            v-model:selected="javaResources[javaResourceCapability]"
+            :capability="javaResourceCapability"
             :view="view"
             :disabled="saving"
-            @revision="javaRevisions[capability] = $event"
-            @busy="javaBusy[capability] = $event"
+            @revision="javaRevisions[javaResourceCapability] = $event"
+            @busy="javaBusy[javaResourceCapability] = $event"
             @manage="openJavaManager"
           />
         </section>
@@ -147,6 +147,12 @@ const javaRevisions = ref<Record<'java.read' | 'java.use', number | undefined>>(
   'java.use': undefined,
 })
 const javaBusy = ref<Record<'java.read' | 'java.use', boolean>>({ 'java.read': false, 'java.use': false })
+const allowJavaAny = computed(() => declaredJava.value.some((capability) => allowJava.value[capability]))
+const javaResourceCapability = computed<'java.read' | 'java.use' | null>(() => {
+  if (declaredJava.value.includes('java.use')) return 'java.use'
+  if (declaredJava.value.includes('java.read')) return 'java.read'
+  return null
+})
 const declaredJava = computed(() =>
   javaCapabilities.filter((capability) =>
     view.value?.items.some((item) => item.capability === capability && item.implemented)
@@ -263,6 +269,9 @@ const canSave = computed(
     !requiredMissing.value &&
     (!needsRoots.value || (selectedResources.value.length > 0 && resourceRevision.value !== undefined))
 )
+function toggleJava(value: boolean): void {
+  for (const capability of javaCapabilities) allowJava.value[capability] = value
+}
 function displayOrigin(reference: string): string {
   const [scheme, host, port] = reference.split(':')
   return scheme + '://' + host + ':' + port

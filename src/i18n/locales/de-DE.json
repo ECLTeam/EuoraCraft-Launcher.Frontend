@@ -695,8 +695,6 @@
     "days": "Tage"
   },
   "plugins": {
-    "allowUiInjection": "Plugins dürfen die Oberfläche ändern",
-    "allowUiInjectionHint": "Wenn aus, wird kein eingefügter Inhalt von Drittanbieter-Plugins angezeigt. Installierte Plugins bleiben unberührt.",
     "permissionUiInjectNote": "Dieses Plugin kann eigene Oberflächeninhalte im Launcher-Fenster anzeigen. Diese laufen auf derselben Seite und können bereits angezeigte Daten lesen. Nur für vertrauenswürdige Plugins aktivieren.",
     "panel": "Panel",
     "panelTitle": "Plugin-Panel",
@@ -805,6 +803,8 @@
     "stopping": "Wird beendet",
     "failed": "Fehlgeschlagen",
     "capabilities": {
+      "java": "Java verwenden",
+      "game": "Spiel",
       "ui_inject": "Launcher-Oberfläche ändern",
       "instances_read": "Spiele anzeigen",
       "network_read": "Netzwerkzugriff",
@@ -1870,7 +1870,9 @@
     "clearPluginsConfirmContent": "Beim nächsten Start werden alle Nutzer-Plugins und Plugin-Konfigurationen gelöscht. Fortfahren?",
     "confirmDangerAction": "Bestätigen und planen",
     "maintenanceScheduled": "Aktion geplant. Bitte starte den Launcher neu, damit sie wirksam wird. Betroffene Daten werden zuvor gesichert und können bei Bedarf wiederhergestellt werden.",
-    "maintenanceFailed": "Aktion konnte nicht geplant werden: {detail}"
+    "maintenanceFailed": "Aktion konnte nicht geplant werden: {detail}",
+    "pluginUiInjection": "Plugin-Oberflächeninjektion",
+    "pluginUiInjectionDesc": "Beim Ausschalten werden alle von Drittanbieter-Plugins eingefügten Oberflächeninhalte sofort entfernt. Beim erneuten Einschalten werden Plugins mit erteilter Berechtigung neu geladen, damit ihre Oberfläche ohne Neustart zurückkehrt."
   },
   "loader": {
     "fabric": "Fabric",

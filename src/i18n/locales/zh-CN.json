@@ -699,8 +699,6 @@
     "days": "天"
   },
   "plugins": {
-    "allowUiInjection": "允许插件修改界面",
-    "allowUiInjectionHint": "关闭后不再渲染任何第三方插件注入的界面内容，已安装插件不受影响。",
     "permissionUiInjectNote": "该插件可以在启动器主窗口显示自己的界面内容。内容与启动器同页运行，可读取页面上已显示的信息，只在你信任该插件时开启。",
     "panel": "面板",
     "panelTitle": "插件面板",
@@ -809,6 +807,8 @@
     "stopping": "停止中",
     "failed": "运行失败",
     "capabilities": {
+      "java": "使用 Java",
+      "game": "游戏",
       "ui_inject": "修改启动器界面",
       "instances_read": "查看游戏",
       "network_read": "联网",
@@ -1755,7 +1755,9 @@
     "clearPluginsConfirmContent": "下次启动时，所有用户插件和插件配置将被删除。是否继续？",
     "confirmDangerAction": "确认并安排",
     "maintenanceScheduled": "操作已安排，请重启启动器后生效。受影响数据会先备份，可在需要时恢复。",
-    "maintenanceFailed": "安排操作失败：{detail}"
+    "maintenanceFailed": "安排操作失败：{detail}",
+    "pluginUiInjection": "插件界面注入",
+    "pluginUiInjectionDesc": "关闭后立即撤销全部第三方插件注入的界面内容；重新打开会重载已获准注入的插件，界面随之恢复，无需重启启动器。"
   },
   "loader": {
     "fabric": "Fabric",

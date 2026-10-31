@@ -83,7 +83,8 @@ describe('simplified plugin permission review', () => {
     try {
       await flushPromises()
       expect(wrapper.findAllComponents(PluginLocalResourceSelector)).toHaveLength(0)
-      for (const key of ['java_read', 'accounts_read']) {
+      // Java 四项合并为一个勾选，勾一次即覆盖已声明的全部 Java 能力。
+      for (const key of ['java', 'accounts_read']) {
         const checkbox = wrapper
           .findAllComponents(NCheckbox)
           .find((control) => control.text() === i18n.global.t('plugins.capabilities.' + key))!

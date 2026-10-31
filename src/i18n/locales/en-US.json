@@ -699,8 +699,6 @@
     "days": "days"
   },
   "plugins": {
-    "allowUiInjection": "Allow plugins to modify the interface",
-    "allowUiInjectionHint": "When off, no third-party plugin content is rendered. Installed plugins are not affected.",
     "permissionUiInjectNote": "This plugin can render its own interface inside the launcher window. That content runs in the same page and can read what is already displayed. Enable it only for plugins you trust.",
     "panel": "Panel",
     "panelTitle": "Plugin panel",
@@ -809,6 +807,8 @@
     "stopping": "Stopping",
     "failed": "Failed",
     "capabilities": {
+      "java": "Use Java",
+      "game": "Game",
       "ui_inject": "Modify the launcher interface",
       "instances_read": "View games",
       "network_read": "Network access",
@@ -1860,7 +1860,9 @@
     "clearPluginsConfirmContent": "On next launch, all user plugins and plugin settings will be deleted. Continue?",
     "confirmDangerAction": "Confirm and schedule",
     "maintenanceScheduled": "Action scheduled. Restart the launcher to apply it. Affected data will be backed up first and can be restored if needed.",
-    "maintenanceFailed": "Could not schedule the action: {detail}"
+    "maintenanceFailed": "Could not schedule the action: {detail}",
+    "pluginUiInjection": "Plugin UI injection",
+    "pluginUiInjectionDesc": "Turning this off immediately removes all third-party plugin UI content. Turning it back on reloads plugins that were granted injection so their UI returns, without restarting the launcher."
   },
   "loader": {
     "fabric": "Fabric",

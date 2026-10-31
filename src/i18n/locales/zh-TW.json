@@ -695,8 +695,6 @@
     "days": "天"
   },
   "plugins": {
-    "allowUiInjection": "允許外掛修改介面",
-    "allowUiInjectionHint": "關閉後不再顯示任何第三方外掛注入的介面內容，已安裝外掛不受影響。",
     "permissionUiInjectNote": "此外掛可以在啟動器主視窗顯示自己的介面內容。內容與啟動器同頁執行，可讀取頁面上已顯示的資訊，只在你信任此外掛時開啟。",
     "panel": "面板",
     "panelTitle": "外掛面板",
@@ -805,6 +803,8 @@
     "stopping": "停止中",
     "failed": "執行失敗",
     "capabilities": {
+      "java": "使用 Java",
+      "game": "遊戲",
       "ui_inject": "修改啟動器介面",
       "instances_read": "查看遊戲",
       "network_read": "連線",
@@ -1753,7 +1753,9 @@
     "clearPluginsConfirmContent": "下次啟動時，所有使用者外掛和外掛配置將被刪除。是否繼續？",
     "confirmDangerAction": "確認並安排",
     "maintenanceScheduled": "操作已安排，請重啟啟動器後生效。受影響資料會先備份，可在需要時還原。",
-    "maintenanceFailed": "安排操作失敗：{detail}"
+    "maintenanceFailed": "安排操作失敗：{detail}",
+    "pluginUiInjection": "外掛介面注入",
+    "pluginUiInjectionDesc": "關閉後立即撤銷全部第三方外掛注入的介面內容；重新開啟會重新載入已獲准注入的外掛，介面隨之恢復，無需重啟啟動器。"
   },
   "loader": {
     "fabric": "Fabric",

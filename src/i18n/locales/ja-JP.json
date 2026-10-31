@@ -695,8 +695,6 @@
     "days": "日"
   },
   "plugins": {
-    "allowUiInjection": "プラグインによる画面変更を許可",
-    "allowUiInjectionHint": "オフにすると、サードパーティプラグインが挿入した画面は表示されません。インストール済みプラグインには影響しません。",
     "permissionUiInjectNote": "このプラグインはランチャーのメインウィンドウに独自の画面を表示できます。同じページで動作し、表示済みの情報を読み取れます。信頼できるプラグインのみ有効にしてください。",
     "panel": "パネル",
     "panelTitle": "プラグインパネル",
@@ -805,6 +803,8 @@
     "stopping": "停止中",
     "failed": "実行失敗",
     "capabilities": {
+      "java": "Java を使用",
+      "game": "ゲーム",
       "ui_inject": "ランチャー画面の変更",
       "instances_read": "ゲームを表示",
       "network_read": "ネットワークアクセス",
@@ -1870,7 +1870,9 @@
     "clearPluginsConfirmContent": "次回の起動時に、すべてのユーザープラグインとプラグイン設定が削除されます。続行しますか？",
     "confirmDangerAction": "確認して予定に追加",
     "maintenanceScheduled": "操作を予定しました。ランチャーを再起動すると反映されます。影響するデータは先にバックアップされ、必要に応じて復元できます。",
-    "maintenanceFailed": "操作の予定に失敗しました：{detail}"
+    "maintenanceFailed": "操作の予定に失敗しました：{detail}",
+    "pluginUiInjection": "プラグインのUI挿入",
+    "pluginUiInjectionDesc": "オフにするとサードパーティプラグインが挿入したUIコンテンツを即座に取り消します。再度オンにすると挿入を許可されたプラグインを再読み込みし、ランチャーを再起動せずにUIが戻ります。"
   },
   "loader": {
     "fabric": "Fabric",
