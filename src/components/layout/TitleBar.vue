@@ -28,24 +28,27 @@
           <span
             v-if="isDevMode"
             class="titlebar-mode-badge titlebar-mode-badge--dev"
-            title="开发模式：Vite 开发构建"
-            aria-label="开发模式"
+            role="img"
+            :title="t('titlebar.developmentMode')"
+            :aria-label="t('titlebar.developmentMode')"
           >
             DEV
           </span>
           <span
             v-if="isDebugMode"
             class="titlebar-mode-badge titlebar-mode-badge--debug"
-            title="调试模式：启动器已开启调试"
-            aria-label="调试模式"
+            role="img"
+            :title="t('settings.debugMode')"
+            :aria-label="t('settings.debugMode')"
           >
             DEBUG
           </span>
           <span
             v-if="isShowcaseMode"
             class="titlebar-mode-badge"
-            title="展示模式使用本地演示数据，不连接后端"
-            aria-label="展示模式：使用本地演示数据，不连接后端"
+            role="img"
+            :title="t('titlebar.showcaseMode')"
+            :aria-label="t('titlebar.showcaseMode')"
           >
             SHOWCASE
           </span>
@@ -53,8 +56,9 @@
             v-if="releaseChannelLabel"
             class="titlebar-mode-badge"
             :class="`titlebar-mode-badge--${releaseChannelType}`"
-            :title="`${releaseChannelLabel} 预发布版本`"
-            :aria-label="`${releaseChannelLabel} 预发布版本`"
+            role="img"
+            :title="t('titlebar.prerelease', { channel: releaseChannelLabel })"
+            :aria-label="t('titlebar.prerelease', { channel: releaseChannelLabel })"
           >
             {{ releaseChannelLabel }}
           </span>

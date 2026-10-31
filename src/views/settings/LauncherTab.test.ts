@@ -51,6 +51,21 @@ async function mountSettings(query: Record<string, string> = {}) {
 }
 
 describe('LauncherTab 联机设置定位', () => {
+  it.each(['zh-CN', 'zh-TW', 'en-US', 'de-DE', 'ja-JP', 'ru-RU'] as const)(
+    '在 %s 为设置开关提供对应标签名称',
+    async (locale) => {
+      i18n.global.locale.value = locale
+      const { wrapper } = await mountSettings()
+      useSettingsStore().launcher.debug = true
+      await flushPromises()
+      expect(wrapper.findAll('[role="switch"]')).toHaveLength(3)
+      for (const control of wrapper.findAll('[role="switch"]')) {
+        const rowLabel = control.element.closest('.setting-item')?.querySelector('.setting-label span')?.textContent
+        expect(rowLabel).toBeTruthy()
+        expect(control.attributes('aria-label')).toBe(rowLabel)
+      }
+    }
+  )
   beforeEach(() => {
     i18n.global.locale.value = 'zh-CN'
     frames = new Map()

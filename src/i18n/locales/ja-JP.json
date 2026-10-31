@@ -2565,5 +2565,10 @@
       "failed": "出力失敗",
       "cancelled": "出力をキャンセルしました"
     }
+  },
+  "titlebar": {
+    "developmentMode": "開発モード：Vite 開発ビルド",
+    "showcaseMode": "デモモード：ローカルのデモデータを使用し、バックエンドには接続しません",
+    "prerelease": "{channel} プレリリース"
   }
 }

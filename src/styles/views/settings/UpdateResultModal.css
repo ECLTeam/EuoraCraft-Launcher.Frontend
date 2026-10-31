@@ -25,7 +25,7 @@
   padding: 3px 8px;
   border-radius: var(--r-sm);
   background: color-mix(in srgb, var(--primary) 10%, transparent);
-  color: var(--primary);
+  color: var(--text-primary);
   font-size: 11px;
   font-weight: 500;
   line-height: 1.5;

@@ -98,6 +98,11 @@ describe('simplified plugin permission review', () => {
     try {
       await flushPromises()
       expect(wrapper.findAllComponents(PluginResourceSelector)).toHaveLength(1)
+      expect(wrapper.get('[role="radiogroup"]').attributes('aria-label')).toBe(i18n.global.t('plugins.gameAccessTitle'))
+      await wrapper.get('summary').trigger('click')
+      expect(wrapper.findAll('[role="radiogroup"]')[1]!.attributes('aria-label')).toBe(
+        i18n.global.t('plugins.permissionLifetime')
+      )
       await wrapper.getComponent(NRadioGroup).vm.$emit('update:value', 'manage')
       await flushPromises()
       await primary(wrapper).trigger('click')

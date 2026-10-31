@@ -14,7 +14,7 @@
         :inert="!isInteractive || undefined"
         role="dialog"
         :aria-modal="isInteractive"
-        :aria-labelledby="titleId"
+        :aria-label="title"
       >
         <div
           ref="modalRef"
@@ -77,7 +77,6 @@ const layoutStore = useLayoutStore(pinia)
 const modalRef = ref<HTMLElement | null>(null)
 const instanceId = useId()
 const modalId = `fullscreen-modal-${instanceId}`
-const titleId = `fullscreen-modal-title-${instanceId}`
 const isActive = computed(() => fullscreenModal.currentId.value === modalId)
 const isVisible = computed(() => props.visible && isActive.value)
 const isInteractive = computed(() => isVisible.value && globalModalStack.interactiveModalId.value === modalId)

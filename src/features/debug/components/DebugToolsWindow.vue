@@ -278,7 +278,7 @@ function restore(): void {
 }
 
 function onEscape(event: KeyboardEvent): void {
-  if (isBlocked.value || event.defaultPrevented) return
+  if (isBlocked.value || event.defaultPrevented || store.mode !== 'floating') return
   event.preventDefault()
   event.stopPropagation()
   minimize()

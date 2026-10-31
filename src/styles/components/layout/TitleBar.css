@@ -47,31 +47,32 @@
 .titlebar-mode-badge {
   padding: 3px 7px;
   border-radius: 4px;
-  background: var(--primary);
-  color: #fff;
+  background: var(--glass-bg-sidebar);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
 
 .titlebar-mode-badge--dev {
-  background: var(--primary);
+  border-color: var(--primary);
 }
 
 .titlebar-mode-badge--debug {
-  background: var(--error);
+  border-color: var(--error);
 }
 
 .titlebar-mode-badge--alpha {
-  background: #d97706;
+  border-color: var(--warning);
 }
 
 .titlebar-mode-badge--beta {
-  background: #6366f1;
+  border-color: var(--primary);
 }
 
 .titlebar-mode-badge--rc {
-  background: #0f766e;
+  border-color: var(--success);
 }
 
 .titlebar-back-btn {
@@ -189,8 +190,9 @@
   height: 18px;
   padding: 0 4px;
   border-radius: 9px;
-  background: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--glass-bg-sidebar);
+  color: var(--text-primary);
+  border: 1px solid var(--primary);
   font-size: 10px;
   font-weight: 700;
   line-height: 1;

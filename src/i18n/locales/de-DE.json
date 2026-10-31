@@ -2565,5 +2565,10 @@
       "failed": "Export fehlgeschlagen",
       "cancelled": "Export abgebrochen"
     }
+  },
+  "titlebar": {
+    "developmentMode": "Entwicklungsmodus: Vite-Entwicklungsbuild",
+    "showcaseMode": "Demomodus: lokale Beispieldaten ohne Backend-Verbindung",
+    "prerelease": "{channel}-Vorabversion"
   }
 }

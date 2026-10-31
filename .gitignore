@@ -30,3 +30,8 @@ vite.config.d.ts
 
 .pnpm-store
 .agents
+
+# Browser governance tooling and reports
+__pycache__/
+.governance-source/
+build/

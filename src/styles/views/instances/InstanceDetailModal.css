@@ -125,7 +125,7 @@
 }
 
 .vdm-tab-button.active {
-  color: var(--ecl-primary);
+  color: var(--ecl-text);
   background: var(--ecl-primary-alpha);
   font-weight: 600;
 }
@@ -281,7 +281,7 @@
 
 .overview-actions :deep(.n-button:first-child) {
   background: var(--ecl-primary-alpha) !important;
-  color: var(--ecl-primary) !important;
+  color: var(--ecl-text) !important;
 }
 .overview-actions :deep(.n-button:first-child:hover) {
   background: var(--ecl-primary-alpha-strong) !important;
@@ -297,7 +297,7 @@
 
 .overview-actions :deep(.n-button:last-child) {
   background: var(--error-alpha) !important;
-  color: var(--error) !important;
+  color: var(--ecl-text) !important;
 }
 .overview-actions :deep(.n-button:last-child:hover) {
   background: color-mix(in srgb, var(--error) 20%, transparent) !important;

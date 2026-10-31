@@ -93,6 +93,25 @@ it('收起恢复保留内部输入，Esc 回到常驻浮条', async () => {
   expect(useDebugToolsWindowStore().mode).toBe('minimized')
 })
 
+it.each(['rectangle', 'circle'] as const)('收起为 %s 时 Esc 继续交给父弹窗处理', async (minimizedShape) => {
+  useSettingsStore().ui.debugTools = { minimizedShape }
+  const store = useDebugToolsWindowStore()
+  store.minimize()
+  render()
+  await flushPromises()
+  const onParentKeydown = vi.fn()
+  document.addEventListener('keydown', onParentKeydown)
+  try {
+    const event = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    windowElement().element.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+    expect(onParentKeydown).toHaveBeenCalledOnce()
+    expect(store.mode).toBe('minimized')
+  } finally {
+    document.removeEventListener('keydown', onParentKeydown)
+  }
+})
+
 it('圆形拖动不误展开，下一次点击与键盘点击仍可恢复面板', async () => {
   useSettingsStore().ui.debugTools = { minimizedShape: 'circle' }
   const store = useDebugToolsWindowStore()

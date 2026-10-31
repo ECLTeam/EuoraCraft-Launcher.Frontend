@@ -2582,5 +2582,10 @@
       "failed": "Export failed",
       "cancelled": "Export cancelled"
     }
+  },
+  "titlebar": {
+    "developmentMode": "Development mode: Vite development build",
+    "showcaseMode": "Showcase mode: local demo data, no backend connection",
+    "prerelease": "{channel} prerelease"
   }
 }

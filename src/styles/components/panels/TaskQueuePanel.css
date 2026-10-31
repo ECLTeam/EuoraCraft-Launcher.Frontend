@@ -179,7 +179,7 @@
 .tq-task-type,
 .tq-task-ver {
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   background: var(--ecl-surface-muted);
   padding: 1px 5px;
   border-radius: var(--r-xs);

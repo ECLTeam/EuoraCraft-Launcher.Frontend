@@ -48,6 +48,7 @@ it('网速曲线和唯一速度数字放在任务卡顶部，仅保留一条进�
   expect(wrapper.find('.tq-live').exists()).toBe(false)
   expect(wrapper.get('.tq-task-top .tq-task-speed').text()).toBe('1.0 KB/s')
   expect(wrapper.findAll('[role="progressbar"]')).toHaveLength(1)
+  expect(wrapper.get('[role="progressbar"]').attributes('aria-label')).toBe('Download')
   expect(wrapper.get('.tq-task-stats').text()).not.toContain('KB/s')
 })
 

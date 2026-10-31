@@ -92,7 +92,11 @@
         :description="t('settings.disableSslVerifyDesc')"
         :details="t('settings.disableSslVerifyDetails')"
       >
-        <NSwitch :value="disableSslVerify" @update:value="handleDisableSslVerifyChange" />
+        <NSwitch
+          :value="disableSslVerify"
+          :aria-label="t('settings.disableSslVerify')"
+          @update:value="handleDisableSslVerifyChange"
+        />
       </SettingRow>
     </SettingSection>
 
@@ -139,7 +143,7 @@
 
     <SettingSection :title="t('settings.developer')">
       <SettingRow :label="t('settings.debugMode')" :description="t('settings.debugModeDesc')">
-        <NSwitch :value="debugMode" @update:value="handleDebugModeChange" />
+        <NSwitch :value="debugMode" :aria-label="t('settings.debugMode')" @update:value="handleDebugModeChange" />
       </SettingRow>
       <SettingRow v-if="debugMode" :label="t('dev.title')" :description="t('dev.desc')">
         <NButton :loading="debugWindow.isSavingPreferences" @click="run(() => debugWindow.show())">
@@ -149,6 +153,7 @@
       <SettingRow v-if="debugMode" :label="t('dev.window.visible')" :description="t('dev.window.visibleHint')">
         <NSwitch
           :value="debugWindow.isVisible"
+          :aria-label="t('dev.window.visible')"
           :disabled="debugWindow.isSavingPreferences"
           @update:value="(value) => run(() => debugWindow.savePreferences({ visible: value }))"
         />

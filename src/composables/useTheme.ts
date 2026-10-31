@@ -386,6 +386,17 @@ export type DeriveMode = 'off' | 'default' | 'monet'
 
 export const presetColors = PRESET_COLORS
 
+/** 在实色背景上选择对比度更高的黑色或白色正文。 */
+function textOnColor(color: string): string {
+  const { r, g, b } = hexToRgb(color)
+  const linear = (channel: number) => {
+    const value = channel / 255
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  }
+  const luminance = 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+  return (luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05) ? '#000000' : '#ffffff'
+}
+
 const themeColors = {
   light: LIGHT_THEME_COLORS,
   dark: DARK_THEME_COLORS,
@@ -435,10 +446,10 @@ function createThemeOverrides(
       cubicBezierEaseIn: 'cubic-bezier(0.3, 0, 0.8, 0.15)',
     },
     Button: {
-      textColorPrimary: 'var(--text-on-primary)',
-      textColorHoverPrimary: 'var(--text-on-primary)',
-      textColorPressedPrimary: 'var(--text-on-primary)',
-      textColorFocusPrimary: 'var(--text-on-primary)',
+      textColorPrimary: textOnColor(primaryScale.primary),
+      textColorHoverPrimary: textOnColor(primaryScale.primaryHover),
+      textColorPressedPrimary: textOnColor(primaryScale.primaryPressed),
+      textColorFocusPrimary: textOnColor(primaryScale.primary),
       color: 'var(--ecl-control-surface)',
       colorHover: 'var(--ecl-hover)',
       colorPressed: 'var(--ecl-hover)',
@@ -518,9 +529,9 @@ function createThemeOverrides(
       color: 'transparent',
       itemColorHover: baseColors.backgroundHover,
       itemTextColor: baseColors.text,
-      itemTextColorHover: primaryScale.primary,
+      itemTextColorHover: baseColors.text,
       itemColorActive: primaryScale.primaryLight,
-      itemTextColorActive: primaryScale.primary,
+      itemTextColorActive: baseColors.text,
       itemIconColorActive: primaryScale.primary,
       itemHeight: '40px',
       itemBorderRadius: '6px',
@@ -747,6 +758,7 @@ export const useThemeStore = defineStore('theme', () => {
     document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
     document.documentElement.dataset.uiSkin = themeId.value
     document.documentElement.style.setProperty('--primary', primaryScale.value.primary)
+    document.documentElement.style.setProperty('--text-on-primary', textOnColor(primaryScale.value.primary))
     document.documentElement.style.setProperty('--ecl-primary', primaryScale.value.primary)
     document.documentElement.style.setProperty('--primary-rgb', primaryScale.value.primaryRgb)
     document.documentElement.style.setProperty('--primary-hover', primaryScale.value.primaryHover)

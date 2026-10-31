@@ -1,6 +1,6 @@
 import js from '@eslint/js'
 import eslintConfigPrettier from 'eslint-config-prettier'
-import importPlugin from 'eslint-plugin-import'
+import importOrder from 'eslint-plugin-import-x/rules/order'
 import vue from 'eslint-plugin-vue'
 import globals from 'globals'
 import ts from 'typescript-eslint'
@@ -14,7 +14,8 @@ export default ts.config(
       reportUnusedDisableDirectives: 'error',
     },
     plugins: {
-      import: importPlugin,
+      // 仅加载项目采用的公开排序规则；其他规则仍依赖 minimatch 11 已移除的 makeRe。
+      'import-x': { rules: { order: importOrder } },
     },
     languageOptions: {
       ecmaVersion: 'latest',
@@ -58,7 +59,7 @@ export default ts.config(
       eqeqeq: ['error', 'always', { null: 'ignore' }],
 
       // ── Import order ──
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'type'],
@@ -70,7 +71,7 @@ export default ts.config(
       ],
     },
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         typescript: true,
       },
     },

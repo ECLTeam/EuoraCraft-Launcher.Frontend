@@ -4,6 +4,26 @@ import { useTheme } from '@/composables/useTheme'
 import { LIGHT_THEME_COLORS } from '@/config/theme'
 
 describe('useTheme 语义色', () => {
+  it.each([
+    ['#5B6FF5', '#000000'],
+    ['#ffffff', '#000000'],
+    ['#000000', '#ffffff'],
+  ])('主色 %s 的按钮正文使用高对比颜色 %s', (background, foreground) => {
+    setActivePinia(createPinia())
+    const theme = useTheme()
+    theme.setPrimaryColor(background, false)
+    expect(theme.themeOverrides.value.Button?.textColorPrimary).toBe(foreground)
+    expect(document.documentElement.style.getPropertyValue('--text-on-primary')).toBe(foreground)
+  })
+  it('选中与悬停菜单文字使用可读正文色，保留主题强调背景与图标', () => {
+    setActivePinia(createPinia())
+    const theme = useTheme()
+    theme.setThemeMode('light', false)
+    theme.setPrimaryColor('#5B6FF5', false)
+    expect(theme.themeOverrides.value.Menu?.itemTextColorActive).toBe(LIGHT_THEME_COLORS.text)
+    expect(theme.themeOverrides.value.Menu?.itemTextColorHover).toBe(LIGHT_THEME_COLORS.text)
+    expect(theme.themeOverrides.value.Menu?.itemIconColorActive).toBe('#5B6FF5')
+  })
   it('关闭额外毛玻璃层后背景模糊仍可调整，切换主题不覆盖数值', () => {
     setActivePinia(createPinia())
     const theme = useTheme()

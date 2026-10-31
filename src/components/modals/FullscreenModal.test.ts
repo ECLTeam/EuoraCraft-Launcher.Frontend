@@ -48,6 +48,8 @@ describe('FullscreenModal', () => {
       (modal) => modal.style.display !== 'none'
     )
     expect(visibleModals).toHaveLength(1)
+    expect(visibleModals[0]?.getAttribute('aria-label')).toBe('任务列表')
+    expect(visibleModals[0]?.hasAttribute('aria-labelledby')).toBe(false)
     expect(visibleModals[0]?.textContent).toContain('任务内容')
 
     taskVisible.value = false

@@ -6,7 +6,7 @@
         class="node-settings-select"
         :options="modes"
         :disabled="settings.status !== 'ready'"
-        :aria-label="t('advanced.nodesPolicy')"
+        :inputProps="{ 'aria-label': t('advanced.nodesPolicy') }"
         @update:value="updateMode"
       />
     </SettingRow>

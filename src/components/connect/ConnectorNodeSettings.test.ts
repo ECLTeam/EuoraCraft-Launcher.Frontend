@@ -18,6 +18,14 @@ function mountSettings() {
 }
 
 describe('ConnectorNodeSettings', () => {
+  it('将可访问名称传给实际输入框而非无角色的外层容器', async () => {
+    const wrapper = mountSettings()
+    await flushPromises()
+    expect(wrapper.getComponent(NSelect).props('inputProps')).toEqual({
+      'aria-label': i18n.global.t('advanced.nodesPolicy'),
+    })
+    expect(wrapper.get('.node-settings-select').attributes('aria-label')).toBeUndefined()
+  })
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.resetAllMocks()

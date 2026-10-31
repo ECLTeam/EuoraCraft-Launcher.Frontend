@@ -1,5 +1,7 @@
 dist/
 node_modules/
+.governance-source/
+build/
 *.tsbuildinfo
 vite.config.d.ts
 components.d.ts

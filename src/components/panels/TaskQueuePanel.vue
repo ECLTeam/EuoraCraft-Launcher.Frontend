@@ -136,7 +136,12 @@
               <span v-if="stageAction(task)">{{ stageAction(task) }}</span>
             </div>
             <div class="tq-task-progress">
-              <UiProgress :percentage="taskProgress(task)" :processing="taskIndeterminate(task)" :height="4" />
+              <UiProgress
+                :percentage="taskProgress(task)"
+                :processing="taskIndeterminate(task)"
+                :height="4"
+                :aria-label="task.name"
+              />
               <span class="tq-progress-text">{{ progressText(task) }}</span>
             </div>
             <div

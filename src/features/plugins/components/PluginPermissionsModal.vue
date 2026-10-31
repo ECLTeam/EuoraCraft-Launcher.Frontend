@@ -15,7 +15,12 @@
         <p>{{ t('plugins.baseAccessNote') }}</p>
         <section v-if="hasGameAccess" class="game-access">
           <strong>{{ t('plugins.gameAccessTitle') }}</strong>
-          <NRadioGroup v-model:value="gameAccess" :disabled="saving" :aria-label="t('plugins.gameAccessTitle')">
+          <NRadioGroup
+            v-model:value="gameAccess"
+            :disabled="saving"
+            role="radiogroup"
+            :aria-label="t('plugins.gameAccessTitle')"
+          >
             <NRadio value="deny">{{ t('plugins.gameAccessDenied') }}</NRadio>
             <NRadio v-if="declaresRead" value="read">{{ t('plugins.capabilities.instances_read') }}</NRadio>
             <NRadio v-if="declaresManage" value="manage">{{ t('plugins.capabilities.instances_manage') }}</NRadio>
@@ -47,7 +52,12 @@
         <p v-if="requiredMissing" role="status">{{ t('plugins.requiredAccessMissing') }}</p>
         <details v-if="view.items.length">
           <summary>{{ t('plugins.permissionOptions') }}</summary>
-          <NRadioGroup v-model:value="lifetime" :disabled="saving" :aria-label="t('plugins.permissionLifetime')">
+          <NRadioGroup
+            v-model:value="lifetime"
+            :disabled="saving"
+            role="radiogroup"
+            :aria-label="t('plugins.permissionLifetime')"
+          >
             <NRadio value="permanent">{{ t('plugins.permissionPermanent') }}</NRadio>
             <NRadio value="session">{{ t('plugins.permissionSession') }}</NRadio>
           </NRadioGroup>
