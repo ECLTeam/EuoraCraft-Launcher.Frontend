@@ -48,6 +48,13 @@
   min-height: 0;
 }
 
+/* 列表与空状态共用的内容容器：撑满滚动区，空状态才能在剩余高度里垂直居中 */
+.plugins-list-content {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+
 .plugins-table-header {
   display: grid;
   height: 32px;
@@ -168,7 +175,7 @@
 
 .plugins-empty {
   display: flex;
-  height: 100%;
+  flex: 1;
   min-height: 170px;
   align-items: center;
   justify-content: center;

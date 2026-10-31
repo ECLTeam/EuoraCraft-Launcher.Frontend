@@ -47,7 +47,7 @@
           {{ t('plugins.loadFailed') }}
           <NButton text @click="refreshPermissions">{{ t('common.retry') }}</NButton>
         </NAlert>
-        <div v-else>
+        <div v-else class="plugins-list-content">
           <div v-if="filteredPlugins.length" class="plugins-list">
             <article v-for="plugin in filteredPlugins" :key="plugin.name" class="plugin-row">
               <div class="plugin-identity">
