@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { ABSOLUTELY_DARK, ABSOLUTELY_LIGHT } from './absolutely'
 import { CATPPUCCIN_PALETTES } from './catppuccin'
 import {
   CATPPUCCIN_SURFACE_STYLE,
@@ -10,10 +11,10 @@ import {
 
 describe('主题表面风格', () => {
   it('经典与极光沿用既有几何，Catppuccin 使用扁平描边', () => {
-    expect(surfaceStyleOf('classic')).toBe(CLASSIC_SURFACE_STYLE)
-    expect(surfaceStyleOf('folia')).toBe(CLASSIC_SURFACE_STYLE)
+    expect(surfaceStyleOf('classic', false)).toBe(CLASSIC_SURFACE_STYLE)
+    expect(surfaceStyleOf('folia', true)).toBe(CLASSIC_SURFACE_STYLE)
     for (const flavor of ['latte', 'frappe', 'macchiato', 'mocha'] as const) {
-      const style = surfaceStyleOf(`catppuccin-${flavor}`)
+      const style = surfaceStyleOf(`catppuccin-${flavor}`, flavor !== 'latte')
       expect(style.cardRadius).toBe(CATPPUCCIN_SURFACE_STYLE.cardRadius)
       expect(style.controlRadius).toBe(CATPPUCCIN_SURFACE_STYLE.controlRadius)
       expect(style.shadow).toBe(CATPPUCCIN_SURFACE_STYLE.shadow)
@@ -38,14 +39,27 @@ describe('主题表面风格', () => {
   })
 
   it('Catppuccin 控件用该风味的 surface0/1/2 做三态填充', () => {
-    const style = surfaceStyleOf('catppuccin-mocha')
+    const style = surfaceStyleOf('catppuccin-mocha', true)
     expect(style.control.fill).toBe(CATPPUCCIN_PALETTES.mocha.surface0)
     expect(style.control.fillHover).toBe(CATPPUCCIN_PALETTES.mocha.surface1)
     expect(style.control.fillActive).toBe(CATPPUCCIN_PALETTES.mocha.surface2)
     expect(style.control.borderColorFocus).toBe('var(--primary)')
     expect(style.control.glow).toBe('none')
 
-    expect(surfaceStyleOf('catppuccin-latte').control.fill).toBe(CATPPUCCIN_PALETTES.latte.surface0)
+    expect(surfaceStyleOf('catppuccin-latte', false).control.fill).toBe(CATPPUCCIN_PALETTES.latte.surface0)
+  })
+
+  it('Absolutely 控件填充随亮暗取该色板的近邻灰阶', () => {
+    const dark = surfaceStyleOf('absolutely', true)
+    const light = surfaceStyleOf('absolutely', false)
+    expect(dark.control.fill).toBe(ABSOLUTELY_DARK.controlFill)
+    expect(dark.control.fillHover).toBe(ABSOLUTELY_DARK.controlFillHover)
+    expect(light.control.fill).toBe(ABSOLUTELY_LIGHT.controlFill)
+    expect(light.control.fillHover).toBe(ABSOLUTELY_LIGHT.controlFillHover)
+    // 绝对几何：中等圆角、无投影
+    expect(dark.cardRadius).toBe(10)
+    expect(dark.controlRadius).toBe(8)
+    expect(dark.shadow).toBe('none')
   })
 
   it('经典控件沿用现有令牌，不改变既有观感', () => {
@@ -56,7 +70,7 @@ describe('主题表面风格', () => {
   })
 
   it('表面风格映射到完整的内联变量清单', () => {
-    const variables = surfaceStyleVariables(surfaceStyleOf('catppuccin-mocha'))
+    const variables = surfaceStyleVariables(surfaceStyleOf('catppuccin-mocha', true))
     expect(Object.keys(variables).sort()).toEqual([...surfaceVariableNames].sort())
     expect(variables['--ecl-card-radius']).toBe('12px')
     expect(variables['--ecl-control-radius']).toBe('8px')

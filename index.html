@@ -26,6 +26,7 @@
           if (s.primaryAlpha) d.style.setProperty('--primary-alpha', s.primaryAlpha)
           if (s.uiSkin) d.setAttribute('data-ui-skin', s.uiSkin)
           if (s.flavor) d.setAttribute('data-theme-flavor', s.flavor)
+          if (s.palette) d.setAttribute('data-theme-palette', s.palette)
         } catch (e) {}
       })()
     </script>
@@ -74,6 +75,21 @@
         --boot-bg: #1e1e2e;
         --boot-text: #cdd6f4;
         --boot-text-secondary: #a6adc8;
+      }
+      /* Absolutely：绝对中性灰阶，亮暗各一套，主色取该外观的强调色 */
+      [data-theme-palette='absolutely'][data-theme='light'] {
+        --boot-primary: #2563eb;
+        --boot-ring: rgba(37, 99, 235, 0.35);
+        --boot-bg: #fafafa;
+        --boot-text: #0a0a0a;
+        --boot-text-secondary: #52525b;
+      }
+      [data-theme-palette='absolutely'][data-theme='dark'] {
+        --boot-primary: #3b82f6;
+        --boot-ring: rgba(59, 130, 246, 0.35);
+        --boot-bg: #0a0a0a;
+        --boot-text: #fafafa;
+        --boot-text-secondary: #a1a1aa;
       }
       @keyframes boot-spin {
         to {

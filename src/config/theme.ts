@@ -31,8 +31,8 @@ export const THEME_MODE_OPTIONS: ThemeModeOption[] = [
 /** Catppuccin 主题风格标识，形如 `catppuccin-mocha`。 */
 export type CatppuccinThemeId = `catppuccin-${CatppuccinFlavor}`
 
-/** 内置主题风格：经典 / 极光 / Catppuccin 四风味。 */
-export type BuiltinThemeId = 'classic' | 'folia' | CatppuccinThemeId
+/** 内置主题风格：经典 / 极光 / Absolutely / Catppuccin 四风味。 */
+export type BuiltinThemeId = 'classic' | 'folia' | 'absolutely' | CatppuccinThemeId
 
 /** 内置主题风格选项；labelKey 指向 settings.* 下的界面名称。 */
 export interface BuiltinThemeOption {
@@ -44,6 +44,7 @@ export interface BuiltinThemeOption {
 export const BUILTIN_THEMES: BuiltinThemeOption[] = [
   { id: 'classic', icon: 'palette', labelKey: 'themeClassic' },
   { id: 'folia', icon: 'sparkles', labelKey: 'themeFolia' },
+  { id: 'absolutely', icon: 'bolt', labelKey: 'themeAbsolutely' },
   { id: 'catppuccin-latte', icon: 'coffee', labelKey: 'themeCatppuccinLatte' },
   { id: 'catppuccin-frappe', icon: 'coffee', labelKey: 'themeCatppuccinFrappe' },
   { id: 'catppuccin-macchiato', icon: 'coffee', labelKey: 'themeCatppuccinMacchiato' },

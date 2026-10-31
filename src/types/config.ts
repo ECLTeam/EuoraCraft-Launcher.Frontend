@@ -175,9 +175,15 @@ export interface ThemeScheduleConfig {
 
 export interface ThemeConfig {
   mode: 'light' | 'dark' | 'system'
-  /** 内置主题风格：经典 / 极光 / Catppuccin 四风味（latte、frappe、macchiato、mocha）。 */
+  /** 内置主题风格：经典 / 极光 / Absolutely / Catppuccin 四风味（latte、frappe、macchiato、mocha）。 */
   theme_id?:
-    'classic' | 'folia' | 'catppuccin-latte' | 'catppuccin-frappe' | 'catppuccin-macchiato' | 'catppuccin-mocha'
+    | 'classic'
+    | 'folia'
+    | 'absolutely'
+    | 'catppuccin-latte'
+    | 'catppuccin-frappe'
+    | 'catppuccin-macchiato'
+    | 'catppuccin-mocha'
   primary_color: string
   blur_amount: number
   navigation_mode?: NavigationMode

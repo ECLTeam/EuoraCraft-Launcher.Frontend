@@ -4,6 +4,8 @@
  * 数值取自 Catppuccin 标准 26 色色板，皮肤变量、naive-ui 语义色与强调色预设
  * 共用同一份数据，避免多处手写十六进制造成漂移。
  */
+import { mix } from './color'
+import type { ThemePaletteTokens } from './themePalette'
 
 /** Catppuccin 风味标识；latte 为亮色，其余三个为深色。 */
 export type CatppuccinFlavor = 'latte' | 'frappe' | 'macchiato' | 'mocha'
@@ -226,6 +228,42 @@ export function catppuccinFlavorOfThemeId(themeId: string): CatppuccinFlavor | n
 export function catppuccinAccentPresets(flavor: CatppuccinFlavor): CatppuccinAccentPreset[] {
   const palette = CATPPUCCIN_PALETTES[flavor]
   return CATPPUCCIN_ACCENT_KEYS.map((key) => ({ name: accent_labels[key], value: palette[key] }))
+}
+
+/**
+ * 把 Catppuccin 色板转换为共享语义令牌。
+ *
+ * 次级面板在 base 与 surface0 之间取中间值，让面板与卡片仍有层次；描边用
+ * surface1/surface2 这一官方层级，比半透明文字色更清晰。
+ * @param palette - 风味色板
+ * @param isDark - 是否为深色外观
+ * @returns 供 themePaletteVariables 使用的语义令牌
+ */
+export function catppuccinPaletteTokens(palette: CatppuccinPalette, isDark: boolean): ThemePaletteTokens {
+  return {
+    canvas: isDark ? palette.crust : palette.mantle,
+    base: palette.base,
+    mutedBase: mix(palette.base, palette.surface0, isDark ? 0.55 : 0.6),
+    text: palette.text,
+    textSecondary: palette.subtext0,
+    textTertiary: isDark ? palette.overlay2 : palette.overlay1,
+    border: palette.surface1,
+    borderStrong: palette.surface2,
+    divider: palette.surface0,
+    shadowTint: isDark ? palette.crust : palette.text,
+    success: palette.green,
+    warning: palette.yellow,
+    error: palette.red,
+    info: palette.blue,
+    raisedFill: palette.surface0,
+    badgeFabric: palette.yellow,
+    badgeForge: palette.lavender,
+    badgeNeoForge: palette.blue,
+    badgeQuilt: palette.green,
+    sliderTrack: isDark ? palette.surface1 : palette.surface0,
+    windowBorder: palette.surface1,
+    windowButtonBorder: palette.surface0,
+  }
 }
 
 /**

@@ -58,6 +58,7 @@ const appearance = looseObject({
 const themeIds = [
   'classic',
   'folia',
+  'absolutely',
   'catppuccin-latte',
   'catppuccin-frappe',
   'catppuccin-macchiato',

@@ -24,11 +24,14 @@ import {
   CATPPUCCIN_PALETTES,
   catppuccinAccentPresets,
   catppuccinFlavorOfThemeId,
+  catppuccinPaletteTokens,
   translateAccentColor,
   type CatppuccinFlavor,
-  type CatppuccinPalette,
 } from '@/config/catppuccin'
 import { surfaceStyleOf, surfaceStyleVariables, surfaceVariableNames, type ThemeSurfaceStyle } from '@/config/surface'
+import { absolutelyAccentPresets, absolutelyPalette, absolutelyPaletteTokens } from '@/config/absolutely'
+import { themePaletteVariables, themePaletteVariableNames, type ThemePaletteTokens } from '@/config/themePalette'
+import { hexToRgb, mix, normalizeHex, rgba, rgbToHex } from '@/config/color'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
 import {
   BACKGROUND_INTERVAL_DEFAULT,
@@ -92,56 +95,6 @@ function readVideoBackground(background: Partial<BackgroundConfig>): BackgroundV
     poster_path: background.media_type === 'video' ? background.poster_path : undefined,
     options: video as BackgroundVideoConfig | undefined,
   }
-}
-
-function normalizeHex(hex: string): string {
-  hex = hex.replace(/^#/, '')
-  if (hex.length === 3) {
-    hex = hex
-      .split('')
-      .map((c) => c + c)
-      .join('')
-  }
-  return `#${hex}`
-}
-
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  hex = normalizeHex(hex)
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!result) throw new Error('Invalid hex color')
-
-  return {
-    r: parseInt(result[1]!, 16),
-    g: parseInt(result[2]!, 16),
-    b: parseInt(result[3]!, 16),
-  }
-}
-
-function rgbToHex(r: number, g: number, b: number): string {
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
-}
-
-function mix(color1: string, color2: string, weight: number = 0.5): string {
-  const rgb1 = hexToRgb(color1)
-  const rgb2 = hexToRgb(color2)
-
-  const w = clamp(weight, 0, 1)
-  const r = Math.round(rgb1.r * (1 - w) + rgb2.r * w)
-  const g = Math.round(rgb1.g * (1 - w) + rgb2.g * w)
-  const b = Math.round(rgb1.b * (1 - w) + rgb2.b * w)
-
-  return rgbToHex(r, g, b)
-}
-
-function rgba(color: string, alpha: number): string {
-  const rgb = hexToRgb(color)
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamp(alpha, 0, 1)})`
-}
-
-/** 生成随卡片不透明度缩放的表面色，与 tokens.css 的 calc 写法保持一致。 */
-function rgbaSurface(color: string, alpha: number): string {
-  const rgb = hexToRgb(color)
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, calc(${clamp(alpha, 0, 1)} * var(--card-opacity, 1)))`
 }
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
@@ -399,149 +352,60 @@ function createPrimaryScale(
   }
 }
 
-/** Catppuccin 皮肤接管的设计令牌；切回经典/极光时按此清单清除内联覆盖。 */
-const catppuccinVariableNames = [
-  '--ecl-canvas',
-  '--ecl-surface',
-  '--ecl-surface-muted',
-  '--ecl-control-surface',
-  '--ecl-text',
-  '--ecl-text-secondary',
-  '--ecl-text-tertiary',
-  '--ecl-border',
-  '--ecl-border-strong',
-  '--ecl-hover',
-  '--ecl-hover-strong',
-  '--ecl-shadow-surface',
-  '--ecl-shadow-pop',
-  '--ecl-badge-fabric-fg',
-  '--ecl-badge-forge-fg',
-  '--ecl-badge-neoforge-fg',
-  '--ecl-badge-quilt-fg',
-  '--bg-surface-solid',
-  '--glass-bg',
-  '--glass-bg-sidebar',
-  '--glass-border',
-  '--glass-divider',
-  '--divider',
-  '--text-disabled',
-  '--border-strong',
-  '--shadow-xs',
-  '--shadow-sm',
-  '--shadow-md',
-  '--shadow-lg',
-  '--shadow-xl',
-  '--shadow-hover',
-  '--shadow-card',
-  '--success',
-  '--success-alpha',
-  '--warning',
-  '--warning-alpha',
-  '--error',
-  '--error-alpha',
-  '--slider-track',
-  '--window-border',
-  '--window-btn-border',
-  '--bg-overlay-tint',
-] as const
-
 /**
- * 由 Catppuccin 色板生成设计令牌取值。
+ * 取当前主题的调色板语义令牌。
  *
- * 表面色沿用 tokens.css 的不透明度语义（卡片 0.88、控件 0.94），画布取比 base
- * 更暗一档的 mantle/crust，保证卡片与页面底色仍有层次。
- * @param palette - 风味色板
+ * 经典/极光沿用 tokens.css，不返回令牌；Catppuccin 按生效风味取，Absolutely
+ * 按亮暗取。返回值只描述语义色，具体 CSS 变量由 themePaletteVariables 推导。
+ * @param themeId - 主题风格标识
+ * @param flavor - 生效的 Catppuccin 风味
  * @param isDark - 是否为深色外观
- * @returns 变量名到取值的映射
+ * @returns 语义令牌；经典/极光返回 null
  */
-function buildCatppuccinVariables(palette: CatppuccinPalette, isDark: boolean): Record<string, string> {
-  const canvas = isDark ? palette.crust : palette.mantle
-  const textMuted = isDark ? palette.overlay2 : palette.overlay1
-  const shadowColor = isDark ? palette.crust : palette.text
-  const shadowScale = isDark ? [0.35, 0.4, 0.45, 0.5, 0.55, 0.45] : [0.05, 0.07, 0.09, 0.12, 0.15, 0.1]
-  const surfaceMutedBase = mix(palette.base, palette.surface0, isDark ? 0.55 : 0.6)
-  const semanticAlpha = isDark ? 0.16 : 0.12
-
-  return {
-    '--ecl-canvas': canvas,
-    '--ecl-surface': rgbaSurface(palette.base, 0.88),
-    '--ecl-surface-muted': rgbaSurface(surfaceMutedBase, 0.88),
-    '--ecl-control-surface': rgbaSurface(palette.base, 0.94),
-    '--ecl-text': palette.text,
-    '--ecl-text-secondary': palette.subtext0,
-    '--ecl-text-tertiary': textMuted,
-    // Catppuccin 用 surface1/surface2 作为描边层级，比半透明文字色更清晰
-    '--ecl-border': palette.surface1,
-    '--ecl-border-strong': palette.surface2,
-    '--ecl-hover': rgba(palette.text, 0.06),
-    '--ecl-hover-strong': rgba(palette.text, 0.1),
-    '--ecl-shadow-surface': `0 1px 2px ${rgba(shadowColor, shadowScale[0]!)}`,
-    '--ecl-shadow-pop': `0 8px 24px ${rgba(shadowColor, isDark ? 0.7 : 0.12)}`,
-    '--ecl-badge-fabric-fg': palette.yellow,
-    '--ecl-badge-forge-fg': palette.lavender,
-    '--ecl-badge-neoforge-fg': palette.blue,
-    '--ecl-badge-quilt-fg': palette.green,
-    '--bg-surface-solid': palette.base,
-    '--glass-bg': rgbaSurface(palette.base, 0.92),
-    '--glass-bg-sidebar': rgbaSurface(isDark ? palette.mantle : palette.base, 0.96),
-    '--glass-border': palette.surface1,
-    '--glass-divider': palette.surface0,
-    '--divider': palette.surface0,
-    '--text-disabled': palette.overlay0,
-    '--border-strong': palette.surface2,
-    '--shadow-xs': `0 1px 2px ${rgba(shadowColor, shadowScale[0]!)}`,
-    '--shadow-sm': `0 2px 6px ${rgba(shadowColor, shadowScale[1]!)}`,
-    '--shadow-md': `0 8px 24px ${rgba(shadowColor, shadowScale[2]!)}`,
-    '--shadow-lg': `0 14px 40px ${rgba(shadowColor, shadowScale[3]!)}`,
-    '--shadow-xl': `0 20px 60px ${rgba(shadowColor, shadowScale[4]!)}`,
-    '--shadow-hover': `0 8px 22px ${rgba(shadowColor, shadowScale[5]!)}`,
-    '--shadow-card': `0 1px 2px ${rgba(shadowColor, shadowScale[0]!)}`,
-    '--success': palette.green,
-    '--success-alpha': rgba(palette.green, semanticAlpha),
-    '--warning': palette.yellow,
-    '--warning-alpha': rgba(palette.yellow, semanticAlpha),
-    '--error': palette.red,
-    '--error-alpha': rgba(palette.red, semanticAlpha),
-    '--slider-track': isDark ? palette.surface1 : palette.surface0,
-    '--window-border': palette.surface1,
-    '--window-btn-border': palette.surface0,
-    '--bg-overlay-tint': rgba(canvas, 0.12),
-  }
+function paletteTokensOf(
+  themeId: BuiltinThemeId,
+  flavor: CatppuccinFlavor | null,
+  isDark: boolean
+): ThemePaletteTokens | null {
+  if (flavor) return catppuccinPaletteTokens(CATPPUCCIN_PALETTES[flavor], flavor !== 'latte')
+  if (themeId === 'absolutely') return absolutelyPaletteTokens(absolutelyPalette(isDark), isDark)
+  return null
 }
 
-/** 由 Catppuccin 色板生成 naive-ui 语义色，保持与设计令牌同源。 */
-function catppuccinSemanticColors(palette: CatppuccinPalette): ThemeColorPalette {
+/**
+ * 由调色板语义令牌生成 naive-ui 语义色，保证组件色与设计令牌同源。
+ * @param tokens - 调色板语义令牌
+ * @returns naive-ui 使用的语义色集合
+ */
+function paletteSemanticColors(tokens: ThemePaletteTokens): ThemeColorPalette {
   return {
-    success: palette.green,
-    warning: palette.yellow,
-    error: palette.red,
-    info: palette.blue,
-    background: rgba(palette.base, 0.94),
-    backgroundHover: palette.surface0,
-    surface: palette.base,
-    cardBackground: rgba(palette.base, 0.88),
-    text: palette.text,
-    textSecondary: palette.subtext0,
-    border: palette.surface1,
+    success: tokens.success,
+    warning: tokens.warning,
+    error: tokens.error,
+    info: tokens.info,
+    background: rgba(tokens.base, 0.94),
+    backgroundHover: tokens.raisedFill,
+    surface: tokens.base,
+    cardBackground: rgba(tokens.base, 0.88),
+    text: tokens.text,
+    textSecondary: tokens.textSecondary,
+    border: tokens.border,
   }
 }
 
 /**
- * 应用或清除 Catppuccin 设计令牌。
+ * 应用或清除主题调色板变量。
  *
  * 通过 documentElement 的内联变量覆盖，优先级高于 tokens.css / base.css 的主题
- * 块；非 Catppuccin 风格时逐项移除，避免残留上一风味的颜色。
- * @param flavor - 生效风味；null 表示回到经典/极光配色
+ * 块；切回经典/极光时按清单逐项移除，避免残留上一套配色。
+ * @param tokens - 调色板语义令牌；null 表示回到经典/极光配色
+ * @param isDark - 是否为深色外观
  */
-function applyCatppuccinVariables(flavor: CatppuccinFlavor | null): void {
+function applyPaletteVariables(tokens: ThemePaletteTokens | null, isDark: boolean): void {
   const style = document.documentElement.style
-  if (!flavor) {
-    for (const name of catppuccinVariableNames) style.removeProperty(name)
-    return
-  }
-  const isDark = flavor !== 'latte'
-  const variables = buildCatppuccinVariables(CATPPUCCIN_PALETTES[flavor], isDark)
-  for (const [name, value] of Object.entries(variables)) style.setProperty(name, value)
+  for (const name of themePaletteVariableNames) style.removeProperty(name)
+  if (!tokens) return
+  for (const [name, value] of Object.entries(themePaletteVariables(tokens, isDark))) style.setProperty(name, value)
 }
 
 export type ThemeMode = 'light' | 'dark' | 'system'
@@ -831,17 +695,24 @@ export const useThemeStore = defineStore('theme', () => {
   /** 当前生效的 Catppuccin 风味；非 Catppuccin 风格时为 null。 */
   const themeFlavor = computed<CatppuccinFlavor | null>(() => resolveCatppuccinFlavor(themeId.value, isDark.value))
 
-  /** 当前皮肤语义色：Catppuccin 风格取对应风味，否则取经典亮/暗色板。 */
+  /** 当前主题的调色板语义令牌；经典/极光为 null，直接沿用 tokens.css。 */
+  const paletteTokens = computed<ThemePaletteTokens | null>(() =>
+    paletteTokensOf(themeId.value, themeFlavor.value, isDark.value)
+  )
+
+  /** 当前皮肤语义色：有调色板时由它派生，否则取经典亮/暗色板。 */
   const baseColors = computed<ThemeColorPalette>(() => {
-    const flavor = themeFlavor.value
-    if (flavor) return catppuccinSemanticColors(CATPPUCCIN_PALETTES[flavor])
+    const tokens = paletteTokens.value
+    if (tokens) return paletteSemanticColors(tokens)
     return isDark.value ? DARK_THEME_COLORS : LIGHT_THEME_COLORS
   })
 
-  /** 设置页强调色预设：Catppuccin 风格改用该风味官方色，否则沿用项目预设。 */
+  /** 设置页强调色预设：配色主题改用其官方色，否则沿用项目预设。 */
   const accentPresets = computed(() => {
     const flavor = themeFlavor.value
-    return flavor ? catppuccinAccentPresets(flavor) : PRESET_COLORS
+    if (flavor) return catppuccinAccentPresets(flavor)
+    if (themeId.value === 'absolutely') return absolutelyAccentPresets(isDark.value)
+    return PRESET_COLORS
   })
 
   /** 生效主色：开启背景取色且提取成功时用提取色，否则回退手动主色。 */
@@ -858,7 +729,7 @@ export const useThemeStore = defineStore('theme', () => {
   })
 
   /** 当前主题的表面风格：卡片圆角、描边、阴影与玻璃层由主题预设决定。 */
-  const surfaceStyle = computed<ThemeSurfaceStyle>(() => surfaceStyleOf(themeId.value))
+  const surfaceStyle = computed<ThemeSurfaceStyle>(() => surfaceStyleOf(themeId.value, isDark.value))
 
   const themeOverrides = computed<GlobalThemeOverrides>(() => {
     return createThemeOverrides(isDark.value, primaryScale.value, baseColors.value, appearance.value)
@@ -944,6 +815,7 @@ export const useThemeStore = defineStore('theme', () => {
           theme: isDark.value ? 'dark' : 'light',
           uiSkin: layoutSkinOf(themeId.value),
           flavor: themeFlavor.value,
+          palette: themeFlavor.value ? 'catppuccin' : themeId.value === 'absolutely' ? 'absolutely' : '',
           primary: scale.primary,
           primaryRgb: scale.primaryRgb,
           primaryHover: scale.primaryHover,
@@ -960,12 +832,15 @@ export const useThemeStore = defineStore('theme', () => {
     const bgImageValue = backgroundImage.value ? `url("${backgroundImage.value}")` : 'none'
 
     document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
-    // 布局皮肤与配色解耦：Catppuccin 只换色板，布局沿用经典皮肤
+    // 布局皮肤与配色解耦：配色主题只换色板，布局沿用经典皮肤
     document.documentElement.dataset.uiSkin = layoutSkinOf(themeId.value)
     const flavor = themeFlavor.value
     if (flavor) document.documentElement.dataset.themeFlavor = flavor
     else delete document.documentElement.dataset.themeFlavor
-    applyCatppuccinVariables(flavor)
+    const paletteFamily = flavor ? 'catppuccin' : themeId.value === 'absolutely' ? 'absolutely' : ''
+    if (paletteFamily) document.documentElement.dataset.themePalette = paletteFamily
+    else delete document.documentElement.dataset.themePalette
+    applyPaletteVariables(paletteTokens.value, isDark.value)
     document.documentElement.style.setProperty('--primary', primaryScale.value.primary)
     document.documentElement.style.setProperty('--text-on-primary', textOnColor(primaryScale.value.primary))
     document.documentElement.style.setProperty('--ecl-primary', primaryScale.value.primary)
@@ -1018,22 +893,27 @@ export const useThemeStore = defineStore('theme', () => {
 
   function setThemeMode(mode: ThemeMode, persist = true) {
     themeMode.value = mode
-    syncCatppuccinAccent()
+    syncPaletteAccent()
     withThemeTransition(updateTheme)
     if (persist) saveThemeConfig()
   }
 
   /**
-   * 生效风味变化时把官方强调色换乘到新风味。
+   * 亮暗或风味变化时把强调色换乘到当前色板。
    *
-   * 深色风味的浅紫直接用于 Latte 背景对比度不足；自定义色不在任何色板中，
-   * 保持原值不动。
+   * Catppuccin 的官方色随风味换乘（深色浅紫直接压在 Latte 背景上对比度不足）；
+   * Absolutely 的默认电光蓝分亮暗两档。自定义色不在任何色板中，保持原值不动。
    */
-  function syncCatppuccinAccent(): void {
+  function syncPaletteAccent(): void {
     const flavor = themeFlavor.value
-    if (!flavor) return
-    const translated = translateAccentColor(primaryColor.value, flavor)
-    if (translated && translated !== primaryColor.value) primaryColor.value = translated
+    if (flavor) {
+      const translated = translateAccentColor(primaryColor.value, flavor)
+      if (translated && translated !== primaryColor.value) primaryColor.value = translated
+      return
+    }
+    if (themeId.value !== 'absolutely') return
+    const oppositeAccent = absolutelyPalette(!isDark.value).accent
+    if (primaryColor.value === oppositeAccent) primaryColor.value = absolutelyPalette(isDark.value).accent
   }
 
   /**
@@ -1041,13 +921,15 @@ export const useThemeStore = defineStore('theme', () => {
    *
    * 选择 Catppuccin 风味时同步亮暗模式（Latte 为亮色，其余为深色），首次进入
    * Catppuccin 会把主色换为该风味的官方 Mauve；之后仅把官方色随风味换乘，
-   * 用户自定义强调色保持不动。
+   * 用户自定义强调色保持不动。Absolutely 支持亮暗两种外观，不改变亮暗模式，
+   * 首次进入时改用其默认强调色。
    * @param id - 目标主题风格
    * @param persist - 是否持久化到后端配置
    */
   function setThemeId(id: BuiltinThemeId, persist = true) {
     if (!isBuiltinThemeId(id)) return
-    const previousFlavor = catppuccinFlavorOfThemeId(themeId.value)
+    const previousThemeId = themeId.value
+    const previousFlavor = catppuccinFlavorOfThemeId(previousThemeId)
     const nextFlavor = catppuccinFlavorOfThemeId(id)
     const previousSurface = surfaceStyle.value
 
@@ -1058,7 +940,10 @@ export const useThemeStore = defineStore('theme', () => {
       themeMode.value = nextFlavor === 'latte' ? 'light' : 'dark'
       // 首次进入 Catppuccin 时改用该风味的官方 Mauve，之后保留用户强调色
       if (!previousFlavor) primaryColor.value = CATPPUCCIN_PALETTES[nextFlavor].mauve
-      syncCatppuccinAccent()
+      syncPaletteAccent()
+      withThemeTransition(updateTheme)
+    } else if (id === 'absolutely') {
+      if (previousThemeId !== 'absolutely') primaryColor.value = absolutelyPalette(isDark.value).accent
       withThemeTransition(updateTheme)
     } else {
       updateTheme()
@@ -1595,9 +1480,9 @@ export const useThemeStore = defineStore('theme', () => {
       } catch {
         /* localStorage 不可用时沿用默认值 */
       }
-      // 保存的强调色可能来自另一风味（例如深色风味下保存、启动时为亮色），
-      // 进入界面后先换乘到当前生效风味，避免浅紫压在 Latte 背景上
-      syncCatppuccinAccent()
+      // 保存的强调色可能来自另一套色板（例如深色风味下保存、启动时为亮色），
+      // 进入界面后先换乘到当前生效色板，避免浅紫压在 Latte 背景上
+      syncPaletteAccent()
       updateTheme()
       restartBgRotation()
       // 开启背景取色且背景图就绪后，异步补一次初始提取
