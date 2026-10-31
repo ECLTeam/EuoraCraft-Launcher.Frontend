@@ -402,6 +402,7 @@
       "selectDirFailed": "选择目录失败",
       "pathUpdated": "路径已更新",
       "pathAdded": "路径已添加",
+      "duplicatePath": "该目录已经在列表中",
       "saveFailed": "保存失败",
       "keepOnePath": "至少保留一个路径",
       "updateConfigFailed": "更新配置失败",
@@ -865,6 +866,7 @@
     "savedButEnableFailed": "授权已保存，插件启用失败。可以直接重试启用。"
   },
   "settings": {
+    "loadFailed": "读取设置失败",
     "title": "设置",
     "general": "通用",
     "launcherSettings": "启动器",

@@ -588,7 +588,14 @@ onMounted(() => {
   })
 })
 
-onUnmounted(() => installStore.clearLoaderVersions())
+onUnmounted(() => {
+  // 卸载后仍可能有排队的帧回调，先取消再清空，避免对已销毁容器写状态。
+  if (scrollRafId !== null) {
+    cancelAnimationFrame(scrollRafId)
+    scrollRafId = null
+  }
+  installStore.clearLoaderVersions()
+})
 </script>
 
 <style scoped src="@/styles/views/instances/InstancesTab.css"></style>

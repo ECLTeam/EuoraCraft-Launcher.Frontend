@@ -41,11 +41,16 @@
           v-for="version in filteredVersions"
           :key="instanceKey(version)"
           :class="['instance-card', { selected: selectedVersion === version.versionId, hidden: version.hidden }]"
+          role="button"
+          tabindex="0"
+          :aria-current="selectedVersion === version.versionId ? 'true' : undefined"
           data-theme-component="instance-card"
           data-theme-node="instances.card"
           :style="coverStyle(version)"
           @contextmenu.prevent="showActionMenu($event, version)"
           @click="emit('selectVersion', version)"
+          @keydown.enter.prevent="emit('selectVersion', version)"
+          @keydown.space.prevent="emit('selectVersion', version)"
         >
           <div class="card-heading">
             <InstanceIcon :version="version" :size="46" />
@@ -104,10 +109,15 @@
             v-for="version in filteredVersions"
             :key="instanceKey(version)"
             :class="['table-row', { selected: selectedVersion === version.versionId, hidden: version.hidden }]"
+            role="button"
+            tabindex="0"
+            :aria-current="selectedVersion === version.versionId ? 'true' : undefined"
             data-theme-component="instance-row"
             data-theme-node="instances.row"
             @contextmenu.prevent="showActionMenu($event, version)"
             @click="emit('selectVersion', version)"
+            @keydown.enter.prevent="emit('selectVersion', version)"
+            @keydown.space.prevent="emit('selectVersion', version)"
           >
             <InstanceIcon class="list-icon" :version="version" :size="32" />
             <div class="instance-copy">
@@ -200,6 +210,7 @@ import UiButton from '@/components/ui/Button.vue'
 import UiEmptyState from '@/components/ui/EmptyState.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
+import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { getLoaderClass, getLoaderName, getVersionLabelKey } from '@/config/version'
 import { instanceProfileApi, targetFromVersion } from '@/features/instances/api/instanceProfileApi'
 import { hasModLoader } from '@/features/instances/model/instanceCapabilities'
@@ -233,6 +244,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const message = useLauncherMessage()
 const settingsStore = useSettingsStore()
 const categories = useResourceSnapshot<InstanceCategory[]>(queryKeys.instanceCategories, [])
 const categoryFilter = ref('')
@@ -435,7 +447,13 @@ function setSort(key: InstanceSortKey, direction: 'asc' | 'desc') {
 }
 
 async function toggleFlag(version: ScannedVersion, field: 'favorite' | 'pinned' | 'hidden') {
-  await instanceProfileApi.patch(targetFromVersion(version), { [field]: !version[field] })
+  try {
+    await instanceProfileApi.patch(targetFromVersion(version), { [field]: !version[field] })
+  } catch (error) {
+    // 标记失败必须提示，否则用户只会觉得点击没有反应。
+    message.error(error instanceof Error ? error.message : '更新实例标记失败')
+    return
+  }
   // 直接更新本地版本对象，避免触发全量扫描
   const flags = version as unknown as Record<string, boolean | undefined>
   flags[field] = !flags[field]

@@ -402,6 +402,7 @@
       "selectDirFailed": "Failed to select directory",
       "pathUpdated": "Path updated",
       "pathAdded": "Path added",
+      "duplicatePath": "This folder is already in the list",
       "saveFailed": "Save failed",
       "keepOnePath": "Keep at least one path",
       "updateConfigFailed": "Failed to update config",
@@ -865,6 +866,7 @@
     "savedButEnableFailed": "Permissions were saved, but enabling failed. You can retry enabling directly."
   },
   "settings": {
+    "loadFailed": "Failed to load settings",
     "title": "Settings",
     "general": "General",
     "launcherSettings": "Launcher",

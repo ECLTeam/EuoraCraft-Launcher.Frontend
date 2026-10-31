@@ -36,9 +36,15 @@ function bindProgressListener(): void {
 }
 if (backend.runtime.isDesktop) {
   bindProgressListener()
-  void updateApi.updateStatus().then((status) => {
-    selfUpdateEnabled.value = Boolean(status?.enabled)
-  })
+  void updateApi
+    .updateStatus()
+    .then((status) => {
+      selfUpdateEnabled.value = Boolean(status?.enabled)
+    })
+    .catch(() => {
+      // 启动时读取更新状态失败不影响手动检查，保留"不支持自更新"的默认值。
+      selfUpdateEnabled.value = false
+    })
 }
 
 async function checkUpdate(): Promise<UpdateCheckResult | null> {

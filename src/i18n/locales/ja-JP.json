@@ -398,6 +398,7 @@
       "selectDirFailed": "ディレクトリの選択に失敗しました",
       "pathUpdated": "パスを更新しました",
       "pathAdded": "パスを追加しました",
+      "duplicatePath": "このフォルダーは既に一覧にあります",
       "saveFailed": "保存に失敗しました",
       "keepOnePath": "少なくとも 1 つのパスを保持してください",
       "updateConfigFailed": "設定の更新に失敗しました",
@@ -861,6 +862,7 @@
     "savedButEnableFailed": "権限は保存されましたが、有効化に失敗しました。そのまま再試行できます。"
   },
   "settings": {
+    "loadFailed": "設定の読み込みに失敗しました",
     "title": "設定",
     "general": "一般",
     "launcherSettings": "ランチャー",
