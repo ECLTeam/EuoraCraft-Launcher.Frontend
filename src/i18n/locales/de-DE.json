@@ -304,6 +304,8 @@
       "launching": "Wird gestartet...",
       "launchSuccess": "Erfolgreich gestartet!",
       "launchError": "Startfehler",
+      "launchBusy": "Der vorherige Start wird noch beendet. Bitte gleich erneut versuchen.",
+      "launchCancelMissed": "Das Spiel wurde bereits gestartet; der Abbruch lief ins Leere.",
       "accountAdded": "Konto erfolgreich hinzugefügt",
       "accountAddFailed": "Konto konnte nicht hinzugefügt werden",
       "accountRemoved": "Konto gelöscht",
@@ -803,6 +805,8 @@
     "stopping": "Wird beendet",
     "failed": "Fehlgeschlagen",
     "capabilities": {
+      "auth_provider": "Anmeldung über Drittanbieter",
+      "connector_extend": "Multiplayer-Erweiterungen",
       "java": "Java verwenden",
       "game": "Spiel",
       "ui_inject": "Launcher-Oberfläche ändern",

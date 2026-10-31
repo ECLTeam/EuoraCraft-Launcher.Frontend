@@ -304,6 +304,8 @@
       "launching": "起動中...",
       "launchSuccess": "起動に成功しました！",
       "launchError": "起動エラー",
+      "launchBusy": "前回の起動がまだ終了しています。しばらくしてから再試行してください。",
+      "launchCancelMissed": "ゲームはすでに起動しています。キャンセルは反映されませんでした。",
       "accountAdded": "アカウントを追加しました",
       "accountAddFailed": "アカウントの追加に失敗しました",
       "accountRemoved": "アカウントを削除しました",
@@ -803,6 +805,8 @@
     "stopping": "停止中",
     "failed": "実行失敗",
     "capabilities": {
+      "auth_provider": "サードパーティログイン",
+      "connector_extend": "マルチプレイ拡張",
       "java": "Java を使用",
       "game": "ゲーム",
       "ui_inject": "ランチャー画面の変更",

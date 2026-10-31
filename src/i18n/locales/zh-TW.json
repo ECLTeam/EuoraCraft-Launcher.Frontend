@@ -304,6 +304,8 @@
       "launching": "正在啟動...",
       "launchSuccess": "啟動成功！",
       "launchError": "啟動異常",
+      "launchBusy": "上一次啟動正在結束，請稍候再試",
+      "launchCancelMissed": "遊戲已經啟動，取消未生效",
       "accountAdded": "帳戶新增成功",
       "accountAddFailed": "帳戶新增失敗",
       "accountRemoved": "帳戶已刪除",
@@ -803,6 +805,8 @@
     "stopping": "停止中",
     "failed": "執行失敗",
     "capabilities": {
+      "auth_provider": "第三方登入",
+      "connector_extend": "連線擴充",
       "java": "使用 Java",
       "game": "遊戲",
       "ui_inject": "修改啟動器介面",

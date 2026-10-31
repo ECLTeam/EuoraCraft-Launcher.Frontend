@@ -308,6 +308,8 @@
       "launching": "正在启动...",
       "launchSuccess": "启动成功！",
       "launchError": "启动异常",
+      "launchBusy": "上一次启动正在退出，请稍候再试",
+      "launchCancelMissed": "游戏已经启动，取消未生效",
       "accountAdded": "账户添加成功",
       "accountAddFailed": "账户添加失败",
       "accountRemoved": "账户已删除",
@@ -807,6 +809,8 @@
     "stopping": "停止中",
     "failed": "运行失败",
     "capabilities": {
+      "auth_provider": "第三方登录",
+      "connector_extend": "联机扩展",
       "java": "使用 Java",
       "game": "游戏",
       "ui_inject": "修改启动器界面",

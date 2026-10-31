@@ -308,6 +308,8 @@
       "launching": "Launching...",
       "launchSuccess": "Game launched successfully!",
       "launchError": "Launch error",
+      "launchBusy": "The previous launch is still exiting. Please try again shortly.",
+      "launchCancelMissed": "The game has already started; the cancel request had no effect.",
       "accountAdded": "Account added successfully",
       "accountAddFailed": "Failed to add account",
       "accountRemoved": "Account removed",
@@ -807,6 +809,8 @@
     "stopping": "Stopping",
     "failed": "Failed",
     "capabilities": {
+      "auth_provider": "Third-party sign-in",
+      "connector_extend": "Multiplayer extensions",
       "java": "Use Java",
       "game": "Game",
       "ui_inject": "Modify the launcher interface",

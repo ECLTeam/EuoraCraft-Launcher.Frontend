@@ -84,6 +84,12 @@
           }}</NCheckbox>
           <p>{{ t('plugins.permissionUiInjectNote') }}</p>
         </section>
+
+        <section v-for="item in extraPermissions" :key="item.capability" class="extra-access">
+          <NCheckbox v-model:checked="allowExtra[item.capability]" :disabled="saving">
+            {{ t('plugins.capabilities.' + item.capability.replaceAll('.', '_')) }}
+          </NCheckbox>
+        </section>
         <p v-if="requiredMissing" role="status">{{ t('plugins.requiredAccessMissing') }}</p>
         <details v-if="view.items.length">
           <summary>{{ t('plugins.permissionOptions') }}</summary>
@@ -188,6 +194,22 @@ const accountResources = ref<string[]>([])
 const accountRevision = ref<number>()
 const accountsBusy = ref(false)
 const accountPermission = computed(() => view.value?.items.find((item) => item.capability === 'accounts.read'))
+// 未单独建模的能力按声明逐项渲染，避免新增能力时界面漏给开关。
+const knownCapabilities = new Set([
+  'accounts.read',
+  'network.read',
+  'java.read',
+  'java.use',
+  'java.catalog.read',
+  'java.install',
+  'ui.inject',
+  'instances.read',
+  'instances.manage',
+])
+const extraPermissions = computed(
+  () => view.value?.items.filter((item) => item.implemented && !knownCapabilities.has(item.capability)) ?? []
+)
+const allowExtra = ref<Record<string, boolean>>({})
 const uiInjectPermission = computed(() => view.value?.items.find((item) => item.capability === 'ui.inject'))
 const lifetime = ref<'session' | 'permanent'>('permanent')
 const loading = ref(false)
@@ -234,6 +256,8 @@ const decisions = computed<PluginPermissionDecision[]>(() =>
         allow = allowJava.value[item.capability]
       } else if (item.capability === 'ui.inject') {
         allow = allowUiInject.value
+      } else if (extraPermissions.value.some((extra) => extra.capability === item.capability)) {
+        allow = allowExtra.value[item.capability] ?? false
       } else if (item.capability === 'instances.read' || item.capability === 'instances.manage') {
         allow = gameAccess.value === 'manage' || (item.capability === 'instances.read' && gameAccess.value === 'read')
         refs = selectedResources.value
@@ -302,6 +326,11 @@ async function load(): Promise<void> {
     const accounts = result.items.find((item) => item.capability === 'accounts.read')
     allowAccounts.value = accounts?.decision === 'allow'
     allowUiInject.value = result.items.find((item) => item.capability === 'ui.inject')?.decision === 'allow'
+    allowExtra.value = Object.fromEntries(
+      result.items
+        .filter((item) => item.implemented && !knownCapabilities.has(item.capability))
+        .map((item) => [item.capability, item.decision === 'allow'])
+    )
     accountResources.value = accounts?.selected_resource_refs ?? []
     accountRevision.value = undefined
     accountsBusy.value = false
