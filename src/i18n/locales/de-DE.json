@@ -695,6 +695,7 @@
     "days": "Tage"
   },
   "plugins": {
+    "permissionUiInjectNote": "Dieses Plugin kann eigene Oberflächeninhalte im Launcher-Fenster anzeigen. Diese laufen auf derselben Seite und können bereits angezeigte Daten lesen. Nur für vertrauenswürdige Plugins aktivieren.",
     "panel": "Panel",
     "panelTitle": "Plugin-Panel",
     "panelEmpty": "Dieses Plugin hat kein Panel",
@@ -802,6 +803,7 @@
     "stopping": "Wird beendet",
     "failed": "Fehlgeschlagen",
     "capabilities": {
+      "ui_inject": "Launcher-Oberfläche ändern",
       "instances_read": "Spiele anzeigen",
       "network_read": "Netzwerkzugriff",
       "instances_manage": "Spiele verwalten",

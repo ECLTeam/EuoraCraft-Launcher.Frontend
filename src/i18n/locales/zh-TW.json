@@ -695,6 +695,7 @@
     "days": "天"
   },
   "plugins": {
+    "permissionUiInjectNote": "此外掛可以在啟動器主視窗顯示自己的介面內容。內容與啟動器同頁執行，可讀取頁面上已顯示的資訊，只在你信任此外掛時開啟。",
     "panel": "面板",
     "panelTitle": "外掛面板",
     "panelEmpty": "此外掛沒有可用面板",
@@ -802,6 +803,7 @@
     "stopping": "停止中",
     "failed": "執行失敗",
     "capabilities": {
+      "ui_inject": "修改啟動器介面",
       "instances_read": "查看遊戲",
       "network_read": "連線",
       "instances_manage": "管理遊戲",

@@ -253,6 +253,7 @@ export const pluginBusinessCapabilities = [
   'java.catalog.read',
   'java.install',
   'accounts.read',
+  'ui.inject',
 ] as const
 export type PluginBusinessCapability = (typeof pluginBusinessCapabilities)[number]
 

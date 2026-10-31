@@ -78,6 +78,12 @@
             @busy="accountsBusy = $event"
           />
         </section>
+        <section v-if="uiInjectPermission?.implemented" class="ui-inject-access">
+          <NCheckbox :checked="allowUiInject" :disabled="saving" @update:checked="allowUiInject = $event">{{
+            t('plugins.capabilities.ui_inject')
+          }}</NCheckbox>
+          <p>{{ t('plugins.permissionUiInjectNote') }}</p>
+        </section>
         <p v-if="requiredMissing" role="status">{{ t('plugins.requiredAccessMissing') }}</p>
         <details v-if="view.items.length">
           <summary>{{ t('plugins.permissionOptions') }}</summary>
@@ -171,10 +177,12 @@ const resourceRevision = ref<number>()
 const resourcesBusy = ref(false)
 const allowNetwork = ref(false)
 const allowAccounts = ref(false)
+const allowUiInject = ref(false)
 const accountResources = ref<string[]>([])
 const accountRevision = ref<number>()
 const accountsBusy = ref(false)
 const accountPermission = computed(() => view.value?.items.find((item) => item.capability === 'accounts.read'))
+const uiInjectPermission = computed(() => view.value?.items.find((item) => item.capability === 'ui.inject'))
 const lifetime = ref<'session' | 'permanent'>('permanent')
 const loading = ref(false)
 const saving = ref(false)
@@ -218,6 +226,8 @@ const decisions = computed<PluginPermissionDecision[]>(() =>
         refs = javaResources.value[item.capability]
       } else if (item.capability === 'java.catalog.read' || item.capability === 'java.install') {
         allow = allowJava.value[item.capability]
+      } else if (item.capability === 'ui.inject') {
+        allow = allowUiInject.value
       } else if (item.capability === 'instances.read' || item.capability === 'instances.manage') {
         allow = gameAccess.value === 'manage' || (item.capability === 'instances.read' && gameAccess.value === 'read')
         refs = selectedResources.value
@@ -282,6 +292,7 @@ async function load(): Promise<void> {
     view.value = result
     const accounts = result.items.find((item) => item.capability === 'accounts.read')
     allowAccounts.value = accounts?.decision === 'allow'
+    allowUiInject.value = result.items.find((item) => item.capability === 'ui.inject')?.decision === 'allow'
     accountResources.value = accounts?.selected_resource_refs ?? []
     accountRevision.value = undefined
     accountsBusy.value = false

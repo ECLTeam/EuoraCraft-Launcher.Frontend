@@ -695,6 +695,7 @@
     "days": "日"
   },
   "plugins": {
+    "permissionUiInjectNote": "このプラグインはランチャーのメインウィンドウに独自の画面を表示できます。同じページで動作し、表示済みの情報を読み取れます。信頼できるプラグインのみ有効にしてください。",
     "panel": "パネル",
     "panelTitle": "プラグインパネル",
     "panelEmpty": "このプラグインにはパネルがありません",
@@ -802,6 +803,7 @@
     "stopping": "停止中",
     "failed": "実行失敗",
     "capabilities": {
+      "ui_inject": "ランチャー画面の変更",
       "instances_read": "ゲームを表示",
       "network_read": "ネットワークアクセス",
       "instances_manage": "ゲームを管理",

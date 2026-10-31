@@ -699,6 +699,7 @@
     "days": "天"
   },
   "plugins": {
+    "permissionUiInjectNote": "该插件可以在启动器主窗口显示自己的界面内容。内容与启动器同页运行，可读取页面上已显示的信息，只在你信任该插件时开启。",
     "panel": "面板",
     "panelTitle": "插件面板",
     "panelEmpty": "该插件没有可用面板",
@@ -806,6 +807,7 @@
     "stopping": "停止中",
     "failed": "运行失败",
     "capabilities": {
+      "ui_inject": "修改启动器界面",
       "instances_read": "查看游戏",
       "network_read": "联网",
       "instances_manage": "管理游戏",

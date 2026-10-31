@@ -699,6 +699,7 @@
     "days": "days"
   },
   "plugins": {
+    "permissionUiInjectNote": "This plugin can render its own interface inside the launcher window. That content runs in the same page and can read what is already displayed. Enable it only for plugins you trust.",
     "panel": "Panel",
     "panelTitle": "Plugin panel",
     "panelEmpty": "This plugin has no panel",
@@ -806,6 +807,7 @@
     "stopping": "Stopping",
     "failed": "Failed",
     "capabilities": {
+      "ui_inject": "Modify the launcher interface",
       "instances_read": "View games",
       "network_read": "Network access",
       "instances_manage": "Manage games",
