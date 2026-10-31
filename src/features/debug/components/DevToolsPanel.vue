@@ -446,7 +446,7 @@ const pendingAction = ref<'reset' | 'plugins' | null>(null)
 const processingAction = ref<'reset' | 'plugins' | null>(null)
 const spawning = ref(false)
 
-// ── 插件界面注入总开关：关闭立即撤销注入内容，重新打开会重载已获准注入的插件 ──
+// ── 插件界面注入总开关：关闭立即撤销注入内容；重新打开不会自动恢复，需要重新启用插件 ──
 const uiInjectionAllowed = ref(true)
 const uiInjectionBusy = ref(false)
 
