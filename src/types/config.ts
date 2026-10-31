@@ -175,8 +175,9 @@ export interface ThemeScheduleConfig {
 
 export interface ThemeConfig {
   mode: 'light' | 'dark' | 'system'
-  /** 内置皮肤：classic（经典）或 folia（花叶）。 */
-  theme_id?: 'classic' | 'folia'
+  /** 内置主题风格：经典 / 极光 / Catppuccin 四风味（latte、frappe、macchiato、mocha）。 */
+  theme_id?:
+    'classic' | 'folia' | 'catppuccin-latte' | 'catppuccin-frappe' | 'catppuccin-macchiato' | 'catppuccin-mocha'
   primary_color: string
   blur_amount: number
   navigation_mode?: NavigationMode

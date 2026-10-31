@@ -25,6 +25,7 @@
           if (s.primaryActive) d.style.setProperty('--ecl-primary-active', s.primaryActive)
           if (s.primaryAlpha) d.style.setProperty('--primary-alpha', s.primaryAlpha)
           if (s.uiSkin) d.setAttribute('data-ui-skin', s.uiSkin)
+          if (s.flavor) d.setAttribute('data-theme-flavor', s.flavor)
         } catch (e) {}
       })()
     </script>
@@ -44,6 +45,35 @@
         --boot-bg: #171a21;
         --boot-text: #f1f3f7;
         --boot-text-secondary: #b4bbc9;
+      }
+      /* Catppuccin 风味：主脚本挂载前先按风味铺色，避免启动闪一下默认配色 */
+      [data-theme-flavor='latte'] {
+        --boot-primary: #8839ef;
+        --boot-ring: rgba(136, 57, 239, 0.35);
+        --boot-bg: #eff1f5;
+        --boot-text: #4c4f69;
+        --boot-text-secondary: #6c6f85;
+      }
+      [data-theme-flavor='frappe'] {
+        --boot-primary: #ca9ee6;
+        --boot-ring: rgba(202, 158, 230, 0.32);
+        --boot-bg: #303446;
+        --boot-text: #c6d0f5;
+        --boot-text-secondary: #a5adce;
+      }
+      [data-theme-flavor='macchiato'] {
+        --boot-primary: #c6a0f6;
+        --boot-ring: rgba(198, 160, 246, 0.32);
+        --boot-bg: #24273a;
+        --boot-text: #cad3f5;
+        --boot-text-secondary: #a5adcb;
+      }
+      [data-theme-flavor='mocha'] {
+        --boot-primary: #cba6f7;
+        --boot-ring: rgba(203, 166, 247, 0.32);
+        --boot-bg: #1e1e2e;
+        --boot-text: #cdd6f4;
+        --boot-text-secondary: #a6adc8;
       }
       @keyframes boot-spin {
         to {

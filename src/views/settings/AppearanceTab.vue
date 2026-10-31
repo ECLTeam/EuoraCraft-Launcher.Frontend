@@ -12,7 +12,7 @@
         />
       </SettingRow>
 
-      <SettingRow :label="t('settings.lightDarkMode')" :description="t('settings.lightDarkModeDesc')">
+      <SettingRow :label="t('settings.lightDarkMode')" :description="lightDarkModeDescription">
         <NTabs :value="currentSettings.mode" type="segment" size="small" @update:value="handleThemeChange">
           <NTab v-for="option in themeOptions" :key="option.value" :name="option.value">
             <span class="theme-option-label">
@@ -26,7 +26,7 @@
       <SettingRow :label="t('settings.primaryColor')">
         <div class="color-presets">
           <button
-            v-for="color in presetColors"
+            v-for="color in accentPresets"
             :key="color.value"
             :class="['color-dot', { active: currentSettings.primary_color === color.value }]"
             :style="{ backgroundColor: color.value }"
@@ -80,7 +80,7 @@
       </SettingRow>
     </SettingSection>
 
-    <SettingSection v-if="themeId === 'folia'" :title="t('settings.appearanceSectionEffects')">
+    <SettingSection v-if="showEffectSettings" :title="t('settings.appearanceSectionEffects')">
       <SettingRow :label="t('settings.auroraBackground')" :description="t('settings.auroraBackgroundDesc')">
         <NSwitch :value="auroraEnabled" @update:value="handleAuroraEnabledChange" />
       </SettingRow>
@@ -382,7 +382,7 @@ import { useActiveWindowChrome, useSystemShadowSupported } from '@/app/runtime/w
 import UiIcon from '@/components/ui/Icon.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
-import { presetColors, useTheme, type ThemeMode } from '@/composables/useTheme'
+import { useTheme, type ThemeMode } from '@/composables/useTheme'
 import { useTopNav } from '@/composables/useTopNav'
 import {
   BUILTIN_THEMES,
@@ -391,6 +391,7 @@ import {
   CARD_OPACITY_MIN,
   DEFAULT_PRIMARY_COLOR,
   THEME_MODE_OPTIONS,
+  isBuiltinThemeId,
 } from '@/config/theme'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { settingsApi } from '@/features/settings/api/settingsApi'
@@ -487,6 +488,8 @@ const {
   blurAmount,
   appearance,
   schedule,
+  themeFlavor,
+  accentPresets,
 } = useTheme()
 const { topNavEnabled, toggleTopNav } = useTopNav()
 
@@ -534,9 +537,17 @@ const themeOptions = computed(() =>
 const builtinThemeOptions = computed(() =>
   BUILTIN_THEMES.map((option) => ({
     value: option.id,
-    label: t(`settings.theme${option.id.charAt(0).toUpperCase() + option.id.slice(1)}`),
+    label: t(`settings.${option.labelKey}`),
   }))
 )
+
+/** Catppuccin 风格的亮暗说明：亮色固定 Latte，深色使用所选风味。 */
+const lightDarkModeDescription = computed(() =>
+  themeFlavor.value ? t('settings.lightDarkModeCatppuccinDesc') : t('settings.lightDarkModeDesc')
+)
+
+/** 极光效果区块：极光皮肤与 Catppuccin 都使用极光光斑，可在此关闭。 */
+const showEffectSettings = computed(() => themeId.value === 'folia' || themeFlavor.value !== null)
 
 async function updateUiConfig(partialTheme: Partial<{ mode: ThemeMode; primary_color: string; blur_amount: number }>) {
   await run(async () =>
@@ -555,9 +566,16 @@ async function handleThemeChange(mode: ThemeMode) {
 }
 
 function handleThemeIdChange(value: string | number | null) {
-  if (value !== 'classic' && value !== 'folia') return
+  if (!isBuiltinThemeId(value)) return
   setThemeId(value, false)
-  void run(async () => settingsStore.patchUiTheme({ theme_id: value }))
+  // 切换 Catppuccin 风味会同步亮暗与主色，需一并落库，避免重启后回退
+  void run(async () =>
+    settingsStore.patchUiTheme({
+      theme_id: value,
+      mode: currentSettings.value.mode,
+      primary_color: currentSettings.value.primary_color,
+    })
+  )
 }
 
 function handleAuroraEnabledChange(value: boolean) {

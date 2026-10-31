@@ -1,4 +1,5 @@
 import type { ThemeMode } from '@/composables/useTheme'
+import { catppuccinFlavorOfThemeId, type CatppuccinFlavor } from './catppuccin'
 
 export interface PresetColor {
   name: string
@@ -27,16 +28,64 @@ export const THEME_MODE_OPTIONS: ThemeModeOption[] = [
   { value: 'system', icon: 'settings' },
 ]
 
-/** 内置皮肤选项（theme_id ∈ classic/folia）。 */
+/** Catppuccin 主题风格标识，形如 `catppuccin-mocha`。 */
+export type CatppuccinThemeId = `catppuccin-${CatppuccinFlavor}`
+
+/** 内置主题风格：经典 / 极光 / Catppuccin 四风味。 */
+export type BuiltinThemeId = 'classic' | 'folia' | CatppuccinThemeId
+
+/** 内置主题风格选项；labelKey 指向 settings.* 下的界面名称。 */
 export interface BuiltinThemeOption {
-  id: 'classic' | 'folia'
+  id: BuiltinThemeId
   icon: string
+  labelKey: string
 }
 
 export const BUILTIN_THEMES: BuiltinThemeOption[] = [
-  { id: 'classic', icon: 'palette' },
-  { id: 'folia', icon: 'sparkles' },
+  { id: 'classic', icon: 'palette', labelKey: 'themeClassic' },
+  { id: 'folia', icon: 'sparkles', labelKey: 'themeFolia' },
+  { id: 'catppuccin-latte', icon: 'coffee', labelKey: 'themeCatppuccinLatte' },
+  { id: 'catppuccin-frappe', icon: 'coffee', labelKey: 'themeCatppuccinFrappe' },
+  { id: 'catppuccin-macchiato', icon: 'coffee', labelKey: 'themeCatppuccinMacchiato' },
+  { id: 'catppuccin-mocha', icon: 'coffee', labelKey: 'themeCatppuccinMocha' },
 ]
+
+export const BUILTIN_THEME_IDS: readonly BuiltinThemeId[] = BUILTIN_THEMES.map((option) => option.id)
+
+/**
+ * 判断任意值是否为受支持的内置主题风格。
+ * @param value - 待校验的值，通常来自后端配置或界面选择
+ * @returns 是内置主题风格标识时为 true
+ */
+export function isBuiltinThemeId(value: unknown): value is BuiltinThemeId {
+  return typeof value === 'string' && (BUILTIN_THEME_IDS as readonly string[]).includes(value)
+}
+
+/**
+ * 取主题风格对应的布局皮肤。
+ *
+ * Catppuccin 只替换配色，布局沿用经典皮肤；`data-ui-skin` 因此只写 classic/folia。
+ * @param themeId - 主题风格标识
+ * @returns 布局皮肤标识
+ */
+export function layoutSkinOf(themeId: BuiltinThemeId): 'classic' | 'folia' {
+  return themeId === 'folia' ? 'folia' : 'classic'
+}
+
+/**
+ * 解析主题风格在指定亮暗下实际使用的 Catppuccin 风味。
+ *
+ * 亮色统一使用 Latte，深色使用所选风味；所选风味为 Latte 时深色回退 Mocha。
+ * @param themeId - 主题风格标识
+ * @param isDark - 当前是否为深色外观
+ * @returns 生效风味；非 Catppuccin 风格时为 null
+ */
+export function resolveCatppuccinFlavor(themeId: BuiltinThemeId, isDark: boolean): CatppuccinFlavor | null {
+  const flavor = catppuccinFlavorOfThemeId(themeId)
+  if (!flavor) return null
+  if (!isDark) return 'latte'
+  return flavor === 'latte' ? 'mocha' : flavor
+}
 
 /** 卡片不透明度滑杆边界（0-100）。 */
 export const CARD_OPACITY_MIN = 20

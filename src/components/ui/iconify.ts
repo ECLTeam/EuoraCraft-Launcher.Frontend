@@ -90,6 +90,7 @@ export const ICON_MAP: Record<string, string> = {
   image: 'photo',
   sparkles: 'sparkles',
   palette: 'palette',
+  coffee: 'coffee',
   layers: 'layers-union',
   more: 'apps',
   archive: 'archive',

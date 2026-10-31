@@ -55,9 +55,17 @@ const appearance = looseObject({
   terminal_font_family: optionalString,
   log_font_family: optionalString,
 })
+const themeIds = [
+  'classic',
+  'folia',
+  'catppuccin-latte',
+  'catppuccin-frappe',
+  'catppuccin-macchiato',
+  'catppuccin-mocha',
+] as const
 const theme = looseObject({
   mode: optional(picklist(['light', 'dark', 'system'])),
-  theme_id: optional(picklist(['classic', 'folia'])),
+  theme_id: optional(picklist(themeIds)),
   primary_color: optionalString,
   blur_amount: optionalNumber,
   navigation_mode: optional(picklist(['sidebar', 'top'])),
