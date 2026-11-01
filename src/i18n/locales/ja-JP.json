@@ -2537,6 +2537,8 @@
   },
   "modpackWizard": {
     "prepare": "パックを読み込む",
+    "backgroundStarted": "「{name}」のインストールをバックグラウンドで開始しました",
+    "installSettings": "インストール設定",
     "retryPrepare": "再読み込み",
     "prepareAgain": "再準備して確認",
     "prepareFailed": "パックを読み込めませんでした",

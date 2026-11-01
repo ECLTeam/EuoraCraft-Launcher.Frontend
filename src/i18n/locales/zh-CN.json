@@ -2449,6 +2449,8 @@
   },
   "modpackWizard": {
     "prepare": "解析整合包",
+    "backgroundStarted": "已在后台开始安装整合包「{name}」",
+    "installSettings": "安装设置",
     "retryPrepare": "重新解析",
     "prepareAgain": "重新准备并确认",
     "prepareFailed": "整合包解析失败",

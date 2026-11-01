@@ -2,7 +2,7 @@
   <Modal
     :visible="store.visible"
     :title="t('modpackImport.title')"
-    width="700px"
+    width="920px"
     :closable="!store.isSubmittingImport"
     wrapperClass="modpack-import-modal"
     bodyClass="modpack-import-modal-body"
@@ -36,121 +36,128 @@
           >{{ t('operations.refresh') }}</NButton
         >
       </section>
-      <section v-if="store.preview && ['preview', 'confirm'].includes(store.step)" class="mp-summary">
-        <h4>{{ store.preview.name }}</h4>
-        <p v-if="store.preview.summary" class="mp-description">{{ store.preview.summary }}</p>
-        <dl class="mp-metadata">
-          <dt>{{ t('modpackWizard.format') }}</dt>
-          <dd>{{ store.preview.format }}</dd>
-          <template v-if="store.preview.minecraftVersion"
-            ><dt>Minecraft</dt>
-            <dd>{{ store.preview.minecraftVersion }}</dd></template
+      <div v-if="store.preview && ['preview', 'confirm'].includes(store.step)" class="mp-columns">
+        <div class="mp-col mp-col-info">
+          <section class="mp-summary">
+            <h4>{{ store.preview.name }}</h4>
+            <p v-if="store.preview.summary" class="mp-description">{{ store.preview.summary }}</p>
+            <dl class="mp-metadata">
+              <dt>{{ t('modpackWizard.format') }}</dt>
+              <dd>{{ store.preview.format }}</dd>
+              <template v-if="store.preview.minecraftVersion"
+                ><dt>Minecraft</dt>
+                <dd>{{ store.preview.minecraftVersion }}</dd></template
+              >
+              <dt>{{ t('modpackWizard.loader') }}</dt>
+              <dd>{{ store.preview.loader }} {{ store.preview.loaderVersion || '' }}</dd>
+            </dl>
+            <p class="mp-note">
+              {{
+                t('modpackWizard.fileCounts', {
+                  required: store.requiredFiles.length,
+                  optional: store.optionalFiles.length,
+                  unsupported: store.unsupportedFiles.length,
+                })
+              }}
+            </p>
+            <p v-if="store.preview.format === 'hmcl'" class="mp-note">{{ t('modpackWizard.hmclLimit') }}</p>
+            <p v-if="store.preview.format === 'multimc'" class="mp-note">{{ t('modpackWizard.multimcLimit') }}</p>
+            <p v-if="store.preview.format === 'ecl-legacy'" class="mp-note">{{ t('modpackWizard.legacyLimit') }}</p>
+            <details v-if="store.preview.warnings.length">
+              <summary>{{ t('modpackWizard.warnings', { count: store.preview.warnings.length }) }}</summary>
+              <ul>
+                <li v-for="(warning, index) in store.preview.warnings" :key="index">{{ warning.message }}</li>
+              </ul>
+            </details>
+          </section>
+          <section v-if="store.step === 'preview'" class="mp-options">
+            <h4>{{ t('modpackWizard.optionalFiles') }}</h4>
+            <p class="mp-note">{{ t('modpackWizard.optionalHint') }}</p>
+            <NInput
+              v-model:value="store.search"
+              clearable
+              :placeholder="t('modpackWizard.searchFiles')"
+              :aria-label="t('modpackWizard.searchFiles')"
+            />
+            <div class="mp-actions">
+              <NButton size="small" @click="store.selectAll(true)">{{ t('modpackWizard.selectAll') }}</NButton>
+              <NButton size="small" @click="store.selectAll(false)">{{ t('modpackWizard.selectNone') }}</NButton>
+              <span class="mp-note">{{
+                t('modpackWizard.optionalSelected', {
+                  selected: store.optionalFiles.length - store.excludedFileIds.length,
+                  total: store.optionalFiles.length,
+                })
+              }}</span>
+            </div>
+            <div class="mp-files">
+              <label v-for="file in store.visibleOptionalFiles" :key="file.fileId" class="mp-file">
+                <NCheckbox
+                  :checked="!store.excludedFileIds.includes(file.fileId)"
+                  @update:checked="store.selectFile(file.fileId, $event)"
+                  ><span :title="file.path">{{ file.path }}</span></NCheckbox
+                >
+                <span class="mp-file-size">{{
+                  file.size === null ? t('modpackWizard.unknownSize') : formatBytes(file.size)
+                }}</span>
+              </label>
+              <p v-if="!store.visibleOptionalFiles.length" class="mp-note">{{ t('modpackWizard.noMatches') }}</p>
+            </div>
+          </section>
+          <template v-if="store.preview && ['preview', 'confirm'].includes(store.step)">
+            <details v-if="store.requiredFiles.length">
+              <summary>{{ t('modpackWizard.requiredFiles', { count: store.requiredFiles.length }) }}</summary>
+              <ul>
+                <li v-for="file in store.requiredFiles" :key="file.fileId" class="mp-path">{{ file.path }}</li>
+              </ul>
+            </details>
+            <details v-if="store.unsupportedFiles.length">
+              <summary>{{ t('modpackWizard.unsupportedFiles', { count: store.unsupportedFiles.length }) }}</summary>
+              <ul>
+                <li v-for="file in store.unsupportedFiles" :key="file.fileId" class="mp-path">{{ file.path }}</li>
+              </ul>
+            </details>
+          </template>
+          <div class="mp-download-summary" aria-live="polite">
+            <p>
+              {{
+                t('modpackWizard.selectedSummary', {
+                  count: store.selectedFiles.length,
+                  excluded: store.excludedFileIds.length,
+                })
+              }}
+            </p>
+            <p>
+              {{
+                t('modpackWizard.knownSize', { size: formatBytes(store.knownBytes), unknown: store.unknownSizeCount })
+              }}
+            </p>
+            <small class="mp-note">{{ t('modpackWizard.sizeHint') }}</small>
+          </div>
+        </div>
+        <div class="mp-col mp-col-settings">
+          <p class="mp-col-title">{{ t('modpackWizard.installSettings') }}</p>
+          <label class="mp-field"
+            ><span>{{ t('modpackImport.gameDir') }}</span
+            ><NSelect
+              :value="store.gamePath"
+              :options="store.gamePaths"
+              :placeholder="t('modpackImport.gameDirPlaceholder')"
+              :disabled="store.isSubmittingImport"
+              @update:value="store.gamePath = String($event || '')"
+          /></label>
+          <label class="mp-field"
+            ><span>{{ t('modpackImport.versionName') }}</span
+            ><NInput
+              v-model:value="store.versionName"
+              :disabled="store.isSubmittingImport"
+              clearable
+              :placeholder="t('modpackImport.versionNamePlaceholder')"
+            /><small>{{ t('modpackImport.versionNameHint') }}</small></label
           >
-          <dt>{{ t('modpackWizard.loader') }}</dt>
-          <dd>{{ store.preview.loader }} {{ store.preview.loaderVersion || '' }}</dd>
-        </dl>
-        <p class="mp-note">
-          {{
-            t('modpackWizard.fileCounts', {
-              required: store.requiredFiles.length,
-              optional: store.optionalFiles.length,
-              unsupported: store.unsupportedFiles.length,
-            })
-          }}
-        </p>
-        <p v-if="store.preview.format === 'hmcl'" class="mp-note">{{ t('modpackWizard.hmclLimit') }}</p>
-        <p v-if="store.preview.format === 'multimc'" class="mp-note">{{ t('modpackWizard.multimcLimit') }}</p>
-        <p v-if="store.preview.format === 'ecl-legacy'" class="mp-note">{{ t('modpackWizard.legacyLimit') }}</p>
-        <details v-if="store.preview.warnings.length">
-          <summary>{{ t('modpackWizard.warnings', { count: store.preview.warnings.length }) }}</summary>
-          <ul>
-            <li v-for="(warning, index) in store.preview.warnings" :key="index">{{ warning.message }}</li>
-          </ul>
-        </details>
-      </section>
-      <section v-if="store.step === 'preview'" class="mp-options">
-        <h4>{{ t('modpackWizard.optionalFiles') }}</h4>
-        <p class="mp-note">{{ t('modpackWizard.optionalHint') }}</p>
-        <NInput
-          v-model:value="store.search"
-          clearable
-          :placeholder="t('modpackWizard.searchFiles')"
-          :aria-label="t('modpackWizard.searchFiles')"
-        />
-        <div class="mp-actions">
-          <NButton size="small" @click="store.selectAll(true)">{{ t('modpackWizard.selectAll') }}</NButton>
-          <NButton size="small" @click="store.selectAll(false)">{{ t('modpackWizard.selectNone') }}</NButton>
-          <span class="mp-note">{{
-            t('modpackWizard.optionalSelected', {
-              selected: store.optionalFiles.length - store.excludedFileIds.length,
-              total: store.optionalFiles.length,
-            })
-          }}</span>
+          <p v-if="store.step === 'confirm'" class="mp-path">
+            {{ t('modpackWizard.target', { path: store.gamePath, name: store.versionName }) }}
+          </p>
         </div>
-        <div class="mp-files">
-          <label v-for="file in store.visibleOptionalFiles" :key="file.fileId" class="mp-file">
-            <NCheckbox
-              :checked="!store.excludedFileIds.includes(file.fileId)"
-              @update:checked="store.selectFile(file.fileId, $event)"
-              ><span :title="file.path">{{ file.path }}</span></NCheckbox
-            >
-            <span class="mp-file-size">{{
-              file.size === null ? t('modpackWizard.unknownSize') : formatBytes(file.size)
-            }}</span>
-          </label>
-          <p v-if="!store.visibleOptionalFiles.length" class="mp-note">{{ t('modpackWizard.noMatches') }}</p>
-        </div>
-      </section>
-      <template v-if="store.preview && ['preview', 'confirm'].includes(store.step)">
-        <details v-if="store.requiredFiles.length">
-          <summary>{{ t('modpackWizard.requiredFiles', { count: store.requiredFiles.length }) }}</summary>
-          <ul>
-            <li v-for="file in store.requiredFiles" :key="file.fileId" class="mp-path">{{ file.path }}</li>
-          </ul>
-        </details>
-        <details v-if="store.unsupportedFiles.length">
-          <summary>{{ t('modpackWizard.unsupportedFiles', { count: store.unsupportedFiles.length }) }}</summary>
-          <ul>
-            <li v-for="file in store.unsupportedFiles" :key="file.fileId" class="mp-path">{{ file.path }}</li>
-          </ul>
-        </details>
-      </template>
-      <template v-if="['source', 'confirm'].includes(store.step)">
-        <label class="mp-field"
-          ><span>{{ t('modpackImport.gameDir') }}</span
-          ><NSelect
-            :value="store.gamePath"
-            :options="store.gamePaths"
-            :placeholder="t('modpackImport.gameDirPlaceholder')"
-            :disabled="store.isSubmittingImport"
-            @update:value="store.gamePath = String($event || '')"
-        /></label>
-        <label class="mp-field"
-          ><span>{{ t('modpackImport.versionName') }}</span
-          ><NInput
-            v-model:value="store.versionName"
-            :disabled="store.isSubmittingImport"
-            clearable
-            :placeholder="t('modpackImport.versionNamePlaceholder')"
-          /><small>{{ t('modpackImport.versionNameHint') }}</small></label
-        >
-        <p v-if="store.step === 'confirm'" class="mp-path">
-          {{ t('modpackWizard.target', { path: store.gamePath, name: store.versionName }) }}
-        </p>
-      </template>
-      <div v-if="['preview', 'confirm'].includes(store.step)" class="mp-download-summary" aria-live="polite">
-        <p>
-          {{
-            t('modpackWizard.selectedSummary', {
-              count: store.selectedFiles.length,
-              excluded: store.excludedFileIds.length,
-            })
-          }}
-        </p>
-        <p>
-          {{ t('modpackWizard.knownSize', { size: formatBytes(store.knownBytes), unknown: store.unknownSizeCount }) }}
-        </p>
-        <small class="mp-note">{{ t('modpackWizard.sizeHint') }}</small>
       </div>
       <section v-if="store.step === 'installing'" class="mp-preparing" aria-live="polite">
         <UiLoading mode="inline" size="md" decorative />

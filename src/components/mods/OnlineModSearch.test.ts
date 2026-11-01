@@ -24,8 +24,9 @@ const mocks = vi.hoisted(() => ({
   versions: vi.fn(),
   ready: null as Ref<boolean> | null,
   instance: null as Ref<ScannedVersion | null> | null,
-  openOnline: vi.fn(),
+  installOnlineInBackground: vi.fn().mockResolvedValue({ ok: true }),
   error: vi.fn(),
+  success: vi.fn(),
   downloadToPath: vi.fn(),
 }))
 vi.mock('@/composables/useResourceInstallTarget', async (original) => ({
@@ -55,14 +56,14 @@ vi.mock('@/features/mods/api/modApi', () => ({
   modApi: { search: mocks.search, info: mocks.info, versions: mocks.versions, downloadToPath: mocks.downloadToPath },
 }))
 vi.mock('@/features/instances/stores/modpackImportStore', () => ({
-  useModpackImportStore: () => ({ openOnline: mocks.openOnline }),
+  useModpackImportStore: () => ({ installOnlineInBackground: mocks.installOnlineInBackground }),
 }))
 vi.mock('@/features/download/model/downloadQueries', () => ({
   getPopularPage: mocks.popular,
   getResourceSourceConfig: async () => ({ curseforge: { available: true } }),
 }))
 vi.mock('@/composables/useLauncherMessage', () => ({
-  useLauncherMessage: () => ({ error: mocks.error, warning: vi.fn(), success: vi.fn() }),
+  useLauncherMessage: () => ({ error: mocks.error, warning: vi.fn(), success: mocks.success }),
 }))
 
 function row(name: string, alternatives = 1): ModSearchItem {
@@ -167,6 +168,7 @@ describe('双平台搜索页面', () => {
     globalCache.clear()
     queryClient.clear()
     vi.resetAllMocks()
+    mocks.installOnlineInBackground.mockResolvedValue({ ok: true })
     mocks.popular.mockResolvedValue(result('first'))
     mocks.search.mockResolvedValue(result('second', 2, { hasMore: false, totalExact: true }))
     mocks.info.mockResolvedValue({ id: 'first', title: 'first', loaders: [], gameVersions: [] })
@@ -725,13 +727,14 @@ describe('双平台搜索页面', () => {
     } as ScannedVersion
     await wrapper.get('.mod-row').trigger('click')
     await flushPromises()
-    expect(mocks.openOnline).not.toHaveBeenCalled()
+    expect(mocks.installOnlineInBackground).not.toHaveBeenCalled()
     await wrapper.get('.version-group-header').trigger('click')
     await flushPromises()
-    expect(mocks.openOnline).not.toHaveBeenCalled()
+    expect(mocks.installOnlineInBackground).not.toHaveBeenCalled()
     await wrapper.get('.version-file-row').trigger('click')
     await flushPromises()
-    expect(mocks.openOnline).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'pack' }))
+    expect(mocks.installOnlineInBackground).toHaveBeenCalledWith(expect.objectContaining({ fileId: 'pack' }))
+    expect(mocks.success).toHaveBeenCalled()
     wrapper.unmount()
   })
 

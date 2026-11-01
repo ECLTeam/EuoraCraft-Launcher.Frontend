@@ -131,3 +131,31 @@
   align-items: center;
   gap: 8px;
 }
+
+.mp-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.mp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.mp-col-title {
+  margin: 0;
+  color: var(--ecl-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .mp-columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}

@@ -1216,19 +1216,21 @@ async function selectVersionFile(group: ModVersionGroup, file: ModVersion): Prom
   await handleSaveAs()
 }
 
-/** 打开在线整合包安装对话框：预填当前来源与所选版本文件。 */
-function openModpackOnlineInstall(): void {
+/** 在线整合包一键后台安装：预填来源与版本文件，直接开始后台安装并进入任务中心。 */
+async function openModpackOnlineInstall(): Promise<void> {
   const mod = selectedMod.value
   const platform = activeSourceRef.value
   const fileId = selectedFileId.value
   if (!mod || !platform || !fileId) return
   detailsVisible.value = false
-  void modpackImportStore.openOnline({
+  const result = await modpackImportStore.installOnlineInBackground({
     source: platform.source,
     projectId: platform.projectId,
     fileId,
     title: mod.displayTitle,
   })
+  if (result.ok) message.success(t('modpackWizard.backgroundStarted', { name: mod.displayTitle }))
+  else if (result.error) message.error(result.error)
 }
 
 function toggleVersionGroup(group: ModVersionGroup): void {

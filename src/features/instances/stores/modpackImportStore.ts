@@ -5,7 +5,7 @@ import { useApplicationOperationStore } from '@/features/operations/stores/appli
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { i18n } from '@/i18n'
 import type { MinecraftPathEntry } from '@/types/config'
-import type { ModpackPreview } from '@/types/modpack'
+import type { ModpackPreparation, ModpackPreview } from '@/types/modpack'
 
 function derivePackName(path: string): string {
   if (!path) return ''
@@ -161,6 +161,87 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     if (isSubmittingImport.value) return
     resetPreparation()
     visible.value = false
+  }
+
+  /**
+   * 从下载页一键后台安装在线整合包：准备 → 等待预览就绪 → 提交安装，整个过程不打开弹窗，
+   * 安装作为后台操作进入任务中心，关闭下载页也不会中止。失败返回错误，由调用方提示。
+   */
+  async function installOnlineInBackground(
+    target: OnlinePackTarget
+  ): Promise<{ ok: boolean; operationId?: string; error?: string }> {
+    if (isSubmittingImport.value) return { ok: false }
+    let defaultPath = ''
+    try {
+      defaultPath = await loadGamePaths()
+    } catch {
+      return { ok: false, error: i18n.global.t('modpackWizard.pathsFailed') }
+    }
+    if (!defaultPath) return { ok: false, error: i18n.global.t('modpackWizard.pathsFailed') }
+    const version = target.title
+    resetPreparation()
+    const gen = generation
+    try {
+      const prepared = await modpackApi.prepare({
+        source: target.source,
+        project_id: target.projectId,
+        file_id: target.fileId,
+      })
+      if (gen !== generation) {
+        void release(prepared.preparationId)
+        return { ok: false }
+      }
+      preparationId.value = prepared.preparationId
+      preparationOperationId.value = prepared.operationId
+      void operations.track({ operationId: prepared.operationId, kind: 'modpack_prepare', status: 'pending' })
+
+      const ready = await waitPreparationReady(prepared.preparationId, gen)
+      if (!ready) {
+        if (gen === generation) error.value = i18n.global.t('modpackWizard.prepareFailed')
+        return { ok: false, error: i18n.global.t('modpackWizard.prepareFailed') }
+      }
+
+      const submitted = await modpackApi.install(prepared.preparationId, defaultPath, version.trim(), [])
+      if (gen !== generation) return { ok: false }
+      installOperationId.value = submitted.operationId
+      installInputs.set(submitted.operationId, {
+        sourcePath: '',
+        onlinePack: { ...target },
+        gamePath: defaultPath,
+        versionName: version,
+      })
+      void operations.track({
+        operationId: submitted.operationId,
+        kind: 'modpack_online_install',
+        status: 'pending',
+      })
+      return { ok: true, operationId: submitted.operationId }
+    } catch (reason) {
+      if (gen === generation)
+        error.value = reason instanceof Error ? reason.message : i18n.global.t('modpackWizard.installFailed')
+      return {
+        ok: false,
+        error: reason instanceof Error ? reason.message : i18n.global.t('modpackWizard.installFailed'),
+      }
+    }
+  }
+
+  async function waitPreparationReady(preparationIdValue: string, gen: number): Promise<boolean> {
+    const deadline = Date.now() + 5 * 60 * 1000
+    while (Date.now() < deadline) {
+      if (gen !== generation) return false
+      let prepared: ModpackPreparation
+      try {
+        prepared = await modpackApi.get(preparationIdValue)
+      } catch {
+        return false
+      }
+      if (gen !== generation) return false
+      if (prepared.status === 'failed') return false
+      if (prepared.status === 'ready' && prepared.preview) return true
+      await new Promise((resolve) => setTimeout(resolve, 800))
+    }
+    return false
   }
 
   function setSource(path: string) {
@@ -330,6 +411,7 @@ export const useModpackImportStore = defineStore('modpackImport', () => {
     unknownSizeCount,
     open,
     openOnline,
+    installOnlineInBackground,
     close,
     setSource,
     prepare,
