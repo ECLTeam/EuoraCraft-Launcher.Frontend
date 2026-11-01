@@ -1,6 +1,12 @@
 <template>
   <span class="instance-icon" :style="{ width: `${size}px`, height: `${size}px` }">
-    <img v-if="imageUrl" :src="imageUrl" alt="" :style="{ width: `${size}px`, height: `${size}px` }" />
+    <img
+      v-if="imageUrl"
+      :src="imageUrl"
+      alt=""
+      :style="{ width: `${size}px`, height: `${size}px` }"
+      @error="handleImageError"
+    />
     <UiIcon v-else :name="fallbackIcon" :size="Math.max(16, Math.round(size * 0.55))" />
   </span>
 </template>
@@ -43,6 +49,10 @@ const imageUrl = computed(() => {
 })
 
 const fallbackIcon = computed(() => getLoaderIcon(props.source.primaryLoader || 'vanilla'))
+
+function handleImageError() {
+  localUrl.value = ''
+}
 
 watch(
   () => props.source.icon,
