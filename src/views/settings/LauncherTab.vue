@@ -1,7 +1,7 @@
 <template>
   <div ref="settingsPage" class="tab-pane launcher-settings">
     <SettingSection :title="t('settings.languageRegion')">
-      <SettingRow :label="t('settings.language')">
+      <SettingRow :label="languageLabel" :description="t('settings.languageDesc')">
         <NSelect
           class="setting-select"
           :value="currentLocale"
@@ -269,6 +269,10 @@ function handleDebugShapeChange(value: 'rectangle' | 'circle'): void {
 }
 
 const currentLocale = computed(() => locale.value as LocaleCode)
+// 界面不是英文时，标签额外标注 “/ Language”，方便不熟悉当前界面语言的用户定位该设置。
+const languageLabel = computed(() =>
+  locale.value === 'en-US' ? t('settings.language') : `${t('settings.language')} / Language`
+)
 // 下载源、模组源与联机功能只面向简体中文用户，其他语言隐藏对应分区；
 // 保存的下载配置保持原值，后端按界面语言固定使用官方源。
 const isSimplifiedChinese = computed(() => isSimplifiedChineseLocale(currentLocale.value))

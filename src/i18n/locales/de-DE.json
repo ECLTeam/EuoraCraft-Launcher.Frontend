@@ -1120,6 +1120,7 @@
     },
     "downloadSettings": "Download-Einstellungen",
     "language": "Sprache",
+    "languageDesc": "Wählen Sie die Anzeigesprache des Launchers. Änderungen werden sofort übernommen.",
     "theme": "Design",
     "themeSystem": "System",
     "themeLight": "Hell",

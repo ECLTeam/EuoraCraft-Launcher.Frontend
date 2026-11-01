@@ -1120,6 +1120,7 @@
     },
     "downloadSettings": "ダウンロード設定",
     "language": "言語",
+    "languageDesc": "ランチャーの表示言語を選択します。変更は即時反映されます。",
     "theme": "テーマ",
     "themeSystem": "システム",
     "themeLight": "ライト",

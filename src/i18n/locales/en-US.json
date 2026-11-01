@@ -1124,6 +1124,7 @@
     },
     "downloadSettings": "Download Settings",
     "language": "Language",
+    "languageDesc": "Choose the launcher display language. Changes apply immediately.",
     "theme": "Theme",
     "themeSystem": "System",
     "themeLight": "Light",

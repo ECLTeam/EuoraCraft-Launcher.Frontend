@@ -1120,6 +1120,7 @@
     },
     "downloadSettings": "下載設定",
     "language": "語言",
+    "languageDesc": "選擇啟動器介面的顯示語言，修改後立即生效。",
     "theme": "主題",
     "themeSystem": "系統",
     "themeLight": "淺色",
