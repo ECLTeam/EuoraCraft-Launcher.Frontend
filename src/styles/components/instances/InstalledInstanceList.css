@@ -362,7 +362,7 @@
   padding: 8px 16px;
   border: 0;
   border-radius: var(--r-sm);
-  background: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--primary-button, var(--primary));
+  color: #fff;
   cursor: pointer;
 }

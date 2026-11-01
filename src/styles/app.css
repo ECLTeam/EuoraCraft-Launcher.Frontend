@@ -209,8 +209,8 @@ body:has(#app[data-window-chrome='custom']) {
   gap: 7px;
   margin-top: 4px;
   padding: 9px 25px;
-  background: var(--primary);
-  color: var(--text-on-primary) !important;
+  background: var(--primary-button, var(--primary));
+  color: #fff !important;
   text-decoration: none !important;
   font-weight: 600;
   font-size: 13px;

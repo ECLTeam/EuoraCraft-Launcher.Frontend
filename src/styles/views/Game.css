@@ -30,9 +30,9 @@
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--primary), white 24%);
   border-radius: var(--r-full);
-  background: var(--primary);
+  background: var(--primary-button, var(--primary));
   box-shadow: 0 8px 22px color-mix(in srgb, var(--primary), transparent 68%);
-  color: var(--text-on-primary);
+  color: #fff;
   cursor: pointer;
   font: inherit;
   font-size: 13px;
@@ -68,7 +68,7 @@
   width: 140px;
   justify-content: flex-start;
   padding: 0 14px;
-  background: var(--primary-hover);
+  background: var(--primary-button-hover, var(--primary-hover));
   box-shadow: 0 10px 26px color-mix(in srgb, var(--primary), transparent 56%);
 }
 

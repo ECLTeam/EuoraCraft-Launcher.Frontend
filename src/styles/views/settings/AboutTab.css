@@ -262,8 +262,8 @@
 }
 
 .about-btn.highlight:hover {
-  background: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--primary-button-hover, var(--primary-hover));
+  color: #fff;
 }
 
 .legal-text {

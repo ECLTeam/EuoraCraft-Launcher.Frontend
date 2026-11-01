@@ -12,8 +12,23 @@ describe('useTheme 语义色', () => {
     setActivePinia(createPinia())
     const theme = useTheme()
     theme.setPrimaryColor(background, false)
-    expect(theme.themeOverrides.value.Button?.textColorPrimary).toBe(foreground)
     expect(document.documentElement.style.getPropertyValue('--text-on-primary')).toBe(foreground)
+  })
+  it.each(['#a54cf0', '#ffffff', '#000000', '#5B6FF5'])('主按钮在主色 %s 下保持白字与足够对比度', (color) => {
+    setActivePinia(createPinia())
+    const theme = useTheme()
+    theme.setPrimaryColor(color, false)
+    const button = theme.themeOverrides.value.Button!
+    expect(button.textColorPrimary).toBe('#ffffff')
+    expect(document.documentElement.style.getPropertyValue('--primary')).toBe(color)
+    for (const background of [button.colorPrimary, button.colorHoverPrimary, button.colorPressedPrimary]) {
+      if (typeof background !== 'string') throw new Error('主按钮背景颜色缺失')
+      expect(background).toMatch(/^#[0-9a-f]{6}$/i)
+      const channels = [1, 3, 5].map((offset) => parseInt(background.slice(offset, offset + 2), 16) / 255)
+      const linear = channels.map((value) => (value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4))
+      const luminance = 0.2126 * linear[0]! + 0.7152 * linear[1]! + 0.0722 * linear[2]!
+      expect(1.05 / (luminance + 0.05)).toBeGreaterThanOrEqual(4.5)
+    }
   })
   it('选中与悬停菜单文字使用可读正文色，保留主题强调背景与图标', () => {
     setActivePinia(createPinia())

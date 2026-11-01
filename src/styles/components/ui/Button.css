@@ -36,20 +36,20 @@
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: var(--text-on-primary);
-  border-color: var(--primary);
+  background: var(--primary-button, var(--primary));
+  color: #fff;
+  border-color: var(--primary-button, var(--primary));
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
+  background: var(--primary-button-hover, var(--primary-hover));
+  border-color: var(--primary-button-hover, var(--primary-hover));
   box-shadow: var(--control-glow);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: var(--primary-active);
-  border-color: var(--primary-active);
+  background: var(--primary-button-active, var(--primary-active));
+  border-color: var(--primary-button-active, var(--primary-active));
   transform: translateY(0) scale(0.98);
   transition-duration: var(--duration-instant);
 }
@@ -132,7 +132,7 @@
 
 .btn-danger {
   background: var(--error);
-  color: var(--text-on-primary);
+  color: var(--text-on-error, #000);
   border-color: var(--error);
 }
 
@@ -183,4 +183,9 @@
 
 .is-loading {
   cursor: wait;
+}
+
+.ui-btn :deep(.ui-loading) {
+  --ui-loading-color: currentColor;
+  --ui-loading-track: color-mix(in srgb, currentColor 25%, transparent);
 }

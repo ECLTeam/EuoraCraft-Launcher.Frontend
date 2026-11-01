@@ -263,7 +263,7 @@ const { t } = useI18n()
   width: 100%;
   height: 48px;
   border-radius: var(--r-md);
-  background: var(--primary);
+  background: var(--primary-button, var(--primary));
   overflow: hidden;
   transition:
     filter var(--duration-fast) var(--ease-emphasized),
@@ -293,7 +293,7 @@ const { t } = useI18n()
   padding: 0 14px;
   border: none;
   background: transparent;
-  color: var(--text-on-primary);
+  color: #fff;
   cursor: pointer;
   font-size: 13px;
   font-weight: 650;
@@ -302,7 +302,7 @@ const { t } = useI18n()
 }
 
 .split-main:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .split-main-icon {
@@ -328,7 +328,7 @@ const { t } = useI18n()
   width: 1px;
   align-self: stretch;
   margin: 10px 0;
-  background: color-mix(in srgb, var(--text-on-primary) 26%, transparent);
+  background: color-mix(in srgb, white 26%, transparent);
   flex-shrink: 0;
 }
 
@@ -342,7 +342,7 @@ const { t } = useI18n()
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--text-on-primary);
+  color: #fff;
   cursor: pointer;
   outline: none;
   transition: background var(--duration-fast) var(--ease-emphasized);
@@ -350,7 +350,7 @@ const { t } = useI18n()
 }
 
 .split-arrow:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .split-arrow:disabled {
@@ -544,10 +544,10 @@ const { t } = useI18n()
   overflow: hidden;
   max-width: 105px;
   padding-left: 10px;
-  color: color-mix(in srgb, var(--text-on-primary) 72%, transparent);
+  color: #fff;
   font-size: 11px;
   font-weight: 500;
-  border-left: 1px solid color-mix(in srgb, var(--text-on-primary) 26%, transparent);
+  border-left: 1px solid color-mix(in srgb, white 26%, transparent);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

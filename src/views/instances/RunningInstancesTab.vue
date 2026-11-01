@@ -298,8 +298,8 @@ async function handleConfirm() {
 }
 
 .running-terminal:hover {
-  background: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--primary-button-hover, var(--primary-hover));
+  color: #fff;
 }
 
 .running-instances-content {

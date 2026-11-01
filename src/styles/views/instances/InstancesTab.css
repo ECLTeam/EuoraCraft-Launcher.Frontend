@@ -165,8 +165,8 @@
   padding: 9px 18px;
   border-radius: var(--r-sm);
   border: none;
-  background: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--primary-button, var(--primary));
+  color: #fff;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -174,7 +174,7 @@
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: var(--primary-button-hover, var(--primary-hover));
 }
 
 .version-content {

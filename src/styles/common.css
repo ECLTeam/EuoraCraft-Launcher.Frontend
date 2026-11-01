@@ -253,9 +253,9 @@
   color: var(--text-primary);
 }
 .loader-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: var(--text-on-primary);
+  background: var(--primary-button, var(--primary));
+  border-color: var(--primary-button, var(--primary));
+  color: #fff;
 }
 
 .progress-body {

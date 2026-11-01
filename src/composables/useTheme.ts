@@ -424,6 +424,38 @@ function textOnColor(color: string): string {
   return (luminance + 0.05) / 0.05 >= 1.05 / (luminance + 0.05) ? '#000000' : '#ffffff'
 }
 
+/** 加深实色按钮背景，使白色前景至少达到 4.5:1 对比度。 */
+function buttonBackground(color: string): string {
+  const contrast = (background: string): number => {
+    const { r, g, b } = hexToRgb(background)
+    const linear = (channel: number) => {
+      const value = channel / 255
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+    }
+    return 1.05 / (0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b) + 0.05)
+  }
+  if (contrast(color) >= 4.5) return color
+  let low = 0
+  let high = 1
+  for (let i = 0; i < 20; i++) {
+    const middle = (low + high) / 2
+    if (contrast(mix(color, '#000000', middle)) >= 4.5) high = middle
+    else low = middle
+  }
+  return mix(color, '#000000', high)
+}
+
+function primaryButtonColors(scale: ReturnType<typeof createPrimaryScale>) {
+  const normal = buttonBackground(scale.primary)
+  let hover = buttonBackground(scale.primaryHover)
+  let pressed = buttonBackground(scale.primaryPressed)
+  if (hover.toLowerCase() === normal.toLowerCase()) hover = mix(normal, '#000000', 0.12)
+  if (pressed.toLowerCase() === hover.toLowerCase() || pressed.toLowerCase() === normal.toLowerCase()) {
+    pressed = mix(normal, '#000000', 0.24)
+  }
+  return { normal, hover, pressed }
+}
+
 /**
  * 创建 naive-ui 主题覆盖配置。
  * @param isDark - 是否为深色模式
@@ -438,6 +470,7 @@ function createThemeOverrides(
   baseColors: ThemeColorPalette,
   _appearance: ThemeAppearanceConfig
 ): GlobalThemeOverrides {
+  const buttonColors = primaryButtonColors(primaryScale)
   return {
     common: {
       primaryColor: primaryScale.primary,
@@ -470,10 +503,18 @@ function createThemeOverrides(
       cubicBezierEaseIn: 'cubic-bezier(0.3, 0, 0.8, 0.15)',
     },
     Button: {
-      textColorPrimary: textOnColor(primaryScale.primary),
-      textColorHoverPrimary: textOnColor(primaryScale.primaryHover),
-      textColorPressedPrimary: textOnColor(primaryScale.primaryPressed),
-      textColorFocusPrimary: textOnColor(primaryScale.primary),
+      colorPrimary: buttonColors.normal,
+      colorHoverPrimary: buttonColors.hover,
+      colorPressedPrimary: buttonColors.pressed,
+      colorFocusPrimary: buttonColors.normal,
+      borderPrimary: `1px solid ${buttonColors.normal}`,
+      borderHoverPrimary: `1px solid ${buttonColors.hover}`,
+      borderPressedPrimary: `1px solid ${buttonColors.pressed}`,
+      borderFocusPrimary: `1px solid ${buttonColors.normal}`,
+      textColorPrimary: '#ffffff',
+      textColorHoverPrimary: '#ffffff',
+      textColorPressedPrimary: '#ffffff',
+      textColorFocusPrimary: '#ffffff',
       color: 'var(--ecl-control-fill)',
       colorHover: 'var(--ecl-control-fill-hover)',
       colorPressed: 'var(--ecl-control-fill-active)',
@@ -842,7 +883,12 @@ export const useThemeStore = defineStore('theme', () => {
     else delete document.documentElement.dataset.themePalette
     applyPaletteVariables(paletteTokens.value, isDark.value)
     document.documentElement.style.setProperty('--primary', primaryScale.value.primary)
+    const buttonColors = primaryButtonColors(primaryScale.value)
+    document.documentElement.style.setProperty('--primary-button', buttonColors.normal)
+    document.documentElement.style.setProperty('--primary-button-hover', buttonColors.hover)
+    document.documentElement.style.setProperty('--primary-button-active', buttonColors.pressed)
     document.documentElement.style.setProperty('--text-on-primary', textOnColor(primaryScale.value.primary))
+    document.documentElement.style.setProperty('--text-on-error', textOnColor(baseColors.value.error))
     document.documentElement.style.setProperty('--ecl-primary', primaryScale.value.primary)
     document.documentElement.style.setProperty('--primary-rgb', primaryScale.value.primaryRgb)
     document.documentElement.style.setProperty('--primary-hover', primaryScale.value.primaryHover)
