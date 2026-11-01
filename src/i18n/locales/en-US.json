@@ -1081,6 +1081,45 @@
       "legal": {
         "disclaimer": "Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.",
         "trademark": "Minecraft is a trademark of Mojang Synergies AB."
+      },
+      "debugInfo": {
+        "title": "Information",
+        "iconLabel": "EuoraCraft Launcher icon",
+        "hintRemaining": "Click {count} more times to enable debug mode",
+        "unlocked": "Debug mode enabled",
+        "unlockFailed": "Failed to enable debug mode, please try again later",
+        "sections": {
+          "system": "System",
+          "launcher": "Launcher"
+        },
+        "fields": {
+          "os": "Operating system",
+          "osVersion": "System version",
+          "architecture": "Architecture",
+          "memory": "Physical memory",
+          "pythonVersion": "Python version",
+          "version": "Launcher version",
+          "versionType": "Version type",
+          "buildDate": "Build date",
+          "runtime": "Runtime",
+          "frontendVersion": "Frontend version",
+          "windowChrome": "Window style",
+          "debugMode": "Debug mode"
+        },
+        "runtimeModes": {
+          "desktop": "Desktop",
+          "desktopDev": "Development",
+          "showcase": "Showcase",
+          "browser": "Browser"
+        },
+        "windowChromes": {
+          "custom": "Custom title bar",
+          "system_shadow": "System shadow title bar",
+          "native": "Native title bar"
+        },
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "footerHint": "Debug mode can be turned off in Settings → Launcher."
       }
     },
     "downloadSettings": "Download Settings",

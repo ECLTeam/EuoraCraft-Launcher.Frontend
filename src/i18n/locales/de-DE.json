@@ -1077,6 +1077,45 @@
       "legal": {
         "disclaimer": "Dieser Launcher ist kein offizielles Minecraft-Produkt, wurde weder von Mojang noch von Microsoft gebilligt und steht in keiner Verbindung dazu.",
         "trademark": "Minecraft ist eine Marke von Mojang Synergies AB."
+      },
+      "debugInfo": {
+        "title": "Informationen",
+        "iconLabel": "EuoraCraft Launcher-Symbol",
+        "hintRemaining": "Noch {count} Klicks, um den Debug-Modus zu aktivieren",
+        "unlocked": "Debug-Modus aktiviert",
+        "unlockFailed": "Debug-Modus konnte nicht aktiviert werden, bitte später erneut versuchen",
+        "sections": {
+          "system": "System",
+          "launcher": "Launcher"
+        },
+        "fields": {
+          "os": "Betriebssystem",
+          "osVersion": "Systemversion",
+          "architecture": "Architektur",
+          "memory": "Arbeitsspeicher",
+          "pythonVersion": "Python-Version",
+          "version": "Launcher-Version",
+          "versionType": "Versionstyp",
+          "buildDate": "Build-Datum",
+          "runtime": "Ausführungsart",
+          "frontendVersion": "Frontend-Version",
+          "windowChrome": "Fensterstil",
+          "debugMode": "Debug-Modus"
+        },
+        "runtimeModes": {
+          "desktop": "Desktop",
+          "desktopDev": "Entwicklung",
+          "showcase": "Demo",
+          "browser": "Browser"
+        },
+        "windowChromes": {
+          "custom": "Eigene Titelleiste",
+          "system_shadow": "Systemschatten-Titelleiste",
+          "native": "Native Titelleiste"
+        },
+        "enabled": "Aktiviert",
+        "disabled": "Deaktiviert",
+        "footerHint": "Der Debug-Modus lässt sich unter Einstellungen → Launcher deaktivieren."
       }
     },
     "downloadSettings": "Download-Einstellungen",

@@ -1,19 +1,34 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { nextTick, ref } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 import { URLS } from '@/config/urls'
 import { i18n } from '@/i18n'
 import { openExternalUrl } from '@/utils/openExternal'
 import AboutTab from './AboutTab.vue'
 
+const debugModeMock = vi.hoisted(() => ({
+  enabledRef: null as null | { value: boolean },
+  setDebugMode: vi.fn<(value: boolean) => Promise<void>>(),
+}))
+
 vi.mock('/favicon.ico', () => ({ default: '/favicon.ico' }))
 vi.mock('@/utils/openExternal', () => ({ openExternalUrl: vi.fn() }))
 vi.mock('@/app/data', () => ({ launcherInfoQuery: vi.fn().mockResolvedValue(null) }))
+vi.mock('@/composables/useDebugMode', async () => {
+  const { computed, ref } = await import('vue')
+  debugModeMock.enabledRef = ref(false)
+  return {
+    useDebugMode: () => ({
+      debugMode: computed(() => debugModeMock.enabledRef!.value),
+      setDebugMode: debugModeMock.setDebugMode,
+    }),
+  }
+})
 vi.mock('@/composables/useLauncherMessage', () => ({
   useLauncherMessage: () => ({
     loading: vi.fn(() => ({ destroy: vi.fn() })),
     success: vi.fn(),
-    info: vi.fn(),
+    info: vi.fn(() => ({ destroy: vi.fn() })),
     error: vi.fn(),
   }),
 }))
@@ -31,9 +46,20 @@ vi.mock('@/features/settings/composables/useUpdateCheck', async () => {
 
 enableAutoUnmount(afterEach)
 
+const DebugInfoModalStub = defineComponent({
+  name: 'DebugInfoModal',
+  props: { visible: Boolean, debugEnabled: Boolean },
+  emits: ['update:visible'],
+  template: '<div class="debug-info-modal-stub" />',
+})
+
 beforeEach(() => {
   vi.useFakeTimers()
   vi.clearAllMocks()
+  debugModeMock.enabledRef!.value = false
+  debugModeMock.setDebugMode.mockImplementation(async (value: boolean) => {
+    debugModeMock.enabledRef!.value = value
+  })
   i18n.global.locale.value = 'zh-CN'
 })
 
@@ -47,7 +73,7 @@ function mountAboutTab() {
     global: {
       plugins: [i18n],
       provide: { launcherVersion: ref(''), launcherVersionType: ref('release') },
-      stubs: { AboutEntryRow: true, UiIcon: true, PluginSlotHost: true },
+      stubs: { AboutEntryRow: true, UiIcon: true, PluginSlotHost: true, DebugInfoModal: DebugInfoModalStub },
     },
   })
 }
@@ -174,4 +200,47 @@ it('离开页面清理等待计时器，已移除图片的事件不会重启等�
   image.dispatchEvent(new Event('error'))
   await vi.advanceTimersByTimeAsync(20_000)
   expect(vi.getTimerCount()).toBe(0)
+})
+
+it('启动器图标是可点击按钮并带无障碍名称', async () => {
+  const wrapper = mountAboutTab()
+  const icon = wrapper.get('.launcher-summary__logo-cell')
+  expect(icon.element.tagName).toBe('BUTTON')
+  expect(icon.attributes('type')).toBe('button')
+  expect(icon.attributes('aria-label')).toBe('EuoraCraft Launcher 图标')
+  // 未开启调试模式时不带旋转标记，图标保持静态
+  expect(icon.classes()).not.toContain('is-debug')
+  expect(wrapper.getComponent(DebugInfoModalStub).props('visible')).toBe(false)
+})
+
+it('连续点击图标七次开启调试模式并打开调试信息弹窗', async () => {
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  const icon = wrapper.get('.launcher-summary__logo-cell')
+
+  for (let index = 0; index < 6; index += 1) await icon.trigger('click')
+  await flushPromises()
+  expect(debugModeMock.setDebugMode).not.toHaveBeenCalled()
+  expect(wrapper.getComponent(DebugInfoModalStub).props('visible')).toBe(false)
+
+  await icon.trigger('click')
+  await flushPromises()
+  expect(debugModeMock.setDebugMode).toHaveBeenCalledWith(true)
+  expect(wrapper.getComponent(DebugInfoModalStub).props('visible')).toBe(true)
+  expect(wrapper.getComponent(DebugInfoModalStub).props('debugEnabled')).toBe(true)
+  // 开启后图标才带旋转标记
+  expect(icon.classes()).toContain('is-debug')
+})
+
+it('调试模式已开启时单击图标直接打开调试信息弹窗', async () => {
+  debugModeMock.enabledRef!.value = true
+  const wrapper = mountAboutTab()
+  await flushPromises()
+
+  await wrapper.get('.launcher-summary__logo-cell').trigger('click')
+  await flushPromises()
+
+  expect(debugModeMock.setDebugMode).not.toHaveBeenCalled()
+  expect(wrapper.getComponent(DebugInfoModalStub).props('visible')).toBe(true)
+  expect(wrapper.get('.launcher-summary__logo-cell').classes()).toContain('is-debug')
 })

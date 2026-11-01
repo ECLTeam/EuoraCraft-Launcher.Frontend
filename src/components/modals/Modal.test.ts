@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick, provide, ref } from 'vue'
@@ -6,6 +7,8 @@ import { modalParentKey } from '@/composables/useModalInteraction'
 import { i18n } from '@/i18n'
 import FullscreenModal from './FullscreenModal.vue'
 import Modal from './Modal.vue'
+
+const modalCss = readFileSync('src/styles/components/modals/Modal.css', 'utf8')
 
 function createHost(options: { template: string; setup: () => object }) {
   return defineComponent({ components: { Modal, FullscreenModal }, ...options })
@@ -175,5 +178,34 @@ describe('Modal', () => {
     await vi.waitFor(() => expect(parent.hasAttribute('inert')).toBe(false))
     expect(parentVisible.value).toBe(true)
     wrapper.unmount()
+  })
+
+  it('默认遮罩覆盖整个窗口，需要保留顶部栏拖动时只放行该区域的点击', async () => {
+    const visible = ref(true)
+    const keepTitlebar = ref(false)
+    const host = createHost({
+      setup: () => ({ visible, keepTitlebar }),
+      template: '<Modal v-model:visible="visible" title="信息" :titlebarInteractive="keepTitlebar">内容</Modal>',
+    })
+    const wrapper = mount(host, { attachTo: document.body, global: { plugins: [i18n], stubs: { transition: false } } })
+    try {
+      await nextTick()
+      const overlay = document.querySelector<HTMLElement>('.modal-overlay')!
+      expect(overlay.classList.contains('modal-overlay--titlebar-interactive')).toBe(false)
+      expect(overlay.querySelector('.modal-overlay__blocker')).toBeNull()
+
+      keepTitlebar.value = true
+      await nextTick()
+      expect(overlay.classList.contains('modal-overlay--titlebar-interactive')).toBe(true)
+      // 内容区仍有阻挡层，遮罩自身放行点击
+      expect(overlay.querySelector('.modal-overlay__blocker')).not.toBeNull()
+      expect(modalCss).toContain('.modal-overlay--titlebar-interactive {')
+      expect(modalCss).toContain('pointer-events: none;')
+      expect(modalCss).toContain('inset: var(--titlebar-h) 0 0 0;')
+      // 遮罩仍铺满整个窗口，只改点击穿透，不移动层级或位置
+      expect(modalCss).not.toContain('top: var(--titlebar-h);')
+    } finally {
+      wrapper.unmount()
+    }
   })
 })

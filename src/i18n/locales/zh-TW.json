@@ -1077,6 +1077,45 @@
       "legal": {
         "disclaimer": "本啟動器並非 Minecraft 官方產品，未經 Mojang 或 Microsoft 批准，亦與之無任何關聯。",
         "trademark": "Minecraft 是 Mojang Synergies AB 的商標。"
+      },
+      "debugInfo": {
+        "title": "資訊",
+        "iconLabel": "EuoraCraft Launcher 圖示",
+        "hintRemaining": "再點擊 {count} 次開啟除錯模式",
+        "unlocked": "除錯模式已開啟",
+        "unlockFailed": "開啟除錯模式失敗，請稍後再試",
+        "sections": {
+          "system": "系統資訊",
+          "launcher": "啟動器資訊"
+        },
+        "fields": {
+          "os": "作業系統",
+          "osVersion": "系統版本",
+          "architecture": "系統架構",
+          "memory": "實體記憶體",
+          "pythonVersion": "Python 版本",
+          "version": "啟動器版本",
+          "versionType": "版本類型",
+          "buildDate": "建置日期",
+          "runtime": "執行型態",
+          "frontendVersion": "前端版本",
+          "windowChrome": "視窗模式",
+          "debugMode": "除錯模式"
+        },
+        "runtimeModes": {
+          "desktop": "桌面執行",
+          "desktopDev": "開發執行",
+          "showcase": "示範模式",
+          "browser": "瀏覽器模式"
+        },
+        "windowChromes": {
+          "custom": "自訂標題列",
+          "system_shadow": "系統陰影標題列",
+          "native": "系統原生標題列"
+        },
+        "enabled": "已開啟",
+        "disabled": "未開啟",
+        "footerHint": "可在「設定 → 啟動器」中關閉除錯模式。"
       }
     },
     "downloadSettings": "下載設定",

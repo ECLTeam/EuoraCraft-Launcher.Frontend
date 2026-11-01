@@ -1212,6 +1212,13 @@ export function createShowcaseTransport(): BackendTransport {
           debug: true,
           active_window_chrome: 'custom',
           system_shadow_supported: false,
+          system: {
+            os_name: 'Windows 11',
+            os_version: '10.0.26100',
+            architecture: 'AMD64',
+            python_version: '3.13.14',
+            memory_total_mb: 32768,
+          },
         })
       case 'launcher_check_update':
         return success({

@@ -10,6 +10,7 @@
       <div
         v-show="isVisible"
         class="modal-overlay"
+        :class="{ 'modal-overlay--titlebar-interactive': titlebarInteractive }"
         :data-modal-id="modalId"
         :inert="!isInteractive || undefined"
         :style="{ zIndex: 1000 + Math.max(0, globalModalStack.displayedModalIds.value.indexOf(modalId)) * 10 }"
@@ -18,6 +19,13 @@
         :aria-labelledby="titleId"
         @click.self="handleOverlayClick"
       >
+        <!-- 放行顶部栏点击时，内容区仍需要阻挡层，否则背景页面会在弹窗打开时被误点 -->
+        <div
+          v-if="titlebarInteractive"
+          class="modal-overlay__blocker"
+          aria-hidden="true"
+          @click="handleOverlayClick"
+        ></div>
         <div
           ref="modalRef"
           tabindex="-1"
@@ -125,6 +133,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: '',
   transitionName: 'modal',
   icon: '',
+  titlebarInteractive: false,
   priority: GLOBAL_MODAL_PRIORITY.interactive,
   parentId: undefined,
 })
@@ -162,6 +171,8 @@ interface Props {
   width?: string
   transitionName?: string
   icon?: string
+  /** 遮罩放行顶部栏区域的点击，窗口在弹窗打开时仍可拖动 */
+  titlebarInteractive?: boolean
   /** 由全局模态框栈仲裁；数值越大越优先。 */
   priority?: number
   /** 并列渲染但属于同一流程的窗口可显式关联父级。null 表示独立窗口。 */

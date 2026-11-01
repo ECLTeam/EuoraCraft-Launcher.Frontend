@@ -13,12 +13,23 @@ export interface UserAgreement {
 //  启动器信息 / 密钥环
 // ═══════════════════════════════════════════════════════════════════
 
+/** 运行环境摘要：由后端读取真实系统信息，避免用浏览器 UA 推测操作系统版本 */
+export interface SystemSummary {
+  os_name: string
+  os_version: string
+  architecture: string
+  python_version: string
+  memory_total_mb: number
+}
+
 export interface LauncherInfo {
   version: string
   version_type: string
   debug: boolean
   active_window_chrome?: 'custom' | 'system_shadow' | 'native'
   system_shadow_supported?: boolean
+  /** 浏览器与演示模式下没有后端系统信息 */
+  system?: SystemSummary
 }
 
 /** 版本检测结果：status 为 disabled=通道禁用 / up_to_date=已最新 / update_available=有新版本 / error=检测失败 */

@@ -72,6 +72,17 @@
 .launcher-summary__logo-cell {
   display: flex;
   align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.launcher-summary__logo-cell:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .launcher-summary__logo {
@@ -80,6 +91,27 @@
   border-radius: 50%;
   flex-shrink: 0;
   object-fit: contain;
+}
+
+/* 仅调试模式已开启时响应悬停：平时图标保持静态，不暴露连点入口 */
+.launcher-summary__logo-cell.is-debug .launcher-summary__logo {
+  transition: transform var(--duration-slower) var(--ease-emphasized);
+}
+
+.launcher-summary__logo-cell.is-debug:hover .launcher-summary__logo,
+.launcher-summary__logo-cell.is-debug:focus-visible .launcher-summary__logo {
+  transform: rotate(360deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher-summary__logo-cell.is-debug .launcher-summary__logo {
+    transition: none;
+  }
+
+  .launcher-summary__logo-cell.is-debug:hover .launcher-summary__logo,
+  .launcher-summary__logo-cell.is-debug:focus-visible .launcher-summary__logo {
+    transform: none;
+  }
 }
 
 .technology-category {

@@ -1077,6 +1077,45 @@
       "legal": {
         "disclaimer": "本ランチャーは Minecraft の公式製品ではなく、Mojang または Microsoft の承認を受けておらず、いかなる関係もありません。",
         "trademark": "Minecraft は Mojang Synergies AB の商標です。"
+      },
+      "debugInfo": {
+        "title": "情報",
+        "iconLabel": "EuoraCraft Launcher のアイコン",
+        "hintRemaining": "あと {count} 回クリックするとデバッグモードが有効になります",
+        "unlocked": "デバッグモードを有効にしました",
+        "unlockFailed": "デバッグモードを有効にできませんでした。後でもう一度お試しください",
+        "sections": {
+          "system": "システム情報",
+          "launcher": "ランチャー情報"
+        },
+        "fields": {
+          "os": "オペレーティングシステム",
+          "osVersion": "システムバージョン",
+          "architecture": "アーキテクチャ",
+          "memory": "物理メモリー",
+          "pythonVersion": "Python バージョン",
+          "version": "ランチャーバージョン",
+          "versionType": "バージョン種別",
+          "buildDate": "ビルド日",
+          "runtime": "実行形態",
+          "frontendVersion": "フロントエンドバージョン",
+          "windowChrome": "ウィンドウ表示",
+          "debugMode": "デバッグモード"
+        },
+        "runtimeModes": {
+          "desktop": "デスクトップ実行",
+          "desktopDev": "開発実行",
+          "showcase": "デモモード",
+          "browser": "ブラウザーモード"
+        },
+        "windowChromes": {
+          "custom": "カスタムタイトルバー",
+          "system_shadow": "システムシャドウタイトルバー",
+          "native": "ネイティブタイトルバー"
+        },
+        "enabled": "有効",
+        "disabled": "無効",
+        "footerHint": "デバッグモードは「設定 → ランチャー」で無効にできます。"
       }
     },
     "downloadSettings": "ダウンロード設定",

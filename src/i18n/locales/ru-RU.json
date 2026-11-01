@@ -1077,6 +1077,45 @@
       "legal": {
         "disclaimer": "Этот лаунчер не является официальным продуктом Minecraft, не одобрен Mojang или Microsoft и никак с ними не связан.",
         "trademark": "Minecraft — торговая марка Mojang Synergies AB."
+      },
+      "debugInfo": {
+        "title": "Информация",
+        "iconLabel": "Значок EuoraCraft Launcher",
+        "hintRemaining": "Нажмите ещё {count} раз(а), чтобы включить режим отладки",
+        "unlocked": "Режим отладки включён",
+        "unlockFailed": "Не удалось включить режим отладки, повторите позже",
+        "sections": {
+          "system": "Система",
+          "launcher": "Лаунчер"
+        },
+        "fields": {
+          "os": "Операционная система",
+          "osVersion": "Версия системы",
+          "architecture": "Архитектура",
+          "memory": "Оперативная память",
+          "pythonVersion": "Версия Python",
+          "version": "Версия лаунчера",
+          "versionType": "Тип версии",
+          "buildDate": "Дата сборки",
+          "runtime": "Режим запуска",
+          "frontendVersion": "Версия интерфейса",
+          "windowChrome": "Оформление окна",
+          "debugMode": "Режим отладки"
+        },
+        "runtimeModes": {
+          "desktop": "Настольный режим",
+          "desktopDev": "Режим разработки",
+          "showcase": "Демонстрационный режим",
+          "browser": "Режим браузера"
+        },
+        "windowChromes": {
+          "custom": "Собственная строка заголовка",
+          "system_shadow": "Системная тень заголовка",
+          "native": "Системная строка заголовка"
+        },
+        "enabled": "Включён",
+        "disabled": "Выключен",
+        "footerHint": "Режим отладки можно отключить в разделе «Настройки → Лаунчер»."
       }
     },
     "downloadSettings": "Настройки загрузки",

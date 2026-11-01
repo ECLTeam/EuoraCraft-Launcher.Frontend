@@ -7,9 +7,15 @@
       </div>
       <div class="card-body">
         <div class="launcher-summary">
-          <div class="launcher-summary__logo-cell">
-            <img src="/favicon.ico" alt="EuoraCraft" class="launcher-summary__logo" />
-          </div>
+          <button
+            type="button"
+            class="launcher-summary__logo-cell"
+            :class="{ 'is-debug': isDebugActive }"
+            :aria-label="t('settings.aboutTab.debugInfo.iconLabel')"
+            @click="handleLauncherIconClick"
+          >
+            <img src="/favicon.ico" alt="" class="launcher-summary__logo" />
+          </button>
           <div class="launcher-summary__content">
             <div class="launcher-summary__name">
               EuoraCraft Launcher
@@ -160,21 +166,26 @@
     </div>
 
     <PluginSlotHost slotId="plugin-slot-settings-about-bottom" class="plugin-slot-container" />
+
+    <DebugInfoModal v-model:visible="debugInfoVisible" :debugEnabled="isDebugActive" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
+import { computed, inject, isRef, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { launcherInfoQuery } from '@/app/data'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import AboutEntryRow from '@/components/settings/AboutEntryRow.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
+import { useDebugMode } from '@/composables/useDebugMode'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { specialThanksEntries, teamMembers, technologyCategories } from '@/features/settings/about/aboutContent'
+import DebugInfoModal from '@/features/settings/components/DebugInfoModal.vue'
+import { useDebugModeUnlock } from '@/features/settings/composables/useDebugModeUnlock'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import type { LauncherInfo, UpdateCheckResult } from '@/types/system'
 import { openExternalUrl } from '@/utils/openExternal'
@@ -231,7 +242,11 @@ onBeforeUnmount(() => {
 
 const launcherVersion = inject<Readonly<Ref<string>>>('launcherVersion')
 const launcherVersionType = inject<Readonly<Ref<'alpha' | 'beta' | 'rc' | 'release'>>>('launcherVersionType')
-const runtimeMode = inject<AppRuntimeMode>('runtimeMode', 'browser')
+// 根组件注入的是只读 ref，测试与局部渲染可能直接传入字符串，两种形态都要兼容
+const injectedRuntimeMode = inject<Readonly<Ref<AppRuntimeMode>> | AppRuntimeMode>('runtimeMode', 'browser')
+const runtimeMode = computed<AppRuntimeMode>(() =>
+  isRef(injectedRuntimeMode) ? injectedRuntimeMode.value : injectedRuntimeMode
+)
 const launcherInfo = ref<LauncherInfo | null>(null)
 const frontendVersion = import.meta.env.VITE_APP_VERSION?.trim() || ''
 const isDevMode = import.meta.env.DEV
@@ -284,7 +299,7 @@ function showCheckResult(result: UpdateCheckResult): void {
 }
 
 const versionText = computed(() => {
-  if (runtimeMode === 'showcase') {
+  if (runtimeMode.value === 'showcase') {
     return frontendVersion
       ? `${translateVersion('demoMode')} · ${translateVersion('frontendLabel')} v${frontendVersion}`
       : translateVersion('demoMode')
@@ -303,6 +318,20 @@ const versionText = computed(() => {
 onMounted(async () => {
   launcherInfo.value = await launcherInfoQuery()
 })
+
+// 调试信息弹窗：调试模式未开启时需要连续点击图标才能解锁，开启后单击直接打开
+const { debugMode } = useDebugMode()
+const { registerClick: registerDebugUnlockClick } = useDebugModeUnlock()
+const debugInfoVisible = ref(false)
+const isDebugActive = computed(() => debugMode.value || launcherInfo.value?.debug === true)
+
+async function handleLauncherIconClick(): Promise<void> {
+  if (isDebugActive.value) {
+    debugInfoVisible.value = true
+    return
+  }
+  if (await registerDebugUnlockClick()) debugInfoVisible.value = true
+}
 
 // 技术栈分类默认全部收起：避免默认展开的"后端运行依赖"等把卡片撑成超出视口的大块，与下拉/折叠式行设计一致
 const expandedTechnologyCategoryIds = ref<Set<string>>(new Set())

@@ -1081,6 +1081,45 @@
       "legal": {
         "disclaimer": "本启动器并非 Minecraft 官方产品，未经 Mojang 或 Microsoft 批准，亦与之无任何关联。",
         "trademark": "Minecraft 是 Mojang Synergies AB 的商标。"
+      },
+      "debugInfo": {
+        "title": "信息",
+        "iconLabel": "EuoraCraft Launcher 图标",
+        "hintRemaining": "再点击 {count} 次开启调试模式",
+        "unlocked": "调试模式已开启",
+        "unlockFailed": "开启调试模式失败，请稍后重试",
+        "sections": {
+          "system": "系统信息",
+          "launcher": "启动器信息"
+        },
+        "fields": {
+          "os": "操作系统",
+          "osVersion": "系统版本",
+          "architecture": "系统架构",
+          "memory": "物理内存",
+          "pythonVersion": "Python 版本",
+          "version": "启动器版本",
+          "versionType": "版本类型",
+          "buildDate": "构建日期",
+          "runtime": "运行形态",
+          "frontendVersion": "前端版本",
+          "windowChrome": "窗口模式",
+          "debugMode": "调试模式"
+        },
+        "runtimeModes": {
+          "desktop": "桌面运行",
+          "desktopDev": "开发运行",
+          "showcase": "演示模式",
+          "browser": "浏览器模式"
+        },
+        "windowChromes": {
+          "custom": "自定义标题栏",
+          "system_shadow": "系统阴影标题栏",
+          "native": "系统原生标题栏"
+        },
+        "enabled": "已开启",
+        "disabled": "未开启",
+        "footerHint": "可在「设置 → 启动器」中关闭调试模式。"
       }
     },
     "downloadSettings": "下载设置",

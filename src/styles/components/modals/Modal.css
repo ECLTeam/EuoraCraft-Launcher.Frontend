@@ -10,6 +10,22 @@
   outline: none;
 }
 
+/* 遮罩仍覆盖整个窗口，只把顶部栏区域的点击放行给窗口拖动；
+   内容区由阻挡层继续拦截，弹窗自身保持可交互。 */
+.modal-overlay--titlebar-interactive {
+  pointer-events: none;
+}
+
+.modal-overlay--titlebar-interactive .modal-container {
+  pointer-events: auto;
+}
+
+.modal-overlay--titlebar-interactive .modal-overlay__blocker {
+  position: absolute;
+  inset: var(--titlebar-h) 0 0 0;
+  pointer-events: auto;
+}
+
 .modal-container {
   background: var(--card-bg);
   border: 1px solid var(--ecl-border);
