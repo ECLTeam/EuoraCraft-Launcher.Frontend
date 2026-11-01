@@ -9,22 +9,35 @@
         <p>{{ t('tools.skinAvatar.summary', { size: avatarSize, hat: hatSummary }) }}</p>
       </div>
       <p v-else class="skin-avatar-hint">{{ t('tools.skinAvatar.hint') }}</p>
-      <details class="tool-options">
-        <summary><UiIcon name="chevron-right" :size="16" />{{ t('tools.skinAvatar.settings') }}</summary>
-        <div class="skin-avatar-settings">
-          <label class="skin-avatar-hat">
-            <input v-model="includeHat" type="checkbox" :disabled="saving" />
-            {{ t('tools.skinAvatar.includeHat') }}
-          </label>
-          <fieldset class="skin-avatar-sizes" :disabled="saving">
-            <legend>{{ t('tools.skinAvatar.size') }}</legend>
-            <label v-for="option in avatarSizes" :key="option">
-              <input v-model="avatarSize" type="radio" :value="option" name="skin-avatar-size" />
-              {{ option }} × {{ option }}
-            </label>
-          </fieldset>
-        </div>
-      </details>
+      <div class="tool-options" :class="{ 'is-open': optionsOpen }">
+        <button
+          type="button"
+          class="tool-options__toggle"
+          :aria-expanded="optionsOpen"
+          @click="optionsOpen = !optionsOpen"
+        >
+          <UiIcon name="chevron-right" :size="16" class="tool-options__chevron" />{{ t('tools.skinAvatar.settings') }}
+        </button>
+        <CollapsiblePanel :open="optionsOpen">
+          <div class="skin-avatar-settings">
+            <NCheckbox
+              v-model:checked="includeHat"
+              class="skin-avatar-hat"
+              :themeOverrides="toolCheckboxTheme"
+              :disabled="saving"
+            >
+              {{ t('tools.skinAvatar.includeHat') }}
+            </NCheckbox>
+            <fieldset class="skin-avatar-sizes" :disabled="saving">
+              <legend>{{ t('tools.skinAvatar.size') }}</legend>
+              <label v-for="option in avatarSizes" :key="option">
+                <input v-model="avatarSize" type="radio" :value="option" name="skin-avatar-size" />
+                {{ option }} × {{ option }}
+              </label>
+            </fieldset>
+          </div>
+        </CollapsiblePanel>
+      </div>
       <p v-if="error" class="skin-avatar-error" role="alert">{{ error }}</p>
       <p v-if="saved" class="skin-avatar-hint" role="status">{{ t('tools.skinAvatar.saved') }}</p>
       <div class="skin-avatar-actions">
@@ -43,12 +56,14 @@
 </template>
 
 <script setup lang="ts">
+import { NCheckbox } from 'naive-ui'
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { BackendCommandError, unwrapResponse } from '@/app/runtime/errorPresentation'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
+import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import {
   avatarSizes,
@@ -58,6 +73,7 @@ import {
   type AvatarSize,
   type SkinPixels,
 } from '@/features/tools/skinAvatar'
+import { toolCheckboxTheme } from '@/features/tools/toolCheckboxTheme'
 import { getErrorMessage } from '@/utils/error'
 
 const { t } = useI18n()
@@ -69,6 +85,8 @@ const avatarPngDataUrl = ref('')
 const loading = ref(false)
 const saving = ref(false)
 const saved = ref(false)
+// 头像设置默认收起，展开状态只影响当前页面
+const optionsOpen = ref(false)
 const error = ref('')
 let active = true
 let selectionRevision = 0

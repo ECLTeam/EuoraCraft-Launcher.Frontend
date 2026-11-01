@@ -52,6 +52,8 @@
   flex: 1;
   overflow: auto;
   contain: layout;
+  /* 内容滚动到容器边缘时按卡片圆角裁切：被遮挡的卡片断面跟随圆角，而不是直角 */
+  border-radius: var(--ecl-card-radius);
 }
 
 .section-layout__menu :deep(.n-menu-item),

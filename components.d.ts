@@ -17,6 +17,7 @@ declare module 'vue' {
     AvatarRenderer: typeof import('./src/components/game/AvatarRenderer.vue')['default']
     Button: typeof import('./src/components/ui/Button.vue')['default']
     Card: typeof import('./src/components/ui/Card.vue')['default']
+    CollapsiblePanel: typeof import('./src/components/ui/CollapsiblePanel.vue')['default']
     ConfirmDialog: typeof import('./src/components/modals/ConfirmDialog.vue')['default']
     ConnectorNodeSettings: typeof import('./src/components/connect/ConnectorNodeSettings.vue')['default']
     ConnectorPlayerAvatar: typeof import('./src/components/connect/ConnectorPlayerAvatar.vue')['default']

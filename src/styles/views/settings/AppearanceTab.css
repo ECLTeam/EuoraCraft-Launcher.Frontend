@@ -102,19 +102,59 @@
   border-top: 1px solid var(--ecl-border);
 }
 
-.font-advanced summary {
+.font-advanced__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
   padding: 14px 16px;
+  border: none;
+  background: transparent;
   color: var(--ecl-text);
   font-size: 13px;
   font-weight: 600;
+  text-align: left;
   cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-emphasized);
 }
 
-.font-advanced summary span {
-  margin-left: 8px;
+.font-advanced__toggle:hover {
+  color: var(--primary);
+}
+
+.font-advanced__toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.font-advanced__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.font-advanced__count {
   color: var(--ecl-text-secondary);
   font-size: 11px;
   font-weight: 400;
+}
+
+.font-advanced__chevron {
+  flex-shrink: 0;
+  color: var(--ecl-text-secondary);
+  transition: transform var(--duration-normal) var(--ease-emphasized);
+}
+
+.font-advanced.is-open .font-advanced__chevron {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .font-advanced__chevron {
+    transition: none;
+  }
 }
 
 .window-chrome-select {

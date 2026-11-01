@@ -5,35 +5,41 @@
   font-size: 12px;
 }
 
-.tool-options summary {
+.tool-options__toggle {
   display: flex;
   align-items: center;
   gap: 8px;
   width: fit-content;
   padding: 4px 6px;
+  border: none;
+  background: transparent;
   border-radius: var(--r-sm);
+  color: inherit;
+  font-size: inherit;
   cursor: pointer;
   line-height: 20px;
 }
 
-.tool-options summary::-webkit-details-marker {
-  display: none;
-}
-
-.tool-options summary:hover {
+.tool-options__toggle:hover {
   background: var(--control-bg-hover);
   color: var(--text-primary);
 }
 
-.tool-options summary:focus-visible {
+.tool-options__toggle:focus-visible {
   outline: none;
   box-shadow: var(--control-ring);
 }
 
-.tool-options summary > .icon {
+.tool-options__toggle > .icon {
   transition: transform var(--duration-fast) var(--ease-emphasized);
 }
 
-.tool-options[open] summary > .icon {
+.tool-options.is-open .tool-options__toggle > .icon {
   transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-options__toggle > .icon {
+    transition: none;
+  }
 }

@@ -43,7 +43,7 @@ describe('SkinAvatarToolCard', () => {
 
   it('keeps the primary actions visible with settings closed and export unavailable before import', () => {
     const wrapper = mountCard()
-    expect(wrapper.get('details').attributes('open')).toBeUndefined()
+    expect(wrapper.get('.tool-options').classes()).not.toContain('is-open')
     expect(button(wrapper, '导出 PNG').attributes('disabled')).toBeDefined()
     expect(wrapper.find('img').exists()).toBe(false)
     expect(mocks.command).not.toHaveBeenCalled()
@@ -56,7 +56,8 @@ describe('SkinAvatarToolCard', () => {
     expect(mocks.command).toHaveBeenCalledWith('select_image', { purpose: 'skin' })
     expect(mocks.command).toHaveBeenCalledWith('fs_read_file', { path: 'D:/skin.png', mode: 'base64' })
     expect(wrapper.get('img').attributes('src')).toBe('data:image/png;base64,avatar')
-    await wrapper.get('input[type="checkbox"]').setValue(false)
+    // 复选框使用与下载卡片一致的 naive-ui 组件，通过点击切换
+    await wrapper.get('.skin-avatar-hat').trigger('click')
     await wrapper.get('input[type="radio"][value="256"]').setValue(true)
     expect(wrapper.text()).toContain('256 × 256 · 帽子层关闭')
     expect(mocks.render).toHaveBeenLastCalledWith(pixels, 256, false)
@@ -98,7 +99,7 @@ describe('SkinAvatarToolCard', () => {
     await button(wrapper, '导出 PNG').trigger('click')
     await button(wrapper, '导出 PNG').trigger('click')
     expect(mocks.command.mock.calls.filter(([name]) => name === 'skin_avatar_export')).toHaveLength(1)
-    expect(wrapper.get('input[type="checkbox"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.skin-avatar-hat').classes()).toContain('n-checkbox--disabled')
     finish({ success: true, data: { path: null } })
     await flushPromises()
     expect(wrapper.find('[role="alert"]').exists()).toBe(false)

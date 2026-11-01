@@ -94,13 +94,17 @@
     </SettingSection>
 
     <SettingSection :title="t('settings.appearanceSectionDetails')">
-      <SettingRow :label="t('settings.windowRadius')" :description="t('settings.windowRadiusDesc')">
+      <!-- 窗口圆角只作用于自定义标题栏，其他窗口样式下直接隐藏，避免留下不可用的滑杆 -->
+      <SettingRow
+        v-if="windowChromePreference === 'custom'"
+        :label="t('settings.windowRadius')"
+        :description="t('settings.windowRadiusDesc')"
+      >
         <div class="slider-control">
           <NSlider
             :value="radiusWindow"
             :min="0"
             :max="32"
-            :disabled="windowChromePreference !== 'custom'"
             :tooltip="false"
             @update:value="handleRadiusChange('radius_window', $event)"
           />
@@ -164,47 +168,59 @@
           @update:modelValue="handleFontFamilyChange('font_family', $event)"
         />
       </SettingRow>
-      <details class="font-advanced">
-        <summary>
-          {{ t('settings.fontAdvanced') }}
-          <span v-if="fontOverrideCount">{{ t('settings.fontAdvancedCount', { count: fontOverrideCount }) }}</span>
-        </summary>
-        <SettingRow
-          class="font-setting-row"
-          :label="t('settings.fontSidebar')"
-          :description="t('settings.fontSidebarDesc')"
+      <div class="font-advanced" :class="{ 'is-open': fontAdvancedOpen }">
+        <button
+          type="button"
+          class="font-advanced__toggle"
+          :aria-expanded="fontAdvancedOpen"
+          @click="fontAdvancedOpen = !fontAdvancedOpen"
         >
-          <FontFamilySelect
-            :modelValue="appearance.sidebar_font_family ?? ''"
-            :defaultLabel="t('settings.fontFollowInterface')"
-            defaultFont="var(--ecl-font-body, var(--font-body))"
-            fallbackFont="var(--ecl-font-body, var(--font-body))"
-            @update:modelValue="handleFontFamilyChange('sidebar_font_family', $event)"
-          />
-        </SettingRow>
-        <SettingRow
-          class="font-setting-row"
-          :label="t('settings.fontTerminal')"
-          :description="t('settings.fontTerminalDesc')"
-        >
-          <FontFamilySelect
-            :modelValue="appearance.terminal_font_family ?? ''"
-            :defaultLabel="t('settings.fontDefaultMono')"
-            defaultFont="var(--font-mono)"
-            fallbackFont="var(--font-mono)"
-            @update:modelValue="handleFontFamilyChange('terminal_font_family', $event)"
-          />
-        </SettingRow>
-        <SettingRow class="font-setting-row" :label="t('settings.fontLog')">
-          <FontFamilySelect
-            :modelValue="appearance.log_font_family ?? ''"
-            :defaultLabel="t('settings.fontDefaultMono')"
-            defaultFont="var(--font-mono)"
-            fallbackFont="var(--font-mono)"
-            @update:modelValue="handleFontFamilyChange('log_font_family', $event)"
-          />
-        </SettingRow>
-      </details>
+          <span class="font-advanced__title">
+            {{ t('settings.fontAdvanced') }}
+            <span v-if="fontOverrideCount" class="font-advanced__count">
+              {{ t('settings.fontAdvancedCount', { count: fontOverrideCount }) }}
+            </span>
+          </span>
+          <UiIcon name="chevron-down" :size="14" class="font-advanced__chevron" />
+        </button>
+        <CollapsiblePanel :open="fontAdvancedOpen">
+          <SettingRow
+            class="font-setting-row"
+            :label="t('settings.fontSidebar')"
+            :description="t('settings.fontSidebarDesc')"
+          >
+            <FontFamilySelect
+              :modelValue="appearance.sidebar_font_family ?? ''"
+              :defaultLabel="t('settings.fontFollowInterface')"
+              defaultFont="var(--ecl-font-body, var(--font-body))"
+              fallbackFont="var(--ecl-font-body, var(--font-body))"
+              @update:modelValue="handleFontFamilyChange('sidebar_font_family', $event)"
+            />
+          </SettingRow>
+          <SettingRow
+            class="font-setting-row"
+            :label="t('settings.fontTerminal')"
+            :description="t('settings.fontTerminalDesc')"
+          >
+            <FontFamilySelect
+              :modelValue="appearance.terminal_font_family ?? ''"
+              :defaultLabel="t('settings.fontDefaultMono')"
+              defaultFont="var(--font-mono)"
+              fallbackFont="var(--font-mono)"
+              @update:modelValue="handleFontFamilyChange('terminal_font_family', $event)"
+            />
+          </SettingRow>
+          <SettingRow class="font-setting-row" :label="t('settings.fontLog')">
+            <FontFamilySelect
+              :modelValue="appearance.log_font_family ?? ''"
+              :defaultLabel="t('settings.fontDefaultMono')"
+              defaultFont="var(--font-mono)"
+              fallbackFont="var(--font-mono)"
+              @update:modelValue="handleFontFamilyChange('log_font_family', $event)"
+            />
+          </SettingRow>
+        </CollapsiblePanel>
+      </div>
     </SettingSection>
 
     <SettingSection :title="t('settings.background')">
@@ -293,13 +309,13 @@
         <SettingRow :label="t('settings.backgroundVideoMute')">
           <NSwitch :value="backgroundVideo.muted" @update:value="handleVideoMutedChange" />
         </SettingRow>
-        <SettingRow :label="t('settings.backgroundVideoVolume')">
+        <!-- 静音时音量没有意义，直接隐藏而不是留一个禁用滑杆 -->
+        <SettingRow v-if="!backgroundVideo.muted" :label="t('settings.backgroundVideoVolume')">
           <div class="slider-control">
             <NSlider
               :value="Math.round(backgroundVideo.volume * 100)"
               :min="0"
               :max="100"
-              :disabled="backgroundVideo.muted"
               :tooltip="false"
               @update:value="handleVideoVolumeChange"
             />
@@ -379,6 +395,7 @@ import { NButton, NInput, NInputGroup, NSelect, NSlider, NSwitch, NTab, NTabs, N
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useActiveWindowChrome, useSystemShadowSupported } from '@/app/runtime/windowChrome'
+import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -611,6 +628,9 @@ const fontOverrideCount = computed(
       appearance.value.log_font_family,
     ].filter(Boolean).length
 )
+
+// 高级字体默认收起；展开状态只影响当前页面，不写入配置
+const fontAdvancedOpen = ref(false)
 
 function handleRadiusChange(key: keyof ThemeAppearanceConfig, value: number | null) {
   if (key === 'radius_window' && windowChromePreference.value !== 'custom') return

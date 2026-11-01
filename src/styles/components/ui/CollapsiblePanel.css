@@ -1,0 +1,34 @@
+/* 折叠面板：用 grid-template-rows 从 0fr 过渡到 1fr，按内容实际高度展开，
+   不需要写死最大高度，也不会在内容变高后出现跳动。 */
+.collapsible-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--duration-fast) var(--ease-emphasized-accelerate),
+    opacity var(--duration-fast) var(--ease-emphasized-accelerate),
+    visibility 0s linear var(--duration-fast);
+}
+
+.collapsible-panel.is-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  opacity: 1;
+  transition:
+    grid-template-rows var(--duration-normal) var(--ease-emphasized-decelerate),
+    opacity var(--duration-normal) var(--ease-emphasized-decelerate),
+    visibility 0s;
+}
+
+.collapsible-panel__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible-panel,
+  .collapsible-panel.is-open {
+    transition: none;
+  }
+}

@@ -41,13 +41,17 @@
   font-size: 12px;
 }
 
-.skin-avatar-settings label {
+.skin-avatar-hat {
+  justify-self: start;
+}
+
+.skin-avatar-sizes label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.skin-avatar-settings input {
+.skin-avatar-sizes input {
   accent-color: var(--primary);
 }
 

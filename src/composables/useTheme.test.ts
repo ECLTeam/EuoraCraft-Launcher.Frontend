@@ -39,6 +39,16 @@ describe('useTheme 语义色', () => {
     expect(theme.themeOverrides.value.Menu?.itemTextColorHover).toBe(LIGHT_THEME_COLORS.text)
     expect(theme.themeOverrides.value.Menu?.itemIconColorActive).toBe('#5B6FF5')
   })
+  it('选中的复选框对勾与主按钮正文同色，不跟随对比度计算出的黑色', () => {
+    setActivePinia(createPinia())
+    const theme = useTheme()
+    theme.setPrimaryColor('#5B6FF5', false)
+
+    // --text-on-primary 在该主色下按对比度算出黑色，复选框必须改用主按钮正文色
+    expect(document.documentElement.style.getPropertyValue('--text-on-primary')).toBe('#000000')
+    expect(theme.themeOverrides.value.Checkbox?.checkMarkColor).toBe('#ffffff')
+    expect(theme.themeOverrides.value.Button?.textColorPrimary).toBe('#ffffff')
+  })
   it('关闭额外毛玻璃层后背景模糊仍可调整，切换主题不覆盖数值', () => {
     setActivePinia(createPinia())
     const theme = useTheme()

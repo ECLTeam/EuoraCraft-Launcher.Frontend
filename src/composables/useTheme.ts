@@ -26,6 +26,7 @@ import {
   LIGHT_THEME_COLORS,
   PRESET_COLORS,
   isBuiltinThemeId,
+  primaryFillTextColor,
   layoutSkinOf,
   resolveCatppuccinFlavor,
   type BuiltinThemeId,
@@ -511,10 +512,10 @@ function createThemeOverrides(
       borderHoverPrimary: `1px solid ${buttonColors.hover}`,
       borderPressedPrimary: `1px solid ${buttonColors.pressed}`,
       borderFocusPrimary: `1px solid ${buttonColors.normal}`,
-      textColorPrimary: '#ffffff',
-      textColorHoverPrimary: '#ffffff',
-      textColorPressedPrimary: '#ffffff',
-      textColorFocusPrimary: '#ffffff',
+      textColorPrimary: primaryFillTextColor,
+      textColorHoverPrimary: primaryFillTextColor,
+      textColorPressedPrimary: primaryFillTextColor,
+      textColorFocusPrimary: primaryFillTextColor,
       color: 'var(--ecl-control-fill)',
       colorHover: 'var(--ecl-control-fill-hover)',
       colorPressed: 'var(--ecl-control-fill-active)',
@@ -532,6 +533,11 @@ function createThemeOverrides(
       borderRadiusSmall: 'var(--ecl-radius-control, 6px)',
       fontWeight: '550',
       paddingMedium: '0 14px',
+    },
+    Checkbox: {
+      // 选中态是主色填充，对勾与主按钮正文使用同一颜色；
+      // naive 默认取主题 baseColor，在较亮的紫色主色上会变成黑色对勾。
+      checkMarkColor: primaryFillTextColor,
     },
     Card: {
       color: 'var(--ecl-surface)',

@@ -104,9 +104,9 @@ describe('CustomDownloadCard', () => {
       expect(wrapper.get(`input#${id}`).attributes('disabled')).toBeUndefined()
     }
     expect(wrapper.get('[role="radiogroup"]').attributes('aria-labelledby')).toBe('custom-download-naming-label')
-    expect(wrapper.get('details').find('[role="radiogroup"]').exists()).toBe(true)
-    expect(wrapper.get('details').find('#custom-download-url').exists()).toBe(false)
-    expect(wrapper.get('details').attributes('open')).toBeUndefined()
+    expect(wrapper.get('.custom-download-advanced').find('[role="radiogroup"]').exists()).toBe(true)
+    expect(wrapper.get('.custom-download-advanced').find('#custom-download-url').exists()).toBe(false)
+    expect(wrapper.get('.custom-download-advanced').classes()).not.toContain('is-open')
     await wrapper.get('input[type="radio"][value="custom"]').setValue(true)
     expect(useCustomDownloadStore().namingMode).toBe('custom')
     await wrapper.get('#custom-download-name').setValue('保留名称.zip')
@@ -126,7 +126,7 @@ describe('CustomDownloadCard', () => {
     const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
     await flushPromises()
     expect((wrapper.get('#custom-download-ua').element as HTMLInputElement).value).toBe('Test-UA')
-    expect(wrapper.get('details').attributes('open')).toBeUndefined()
+    expect(wrapper.get('.custom-download-advanced').classes()).not.toContain('is-open')
     expect((wrapper.get('[aria-label="请求头值"]').element as HTMLInputElement).value).toBe('preserved')
     useCustomDownloadStore().operationId = 'active'
     useApplicationOperationStore().accept({ operationId: 'active', status: 'running', percent: 20, message: '下载中' })
@@ -147,9 +147,9 @@ describe('CustomDownloadCard', () => {
     const wrapper = mount(CustomDownloadCard, { global: { plugins: [i18n] } })
     await flushPromises()
     expect(wrapper.findAll('[role="alert"]')).toHaveLength(1)
-    expect(wrapper.get('details').find('[role="alert"]').exists()).toBe(false)
+    expect(wrapper.get('.custom-download-advanced').find('[role="alert"]').exists()).toBe(false)
     expect(wrapper.get('[role="alert"]').text()).not.toBe('')
-    expect((wrapper.get('details').element as HTMLDetailsElement).open).toBe(true)
+    expect(wrapper.get('.custom-download-advanced').classes()).toContain('is-open')
     expect(
       wrapper
         .findAll('button')
@@ -275,7 +275,7 @@ describe('CustomDownloadCard', () => {
       overwrite: false,
     })
     expect(wrapper.text()).toContain('D:/Chosen/精确名称')
-    expect(wrapper.get('details').attributes('open')).toBeUndefined()
+    expect(wrapper.get('.custom-download-advanced').classes()).not.toContain('is-open')
     wrapper.unmount()
   })
 

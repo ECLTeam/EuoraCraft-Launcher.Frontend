@@ -17,6 +17,14 @@ export const PRESET_COLORS: PresetColor[] = [
 
 export const DEFAULT_PRIMARY_COLOR = '#5B6FF5'
 
+/**
+ * 主色填充（主按钮、选中的复选框等）上的文字与图标颜色。
+ *
+ * 主按钮正文始终使用白色，选中的复选框对勾必须与之保持一致；
+ * 不要改用按对比度计算的 ``--text-on-primary``，它在较亮的紫色上会算出黑色。
+ */
+export const primaryFillTextColor = '#ffffff'
+
 export interface ThemeModeOption {
   value: ThemeMode
   icon: string

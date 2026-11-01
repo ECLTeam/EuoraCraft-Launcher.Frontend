@@ -22,80 +22,93 @@
           })
         }}
       </p>
-      <details ref="downloadOptions" class="custom-download-advanced tool-options">
-        <summary><UiIcon name="chevron-right" :size="16" />{{ t('tools.downloadOptions') }}</summary>
-        <div class="custom-download-advanced-body">
-          <div class="custom-download-row">
-            <span id="custom-download-naming-label" class="custom-download-label">{{
-              t('tools.download.naming')
-            }}</span>
-            <div class="custom-download-naming">
-              <NRadioGroup
-                v-model:value="namingMode"
-                role="radiogroup"
-                aria-labelledby="custom-download-naming-label"
-                name="download-naming"
-                :disabled="busy"
-                :themeOverrides="namingTheme"
-              >
-                <NRadioButton value="original">{{ t('tools.download.originalName') }}</NRadioButton>
-                <NRadioButton value="custom">{{ t('tools.download.customName') }}</NRadioButton>
-              </NRadioGroup>
-              <div v-if="namingMode === 'custom'" class="custom-download-name">
-                <label for="custom-download-name">{{ t('tools.download.fileName') }}</label>
-                <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
-                <p class="custom-download-hint">{{ t('tools.download.fileNameHint') }}</p>
+      <div class="custom-download-advanced tool-options" :class="{ 'is-open': optionsOpen }">
+        <button
+          type="button"
+          class="custom-download-advanced__toggle tool-options__toggle"
+          :aria-expanded="optionsOpen"
+          @click="optionsOpen = !optionsOpen"
+        >
+          <UiIcon name="chevron-right" :size="16" class="tool-options__chevron" />{{ t('tools.downloadOptions') }}
+        </button>
+        <CollapsiblePanel :open="optionsOpen">
+          <div class="custom-download-advanced-body">
+            <div class="custom-download-row">
+              <span id="custom-download-naming-label" class="custom-download-label">{{
+                t('tools.download.naming')
+              }}</span>
+              <div class="custom-download-naming">
+                <NRadioGroup
+                  v-model:value="namingMode"
+                  role="radiogroup"
+                  aria-labelledby="custom-download-naming-label"
+                  name="download-naming"
+                  :disabled="busy"
+                  :themeOverrides="namingTheme"
+                >
+                  <NRadioButton value="original">{{ t('tools.download.originalName') }}</NRadioButton>
+                  <NRadioButton value="custom">{{ t('tools.download.customName') }}</NRadioButton>
+                </NRadioGroup>
+                <div v-if="namingMode === 'custom'" class="custom-download-name">
+                  <label for="custom-download-name">{{ t('tools.download.fileName') }}</label>
+                  <UiInput id="custom-download-name" v-model="customName" :disabled="busy" placeholder="archive.zip" />
+                  <p class="custom-download-hint">{{ t('tools.download.fileNameHint') }}</p>
+                </div>
+                <p v-else class="custom-download-hint">
+                  {{
+                    url.trim()
+                      ? t('tools.download.originalHint', { name: estimatedName })
+                      : t('tools.download.originalRule')
+                  }}
+                </p>
               </div>
-              <p v-else class="custom-download-hint">
-                {{
-                  url.trim()
-                    ? t('tools.download.originalHint', { name: estimatedName })
-                    : t('tools.download.originalRule')
-                }}
-              </p>
+            </div>
+            <NCheckbox
+              v-model:checked="overwrite"
+              class="custom-download-overwrite"
+              :themeOverrides="toolCheckboxTheme"
+              :disabled="busy"
+              >{{ t('tools.download.overwrite') }}</NCheckbox
+            >
+            <div class="custom-download-row">
+              <label for="custom-download-ua">{{ t('tools.download.userAgent') }}</label>
+              <UiInput id="custom-download-ua" v-model="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
+            </div>
+            <div class="custom-download-row">
+              <span class="custom-download-label">{{ t('tools.download.headers') }}</span>
+              <div class="custom-download-headers">
+                <div v-for="header in headers" :key="header.id" class="custom-download-header-row">
+                  <UiInput
+                    v-model="header.name"
+                    :placeholder="t('tools.download.headerName')"
+                    :aria-label="t('tools.download.headerName')"
+                    :disabled="busy"
+                  />
+                  <UiInput
+                    v-model="header.value"
+                    :placeholder="t('tools.download.headerValue')"
+                    :aria-label="t('tools.download.headerValue')"
+                    :disabled="busy"
+                  />
+                  <UiButton variant="text" :disabled="busy" @click="removeHeader(header.id)">{{
+                    t('common.remove')
+                  }}</UiButton>
+                </div>
+                <div class="custom-download-header-actions">
+                  <UiButton
+                    variant="secondary"
+                    icon="plus"
+                    :disabled="busy || headers.length >= 64"
+                    @click="addHeader"
+                    >{{ t('tools.download.addHeader') }}</UiButton
+                  >
+                </div>
+                <p class="custom-download-hint">{{ t('tools.download.headersHint') }}</p>
+              </div>
             </div>
           </div>
-          <NCheckbox
-            v-model:checked="overwrite"
-            class="custom-download-overwrite"
-            :themeOverrides="overwriteTheme"
-            :disabled="busy"
-            >{{ t('tools.download.overwrite') }}</NCheckbox
-          >
-          <div class="custom-download-row">
-            <label for="custom-download-ua">{{ t('tools.download.userAgent') }}</label>
-            <UiInput id="custom-download-ua" v-model="userAgent" :placeholder="defaultUserAgent" :disabled="busy" />
-          </div>
-          <div class="custom-download-row">
-            <span class="custom-download-label">{{ t('tools.download.headers') }}</span>
-            <div class="custom-download-headers">
-              <div v-for="header in headers" :key="header.id" class="custom-download-header-row">
-                <UiInput
-                  v-model="header.name"
-                  :placeholder="t('tools.download.headerName')"
-                  :aria-label="t('tools.download.headerName')"
-                  :disabled="busy"
-                />
-                <UiInput
-                  v-model="header.value"
-                  :placeholder="t('tools.download.headerValue')"
-                  :aria-label="t('tools.download.headerValue')"
-                  :disabled="busy"
-                />
-                <UiButton variant="text" :disabled="busy" @click="removeHeader(header.id)">{{
-                  t('common.remove')
-                }}</UiButton>
-              </div>
-              <div class="custom-download-header-actions">
-                <UiButton variant="secondary" icon="plus" :disabled="busy || headers.length >= 64" @click="addHeader">{{
-                  t('tools.download.addHeader')
-                }}</UiButton>
-              </div>
-              <p class="custom-download-hint">{{ t('tools.download.headersHint') }}</p>
-            </div>
-          </div>
-        </div>
-      </details>
+        </CollapsiblePanel>
+      </div>
       <p v-if="error || validationError" class="custom-download-error" role="alert">{{ error || validationError }}</p>
       <div v-if="queryError" class="custom-download-error" role="alert">
         <p>{{ t('operations.queryFailed') }}</p>
@@ -146,11 +159,13 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
+import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiInput from '@/components/ui/Input.vue'
 import UiProgress from '@/components/ui/Progress.vue'
 import { customDownloadApi } from '@/features/download/api/customDownloadApi'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
+import { toolCheckboxTheme } from '@/features/tools/toolCheckboxTheme'
 import { getErrorMessage } from '@/utils/error'
 const { t } = useI18n()
 const namingTheme = {
@@ -166,16 +181,6 @@ const namingTheme = {
   buttonTextColorActive: 'var(--primary)',
   buttonTextColorHover: 'var(--text-primary)',
   buttonBoxShadowFocus: 'var(--control-ring)',
-}
-const overwriteTheme = {
-  fontSizeMedium: '12px',
-  textColor: 'var(--text-secondary)',
-  color: 'var(--control-bg)',
-  colorChecked: 'var(--primary)',
-  border: '1px solid var(--control-border)',
-  borderChecked: '1px solid var(--primary)',
-  checkMarkColor: 'var(--text-on-primary)',
-  boxShadowFocus: 'var(--control-ring)',
 }
 const downloadStore = useCustomDownloadStore()
 const {
@@ -199,7 +204,7 @@ const {
   validationKey,
 } = storeToRefs(downloadStore)
 const { start, cancel, retry, refresh } = downloadStore
-const downloadOptions = ref<HTMLDetailsElement | null>(null)
+const optionsOpen = ref(false)
 let active = true
 const estimatedName = computed(() => {
   try {
@@ -212,11 +217,12 @@ const estimatedName = computed(() => {
 const validationError = computed(() => (validationKey.value ? t(validationKey.value) : ''))
 
 watch(
-  [validationError, downloadOptions],
-  ([message, options]) => {
-    if (message && options) options.open = true
+  validationError,
+  (message) => {
+    // 校验失败时自动展开选项，让用户看到需要修正的字段
+    if (message) optionsOpen.value = true
   },
-  { immediate: true, flush: 'post' }
+  { immediate: true }
 )
 
 function addHeader() {
@@ -329,36 +335,39 @@ p {
 .custom-download-advanced {
   min-width: 0;
 }
-.custom-download-advanced summary {
+.custom-download-advanced__toggle {
   display: flex;
   align-items: center;
   gap: 8px;
   width: fit-content;
   padding: 4px 6px;
   margin-left: -6px;
+  border: none;
+  background: transparent;
   border-radius: var(--r-sm);
   color: var(--text-secondary);
   cursor: pointer;
-  list-style: none;
   font-size: 12px;
   line-height: 20px;
 }
-.custom-download-advanced summary::-webkit-details-marker {
-  display: none;
-}
-.custom-download-advanced summary:hover {
+.custom-download-advanced__toggle:hover {
   background: var(--control-bg-hover);
   color: var(--text-primary);
 }
-.custom-download-advanced summary:focus-visible {
+.custom-download-advanced__toggle:focus-visible {
   outline: none;
   box-shadow: var(--control-ring);
 }
-.custom-download-advanced summary > .icon {
+.custom-download-advanced__toggle > .icon {
   transition: transform var(--duration-fast) var(--ease-emphasized);
 }
-.custom-download-advanced[open] summary > .icon {
+.custom-download-advanced.is-open .custom-download-advanced__toggle > .icon {
   transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .custom-download-advanced__toggle > .icon {
+    transition: none;
+  }
 }
 .custom-download-advanced-body {
   padding-top: 16px;
