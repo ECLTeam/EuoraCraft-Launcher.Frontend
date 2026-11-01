@@ -41,6 +41,7 @@ export function useConnectFlowDebug({ status, hostStep, detectedPort, scanning }
       mcHost: null,
       mcPort: null,
       gameInfo: null,
+      hostName: null,
       players: [],
       nodes: [],
       error: null,
@@ -55,6 +56,7 @@ export function useConnectFlowDebug({ status, hostStep, detectedPort, scanning }
       mcHost: '127.0.0.1',
       mcPort: 25565,
       gameInfo: inRoom ? { gameVersion: '1.20.1', loader: 'fabric', loaderVersion: '0.15.11' } : null,
+      hostName: null,
       players: inRoom
         ? [
             { name: 'HostPlayer', vendor: 'Fabric', iconBase64: null, kind: 'host', machineId: 'host-1' },

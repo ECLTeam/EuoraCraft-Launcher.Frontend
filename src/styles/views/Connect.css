@@ -72,14 +72,31 @@
   width: min(100%, 1040px);
   grid-template-columns: minmax(0, 1fr) 248px;
   gap: 12px;
-  align-items: start;
-  margin: 10px auto;
+  /* 玩家列表卡片要占满可用高度，右侧信息卡保持贴合内容。 */
+  align-items: stretch;
+  min-height: 100%;
 }
 
 .connect-room-main {
   display: flex;
   min-width: 0;
+  height: 100%;
   flex-direction: column;
+}
+
+/* 列表在卡片内部滚动，避免长名单把整页顶出滚动条。 */
+.connect-room-main :deep(.card-body) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.connect-room-main :deep(.connect-player-list) {
+  width: 100%;
+}
+
+.connect-room-sidebar {
+  align-self: start;
 }
 
 .connect-side-panel {

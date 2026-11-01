@@ -25,6 +25,7 @@ export interface ConnectorStatus {
   mcHost: string | null
   mcPort: number | null
   gameInfo: ConnectorGameInfo | null
+  hostName: string | null
   players: ConnectorPlayer[]
   nodes: string[]
   error: string | null

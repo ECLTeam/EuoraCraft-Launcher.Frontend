@@ -87,6 +87,7 @@ function idleStatus(): ConnectorStatus {
     mcHost: null,
     mcPort: null,
     gameInfo: null,
+    hostName: null,
     players: [],
     nodes: [],
     error: null,
@@ -516,6 +517,7 @@ describe('ConnectRoomTab', () => {
       mcHost: '127.0.0.1',
       mcPort: 25566,
       gameInfo: { gameVersion: '1.21.5', loader: 'Fabric', loaderVersion: '0.16.10' },
+      hostName: null,
     })
     const wrapper = mountRoomTab(state)
 

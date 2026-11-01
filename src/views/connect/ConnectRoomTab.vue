@@ -489,7 +489,11 @@ const createRoomDisabled = computed(() => !serviceReady.value || busy.value)
 const serverAddress = computed(
   () => `${displayStatus.value.mcHost || '127.0.0.1'}:${displayStatus.value.mcPort || 25565}`
 )
-const hostName = computed(() => displayStatus.value.players.find((p) => p.kind === 'host')?.name ?? '')
+const hostName = computed(() => {
+  const reported = displayStatus.value.hostName
+  if (reported) return reported
+  return displayStatus.value.players.find((player) => player.kind === 'host')?.name ?? ''
+})
 const hostPlayer = computed(() => displayStatus.value.players.find((player) => player.kind === 'host'))
 
 function goToPortStep(): void {
