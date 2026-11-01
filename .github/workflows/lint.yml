@@ -55,8 +55,6 @@ jobs:
         with:
           node-version: 22
       - uses: pnpm/action-setup@v6
-        with:
-          version: 10
       - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
