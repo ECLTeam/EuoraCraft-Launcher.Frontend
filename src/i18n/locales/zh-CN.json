@@ -811,9 +811,11 @@
     "capabilities": {
       "auth_provider": "第三方登录",
       "connector_extend": "联机扩展",
+      "connector_manage": "创建和管理自己的联机房间",
       "java": "使用 Java",
       "game": "游戏",
       "ui_inject": "修改启动器界面",
+      "ui_custom_execute": "打开独立插件窗口",
       "instances_read": "查看游戏",
       "network_read": "联网",
       "instances_manage": "管理游戏",
@@ -2137,6 +2139,7 @@
     "plugin_game_install": "插件安装游戏",
     "plugin_game_launch": "插件启动游戏",
     "plugin_game_stop": "插件停止游戏",
+    "plugin_connector_room": "插件联机房间",
     "pluginPhases": {
       "preparing": "准备启动游戏",
       "checking": "检查并补全游戏文件",

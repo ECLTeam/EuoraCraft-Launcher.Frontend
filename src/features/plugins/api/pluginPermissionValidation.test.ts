@@ -56,14 +56,21 @@ describe('plugin permission boundary', () => {
   it('accepts a reviewed installation and preserves explicit denial', () => {
     expect(parsePermissions(valid).items[0]?.decision).toBe('deny')
   })
-  it.each(['java.read', 'java.use', 'java.catalog.read', 'java.install', 'accounts.read'])(
-    'accepts the current declared domain capability %s',
-    (capability) => {
-      expect(parsePermissions({ ...valid, items: [{ ...valid.items[0], capability }] }).items[0]?.capability).toBe(
-        capability
-      )
-    }
-  )
+  it.each([
+    'java.read',
+    'java.use',
+    'java.catalog.read',
+    'java.install',
+    'accounts.read',
+    'ui.custom.execute',
+    'auth.provider',
+    'connector.extend',
+    'connector.manage',
+  ])('accepts the current declared domain capability %s', (capability) => {
+    expect(parsePermissions({ ...valid, items: [{ ...valid.items[0], capability }] }).items[0]?.capability).toBe(
+      capability
+    )
+  })
   it('accepts account candidates and rejects hierarchy fields', () => {
     const account = { ...candidate, kind: 'account', label: 'Player (offline)' }
     expect(parseResourcePage({ catalog_revision: 2, items: [account], next_cursor: null }).items[0]?.kind).toBe(

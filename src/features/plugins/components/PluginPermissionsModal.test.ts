@@ -74,6 +74,33 @@ function primary(wrapper: ReturnType<typeof open>) {
     )!
 }
 describe('simplified plugin permission review', () => {
+  it.each(['ui.custom.execute', 'connector.manage'])(
+    'requires an explicit choice for %s and saves that capability',
+    async (capability) => {
+      mocks.permissions.mockResolvedValue({ ...view, items: [{ ...item, capability, required: true }] })
+      const wrapper = open()
+      try {
+        await flushPromises()
+        const checkbox = wrapper
+          .findAllComponents(NCheckbox)
+          .find(
+            (control) => control.text() === i18n.global.t('plugins.capabilities.' + capability.replaceAll('.', '_'))
+          )!
+        expect(checkbox.props('checked')).toBe(false)
+        await checkbox.vm.$emit('update:checked', true)
+        await primary(wrapper).trigger('click')
+        await flushPromises()
+        expect(mocks.updatePermissions.mock.lastCall?.[1]).toContainEqual({
+          capability,
+          decision: 'allow',
+          resource_refs: [],
+          lifetime: 'permanent',
+        })
+      } finally {
+        wrapper.unmount()
+      }
+    }
+  )
   it('keeps game, Java and account selection revisions independent and requires explicit account choices', async () => {
     mocks.permissions.mockResolvedValue({
       ...view,

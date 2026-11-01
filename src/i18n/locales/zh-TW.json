@@ -807,9 +807,11 @@
     "capabilities": {
       "auth_provider": "第三方登入",
       "connector_extend": "連線擴充",
+      "connector_manage": "建立與管理自己的連線房間",
       "java": "使用 Java",
       "game": "遊戲",
       "ui_inject": "修改啟動器介面",
+      "ui_custom_execute": "開啟獨立插件視窗",
       "instances_read": "查看遊戲",
       "network_read": "連線",
       "instances_manage": "管理遊戲",
@@ -2109,6 +2111,7 @@
     "plugin_game_install": "外掛安裝遊戲",
     "plugin_game_launch": "外掛啟動遊戲",
     "plugin_game_stop": "外掛停止遊戲",
+    "plugin_connector_room": "外掛連線房間",
     "pluginPhases": {
       "preparing": "準備啟動遊戲",
       "checking": "檢查並補齊遊戲檔案",

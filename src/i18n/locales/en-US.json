@@ -811,9 +811,11 @@
     "capabilities": {
       "auth_provider": "Third-party sign-in",
       "connector_extend": "Multiplayer extensions",
+      "connector_manage": "Create and manage own multiplayer rooms",
       "java": "Use Java",
       "game": "Game",
       "ui_inject": "Modify the launcher interface",
+      "ui_custom_execute": "Open independent plugin windows",
       "instances_read": "View games",
       "network_read": "Network access",
       "instances_manage": "Manage games",
@@ -2242,6 +2244,7 @@
     "plugin_game_install": "Install game (plugin)",
     "plugin_game_launch": "Launch game (plugin)",
     "plugin_game_stop": "Stop game (plugin)",
+    "plugin_connector_room": "Multiplayer room (plugin)",
     "pluginPhases": {
       "preparing": "Preparing game launch",
       "checking": "Checking and completing game files",

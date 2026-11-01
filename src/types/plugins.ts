@@ -254,6 +254,10 @@ export const pluginBusinessCapabilities = [
   'java.install',
   'accounts.read',
   'ui.inject',
+  'ui.custom.execute',
+  'auth.provider',
+  'connector.extend',
+  'connector.manage',
 ] as const
 export type PluginBusinessCapability = (typeof pluginBusinessCapabilities)[number]
 

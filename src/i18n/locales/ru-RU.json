@@ -807,9 +807,11 @@
     "capabilities": {
       "auth_provider": "Вход через сторонний сервис",
       "connector_extend": "Расширения сетевой игры",
+      "connector_manage": "Создание и управление собственными комнатами",
       "java": "Использование Java",
       "game": "Игра",
       "ui_inject": "Изменение интерфейса лаунчера",
+      "ui_custom_execute": "Открытие отдельных окон плагина",
       "instances_read": "Просмотр игр",
       "network_read": "Доступ к сети",
       "instances_manage": "Управление играми",
@@ -2223,6 +2225,7 @@
     "plugin_game_install": "Установка игры плагином",
     "plugin_game_launch": "Запуск игры плагином",
     "plugin_game_stop": "Остановка игры плагином",
+    "plugin_connector_room": "Сетевая комната плагина",
     "pluginPhases": {
       "preparing": "Подготовка запуска игры",
       "checking": "Проверка и загрузка файлов игры",
