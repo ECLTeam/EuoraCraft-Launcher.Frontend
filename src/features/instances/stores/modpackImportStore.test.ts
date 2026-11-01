@@ -1,7 +1,5 @@
-import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { modpackApi } from '@/features/instances/api/modpackApi'
-import { derivePackName, extractPackPath, useModpackImportStore } from './modpackImportStore'
+import { describe, expect, it, vi } from 'vitest'
+import { derivePackName, extractPackPath } from './modpackImportStore'
 
 vi.mock('@/features/instances/api/modpackApi', () => ({
   modpackApi: {
@@ -13,12 +11,10 @@ vi.mock('@/features/instances/api/modpackApi', () => ({
   parseModpackResult: (value: unknown) => value,
 }))
 
-const settingsState = vi.hoisted(() => ({ lastInstallPath: 'D:/default' }))
-
 vi.mock('@/features/settings/stores/settingsStore', () => ({
   useSettingsStore: () => ({
     status: 'ready',
-    game: { minecraft_paths: [], last_install_path: settingsState.lastInstallPath },
+    game: { minecraft_paths: [], last_install_path: 'D:/default' },
     load: vi.fn(),
   }),
 }))
@@ -81,66 +77,5 @@ describe('derivePackName 从整合包文件路径推导实例名', () => {
 
   it('非整合包后缀不剥离', () => {
     expect(derivePackName('packs/backup.tar.gz')).toBe('backup.tar.gz')
-  })
-})
-
-describe('installOnlineInBackground 在线整合包一键后台安装', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.clearAllMocks()
-  })
-
-  const target = { source: 'modrinth' as const, projectId: 'p1', fileId: 'f1', title: 'Test Pack' }
-
-  it('准备就绪后提交安装成功，返回 operationId', async () => {
-    vi.mocked(modpackApi.prepare).mockResolvedValue({
-      preparationId: 'prep-1',
-      operationId: 'op-prep',
-    } as never)
-    vi.mocked(modpackApi.get).mockResolvedValue({ status: 'ready', preview: { files: [] } } as never)
-    vi.mocked(modpackApi.install).mockResolvedValue({ operationId: 'op-install' } as never)
-
-    const store = useModpackImportStore()
-    const result = await store.installOnlineInBackground(target)
-
-    expect(result.ok).toBe(true)
-    expect(result.operationId).toBe('op-install')
-    expect(modpackApi.prepare).toHaveBeenCalledWith({ source: 'modrinth', project_id: 'p1', file_id: 'f1' })
-    expect(modpackApi.install).toHaveBeenCalledWith('prep-1', 'D:/default', 'Test Pack', [])
-  })
-
-  it('准备阶段抛出异常时返回失败', async () => {
-    vi.mocked(modpackApi.prepare).mockRejectedValue(new Error('boom'))
-
-    const store = useModpackImportStore()
-    const result = await store.installOnlineInBackground(target)
-
-    expect(result.ok).toBe(false)
-    expect(result.error).toBe('boom')
-    expect(modpackApi.install).not.toHaveBeenCalled()
-  })
-
-  it('预览就绪判定为失败（status=failed）时返回失败', async () => {
-    vi.mocked(modpackApi.prepare).mockResolvedValue({
-      preparationId: 'prep-1',
-      operationId: 'op-prep',
-    } as never)
-    vi.mocked(modpackApi.get).mockResolvedValue({ status: 'failed' } as never)
-
-    const store = useModpackImportStore()
-    const result = await store.installOnlineInBackground(target)
-
-    expect(result.ok).toBe(false)
-    expect(modpackApi.install).not.toHaveBeenCalled()
-  })
-
-  it('未配置默认游戏目录时返回失败', async () => {
-    settingsState.lastInstallPath = ''
-
-    const store = useModpackImportStore()
-    const result = await store.installOnlineInBackground(target)
-
-    expect(result.ok).toBe(false)
-    expect(modpackApi.prepare).not.toHaveBeenCalled()
   })
 })

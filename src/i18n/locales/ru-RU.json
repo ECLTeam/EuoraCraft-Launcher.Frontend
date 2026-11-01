@@ -2534,7 +2534,6 @@
   },
   "modpackWizard": {
     "prepare": "Прочитать сборку",
-    "backgroundStarted": "Установка «{name}» запущена в фоновом режиме",
     "installSettings": "Параметры установки",
     "retryPrepare": "Повторить чтение",
     "prepareAgain": "Подготовить и проверить снова",

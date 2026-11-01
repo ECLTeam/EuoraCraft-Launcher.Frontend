@@ -2537,7 +2537,6 @@
   },
   "modpackWizard": {
     "prepare": "Modpack einlesen",
-    "backgroundStarted": "{name} wird im Hintergrund installiert",
     "installSettings": "Installationseinstellungen",
     "retryPrepare": "Erneut einlesen",
     "prepareAgain": "Erneut vorbereiten und prüfen",

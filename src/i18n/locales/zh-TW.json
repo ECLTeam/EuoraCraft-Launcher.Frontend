@@ -2420,7 +2420,6 @@
   },
   "modpackWizard": {
     "prepare": "解析整合包",
-    "backgroundStarted": "已在背景開始安裝整合包「{name}」",
     "installSettings": "安裝設定",
     "retryPrepare": "重新解析",
     "prepareAgain": "重新準備並確認",

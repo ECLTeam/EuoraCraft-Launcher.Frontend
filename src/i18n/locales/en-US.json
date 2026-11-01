@@ -2554,7 +2554,6 @@
   },
   "modpackWizard": {
     "prepare": "Read modpack",
-    "backgroundStarted": "Started installing {name} in the background",
     "installSettings": "Install settings",
     "retryPrepare": "Retry reading",
     "prepareAgain": "Prepare and review again",
