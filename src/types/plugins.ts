@@ -11,6 +11,9 @@ export interface PluginInfo {
   requested_permissions?: PluginBusinessCapability[]
   required_satisfied?: boolean
   cleanup_state?: string
+  source?: 'directory' | 'package'
+  supports_hot_reload?: boolean
+  development?: PluginDevelopmentItem | null
   title: string
   version: string
   description: string
@@ -91,6 +94,35 @@ export interface PluginSettingsData {
   revision?: number
   schema: PluginSettingSchema[]
   values: Record<string, unknown>
+  installation_id?: string
+  content_digest?: string
+  schema_revision?: string | null
+  editable?: boolean
+  reason?: string | null
+}
+
+export interface PluginDevelopmentItem {
+  name: string
+  status: (typeof pluginDevelopmentStatuses)[number]
+  error_code: string | null
+  reload_count: number
+  supports_hot_reload: boolean
+}
+
+export const pluginDevelopmentStatuses = [
+  'preparing',
+  'reloading',
+  'watching',
+  'opted_out',
+  'review_required',
+  'cleanup_pending',
+  'failed',
+  'disabled',
+] as const
+
+export interface PluginDevelopmentState {
+  enabled: boolean
+  items: PluginDevelopmentItem[]
 }
 
 export type PluginPanelTone = 'default' | 'primary' | 'danger'

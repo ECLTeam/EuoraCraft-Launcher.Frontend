@@ -133,24 +133,45 @@ export const usePluginStore = defineStore('plugins', () => {
     return result.status === 'success' ? result.value : undefined
   }
 
+  const settingsRequests = new Map<string, number>()
   async function getSettings(pluginName: string): Promise<PluginSettingsData> {
+    const request = (settingsRequests.get(pluginName) ?? 0) + 1
+    settingsRequests.set(pluginName, request)
     const data = await pluginManagementApi.getSettings(pluginName)
-    settingsCache.value = { ...settingsCache.value, [pluginName]: data }
+    if (settingsRequests.get(pluginName) === request)
+      settingsCache.value = { ...settingsCache.value, [pluginName]: data }
     return data
   }
 
-  async function updateSetting(pluginName: string, key: string, value: unknown): Promise<void> {
-    const cached = settingsCache.value[pluginName]
-    const result = await pluginManagementApi.updateSetting(pluginName, key, value, cached?.revision)
-    if (cached) {
-      settingsCache.value = {
-        ...settingsCache.value,
-        [pluginName]: {
-          ...cached,
-          revision: result?.revision ?? cached.revision,
-          values: { ...cached.values, [key]: value },
-        },
+  const settingsWrites = new Set<string>()
+
+  async function updateSetting(
+    pluginName: string,
+    key: string,
+    value: unknown,
+    settings?: PluginSettingsData
+  ): Promise<void> {
+    if (settingsWrites.has(pluginName)) throw new Error('PLUGIN_SETTING_SAVE_BUSY')
+    const cached = settings ?? settingsCache.value[pluginName]
+    if (!cached) throw new Error('PLUGIN_SETTING_SCHEMA_UNAVAILABLE')
+    settingsWrites.add(pluginName)
+    try {
+      const result = await pluginManagementApi.updateSetting(pluginName, key, value, cached)
+      if (
+        settingsCache.value[pluginName]?.schema_revision === cached.schema_revision &&
+        (settingsCache.value[pluginName]?.revision ?? 0) <= (result?.revision ?? cached.revision ?? 0)
+      ) {
+        settingsCache.value = {
+          ...settingsCache.value,
+          [pluginName]: {
+            ...cached,
+            revision: result?.revision ?? cached.revision,
+            values: { ...cached.values, [key]: value },
+          },
+        }
       }
+    } finally {
+      settingsWrites.delete(pluginName)
     }
   }
 
@@ -193,6 +214,7 @@ export const usePluginStore = defineStore('plugins', () => {
     selectPackage,
     installPackage,
     getSettings,
+    subscribeSettingsChanges: pluginManagementApi.onSettingsChanged,
     updateSetting,
     start,
     stop,

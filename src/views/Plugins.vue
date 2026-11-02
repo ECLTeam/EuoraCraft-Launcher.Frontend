@@ -22,6 +22,16 @@
         </NRadioGroup>
 
         <div class="plugins-toolbar-actions">
+          <label class="plugins-development-switch">
+            <span>{{ t('plugins.developmentMode') }}</span>
+            <NSwitch
+              :value="development.enabled"
+              :disabled="developmentBusy || developmentLoading"
+              :aria-label="t('plugins.developmentMode')"
+              @update:value="setDevelopment"
+            />
+          </label>
+          <NButton size="small" @click="openSettings(null)">{{ t('plugins.settingsCenter') }}</NButton>
           <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
             <NButton type="primary" size="small">
               <template #icon><UiIcon name="add" :size="14" /></template>
@@ -32,6 +42,12 @@
       </header>
 
       <PluginSlotHost slotId="plugin-slot-plugins-toolbar-after" class="plugin-slot-container" />
+
+      <NAlert v-if="developmentError" type="error" :showIcon="false">
+        {{ developmentError }}
+        <NButton text @click="setDevelopment(development.enabled)">{{ t('common.retry') }}</NButton>
+      </NAlert>
+      <p v-if="development.enabled" class="plugins-development-help">{{ t('plugins.developmentHelp') }}</p>
 
       <div class="plugins-table-header">
         <span>{{ t('plugins.pluginName') }}</span>
@@ -77,6 +93,9 @@
                 <NTag v-if="plugin.pending_restart && plugin.status !== 'pending_restart'" size="small" type="warning">
                   {{ t('plugins.pending_restart') }}
                 </NTag>
+                <NTag v-if="plugin.development" size="small" :title="plugin.development.error_code ?? undefined">
+                  {{ t(`plugins.developmentStates.${plugin.development.status}`) }}
+                </NTag>
               </div>
 
               <NSpace class="plugin-actions" :size="3" :wrap="true">
@@ -92,13 +111,7 @@
                 >
                   {{ t('plugins.panel') }}
                 </NButton>
-                <NButton
-                  v-if="plugin.settings?.length"
-                  quaternary
-                  size="tiny"
-                  :title="t('plugins.settings')"
-                  @click="openSettings(plugin)"
-                >
+                <NButton quaternary size="tiny" :title="t('plugins.settings')" @click="openSettings(plugin)">
                   <template #icon><UiIcon name="settings" :size="13" /></template>
                 </NButton>
                 <NButton
@@ -155,7 +168,10 @@
     <PluginSettingsModal
       :visible="settingsModalVisible"
       :plugin="settingsTarget"
+      :plugins="plugins"
       @close="settingsModalVisible = false"
+      @activate="togglePlugin"
+      @openDirectory="openDirectory"
     />
     <PluginPanelModal :visible="panelVisible" :plugin="panelTarget" @close="panelVisible = false" />
     <PluginPackageInstallModal
@@ -177,6 +193,7 @@ import {
   NRadioButton,
   NRadioGroup,
   NSpace,
+  NSwitch,
   NTab,
   NTabs,
   NTag,
@@ -189,13 +206,14 @@ import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
+import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
 import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
-import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
+import type { PluginInfo, PluginPackageSelection, PluginDevelopmentState } from '@/types/plugins'
 
 const { t, te } = useI18n()
 const { isFolia } = useUiSkin()
@@ -207,6 +225,12 @@ const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const settingsModalVisible = ref(false)
+const development = ref<PluginDevelopmentState>({ enabled: false, items: [] })
+const developmentBusy = ref(false)
+const developmentLoading = ref(true)
+const developmentError = ref('')
+let developmentRequest = 0
+let unlistenDevelopment: (() => void) | null = null
 const settingsTarget = ref<PluginInfo | null>(null)
 const panelVisible = ref(false)
 const panelTarget = ref<PluginInfo | null>(null)
@@ -347,7 +371,7 @@ function handleInstallSelect(key: string | number) {
   if (key === 'directory') void installDirectory()
 }
 
-function openSettings(plugin: PluginInfo) {
+function openSettings(plugin: PluginInfo | null) {
   settingsTarget.value = plugin
   settingsModalVisible.value = true
 }
@@ -357,10 +381,55 @@ function openPanel(plugin: PluginInfo) {
   panelVisible.value = true
 }
 
+async function refreshDevelopment(): Promise<void> {
+  const request = ++developmentRequest
+  try {
+    const state = await pluginManagementApi.development()
+    if (request === developmentRequest) development.value = state
+  } catch {
+    if (request === developmentRequest) developmentError.value = t('plugins.developmentFailed')
+  } finally {
+    if (request === developmentRequest) developmentLoading.value = false
+  }
+}
+
+async function setDevelopment(enabled: boolean): Promise<void> {
+  if (developmentBusy.value) return
+  developmentBusy.value = true
+  developmentError.value = ''
+  ++developmentRequest
+  try {
+    development.value = await pluginManagementApi.setDevelopment(enabled)
+    await pluginStore.load(true)
+  } catch {
+    developmentError.value = t('plugins.developmentFailed')
+    await refreshDevelopment()
+  } finally {
+    developmentBusy.value = false
+  }
+}
+
+async function openDirectory(plugin: PluginInfo): Promise<void> {
+  const installationId = plugin.installation_id
+  if (!installationId) return
+  await run(() => pluginManagementApi.openDirectory(installationId), {
+    showError: true,
+    errorMessage: t('plugins.directoryOpenFailed'),
+  })
+}
+
 onMounted(() => {
   void pluginStore.start().catch(() => {})
+  void refreshDevelopment()
+  unlistenDevelopment = pluginManagementApi.onStatusChanged(() => {
+    if (!developmentBusy.value) void refreshDevelopment()
+  })
 })
-onUnmounted(() => pluginStore.stop())
+onUnmounted(() => {
+  ++developmentRequest
+  unlistenDevelopment?.()
+  pluginStore.stop()
+})
 </script>
 
 <style scoped src="@/styles/views/Plugins.css"></style>

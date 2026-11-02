@@ -911,7 +911,30 @@
     "javaManage": "打开 Java 管理",
     "accountReadTitle": "选择允许查看的账户",
     "accountReadNote": "仅提供所选账户的玩家名称、UUID、类型和当前选择状态，不提供邮箱、令牌或登录凭据。",
-    "accountResourcesEmpty": "暂无账户，请先在启动器中添加账户。"
+    "accountResourcesEmpty": "暂无账户，请先在启动器中添加账户。",
+    "settingsCenter": "插件设置",
+    "pluginList": "插件列表",
+    "configuration": "配置项",
+    "selectPlugin": "选择一个插件以查看配置",
+    "settingsUnavailable": "请先审阅并启用当前插件，加载有效的配置定义。",
+    "reloadSettings": "重新读取",
+    "settingSaving": "正在保存…",
+    "settingsConflict": "配置或插件定义已变化，请重新读取后再编辑。",
+    "openDirectory": "打开插件目录",
+    "directoryOpenFailed": "无法打开插件目录",
+    "developmentMode": "开发模式",
+    "developmentHelp": "仅本次启动有效。修改实际安装目录自动重载；权限或依赖变化需要审阅。关闭后停止开发插件。",
+    "developmentFailed": "开发模式操作未完成，请检查状态并重试。",
+    "developmentStates": {
+      "preparing": "准备版本",
+      "reloading": "正在重载",
+      "watching": "监听中",
+      "opted_out": "插件拒绝热重载",
+      "review_required": "需要重新审阅",
+      "cleanup_pending": "等待清理",
+      "failed": "重载失败",
+      "disabled": "已禁用"
+    }
   },
   "settings": {
     "loadFailed": "读取设置失败",

@@ -156,7 +156,8 @@ async function updateSetting(key: string, value: unknown): Promise<void> {
   busy.value = true
   actionError.value = ''
   try {
-    await pluginManagementApi.updateSetting(plugin.name, key, value, settings.value?.revision)
+    if (!settings.value) return
+    await pluginManagementApi.updateSetting(plugin.name, key, value, settings.value)
   } catch (cause) {
     actionError.value = `${t('plugins.panelActionFailed')}: ${getErrorMessage(cause)}`
   } finally {

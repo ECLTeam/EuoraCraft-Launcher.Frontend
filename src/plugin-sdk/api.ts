@@ -53,9 +53,9 @@ export function updatePluginSetting(
   pluginName: string,
   key: string,
   value: unknown,
-  expectedRevision?: number
+  settings: PluginSettingsData
 ): Promise<ApiResponse<{ revision: number } | undefined>> {
-  return toApiResponse(pluginManagementApi.updateSetting(pluginName, key, value, expectedRevision))
+  return toApiResponse(pluginManagementApi.updateSetting(pluginName, key, value, settings))
 }
 
 // ── 插件路由 ──

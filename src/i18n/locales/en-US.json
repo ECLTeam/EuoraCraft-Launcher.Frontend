@@ -911,7 +911,30 @@
     "javaManage": "Open Java management",
     "accountReadTitle": "Select accounts to share",
     "accountReadNote": "Shares only player names, UUIDs, account types and current selection. Email addresses, tokens and login credentials are excluded.",
-    "accountResourcesEmpty": "No accounts. Add an account in the launcher first."
+    "accountResourcesEmpty": "No accounts. Add an account in the launcher first.",
+    "settingsCenter": "Plugin settings",
+    "pluginList": "Plugin list",
+    "configuration": "Configuration",
+    "selectPlugin": "Select a plugin to view its settings",
+    "settingsUnavailable": "Review and enable this plugin to load its current settings definition.",
+    "reloadSettings": "Reload settings",
+    "settingSaving": "Saving…",
+    "settingsConflict": "The settings or plugin definition changed. Reload before editing.",
+    "openDirectory": "Open plugin folder",
+    "directoryOpenFailed": "Could not open the plugin folder",
+    "developmentMode": "Development mode",
+    "developmentHelp": "For this launcher session only. Changes in installed plugin folders reload automatically; permissions or dependencies need review. Turning this off stops development plugins.",
+    "developmentFailed": "The development operation did not finish. Check the status and retry.",
+    "developmentStates": {
+      "preparing": "Preparing",
+      "reloading": "Reloading",
+      "watching": "Watching",
+      "opted_out": "Hot reload declined",
+      "review_required": "Review required",
+      "cleanup_pending": "Cleanup pending",
+      "failed": "Reload failed",
+      "disabled": "Disabled"
+    }
   },
   "settings": {
     "loadFailed": "Failed to load settings",

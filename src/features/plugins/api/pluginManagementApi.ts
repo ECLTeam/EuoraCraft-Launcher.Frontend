@@ -13,8 +13,22 @@ import {
   type PluginResourceQuery,
 } from '@/types/plugins'
 import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
+import { parseDevelopment, parseSettings } from './pluginSettingsValidation'
 
 export const pluginManagementApi = {
+  async development() {
+    return parseDevelopment(assertSuccess(await backend.command('plugin_development_get', {}), '读取插件开发模式'))
+  },
+
+  async setDevelopment(enabled: boolean) {
+    return parseDevelopment(
+      assertSuccess(await backend.command('plugin_development_set', { enabled }), '切换插件开发模式')
+    )
+  },
+
+  async openDirectory(installationId: string) {
+    assertSuccess(await backend.command('plugin_open_directory', { installation_id: installationId }), '打开插件目录')
+  },
   async permissions(installationId: string): Promise<PluginPermissions> {
     return parsePermissions(
       assertSuccess(
@@ -61,6 +75,12 @@ export const pluginManagementApi = {
   async list(): Promise<PluginInfo[]> {
     const plugins = assertSuccess(await backend.command('plugin_list'), '读取插件列表') ?? []
     for (const plugin of plugins) {
+      if (plugin.development) parseDevelopment({ enabled: true, items: [plugin.development] })
+      if (
+        (plugin.source !== undefined && !['directory', 'package'].includes(plugin.source)) ||
+        (plugin.supports_hot_reload !== undefined && typeof plugin.supports_hot_reload !== 'boolean')
+      )
+        throw new Error('PLUGIN_SCHEMA_INVALID')
       if (
         plugin.installation_id &&
         (!Array.isArray(plugin.requested_permissions) ||
@@ -124,9 +144,13 @@ export const pluginManagementApi = {
     return backend.on('plugin:status_changed', handler)
   },
 
+  onSettingsChanged(handler: () => void): () => void {
+    return backend.on('plugin:settings_updated', handler)
+  },
+
   async getSettings(pluginName: string): Promise<PluginSettingsData> {
     const result = await backend.command('plugin_get_settings', { plugin_name: pluginName })
-    return assertSuccess(result, '读取插件设置')
+    return parseSettings(assertSuccess(result, '读取插件设置'))
   },
 
   async getPanels(pluginName: string): Promise<PluginPanelDefinition[]> {
@@ -152,13 +176,23 @@ export const pluginManagementApi = {
     )
   },
 
-  async updateSetting(pluginName: string, key: string, value: unknown, expectedRevision?: number) {
+  async updateSetting(pluginName: string, key: string, value: unknown, settings: PluginSettingsData) {
+    if (
+      !settings.content_digest ||
+      !settings.schema_revision ||
+      settings.revision === undefined ||
+      settings.editable === false
+    ) {
+      throw new Error('PLUGIN_SETTING_SCHEMA_UNAVAILABLE')
+    }
     return assertSuccess(
       await backend.command('plugin_update_setting', {
         plugin_name: pluginName,
         key,
         value,
-        ...(expectedRevision === undefined ? {} : { expected_revision: expectedRevision }),
+        expected_revision: settings.revision,
+        content_digest: settings.content_digest,
+        schema_revision: settings.schema_revision,
       }),
       '更新插件设置'
     )

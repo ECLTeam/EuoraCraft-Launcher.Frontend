@@ -66,6 +66,7 @@ import type { ModpackPreparation, ModpackPrepareInput } from '@/types/modpack'
 import type { ModInfo, ModInstallResult, ModItem, ModSearchResult, ModSourceConfig, ModVersion } from '@/types/mods'
 import type {
   PluginInfo,
+  PluginDevelopmentState,
   PluginPermissions,
   PluginResourcePage,
   PluginResourceQuery,
@@ -197,6 +198,7 @@ export interface BackendEvents {
     contextKey?: string
   }
   'plugin:settings_changed': { plugin: string; key: string; old_value: unknown; new_value: unknown }
+  'plugin:settings_updated': { installation_id: string }
   'window:opened': WindowMetadata
   'window:ready': WindowMetadata
   'window:closed': Partial<WindowMetadata> & { label: string }
@@ -594,6 +596,9 @@ export interface CommandPayloadMap {
     account_resource_revision?: number
   }
   plugin_runtime_info: { installation_id: string }
+  plugin_development_get: Record<string, never>
+  plugin_development_set: { enabled: boolean }
+  plugin_open_directory: { installation_id: string }
   plugin_list: undefined
   plugin_info: { plugin_name: string }
   plugin_enable: { plugin_name: string }
@@ -612,7 +617,14 @@ export interface CommandPayloadMap {
   plugin_get_vue_components: Record<string, never>
   plugin_call_command: { command: string; params?: Record<string, unknown> }
   plugin_get_settings: { plugin_name: string }
-  plugin_update_setting: { plugin_name: string; key: string; value: unknown; expected_revision?: number }
+  plugin_update_setting: {
+    plugin_name: string
+    key: string
+    value: unknown
+    expected_revision: number
+    content_digest: string
+    schema_revision: string
+  }
   plugin_panels_get: { plugin_name: string }
   plugin_panel_data: { plugin_name: string; key: string }
   plugin_panel_action: { plugin_name: string; command: string; args: Record<string, unknown> }
@@ -895,6 +907,9 @@ export const COMMAND_NAMES = {
   plugin_permission_resources: 'plugin_permission_resources',
   plugin_permissions_update: 'plugin_permissions_update',
   plugin_runtime_info: 'plugin_runtime_info',
+  plugin_development_get: 'plugin_development_get',
+  plugin_development_set: 'plugin_development_set',
+  plugin_open_directory: 'plugin_open_directory',
   plugin_list: 'plugin_list',
   plugin_info: 'plugin_info',
   plugin_enable: 'plugin_enable',
@@ -1187,6 +1202,9 @@ export interface CommandResponseMap {
   plugin_permission_resources: PluginResourcePage
   plugin_permissions_update: PluginPermissionUpdateResult
   plugin_runtime_info: PluginRuntimeInfo
+  plugin_development_get: PluginDevelopmentState
+  plugin_development_set: PluginDevelopmentState
+  plugin_open_directory: void
   plugin_list: PluginInfo[]
   plugin_info: PluginInfo
   plugin_enable: void

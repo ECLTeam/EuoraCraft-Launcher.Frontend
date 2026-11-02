@@ -61,6 +61,8 @@ export function createShowcaseTransport(): BackendTransport {
   const config = loadShowcaseConfig(showcaseConfig)
   const accounts = structuredClone(showcaseAccounts)
   const plugins = structuredClone(showcasePlugins)
+  let developmentEnabled = false
+  const pluginSettings = new Map<string, { revision: number; values: Record<string, unknown> }>()
   const wardrobe: WardrobeItem[] = []
   const runningInstances: GameInstance[] = []
   const versionStats = new Map<string, VersionRunStats>()
@@ -683,10 +685,41 @@ export function createShowcaseTransport(): BackendTransport {
         return success({})
       case 'plugin_call_command':
         return success({ command: payload.command, mode: 'showcase' })
-      case 'plugin_get_settings':
-        return success({ schema: {}, values: {} })
-      case 'plugin_update_setting':
+      case 'plugin_development_get':
+        return success({ enabled: developmentEnabled, items: [] })
+      case 'plugin_development_set':
+        developmentEnabled = payload.enabled === true
+        return success({ enabled: developmentEnabled, items: [] })
+      case 'plugin_open_directory':
         return success()
+      case 'plugin_get_settings': {
+        const name = String(payload.plugin_name)
+        const state = pluginSettings.get(name) ?? { revision: 0, values: { greeting: 'Hello', notifications: true } }
+        pluginSettings.set(name, state)
+        return success({
+          installation_id: 'a'.repeat(32),
+          content_digest: 'b'.repeat(64),
+          schema_revision: 'c'.repeat(64),
+          editable: true,
+          reason: null,
+          revision: state.revision,
+          values: state.values,
+          schema: [
+            { key: 'greeting', description: 'Greeting', type: 'string', default: 'Hello' },
+            { key: 'notifications', description: 'Notifications', type: 'bool', default: true },
+          ],
+        })
+      }
+      case 'plugin_update_setting': {
+        const name = String(payload.plugin_name)
+        const state = pluginSettings.get(name)
+        if (!state || state.revision !== payload.expected_revision)
+          return failure('PLUGIN_REVISION_CONFLICT', 'Settings changed')
+        state.values[String(payload.key)] = payload.value
+        state.revision += 1
+        emit('plugin:settings_updated', { installation_id: 'a'.repeat(32) })
+        return success({ revision: state.revision })
+      }
       case 'search_mods': {
         const query = String(payload.query ?? '').toLowerCase()
         const type = String(payload.resource_type ?? 'mod')

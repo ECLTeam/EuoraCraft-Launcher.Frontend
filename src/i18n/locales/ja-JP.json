@@ -907,7 +907,30 @@
     "javaManage": "Java 管理を開く",
     "accountReadTitle": "共有するアカウントを選択",
     "accountReadNote": "選択したアカウントのプレイヤー名、UUID、種類、現在の選択状態のみ共有します。メールアドレス、トークン、ログイン認証情報は含みません。",
-    "accountResourcesEmpty": "アカウントがありません。先にランチャーで追加してください。"
+    "accountResourcesEmpty": "アカウントがありません。先にランチャーで追加してください。",
+    "settingsCenter": "プラグイン設定",
+    "pluginList": "プラグイン一覧",
+    "configuration": "設定項目",
+    "selectPlugin": "プラグインを選択して設定を表示",
+    "settingsUnavailable": "このプラグインを確認して有効にし、現在の設定定義を読み込んでください。",
+    "reloadSettings": "設定を再読み込み",
+    "settingSaving": "保存中…",
+    "settingsConflict": "設定またはプラグイン定義が変更されました。再読み込みしてから編集してください。",
+    "openDirectory": "プラグインフォルダーを開く",
+    "directoryOpenFailed": "プラグインフォルダーを開けませんでした",
+    "developmentMode": "開発モード",
+    "developmentHelp": "今回の起動中のみ有効です。インストール先の変更を自動で再読み込みします。権限や依存関係の変更は確認が必要です。オフにすると開発プラグインを停止します。",
+    "developmentFailed": "開発操作が完了しませんでした。状態を確認して再試行してください。",
+    "developmentStates": {
+      "preparing": "準備中",
+      "reloading": "再読み込み中",
+      "watching": "監視中",
+      "opted_out": "自動再読み込みを拒否",
+      "review_required": "確認が必要",
+      "cleanup_pending": "後処理待ち",
+      "failed": "再読み込み失敗",
+      "disabled": "無効"
+    }
   },
   "settings": {
     "loadFailed": "設定の読み込みに失敗しました",

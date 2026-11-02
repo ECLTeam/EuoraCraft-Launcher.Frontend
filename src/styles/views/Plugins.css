@@ -17,7 +17,7 @@
 .plugins-toolbar {
   display: grid;
   min-height: 48px;
-  grid-template-columns: minmax(0, 280px) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
   gap: 9px;
@@ -30,10 +30,25 @@
 }
 
 .plugins-toolbar-actions {
+  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 9px;
+}
+
+.plugins-development-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.plugins-development-help {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--ecl-text-secondary);
+  border-bottom: 1px solid var(--ecl-border);
 }
 
 .plugins-list-body {

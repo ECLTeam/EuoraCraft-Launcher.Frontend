@@ -907,7 +907,30 @@
     "javaManage": "Java-Verwaltung öffnen",
     "accountReadTitle": "Freigegebene Konten auswählen",
     "accountReadNote": "Gibt nur Spielernamen, UUIDs, Kontotypen und die aktuelle Auswahl frei. E-Mail-Adressen, Tokens und Anmeldedaten werden nicht weitergegeben.",
-    "accountResourcesEmpty": "Keine Konten. Füge zuerst ein Konto im Launcher hinzu."
+    "accountResourcesEmpty": "Keine Konten. Füge zuerst ein Konto im Launcher hinzu.",
+    "settingsCenter": "Plugin-Einstellungen",
+    "pluginList": "Plugin-Liste",
+    "configuration": "Konfiguration",
+    "selectPlugin": "Plugin auswählen, um Einstellungen anzuzeigen",
+    "settingsUnavailable": "Prüfe und aktiviere das Plugin, um seine aktuelle Einstellungsdefinition zu laden.",
+    "reloadSettings": "Neu laden",
+    "settingSaving": "Wird gespeichert…",
+    "settingsConflict": "Einstellungen oder Plugin-Definition geändert. Vor dem Bearbeiten neu laden.",
+    "openDirectory": "Plugin-Ordner öffnen",
+    "directoryOpenFailed": "Plugin-Ordner konnte nicht geöffnet werden",
+    "developmentMode": "Entwicklungsmodus",
+    "developmentHelp": "Gilt nur für diesen Launcher-Start. Änderungen im installierten Plugin-Ordner werden automatisch geladen; Rechte oder Abhängigkeiten benötigen eine Prüfung. Ausschalten beendet Entwicklungs-Plugins.",
+    "developmentFailed": "Der Entwicklungsvorgang wurde nicht abgeschlossen. Status prüfen und erneut versuchen.",
+    "developmentStates": {
+      "preparing": "Wird vorbereitet",
+      "reloading": "Wird neu geladen",
+      "watching": "Überwachung aktiv",
+      "opted_out": "Neuladen abgelehnt",
+      "review_required": "Prüfung erforderlich",
+      "cleanup_pending": "Bereinigung ausstehend",
+      "failed": "Neuladen fehlgeschlagen",
+      "disabled": "Deaktiviert"
+    }
   },
   "settings": {
     "loadFailed": "Einstellungen konnten nicht geladen werden",
