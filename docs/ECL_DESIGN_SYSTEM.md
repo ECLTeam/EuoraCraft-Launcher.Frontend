@@ -1,32 +1,99 @@
-# ECL Frontend Design System
+# ECL 前端设计规范
 
-ECL uses Naive UI as the primary component library. Product pages should compose existing Naive UI components before introducing custom controls.
+本规范描述 ECL 已有的紧凑桌面界面、主题和组件契约。修改 Vue 模板、公共组件、主题或页面样式前必须阅读；工程流程与测试分级由主仓库 [AGENTS.md](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/AGENTS.md) 统一规定。
 
-## Visual Principles
+视觉来源是当前 ECL 源码和已确认的产品行为。参照其他项目的规范组织方式，不导入其配色、圆角、间距、组件层级或框架。本规范中的数值是当前默认值或回退值，不覆盖内置主题、用户外观设置和已批准的内容特例。
 
-- Quiet surfaces: use a light canvas with white cards, or a dark canvas with graphite cards.
-- Compact controls: standard controls are 36 px high with 6 px corner radii.
-- Clear hierarchy: each page has one header, optional toolbar, and grouped content surfaces.
-- Limited emphasis: reserve the primary color for selection, progress, and primary actions.
-- Consistent spacing: prefer 4, 8, 12, 16, 24, and 32 px increments.
+## 1. 样式来源与所有权
 
-## Core Tokens
+| 来源                                                                                                                       | 维护内容                                                                 | 消费方式                                               |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------ |
+| [base.css](../src/styles/base.css)                                                                                         | 字体、状态色、基础间距、行高、窗口几何、duration/easing                  | 公共组件和页面复用现有变量                             |
+| [tokens.css](../src/styles/tokens.css)                                                                                     | `--ecl-*` 语义表面、文字、边框、焦点、控件高度和圆角；已有变量的派生关系 | 优先使用语义明确且已实际接线的变量                     |
+| [design-system.css](../src/styles/design-system.css)                                                                       | 页面、标题、表面、工具栏等公共布局样式                                   | 复用 `.ecl-page`、`.ecl-surface`、`.ecl-toolbar`       |
+| [folia.css](../src/styles/folia.css)                                                                                       | Folia 布局皮肤的透明表面、描边和控件差异                                 | 限定 `[data-ui-skin='folia']`，避免影响其他皮肤        |
+| [animations.css](../src/styles/animations.css)                                                                             | 公共关键帧、Vue 过渡和减少动效处理                                       | 公共过渡按名称复用，时长和缓动引用基础变量             |
+| [useTheme.ts](../src/composables/useTheme.ts)、[主题配置](../src/config/theme.ts)、[调色板](../src/config/themePalette.ts) | 主题状态、配色计算、用户外观、CSS 变量写入及 Naive UI overrides          | 通过公开主题入口读取和修改，不在页面再维护一份主题状态 |
+| `styles/components/`、组件自身样式                                                                                         | 公共组件的几何、状态和交互反馈                                           | 共性问题在所属公共实现修复                             |
+| `styles/views/`、业务局部样式                                                                                              | 当前业务页面所需的排列、尺寸和内容适配                                   | 使用 scoped 或明确页面根选择器，不覆盖无关页面         |
 
-- Primary: `#5B6FF5`
-- Light canvas: `#F4F6FA`
-- Light surface: `#FFFFFF`
-- Dark canvas: `#171A21`
-- Dark surface: `#222630`
-- Control radius: `6px`
-- Card radius: `8px`
-- Dialog radius: `10px`
+[main.css](../src/styles/main.css) 的实际顺序是 `base → tokens → design-system → animations → layout → common → folia`，后续还有 Tailwind 主题和调试样式。最终结果还取决于选择器、层级和内联变量：`useTheme` 写入的根元素内联属性通常覆盖普通样式定义；局部重新定义同名变量会改变继承。因此不能仅凭文件顺序推断外观。
 
-## Page Composition
+`tokens.css` 已映射的一部分旧变量仍被现有组件使用；新代码选择能表达当前语义且已接线的入口。不要借规范整理批量重命名、删除消费者或另建双格式兼容层。主题包协议和实际 SDK 属于独立契约，发生变更须另行审阅。
 
-- `PageHeader`: page title, description, and primary actions.
-- `SectionLayout`: pages with a stable secondary navigation.
-- `.ecl-page`: full-page vertical layout.
-- `.ecl-surface`: standard content surface.
-- `.ecl-toolbar`: compact search and filter row.
+## 2. 现有视觉基准
 
-Custom CSS should only handle page-specific layout. Component states, inputs, buttons, dialogs, menus, lists, tags, switches, sliders, and loading states should use Naive UI.
+ECL 使用紧凑控件、清楚的信息层级、有限强调色和可配置表面。强调色用于主要操作、选中状态和进度；背景、内容区和浮层通过已有语义颜色与层次区分。
+
+| 项目     | 当前来源及默认值                                                  | 使用要求                                                                                                   |
+| -------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 主色     | `--ecl-primary` 默认 `#5b6ff5`，可由主题覆盖                      | 不在页面写固定品牌蓝代替用户强调色                                                                         |
+| 画布     | `--ecl-canvas` 的亮暗默认值由 tokens 定义                         | 画布与内容表面分开，不能把半透明卡片改成实底以掩盖可读性问题                                               |
+| 表面     | `--ecl-surface`、`--ecl-surface-muted`、`--ecl-control-surface`   | 保留卡片透明度的计算；模糊由对应表面/浮层变量决定                                                          |
+| 控件高度 | `--ecl-control-height-sm/默认/lg`：32/36/40px                     | Ui 和 Naive UI 都使用统一高度；图标、微型按钮等遵循所属组件既有变体                                        |
+| 圆角     | 默认控制 6px、卡片 8px、对话框 10px                               | 消费 `--ecl-radius-control`、`--ecl-radius-card`、`--ecl-radius-dialog` 等生效变量，不把回退值写死到业务页 |
+| 页面     | `--ecl-page-padding` 20px、`--ecl-page-gap` 16px                  | 页面按现有布局容器使用，避免同层重复内边距                                                                 |
+| 基础间距 | `--s-xs/sm/md/lg/xl/2xl/3xl`：4/7/11/14/22/29/43px                | 延续当前密度和相邻组件节奏；不套用其他项目的 8px 间距系统                                                  |
+| 字体     | `--font-body`、`--font-display`、`--font-mono` 及已接线的外观变量 | 跟随用户字体；公共标题和正文层级由公共组件控制，终端/原始输出保留等宽用途                                  |
+| 动效     | instant/fast/normal/slow/slower/slowest：60/150/250/350/500/700ms | 进入、退出、状态反馈和循环使用对应现有 easing，避免每页另写曲线和时长                                      |
+
+细边框、百分比、图标几何、零值、布局比例、圆形和运行时测量可以使用有业务含义的固定值。不机械禁止所有 px，也不为了检查通过给每个数字新增变量。
+
+## 3. 主题与外观
+
+- **布局皮肤**：当前 `data-ui-skin` 为 Classic/Folia。配色方案不等于布局皮肤，新增配色不得自行复制页面布局。
+- **配色与亮暗**：内置 Classic、Folia、Absolutely、Catppuccin 及用户主题通过实际主题注册和映射处理；亮暗由主题 store 写入 `data-theme`。组件使用当前语义颜色，不在页面维护第二套 `.dark` 覆盖。
+- **用户外观**：背景图片/视频、透明度、模糊、字体、圆角、减少动效和原生窗口模式按既有公开入口应用。页面不得用局部变量或固定背景覆盖用户选择。
+- **Naive UI**：`useTheme` 的集中 overrides 对齐颜色、表面、圆角、控件高度和状态；第三方内部选择器的修复放入所属公共边界，不能散落到每个业务页。
+- **主色填充文字**：当前 `theme.ts` 的 `primaryFillTextColor` 明确规定白色文字/对勾，这是已有契约。不能在本轮规范整理中改成另一种配色算法；若需要调整，应单独验证可访问性及所有消费方。
+- **窗口边界**：系统/原生窗口与纯自绘窗口的裁剪规则不同。遵循已有窗口模式和变量，不在业务容器上补圆角去裁剪整个原生窗口。
+
+## 4. 组件与业务边界
+
+| 当前层                                   | 职责                                         | 依赖要求                                                                                          |
+| ---------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `components/ui`                          | 通用控件、显示、加载、图标、无业务的交互状态 | 只直接引用同层组件、`utils`、`types`、`i18n`、必要外部库，以及检查规则中列明的通用交互 composable |
+| `components/layout`、`components/modals` | 页面骨架、窗口空间、弹层层级、焦点和滚动管理 | 复用既有布局和模态生命周期；业务状态由调用者传入                                                  |
+| 业务组件、`features`、`views`            | 业务界面编排、表单和操作入口                 | 复用公共组件；通过所属领域 API、store、composable 处理状态                                        |
+| 领域 API、store、composable              | IPC、请求版本、共享状态、任务及资源生命周期  | 不由公共 Ui 组件重新实现账户、实例、插件等业务流程                                                |
+
+目录不改成另一套原子命名。`components/ui` 不直接导入 `features`、`views`、业务 API、业务 store 或其他业务组件；相对路径、别名、动态导入、重导出和 require 同样受约束。现有 Markdown 控件可使用通用 Markdown/外链工具；该直接依赖检查不宣称验证全部间接依赖或业务语义。
+
+| 需求                           | 优先入口                                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| 标准输入、选择、操作和反馈     | 当前业务入口已有的 Naive UI 或 Ui 控件；两者共用主题来源，保留其已有交互契约                        |
+| 图标                           | `components/ui/Icon.vue` 及离线图标集合；避免另开在线图标请求或新命名体系                           |
+| 加载与空数据                   | `Loading.vue`、`EmptyState.vue` 或当前已有的 Naive UI 入口；加载反馈不等于执行去重                  |
+| 页面标题与次级导航             | `PageHeader.vue`、`SectionLayout.vue` 和公共页面样式                                                |
+| 标准弹窗、确认、错误、全屏流程 | `Modal.vue`、`ConfirmDialog.vue`、`ErrorModal.vue`、`FullscreenModal.vue`；使用统一模态栈和焦点机制 |
+| 卡片、可折叠内容和工具栏       | 已有公共卡片/折叠组件或 `.ecl-surface`、`.ecl-toolbar`                                              |
+
+先检查现有组件能否通过组合或已有 props 满足需求。不要把 Naive UI 再包装成一套无调用需求的组件库，也不要为了形式统一替换已正确工作的 Ui 控件。共性问题在公共层修复，确有当前需求的新组件说明调用方、状态和生命周期。
+
+## 5. 页面和交互契约
+
+- 页面由标题、可选工具栏和内容区组成；标题、操作、内容保留统一边距。单卡片占满扣除标题/工具栏后的剩余空间，不能用固定高度撑满窗口。
+- 每个区域明确主要滚动容器；独立列表可单独滚动，列表末项和主要操作必须可达。`overflow:hidden` 只用于明确裁剪或动画，不能掩盖布局问题。
+- 主窗口覆盖最小 960×600、默认和放大尺寸；独立窗口按自己的约束。长路径、长名称及德语/俄语等长译文预留空间，截断内容提供完整查看方式。
+- hover、pressed、focus、disabled、loading 使用所属公共控件和已有状态变量，不复制博客的状态层。每个可交互控件支持适用键盘操作，并有可访问名称和可见焦点。
+- 数据区域覆盖适用的加载、空、失败和成功。失败提供对应恢复方式；重复提交会产生副作用时显式去重；目标切换后旧响应不能覆盖新状态。
+- 模态必须处理进入焦点、Tab/Shift+Tab、Esc 关闭约束及返回焦点；全屏设置等业务流程不能绕过执行中的关闭限制。
+- 新用户文案同步六语言及插值。列表使用稳定业务身份。公共组件的可访问名称、错误、加载和禁用状态随调用契约验证。
+
+## 6. 动效、覆盖和例外
+
+公共 CSS 关键帧与 Vue 过渡由 `animations.css` 管理；组件使用现有 duration/easing。Canvas、Three.js 或必要的运行时测量动画由所属组件显式管理创建和销毁，并遵循减少动效设置，不伪装成 CSS 关键帧豁免。
+
+新增 `!important` 前先检查选择器、导入顺序、变量继承与组件 API。允许的所有权边界是第三方/生成样式、明确的公共覆盖契约、用户偏好或输出介质、原生窗口裁剪等。每个新增例外都要解释范围、原因和退出条件，不能通过整文件或整目录忽略获得无限权限。
+
+品牌图例、游戏内容色、皮肤预览、选色器数据、主色填充文字和其他内容固有颜色，不需要伪装成用户强调色；它们应留在其实际领域。新增 CSS 字面量、动效或 important 如果命中自动规则，按[样式检查说明](frontend-style-checks.md)登记精确、有所有者和期限的例外，经当前功能评审确认；不要直接扩大主题源白名单。
+
+## 7. 检查与验收
+
+`pnpm check:design` 检查新增/修改的受管 CSS 声明和 Vue style 块，`pnpm lint` 包含公共 Ui 的直接依赖边界。`pnpm check` 已整合这两项；规则、增量来源、CI 和例外格式见[样式检查说明](frontend-style-checks.md)。
+
+静态检查不能判断所有字体层级、组件复用意图、对比度、布局美观或动态内联样式。Vue 模板中的 style 对象、JS/TS 颜色配置、外部插件及运行时 Canvas 均不属于当前 CSS 解析器的完整覆盖范围，仍需按业务边界审查，不得把这些路径当作绕过规范的方式。
+
+按主仓库第 6 节选择验证范围：局部样式做定向检查和真实布局；公共控件、全局样式、主题、检查工具或 CI 做对应全量检查。行为/模板/资源处理变化再构建并实际启动启动器；本规范和开发检查的纯文档/工具调整，不要求无关的产品界面重验。
+
+受影响界面的基础矩阵为 Classic/Folia × 亮暗，加相关背景、透明度和模糊代表状态；主题共用入口变化增加受影响内置配色和用户主题代表状态。分别记录静态、组件、浏览器和原生验收；jsdom 不计算真实布局，自动可访问性扫描的 incomplete 必须复核，截图不得未经检查自动更新。

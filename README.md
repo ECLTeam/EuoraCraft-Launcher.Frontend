@@ -40,7 +40,10 @@ pnpm check
 - `pnpm lint`：检查 Vue、TypeScript 和导入顺序。
 - `pnpm lint:fix`：自动修复可安全修复的 Lint 问题。
 - `pnpm typecheck`：执行严格 TypeScript 类型检查。
+- `pnpm check:design`：检查新增/修改的 CSS 与 Vue style 声明；支持明确的 Git 提交范围。
 - `pnpm build`：类型检查并构建生产版本。
 - `pnpm build:showcase`：类型检查并构建可独立展示的前端版本。
 
 工程协作约定见主仓库的[贡献指南](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/CONTRIBUTING.md)和[项目规范](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/AGENTS.md)。项目文档见[文档索引](https://github.com/ECLTeam/EuoraCraft-Launcher/blob/main/docs/README.md)。
+
+前端目录要求见 [AGENTS.md](AGENTS.md)。界面和样式沿用 [ECL 设计规范](docs/ECL_DESIGN_SYSTEM.md)；新增样式约束、Git/CI 范围及精确例外见[自动检查说明](docs/frontend-style-checks.md)。

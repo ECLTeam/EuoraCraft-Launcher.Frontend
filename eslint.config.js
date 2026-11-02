@@ -4,6 +4,7 @@ import importOrder from 'eslint-plugin-import-x/rules/order'
 import vue from 'eslint-plugin-vue'
 import globals from 'globals'
 import ts from 'typescript-eslint'
+import { uiBoundaryRule } from './scripts/eslint-ui-boundaries.mjs'
 
 export default ts.config(
   js.configs.recommended,
@@ -75,6 +76,17 @@ export default ts.config(
         typescript: true,
       },
     },
+  },
+  {
+    files: ['src/components/ui/**/*.{vue,ts,js,mjs}'],
+    ignores: ['**/*.test.*', '**/*.spec.*'],
+    plugins: { 'ecl-design': { rules: { 'ui-boundary': uiBoundaryRule } } },
+    rules: { 'ecl-design/ui-boundary': 'error' },
+  },
+  {
+    files: ['scripts/*design*.mjs', 'scripts/eslint-ui-boundaries.mjs'],
+    languageOptions: { globals: globals.node },
+    rules: { 'no-console': 'off' },
   },
   eslintConfigPrettier,
   {

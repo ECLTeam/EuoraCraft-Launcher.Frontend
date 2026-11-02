@@ -13,11 +13,12 @@
     "build": "pnpm typecheck && vite build",
     "build:showcase": "pnpm typecheck && vite build --mode showcase",
     "preview": "vite preview",
-    "lint": "eslint src eslint.config.js",
+    "lint": "eslint src eslint.config.js scripts/*design*.mjs scripts/eslint-ui-boundaries.mjs",
     "lint:fix": "eslint src eslint.config.js --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "check:design": "node scripts/check-design-styles.mjs",
+    "check": "pnpm format:check && pnpm lint && pnpm check:design && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
