@@ -918,9 +918,6 @@
     "settingsConflict": "設定或外掛定義已變更，請重新讀取後再編輯。",
     "openDirectory": "開啟外掛目錄",
     "directoryOpenFailed": "無法開啟外掛目錄",
-    "developmentMode": "開發模式",
-    "developmentHelp": "僅本次啟動有效。修改實際安裝目錄會自動重載；權限或相依項變更需要審閱。關閉後停止開發外掛。",
-    "developmentFailed": "開發模式操作未完成，請檢查狀態並重試。",
     "developmentStates": {
       "preparing": "準備版本",
       "reloading": "正在重載",

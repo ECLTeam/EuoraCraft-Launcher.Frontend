@@ -597,7 +597,6 @@ export interface CommandPayloadMap {
   }
   plugin_runtime_info: { installation_id: string }
   plugin_development_get: Record<string, never>
-  plugin_development_set: { enabled: boolean }
   plugin_open_directory: { installation_id: string }
   plugin_list: undefined
   plugin_info: { plugin_name: string }
@@ -908,7 +907,6 @@ export const COMMAND_NAMES = {
   plugin_permissions_update: 'plugin_permissions_update',
   plugin_runtime_info: 'plugin_runtime_info',
   plugin_development_get: 'plugin_development_get',
-  plugin_development_set: 'plugin_development_set',
   plugin_open_directory: 'plugin_open_directory',
   plugin_list: 'plugin_list',
   plugin_info: 'plugin_info',
@@ -1203,7 +1201,6 @@ export interface CommandResponseMap {
   plugin_permissions_update: PluginPermissionUpdateResult
   plugin_runtime_info: PluginRuntimeInfo
   plugin_development_get: PluginDevelopmentState
-  plugin_development_set: PluginDevelopmentState
   plugin_open_directory: void
   plugin_list: PluginInfo[]
   plugin_info: PluginInfo

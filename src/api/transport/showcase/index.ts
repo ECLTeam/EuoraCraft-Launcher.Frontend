@@ -61,7 +61,6 @@ export function createShowcaseTransport(): BackendTransport {
   const config = loadShowcaseConfig(showcaseConfig)
   const accounts = structuredClone(showcaseAccounts)
   const plugins = structuredClone(showcasePlugins)
-  let developmentEnabled = false
   const pluginSettings = new Map<string, { revision: number; values: Record<string, unknown> }>()
   const wardrobe: WardrobeItem[] = []
   const runningInstances: GameInstance[] = []
@@ -686,10 +685,7 @@ export function createShowcaseTransport(): BackendTransport {
       case 'plugin_call_command':
         return success({ command: payload.command, mode: 'showcase' })
       case 'plugin_development_get':
-        return success({ enabled: developmentEnabled, items: [] })
-      case 'plugin_development_set':
-        developmentEnabled = payload.enabled === true
-        return success({ enabled: developmentEnabled, items: [] })
+        return success({ enabled: false, items: [] })
       case 'plugin_open_directory':
         return success()
       case 'plugin_get_settings': {

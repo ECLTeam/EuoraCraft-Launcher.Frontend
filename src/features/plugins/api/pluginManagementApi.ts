@@ -16,16 +16,6 @@ import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pl
 import { parseDevelopment, parseSettings } from './pluginSettingsValidation'
 
 export const pluginManagementApi = {
-  async development() {
-    return parseDevelopment(assertSuccess(await backend.command('plugin_development_get', {}), '读取插件开发模式'))
-  },
-
-  async setDevelopment(enabled: boolean) {
-    return parseDevelopment(
-      assertSuccess(await backend.command('plugin_development_set', { enabled }), '切换插件开发模式')
-    )
-  },
-
   async openDirectory(installationId: string) {
     assertSuccess(await backend.command('plugin_open_directory', { installation_id: installationId }), '打开插件目录')
   },

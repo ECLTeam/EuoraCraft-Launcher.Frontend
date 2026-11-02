@@ -922,9 +922,6 @@
     "settingsConflict": "配置或插件定义已变化，请重新读取后再编辑。",
     "openDirectory": "打开插件目录",
     "directoryOpenFailed": "无法打开插件目录",
-    "developmentMode": "开发模式",
-    "developmentHelp": "仅本次启动有效。修改实际安装目录自动重载；权限或依赖变化需要审阅。关闭后停止开发插件。",
-    "developmentFailed": "开发模式操作未完成，请检查状态并重试。",
     "developmentStates": {
       "preparing": "准备版本",
       "reloading": "正在重载",

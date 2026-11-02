@@ -8,12 +8,21 @@
   >
     <div class="plugin-settings-center">
       <aside class="plugin-settings-navigation ecl-surface" :aria-label="t('plugins.pluginList')">
-        <NInput
-          v-model:value="search"
-          clearable
-          :placeholder="t('plugins.searchPlugins')"
-          :inputProps="{ 'aria-label': t('plugins.searchPlugins') }"
-        />
+        <div class="plugin-settings-nav-title">
+          <UiIcon name="plugin" :size="18" />
+          <span>{{ t('plugins.pluginList') }}</span>
+        </div>
+        <div class="plugin-settings-search">
+          <NInput
+            v-model:value="search"
+            size="small"
+            clearable
+            :placeholder="t('plugins.searchPlugins')"
+            :inputProps="{ 'aria-label': t('plugins.searchPlugins') }"
+          >
+            <template #prefix><UiIcon name="search" :size="14" /></template>
+          </NInput>
+        </div>
         <nav class="plugin-settings-list" :aria-label="t('plugins.pluginList')">
           <button
             v-for="item in filteredPlugins"
@@ -26,7 +35,7 @@
             @click="select(item)"
           >
             <strong>{{ item.title || item.name }}</strong>
-            <span>{{ item.name }}</span>
+            <span :title="item.name">{{ item.name }}</span>
           </button>
           <NEmpty v-if="!filteredPlugins.length" :description="t('plugins.noPlugins')" size="small" />
         </nav>
@@ -45,7 +54,13 @@
               >{{ t('plugins.openDirectory') }}</NButton
             >
           </header>
-          <div class="plugin-settings-content">
+          <div
+            class="plugin-settings-content"
+            :class="{
+              'plugin-settings-content--state':
+                loading || loadError || !data?.schema.length || data?.editable === false,
+            }"
+          >
             <UiLoading v-if="loading" mode="inline" />
             <NAlert v-else-if="loadError" type="error" :showIcon="false">
               {{ loadError }} <NButton text @click="load">{{ t('common.retry') }}</NButton>
@@ -65,6 +80,7 @@
                 <div class="plugin-setting-value">
                   <NSwitch
                     v-if="item.type === 'bool'"
+                    size="small"
                     :aria-label="item.description || item.key"
                     :disabled="isSaving"
                     :value="values[item.key] === true"
@@ -72,6 +88,7 @@
                   />
                   <NInputNumber
                     v-else-if="item.type === 'number'"
+                    size="small"
                     class="setting-control"
                     :disabled="isSaving"
                     :inputProps="{ 'aria-label': item.description || item.key }"
@@ -80,6 +97,7 @@
                   />
                   <NSelect
                     v-else-if="item.type === 'select'"
+                    size="small"
                     class="setting-control"
                     :disabled="isSaving"
                     :aria-label="item.description || item.key"
@@ -89,6 +107,7 @@
                   />
                   <NInput
                     v-else
+                    size="small"
                     class="setting-control"
                     :disabled="isSaving"
                     :inputProps="{ 'aria-label': item.description || item.key }"
@@ -119,6 +138,7 @@ import { NAlert, NButton, NEmpty, NInput, NInputNumber, NSelect, NSwitch } from 
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
+import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
@@ -270,59 +290,83 @@ onUnmounted(() => unlisten?.())
 <style scoped>
 .plugin-settings-center {
   display: grid;
-  grid-template-columns: minmax(180px, 26%) minmax(0, 1fr);
-  gap: var(--s-md, 16px);
+  grid-template-columns: clamp(180px, 22vw, 240px) minmax(0, 1fr);
+  gap: var(--s-md);
   height: 100%;
   min-height: 0;
-  padding: var(--s-lg, 24px);
+  padding: var(--ecl-page-padding);
   box-sizing: border-box;
 }
 .plugin-settings-navigation,
 .plugin-settings-detail {
   min-width: 0;
   min-height: 0;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--radius-lg, 12px);
 }
 .plugin-settings-navigation {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  overflow: hidden;
+}
+.plugin-settings-nav-title {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: var(--s-sm);
+  height: 44px;
+  padding: 0 var(--s-md);
+  border-bottom: 1px solid var(--ecl-border);
+  color: var(--ecl-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+.plugin-settings-nav-title :deep(svg) {
+  color: var(--primary);
+}
+.plugin-settings-search {
+  flex-shrink: 0;
+  padding: var(--s-sm);
 }
 .plugin-settings-list {
   display: flex;
   flex: 1;
   min-height: 0;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-xs);
   overflow: auto;
+  padding: 0 var(--s-sm) var(--s-sm);
 }
 .plugin-settings-choice {
   display: grid;
-  gap: 4px;
+  gap: var(--s-xs);
   width: 100%;
+  min-width: 0;
   flex-shrink: 0;
-  padding: 12px;
+  padding: var(--s-sm) var(--s-md);
   text-align: start;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md, 8px);
+  border: 0;
+  border-radius: var(--ecl-radius-control);
   color: var(--ecl-text);
   background: transparent;
+  font: inherit;
+  font-size: 13px;
   cursor: pointer;
 }
-.plugin-settings-choice:hover,
-.plugin-settings-choice.selected {
+.plugin-settings-choice:hover {
   background: var(--ecl-hover);
-  border-color: var(--ecl-border);
+}
+.plugin-settings-choice.selected {
+  color: var(--primary);
+  background: var(--ecl-primary-alpha);
 }
 .plugin-settings-choice:focus-visible {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
 .plugin-settings-choice strong,
 .plugin-settings-choice span {
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .plugin-settings-choice span,
 .plugin-settings-heading p,
@@ -330,18 +374,22 @@ onUnmounted(() => unlisten?.())
   font-size: 12px;
   color: var(--ecl-text-secondary);
 }
+.plugin-settings-choice.selected span {
+  color: inherit;
+}
 .plugin-settings-detail {
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: var(--s-lg);
 }
 .plugin-settings-heading {
   display: flex;
+  flex-shrink: 0;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 16px;
+  gap: var(--s-md);
+  padding-bottom: var(--s-md);
   border-bottom: 1px solid var(--ecl-border);
 }
 .plugin-settings-heading > div {
@@ -349,18 +397,24 @@ onUnmounted(() => unlisten?.())
 }
 .plugin-settings-heading h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .plugin-settings-heading p {
-  margin: 6px 0 0;
+  margin: var(--s-xs) 0 0;
   overflow-wrap: anywhere;
 }
 .plugin-settings-content {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding-top: 16px;
+}
+.plugin-settings-content--state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--s-lg) 0;
 }
 .plugin-setting-list {
   list-style: none;
@@ -372,16 +426,23 @@ onUnmounted(() => unlisten?.())
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 0;
+  gap: var(--s-md);
+  padding: var(--s-lg) 0;
   border-bottom: 1px solid var(--ecl-border);
+}
+.plugin-setting-row:last-child {
+  border-bottom: 0;
 }
 .plugin-setting-label {
   display: grid;
-  gap: 4px;
+  gap: var(--s-xs);
   min-width: 0;
   flex: 1 1 160px;
   overflow-wrap: anywhere;
+}
+.plugin-setting-label strong {
+  font-size: 13px;
+  font-weight: 500;
 }
 .plugin-setting-value {
   min-width: 0;
@@ -392,7 +453,7 @@ onUnmounted(() => unlisten?.())
   max-width: 100%;
 }
 .plugin-settings-feedback {
-  margin: 16px 0 0;
+  margin: var(--s-md) 0 0;
   overflow-wrap: anywhere;
 }
 </style>

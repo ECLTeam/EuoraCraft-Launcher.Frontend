@@ -22,15 +22,6 @@
         </NRadioGroup>
 
         <div class="plugins-toolbar-actions">
-          <label class="plugins-development-switch">
-            <span>{{ t('plugins.developmentMode') }}</span>
-            <NSwitch
-              :value="development.enabled"
-              :disabled="developmentBusy || developmentLoading"
-              :aria-label="t('plugins.developmentMode')"
-              @update:value="setDevelopment"
-            />
-          </label>
           <NButton size="small" @click="openSettings(null)">{{ t('plugins.settingsCenter') }}</NButton>
           <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
             <NButton type="primary" size="small">
@@ -42,12 +33,6 @@
       </header>
 
       <PluginSlotHost slotId="plugin-slot-plugins-toolbar-after" class="plugin-slot-container" />
-
-      <NAlert v-if="developmentError" type="error" :showIcon="false">
-        {{ developmentError }}
-        <NButton text @click="setDevelopment(development.enabled)">{{ t('common.retry') }}</NButton>
-      </NAlert>
-      <p v-if="development.enabled" class="plugins-development-help">{{ t('plugins.developmentHelp') }}</p>
 
       <div class="plugins-table-header">
         <span>{{ t('plugins.pluginName') }}</span>
@@ -193,7 +178,6 @@ import {
   NRadioButton,
   NRadioGroup,
   NSpace,
-  NSwitch,
   NTab,
   NTabs,
   NTag,
@@ -213,7 +197,7 @@ import PluginPermissionsModal from '@/features/plugins/components/PluginPermissi
 import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
-import type { PluginInfo, PluginPackageSelection, PluginDevelopmentState } from '@/types/plugins'
+import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
 
 const { t, te } = useI18n()
 const { isFolia } = useUiSkin()
@@ -225,12 +209,6 @@ const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const settingsModalVisible = ref(false)
-const development = ref<PluginDevelopmentState>({ enabled: false, items: [] })
-const developmentBusy = ref(false)
-const developmentLoading = ref(true)
-const developmentError = ref('')
-let developmentRequest = 0
-let unlistenDevelopment: (() => void) | null = null
 const settingsTarget = ref<PluginInfo | null>(null)
 const panelVisible = ref(false)
 const panelTarget = ref<PluginInfo | null>(null)
@@ -381,34 +359,6 @@ function openPanel(plugin: PluginInfo) {
   panelVisible.value = true
 }
 
-async function refreshDevelopment(): Promise<void> {
-  const request = ++developmentRequest
-  try {
-    const state = await pluginManagementApi.development()
-    if (request === developmentRequest) development.value = state
-  } catch {
-    if (request === developmentRequest) developmentError.value = t('plugins.developmentFailed')
-  } finally {
-    if (request === developmentRequest) developmentLoading.value = false
-  }
-}
-
-async function setDevelopment(enabled: boolean): Promise<void> {
-  if (developmentBusy.value) return
-  developmentBusy.value = true
-  developmentError.value = ''
-  ++developmentRequest
-  try {
-    development.value = await pluginManagementApi.setDevelopment(enabled)
-    await pluginStore.load(true)
-  } catch {
-    developmentError.value = t('plugins.developmentFailed')
-    await refreshDevelopment()
-  } finally {
-    developmentBusy.value = false
-  }
-}
-
 async function openDirectory(plugin: PluginInfo): Promise<void> {
   const installationId = plugin.installation_id
   if (!installationId) return
@@ -420,14 +370,8 @@ async function openDirectory(plugin: PluginInfo): Promise<void> {
 
 onMounted(() => {
   void pluginStore.start().catch(() => {})
-  void refreshDevelopment()
-  unlistenDevelopment = pluginManagementApi.onStatusChanged(() => {
-    if (!developmentBusy.value) void refreshDevelopment()
-  })
 })
 onUnmounted(() => {
-  ++developmentRequest
-  unlistenDevelopment?.()
   pluginStore.stop()
 })
 </script>

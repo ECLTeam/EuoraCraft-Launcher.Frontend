@@ -922,9 +922,6 @@
     "settingsConflict": "The settings or plugin definition changed. Reload before editing.",
     "openDirectory": "Open plugin folder",
     "directoryOpenFailed": "Could not open the plugin folder",
-    "developmentMode": "Development mode",
-    "developmentHelp": "For this launcher session only. Changes in installed plugin folders reload automatically; permissions or dependencies need review. Turning this off stops development plugins.",
-    "developmentFailed": "The development operation did not finish. Check the status and retry.",
     "developmentStates": {
       "preparing": "Preparing",
       "reloading": "Reloading",

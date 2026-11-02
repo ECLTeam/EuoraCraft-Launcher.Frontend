@@ -918,9 +918,6 @@
     "settingsConflict": "Einstellungen oder Plugin-Definition geändert. Vor dem Bearbeiten neu laden.",
     "openDirectory": "Plugin-Ordner öffnen",
     "directoryOpenFailed": "Plugin-Ordner konnte nicht geöffnet werden",
-    "developmentMode": "Entwicklungsmodus",
-    "developmentHelp": "Gilt nur für diesen Launcher-Start. Änderungen im installierten Plugin-Ordner werden automatisch geladen; Rechte oder Abhängigkeiten benötigen eine Prüfung. Ausschalten beendet Entwicklungs-Plugins.",
-    "developmentFailed": "Der Entwicklungsvorgang wurde nicht abgeschlossen. Status prüfen und erneut versuchen.",
     "developmentStates": {
       "preparing": "Wird vorbereitet",
       "reloading": "Wird neu geladen",
