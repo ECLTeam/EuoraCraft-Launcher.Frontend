@@ -315,8 +315,7 @@
 
 <script setup lang="ts">
 import { NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
-import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref, onUnmounted } from 'vue'
+import { computed, onMounted, ref, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { parseLaunchArguments } from '@/features/instances/model/instanceSettings'
@@ -327,10 +326,26 @@ import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { GameRenderer, InstanceIsolationPolicy, SystemMemoryInfo } from '@/types/config'
+import { changedConfigFields, configValuesEqual, copyConfigValue } from '@/utils/configValue'
 const { t } = useI18n()
 const { run } = useAsyncAction({ showSuccess: false, showError: true, errorMessage: t('common.error') })
 const settingsStore = useSettingsStore()
-const { game: localSettings } = storeToRefs(settingsStore)
+const localSettings = ref(copyConfigValue(settingsStore.game))
+let confirmedSettings = copyConfigValue(settingsStore.game)
+let hasLoaded = false
+
+watch(
+  () => settingsStore.game,
+  (current) => {
+    // 外部更新只同步未编辑字段，保存中继续输入的草稿不能被旧响应替换。
+    const cleanFields = { ...current }
+    for (const key of Object.keys(current) as Array<keyof typeof current>) {
+      if (!configValuesEqual(localSettings.value[key], confirmedSettings[key])) delete cleanFields[key]
+    }
+    localSettings.value = { ...localSettings.value, ...copyConfigValue(cleanFields) }
+    confirmedSettings = copyConfigValue(current)
+  }
+)
 const isWindows = window.navigator.userAgent.toLowerCase().includes('windows')
 
 const systemMemory = ref<SystemMemoryInfo>({
@@ -462,7 +477,10 @@ const globalJvmArgsText = computed({
 })
 
 const loadGameConfig = async () => {
-  await run(async () => settingsStore.load())
+  await run(async () => {
+    await settingsStore.load()
+    hasLoaded = true
+  })
 }
 
 const loadSystemMemory = async () => {
@@ -484,31 +502,18 @@ const loadSystemMemory = async () => {
 }
 
 const saveConfig = async () => {
-  const config = {
-    java_auto: localSettings.value.java_auto,
-    java_path: localSettings.value.java_path,
-    memory_auto: localSettings.value.memory_auto,
-    memory_size: localSettings.value.memory_size,
-    lock_memory: localSettings.value.lock_memory,
-    process_priority: localSettings.value.process_priority || 'normal',
-    game_width: localSettings.value.game_width,
-    game_height: localSettings.value.game_height,
-    jvm_args: localSettings.value.jvm_args || [],
-    renderer: localSettings.value.renderer || 'default',
-    fullscreen: localSettings.value.fullscreen,
-    instance_isolation_policy: localSettings.value.instance_isolation_policy || 'all',
-    game_args_tail: localSettings.value.game_args_tail || '',
-    pre_launch_command: localSettings.value.pre_launch_command || '',
-    wrapper_command: localSettings.value.wrapper_command || '',
-    post_exit_command: localSettings.value.post_exit_command || '',
-    env_vars: localSettings.value.env_vars || '',
-    window_title_template: localSettings.value.window_title_template || '',
-    launcher_visibility: localSettings.value.launcher_visibility || 'none',
-    prefer_high_performance_gpu: localSettings.value.prefer_high_performance_gpu === true,
-    use_java_exe: localSettings.value.use_java_exe === true,
-    disable_crash_analysis: localSettings.value.disable_crash_analysis === true,
-  }
-  await run(async () => settingsStore.patchGame(config))
+  if (!hasLoaded) return
+  const submitted = copyConfigValue(localSettings.value)
+  const patch = changedConfigFields(confirmedSettings, submitted)
+  if (Object.keys(patch).length === 0) return
+  await run(async () => {
+    await settingsStore.patchGame(patch)
+    const normalized = { ...settingsStore.game }
+    for (const key of Object.keys(normalized) as Array<keyof typeof normalized>) {
+      if (!configValuesEqual(localSettings.value[key], submitted[key])) delete normalized[key]
+    }
+    localSettings.value = { ...localSettings.value, ...copyConfigValue(normalized) }
+  })
 }
 
 /** 防抖保存：拖动滑块时延迟保存，避免高频请求 */
@@ -517,7 +522,8 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null
 function debouncedSaveConfig(delay = 300) {
   if (saveTimer) clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    saveConfig()
+    saveTimer = null
+    void saveConfig()
   }, delay)
 }
 
@@ -612,6 +618,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (saveTimer) clearTimeout(saveTimer)
+  void saveConfig()
 })
 </script>
 

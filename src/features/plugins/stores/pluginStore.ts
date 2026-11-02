@@ -9,6 +9,7 @@ import type {
   PluginSettingsData,
   PluginPermissions,
 } from '@/types/plugins'
+import { configValuesEqual, copyConfigValue } from '@/utils/configValue'
 
 export const usePluginStore = defineStore('plugins', () => {
   const plugins = ref<PluginInfo[]>([])
@@ -21,16 +22,14 @@ export const usePluginStore = defineStore('plugins', () => {
   let refreshTimer: ReturnType<typeof setTimeout> | null = null
   let loadPromise: Promise<void> | null = null
   let reloadRequested = false
+  const executingOperations = new Set<string>()
 
   const reloadingPlugins = computed(() =>
     activeOperations.value.filter((operation) => operation.startsWith('reload:')).map((operation) => operation.slice(7))
   )
 
   async function load(force = false): Promise<void> {
-    if (loadPromise) {
-      if (force) reloadRequested = true
-      return loadPromise
-    }
+    if (loadPromise) return loadPromise
     if (!force && !isListStale.value) return
 
     loading.value = true
@@ -65,11 +64,24 @@ export const usePluginStore = defineStore('plugins', () => {
     if (activeOperations.value.some((active) => active.slice(active.indexOf(':') + 1) === pluginName))
       return { status: 'skipped' }
     activeOperations.value = [...activeOperations.value, operation]
+    executingOperations.add(operation)
+    let succeeded = false
     try {
-      const value = await action()
-      isListStale.value = true
-      await load(true)
-      return { status: 'success', value }
+      try {
+        const value = await action()
+        succeeded = true
+        return { status: 'success', value }
+      } finally {
+        executingOperations.delete(operation)
+        isListStale.value = true
+        if (refreshTimer) clearTimeout(refreshTimer)
+        refreshTimer = null
+        if (loadPromise) reloadRequested = true
+        // 操作失败也可能已改变部分状态，刷新失败时保留原操作异常。
+        const refreshing = load(true)
+        if (succeeded) await refreshing
+        else await refreshing.catch(() => undefined)
+      }
     } finally {
       activeOperations.value = activeOperations.value.filter((item) => item !== operation)
     }
@@ -154,9 +166,20 @@ export const usePluginStore = defineStore('plugins', () => {
     if (settingsWrites.has(pluginName)) throw new Error('PLUGIN_SETTING_SAVE_BUSY')
     const cached = settings ?? settingsCache.value[pluginName]
     if (!cached) throw new Error('PLUGIN_SETTING_SCHEMA_UNAVAILABLE')
+    const latest = settingsCache.value[pluginName]
+    if (
+      latest &&
+      (latest.installation_id !== cached.installation_id ||
+        latest.content_digest !== cached.content_digest ||
+        latest.schema_revision !== cached.schema_revision ||
+        latest.revision !== cached.revision)
+    )
+      throw new Error('PLUGIN_REVISION_CONFLICT')
+    if (configValuesEqual(cached.values[key], value)) return
+    const submitted = copyConfigValue(value)
     settingsWrites.add(pluginName)
     try {
-      const result = await pluginManagementApi.updateSetting(pluginName, key, value, cached)
+      const result = await pluginManagementApi.updateSetting(pluginName, key, submitted, cached)
       if (
         settingsCache.value[pluginName]?.schema_revision === cached.schema_revision &&
         (settingsCache.value[pluginName]?.revision ?? 0) <= (result?.revision ?? cached.revision ?? 0)
@@ -166,7 +189,7 @@ export const usePluginStore = defineStore('plugins', () => {
           [pluginName]: {
             ...cached,
             revision: result?.revision ?? cached.revision,
-            values: { ...cached.values, [key]: value },
+            values: { ...cached.values, [key]: submitted },
           },
         }
       }
@@ -179,7 +202,10 @@ export const usePluginStore = defineStore('plugins', () => {
     isListStale.value = true
     if (loadPromise) reloadRequested = true
     if (refreshTimer) clearTimeout(refreshTimer)
+    refreshTimer = null
+    if (executingOperations.size) return
     refreshTimer = setTimeout(() => {
+      refreshTimer = null
       void load().catch(() => {})
     }, 150)
   }

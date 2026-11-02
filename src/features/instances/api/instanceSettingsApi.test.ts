@@ -13,6 +13,19 @@ vi.mock('@/api/client', async () => {
 const { mocks } = mock.state!
 
 describe('instanceSettingsApi', () => {
+  it('已读取的相同独立配置不写入，实际修改及失败重试正常提交', async () => {
+    const target = { versionId: 'same-settings', path: 'C:/Minecraft' }
+    const current = await instanceSettingsApi.get(target)
+    await instanceSettingsApi.save(target, current)
+    expect(mocks.command).toHaveBeenCalledOnce()
+    mocks.command.mockResolvedValueOnce({ success: false, message: 'write failed' })
+    await expect(instanceSettingsApi.save(target, { ...current, memory: 6144 })).rejects.toThrow('write failed')
+    mocks.command.mockResolvedValueOnce({ success: true, data: { ...current, memory: 6144 } })
+    await instanceSettingsApi.save(target, { ...current, memory: 6144 })
+    await instanceSettingsApi.save(target, { ...current, memory: 6144 })
+    expect(mocks.command).toHaveBeenCalledTimes(3)
+  })
+
   beforeEach(() => {
     queryClient.clear()
     vi.clearAllMocks()

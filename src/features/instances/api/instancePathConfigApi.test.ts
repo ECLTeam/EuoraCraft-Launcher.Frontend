@@ -12,6 +12,17 @@ vi.mock('@/api/client', async () => {
 const { mocks } = mock.state!
 
 describe('instancePathConfigApi', () => {
+  it('skips identical full writes and patches while preserving other confirmed directory fields', async () => {
+    const path = 'D:/mc/ConfigNoop/.minecraft'
+    const current = await instancePathConfigApi.readConfig(path)
+    await instancePathConfigApi.writeConfig(path, { ...current })
+    await instancePathConfigApi.patchConfig(path, { activeVersion: current.activeVersion })
+    expect(mocks.command).toHaveBeenCalledOnce()
+    mocks.command.mockResolvedValueOnce({ success: true, data: { ...current, activeVersion: 'new' } })
+    await instancePathConfigApi.patchConfig(path, { activeVersion: 'new' })
+    expect(mocks.command).toHaveBeenCalledTimes(2)
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     instancePathConfigApi.invalidateActiveVersionCache()

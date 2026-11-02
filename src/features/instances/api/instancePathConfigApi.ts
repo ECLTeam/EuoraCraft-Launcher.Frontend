@@ -6,6 +6,7 @@ import { queryClient } from '@/app/queryClient'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { i18n } from '@/i18n'
 import type { EclPathConfig } from '@/types/config'
+import { configValuesEqual, copyConfigValue } from '@/utils/configValue'
 import { gamePathIdentity, normalizeGamePath } from '@/utils/path'
 
 const pathConfigSchema = looseObject({ activeVersion: optional(string()), active_version: optional(string()) })
@@ -44,17 +45,28 @@ function readConfig(gamePath: string): Promise<EclPathConfig> {
 
 async function writeConfig(gamePath: string, data: EclPathConfig): Promise<void> {
   const key = configKey(gamePath)
+  const submitted = copyConfigValue(data)
   await serializeMutation(key, async () => {
-    const result = await backend.command('game_config_set', { game_path: gamePath, data })
+    const current = queryClient.getQueryData<EclPathConfig>(key)
+    if (current && !queryClient.getQueryState(key)?.isInvalidated && configValuesEqual(current, submitted)) return
+    const result = await backend.command('game_config_set', { game_path: gamePath, data: submitted })
     assertSuccess(result, '写入 ecl.json')
-    setResourceSnapshot(key, parseConfig(data))
+    setResourceSnapshot(key, parseConfig(submitted))
   })
 }
 
 function patchConfig(gamePath: string, patch: Partial<EclPathConfig>): Promise<EclPathConfig> {
   const key = configKey(gamePath)
+  const submitted = copyConfigValue(patch)
   return serializeMutation(key, async () => {
-    const result = await backend.command('game_config_patch', { game_path: gamePath, patch })
+    const current = queryClient.getQueryData<EclPathConfig>(key)
+    if (
+      current &&
+      !queryClient.getQueryState(key)?.isInvalidated &&
+      configValuesEqual(current, { ...current, ...submitted })
+    )
+      return copyConfigValue(current)
+    const result = await backend.command('game_config_patch', { game_path: gamePath, patch: submitted })
     const config = parseConfig(assertSuccess(result, '更新 ecl.json') ?? {})
     setResourceSnapshot(key, config)
     return config

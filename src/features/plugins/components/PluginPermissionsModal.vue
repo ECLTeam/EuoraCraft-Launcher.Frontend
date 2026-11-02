@@ -403,7 +403,7 @@ async function save(revoke: boolean): Promise<void> {
       }
       savedSignature = signature
       cleanupPending = result.cleanup_state === 'pending'
-      emit('saved')
+      if (!enable) emit('saved')
     }
     isSaved = true
     if (revoke) {
@@ -418,7 +418,6 @@ async function save(revoke: boolean): Promise<void> {
       const result = await store.enableReviewed(target, view.value)
       if (!current()) return
       if (result.status !== 'success') throw new Error('PLUGIN_ENABLE_BUSY')
-      emit('saved')
       emit('update:visible', false)
     } else resultMessage.value = t(cleanupPending ? 'plugins.permissionsCleanupPending' : 'plugins.permissionsSaved')
   } catch {

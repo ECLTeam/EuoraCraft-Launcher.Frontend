@@ -143,6 +143,7 @@ import UiLoading from '@/components/ui/Loading.vue'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import type { PluginInfo, PluginSettingsData } from '@/types/plugins'
+import { configValuesEqual } from '@/utils/configValue'
 import { getErrorMessage } from '@/utils/error'
 
 const props = defineProps<{ visible: boolean; plugins: PluginInfo[]; plugin: PluginInfo | null }>()
@@ -220,6 +221,7 @@ async function save(key: string, value: unknown): Promise<void> {
   const plugin = selected.value
   const settings = data.value
   if (!plugin || !settings || isSaving.value || loading.value) return
+  if (configValuesEqual(settings.values[key], value)) return
   const current = scope.begin()
   pendingNames.value = [...pendingNames.value, plugin.name]
   saveError.value = ''

@@ -35,6 +35,57 @@ const plugin = {
 }
 
 describe('pluginStore', () => {
+  it('操作成功但最终列表尚未返回时仍拒绝重复执行', async () => {
+    let finish!: (value: Array<typeof plugin>) => void
+    vi.mocked(pluginManagementApi.list).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const store = usePluginStore()
+    const first = store.toggle(plugin)
+    await vi.waitFor(() => expect(pluginManagementApi.list).toHaveBeenCalledOnce())
+    await expect(store.toggle(plugin)).resolves.toEqual({ status: 'skipped' })
+    expect(pluginManagementApi.disable).toHaveBeenCalledOnce()
+    finish([{ ...plugin, status: 'disabled' }])
+    await first
+    expect(store.activeOperations).toEqual([])
+  })
+
+  it('本地操作期间的多个状态事件不提前刷新，完成后只读取一次最终列表', async () => {
+    vi.useFakeTimers()
+    let changed!: () => void
+    let finish!: () => void
+    vi.mocked(pluginManagementApi.onStatusChanged).mockImplementation((handler) => {
+      changed = handler
+      return vi.fn()
+    })
+    const store = usePluginStore()
+    try {
+      await store.start()
+      vi.mocked(pluginManagementApi.list).mockClear()
+      vi.mocked(pluginManagementApi.disable).mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finish = resolve
+          })
+      )
+      const operation = store.toggle(plugin)
+      changed()
+      changed()
+      await vi.advanceTimersByTimeAsync(200)
+      expect(pluginManagementApi.list).not.toHaveBeenCalled()
+      finish()
+      await operation
+      await vi.advanceTimersByTimeAsync(200)
+      expect(pluginManagementApi.list).toHaveBeenCalledOnce()
+    } finally {
+      store.stop()
+      vi.useRealTimers()
+    }
+  })
+
   it('基础插件确认当前内容后直接启用，并在整个流程中拒绝重复执行', async () => {
     let finish!: () => void
     vi.mocked(pluginManagementApi.permissions).mockResolvedValue({

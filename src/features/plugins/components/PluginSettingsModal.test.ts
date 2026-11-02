@@ -27,6 +27,24 @@ const plugin: PluginInfo = {
 }
 
 describe('plugin settings', () => {
+  it('unchanged text does not submit, refetch or announce saved', async () => {
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      const input = wrapper.findAllComponents(NInput).find((field) => field.props('value') === 'hello')!
+      await input.vm.$emit('change', 'hello')
+      await flushPromises()
+      expect(mocks.updateSetting).not.toHaveBeenCalled()
+      expect(mocks.getSettings).toHaveBeenCalledOnce()
+      expect(wrapper.text()).not.toContain(i18n.global.t('plugins.settingSaved'))
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getSettings.mockResolvedValue({

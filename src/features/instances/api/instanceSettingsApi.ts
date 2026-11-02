@@ -1,12 +1,14 @@
 import backend from '@/api/client'
 import { serializeMutation } from '@/app/data/mutationCoordinator'
 import { invalidateResource, readResource, setResourceSnapshot } from '@/app/data/refreshCoordinator'
+import { queryClient } from '@/app/queryClient'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import {
   normalizeVersionSettings,
   type VersionLaunchSettings,
   type VersionSettingsTarget,
 } from '@/features/instances/model/instanceSettings'
+import { configValuesEqual, copyConfigValue } from '@/utils/configValue'
 import { gamePathIdentity } from '@/utils/path'
 /**
  * 版本独立启动设置保存在每个版本自己的目录中
@@ -32,11 +34,14 @@ export const instanceSettingsApi = {
 
   async save(target: VersionSettingsTarget, value: Partial<VersionLaunchSettings>): Promise<void> {
     const key = ['instance-settings', gamePathIdentity(target.path), target.versionId]
+    const submitted = normalizeVersionSettings(copyConfigValue(value))
     await serializeMutation(key, async () => {
+      const confirmed = queryClient.getQueryData<VersionLaunchSettings>(key)
+      if (!queryClient.getQueryState(key)?.isInvalidated && confirmed && configValuesEqual(confirmed, submitted)) return
       const result = await backend.command('game_version_settings_set', {
         game_path: target.path,
         version_id: target.versionId,
-        data: normalizeVersionSettings(value),
+        data: submitted,
       })
       const saved = assertSuccess(result, '保存版本独立设置')
       setResourceSnapshot(key, normalizeVersionSettings(saved))

@@ -11,6 +11,7 @@ import type { ConfigSection } from '@/types/config'
 import type { InstallVersionResult, JavaInstallation, MinecraftVersion, ScannedVersion } from '@/types/instances'
 import type { PluginInfo, PluginRoute, PluginSettingsData } from '@/types/plugins'
 import type { FileContent, FsEntry, PathInfo } from '@/types/system'
+import { configValuesEqual, copyConfigValue } from '@/utils/configValue'
 import { getErrorMessage } from '@/utils/error'
 
 /** 将 feature API 的已解包结果包装回 ApiResponse，保持插件侧返回契约。 */
@@ -95,8 +96,19 @@ export async function getLauncherConfig(section: ConfigSection): Promise<ApiResp
  * @param data - 配置数据
  */
 export function setLauncherConfig(section: ConfigSection, data: JsonDict): Promise<ApiResponse<void>> {
+  const submitted = copyConfigValue(data)
   return serializeConfigWrite(section, async () => {
-    const response = await backend.config.set(section, data)
+    if (
+      section === 'ui' ||
+      section === 'game' ||
+      section === 'launcher' ||
+      section === 'download' ||
+      section === 'connector'
+    ) {
+      const current = (await configQuery())[section]
+      if (configValuesEqual(current, submitted)) return { success: true, data: undefined, timestamp: Date.now() }
+    }
+    const response = await backend.config.set(section, submitted)
     if (response.success) confirmConfigWrite(response.data)
     return { ...response, data: undefined }
   })

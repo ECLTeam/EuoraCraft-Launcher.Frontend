@@ -74,6 +74,20 @@ function primary(wrapper: ReturnType<typeof open>) {
     )!
 }
 describe('simplified plugin permission review', () => {
+  it('agree and enable leaves the final list refresh to the store without intermediate parent refreshes', async () => {
+    const wrapper = open()
+    try {
+      await flushPromises()
+      await primary(wrapper).trigger('click')
+      await flushPromises()
+      expect(mocks.enableReviewed).toHaveBeenCalledOnce()
+      expect(wrapper.emitted('saved')).toBeUndefined()
+      expect(wrapper.emitted('update:visible')).toEqual([[false]])
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it.each(['ui.custom.execute', 'connector.manage'])(
     'requires an explicit choice for %s and saves that capability',
     async (capability) => {

@@ -460,11 +460,13 @@ async function loadUiInjection(): Promise<void> {
 }
 
 async function setUiInjectionAllowed(value: boolean): Promise<void> {
+  if (uiInjectionBusy.value || value === uiInjectionAllowed.value) return
   uiInjectionBusy.value = true
   const previous = uiInjectionAllowed.value
   uiInjectionAllowed.value = value
   try {
-    await backend.config.set('plugins', { allow_ui_injection: value })
+    const result = await backend.config.set('plugins', { allow_ui_injection: value })
+    if (!result.success) uiInjectionAllowed.value = previous
   } catch {
     uiInjectionAllowed.value = previous
   } finally {

@@ -2,6 +2,8 @@ import { defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { configQuery, invalidateConfig } from '@/app/data'
 import { serializeConfigWrite, waitForConfigWrites } from '@/app/data/configQueries'
+import { queryClient } from '@/app/queryClient'
+import { queryKeys } from '@/app/queryKeys'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { toJavaInstallations, useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { resolveLocalImageUrl, settingsApi } from '@/features/settings/api/settingsApi'
@@ -17,6 +19,7 @@ import type {
   UiConfig,
 } from '@/types/config'
 import type { JavaInstallation } from '@/types/instances'
+import { configValuesEqual, copyConfigValue } from '@/utils/configValue'
 
 const DEFAULT_GAME_CONFIG: GameConfig = {
   minecraft_paths: [],
@@ -99,6 +102,7 @@ export const useSettingsStore = defineStore('settings', () => {
   let latestLoadId = 0
   let configRevision = 0
   let refreshPromise: Promise<void> | null = null
+  let appliedQuery: unknown = null
 
   async function load(force = false, synchronize = false): Promise<void> {
     if (!force && !synchronize && status.value === 'ready') return
@@ -116,10 +120,11 @@ export const useSettingsStore = defineStore('settings', () => {
           status.value = 'ready'
           return
         }
+        appliedQuery = queryClient.getQueryData(queryKeys.config.all)
         ui.value = config.ui
         game.value = { ...DEFAULT_GAME_CONFIG, ...config.game }
         download.value = { ...DEFAULT_DOWNLOAD_CONFIG, ...config.download }
-        launcher.value = { ...config.launcher }
+        launcher.value = { ...DEFAULT_LAUNCHER_CONFIG, ...config.launcher }
         connector.value = config.connector ?? { mode: 'automatic', nodes: [] }
         status.value = 'ready'
       } catch (reason) {
@@ -152,7 +157,14 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function ensureReady(): Promise<void> {
-    if (status.value !== 'ready') await load()
+    if (status.value !== 'ready') {
+      await load()
+      return
+    }
+    // SDK 写入或外部配置事件可能先更新共享快照，再通知运行时同步 store。
+    const cached = queryClient.getQueryData(queryKeys.config.all)
+    if (cached && cached !== appliedQuery && !queryClient.getQueryState(queryKeys.config.all)?.isInvalidated)
+      await load(false, true)
   }
 
   async function refreshAfterWrites(): Promise<void> {
@@ -170,9 +182,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchUi(patch: Partial<UiConfig>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('ui', async () => {
       await ensureReady()
-      const next = { ...ui.value, ...patch }
+      const next = { ...ui.value, ...submittedPatch }
+      if (configValuesEqual(next, ui.value)) return
       const saved = await settingsApi.saveUi(next)
       ui.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -183,7 +198,8 @@ export const useSettingsStore = defineStore('settings', () => {
   async function updateUi(update: (current: UiConfig) => UiConfig): Promise<void> {
     await enqueueWrite('ui', async () => {
       await ensureReady()
-      const next = update((await configQuery()).ui)
+      const next = copyConfigValue(update(copyConfigValue(ui.value)))
+      if (configValuesEqual(next, ui.value)) return
       const saved = await settingsApi.saveUi(next)
       ui.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -192,9 +208,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchUiDebugTools(patch: NonNullable<UiConfig['debugTools']>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('ui', async () => {
       await ensureReady()
-      const next = { ...ui.value, debugTools: { ...ui.value.debugTools, ...patch } }
+      const next = { ...ui.value, debugTools: { ...ui.value.debugTools, ...submittedPatch } }
+      if (configValuesEqual(next, ui.value)) return
       const saved = await settingsApi.saveUi(next)
       ui.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -203,9 +222,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchUiTheme(patch: NonNullable<UiConfig['theme']>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('ui', async () => {
       await ensureReady()
-      const next = { ...ui.value, theme: { ...ui.value.theme, ...patch } }
+      const next = { ...ui.value, theme: { ...ui.value.theme, ...submittedPatch } }
+      if (configValuesEqual(next, ui.value)) return
       const saved = await settingsApi.saveUi(next)
       ui.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -214,23 +236,29 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchUiBackground(patch: Partial<NonNullable<UiConfig['background']>>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('ui', async () => {
       await ensureReady()
       const current = ui.value.background
-      const image = patch.image ? { ...readImageBackground(current), ...patch.image } : readImageBackground(current)
-      const video = patch.video
+      if (configValuesEqual({ ...current, ...submittedPatch }, current)) return
+      const image = submittedPatch.image
+        ? { ...readImageBackground(current), ...submittedPatch.image }
+        : readImageBackground(current)
+      const video = submittedPatch.video
         ? {
             ...readVideoBackground(current),
-            ...patch.video,
-            options: patch.video.options
-              ? { ...readVideoBackground(current).options, ...patch.video.options }
+            ...submittedPatch.video,
+            options: submittedPatch.video.options
+              ? { ...readVideoBackground(current).options, ...submittedPatch.video.options }
               : readVideoBackground(current).options,
           }
         : readVideoBackground(current)
       const next = {
         ...ui.value,
-        background: { ...current, ...patch, image, video },
+        background: { ...current, ...submittedPatch, image, video },
       }
+      if (configValuesEqual(next, ui.value)) return
       const saved = await settingsApi.saveUi(next)
       ui.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -239,9 +267,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchGame(patch: Partial<GameConfig>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('game', async () => {
       await ensureReady()
-      const next = { ...game.value, ...patch }
+      const next = { ...game.value, ...submittedPatch }
+      if (configValuesEqual(next, game.value)) return
       const saved = await settingsApi.saveGame(next)
       game.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -250,9 +281,12 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchLauncher(patch: Partial<LauncherConfig>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('launcher', async () => {
       await ensureReady()
-      const next = { ...launcher.value, ...patch }
+      const next = { ...launcher.value, ...submittedPatch }
+      if (configValuesEqual(next, launcher.value)) return
       const saved = await settingsApi.saveLauncher(next)
       launcher.value = saved ?? next
       if (!saved) void invalidateConfig()
@@ -261,18 +295,37 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   async function patchDownload(patch: Partial<DownloadConfig>): Promise<void> {
-    const submittedPatch = structuredClone(patch)
+    const submittedPatch = copyConfigValue(patch)
     await enqueueWrite('download', async () => {
       await ensureReady()
+      const next = {
+        ...download.value,
+        ...submittedPatch,
+        ...(submittedPatch.resourceInstallCache
+          ? { resourceInstallCache: { ...download.value.resourceInstallCache, ...submittedPatch.resourceInstallCache } }
+          : {}),
+        ...(submittedPatch.resourceSaveDirectories
+          ? {
+              resourceSaveDirectories: {
+                ...download.value.resourceSaveDirectories,
+                ...submittedPatch.resourceSaveDirectories,
+              },
+            }
+          : {}),
+      }
+      if (configValuesEqual(next, download.value)) return
       download.value = await settingsApi.patchDownload(submittedPatch)
       configRevision += 1
     })
   }
 
   async function patchConnector(patch: Partial<ConnectorConfig>): Promise<void> {
+    const submittedPatch = copyConfigValue(patch)
+    if (Object.keys(submittedPatch).length === 0) return
     await enqueueWrite('connector', async () => {
       await ensureReady()
-      const next = { ...connector.value, ...patch }
+      const next = { ...connector.value, ...submittedPatch }
+      if (configValuesEqual(next, connector.value)) return
       const saved = await settingsApi.saveConnector(next)
       connector.value = saved ?? next
       if (!saved) void invalidateConfig()

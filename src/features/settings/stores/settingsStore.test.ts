@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { toRaw } from 'vue'
+import { acceptConfigSnapshot } from '@/app/data/configQueries'
 import { queryClient } from '@/app/queryClient'
 import { javaApi } from '@/features/java/api/javaApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
@@ -15,6 +16,7 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
     load: vi.fn(),
     saveUi: vi.fn(),
     saveGame: vi.fn(),
+    saveLauncher: vi.fn(),
     patchDownload: vi.fn(),
     saveConnector: vi.fn(),
     listJava: vi.fn(),
@@ -27,6 +29,83 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
 }))
 
 describe('settingsStore', () => {
+  it('保存前接纳外部已确认快照，保留外部更新且跳过相同值', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    acceptConfigSnapshot({ section: 'game', effective: true, data: { ...store.game, memory_size: 8192 } })
+    await store.patchGame({ memory_size: 8192 })
+    expect(settingsApi.saveGame).not.toHaveBeenCalled()
+    await store.patchGame({ fullscreen: true })
+    expect(settingsApi.saveGame).toHaveBeenLastCalledWith(
+      expect.objectContaining({ memory_size: 8192, fullscreen: true })
+    )
+  })
+
+  it('嵌套下载映射按资源键比较，保留其他类型且不重复提交', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    store.download.resourceSaveDirectories = { mod: 'D:/Mods', shader: 'D:/Shaders' }
+    await store.patchDownload({ resourceSaveDirectories: { mod: 'D:/Mods' } })
+    expect(settingsApi.patchDownload).not.toHaveBeenCalled()
+    vi.mocked(settingsApi.patchDownload).mockResolvedValue({
+      ...store.download,
+      resourceSaveDirectories: { mod: 'D:/NewMods', shader: 'D:/Shaders' },
+    })
+    await store.patchDownload({ resourceSaveDirectories: { mod: 'D:/NewMods' } })
+    await store.patchDownload({ resourceSaveDirectories: { mod: 'D:/NewMods' } })
+    expect(settingsApi.patchDownload).toHaveBeenCalledOnce()
+    expect(store.download.resourceSaveDirectories?.shader).toBe('D:/Shaders')
+  })
+
+  it('未变化的全部配置分区与嵌套偏好不请求保存', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    await store.patchGame({ memory_size: 6144, fullscreen: false })
+    await store.patchLauncher({ request_timeout: 15, request_retries: 2 })
+    await store.patchDownload({ mirror_source: 'bmclapi' })
+    await store.patchConnector({ mode: 'automatic', nodes: [] })
+    await store.patchUi({})
+    await store.patchUiTheme({})
+    await store.patchUiDebugTools({})
+    await store.patchUiBackground({})
+    await store.updateUi((current) => ({ ...current }))
+    for (const save of [
+      settingsApi.saveGame,
+      settingsApi.saveLauncher,
+      settingsApi.patchDownload,
+      settingsApi.saveConnector,
+      settingsApi.saveUi,
+    ])
+      expect(save).not.toHaveBeenCalled()
+    expect(settingsApi.load).toHaveBeenCalledOnce()
+  })
+
+  it('重复同值提交只写一次，失败后相同内容可重试', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    vi.mocked(settingsApi.saveGame).mockResolvedValue(undefined)
+    await Promise.all([store.patchGame({ memory_size: 8192 }), store.patchGame({ memory_size: 8192 })])
+    expect(settingsApi.saveGame).toHaveBeenCalledOnce()
+    vi.mocked(settingsApi.saveGame).mockRejectedValueOnce(new Error('write failed'))
+    await expect(store.patchGame({ memory_size: 4096 })).rejects.toThrow('write failed')
+    await store.patchGame({ memory_size: 4096 })
+    expect(settingsApi.saveGame).toHaveBeenCalledTimes(3)
+    expect(store.game.memory_size).toBe(4096)
+  })
+
+  it('排队期间冻结调用方数组，A → B → A 不丢最后一次修改', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    const patch = { jvm_args: ['-Xmx4G'] }
+    const first = store.patchGame(patch)
+    patch.jvm_args.push('-Dunexpected=true')
+    await first
+    expect(settingsApi.saveGame).toHaveBeenLastCalledWith(expect.objectContaining({ jvm_args: ['-Xmx4G'] }))
+    await Promise.all([store.patchGame({ memory_size: 8192 }), store.patchGame({ memory_size: 6144 })])
+    expect(store.game.memory_size).toBe(6144)
+    expect(settingsApi.saveGame).toHaveBeenCalledTimes(3)
+  })
+
   it('并发修改调试显示、形态及其他 UI 偏好时合并保存，重新加载保留结果', async () => {
     const store = useSettingsStore()
     await store.load()
