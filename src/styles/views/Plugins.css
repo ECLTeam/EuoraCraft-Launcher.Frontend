@@ -17,24 +17,33 @@
 .plugins-toolbar {
   display: grid;
   min-height: 48px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   justify-content: space-between;
-  gap: 9px;
-  padding: 7px 14px;
+  gap: var(--s-sm);
+  padding: var(--s-sm) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
 }
 
 .plugins-search {
-  grid-column: 1 / -1;
+  min-width: 0;
   width: 100%;
+}
+
+.plugins-filters {
+  width: max-content;
 }
 
 .plugins-toolbar-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
-  gap: 9px;
+  gap: var(--s-sm);
+}
+
+.plugins-settings-button {
+  width: var(--ecl-control-height-sm);
+  padding: 0;
 }
 
 .plugins-list-body {

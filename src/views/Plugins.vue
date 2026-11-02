@@ -8,6 +8,7 @@
           clearable
           size="small"
           :placeholder="t('plugins.searchPlugins')"
+          :inputProps="{ 'aria-label': t('plugins.searchPlugins') }"
         >
           <template #prefix><UiIcon name="search" :size="14" /></template>
         </NInput>
@@ -22,7 +23,15 @@
         </NRadioGroup>
 
         <div class="plugins-toolbar-actions">
-          <NButton size="small" @click="openSettings(null)">{{ t('plugins.settingsCenter') }}</NButton>
+          <NButton
+            class="plugins-settings-button"
+            size="small"
+            :title="t('plugins.settingsCenter')"
+            :aria-label="t('plugins.settingsCenter')"
+            @click="openSettings(null)"
+          >
+            <template #icon><UiIcon name="settings" :size="16" /></template>
+          </NButton>
           <NDropdown :options="installOptions" trigger="click" @select="handleInstallSelect">
             <NButton type="primary" size="small">
               <template #icon><UiIcon name="add" :size="14" /></template>
