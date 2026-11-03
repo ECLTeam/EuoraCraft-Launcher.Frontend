@@ -26,6 +26,7 @@
           <NButton
             class="plugins-settings-button"
             size="small"
+            circle
             :title="t('plugins.settingsCenter')"
             :aria-label="t('plugins.settingsCenter')"
             @click="openSettings(null)"

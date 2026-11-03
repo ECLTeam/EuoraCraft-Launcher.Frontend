@@ -21,14 +21,15 @@
 }
 .java-manager-toolbar {
   flex-shrink: 0;
+  min-height: 48px;
   justify-content: space-between;
-  padding: var(--s-md) var(--s-lg);
+  padding: var(--s-sm) var(--s-lg);
   border-bottom: 1px solid var(--divider);
 }
 .java-manager-tabs {
   flex-wrap: nowrap;
   gap: 2px;
-  padding: 3px;
+  padding: 2px;
   border-radius: var(--ecl-radius-control);
   background: var(--control-bg);
 }
@@ -37,7 +38,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--s-xs);
-  height: var(--ecl-control-height-sm);
+  height: calc(var(--ecl-control-height-sm) - 4px);
   padding: 0 12px;
   border: 0;
   border-radius: var(--ecl-radius-control);

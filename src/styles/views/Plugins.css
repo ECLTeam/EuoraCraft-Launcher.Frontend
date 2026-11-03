@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--s-sm);
-  padding: var(--s-sm) var(--s-lg);
+  padding: var(--s-xs) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
 }
 
