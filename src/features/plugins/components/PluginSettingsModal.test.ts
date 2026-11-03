@@ -9,7 +9,7 @@ import PluginSettingsModal from './PluginSettingsModal.vue'
 const mocks = vi.hoisted(() => ({
   getSettings: vi.fn(),
   updateSetting: vi.fn(),
-  subscribeSettingsChanges: vi.fn(() => vi.fn()),
+  subscribeSettingsChanges: vi.fn((_handler: () => void) => vi.fn()),
 }))
 vi.mock('@/features/plugins/stores/pluginStore', () => ({ usePluginStore: () => mocks }))
 const plugin: PluginInfo = {
@@ -138,13 +138,7 @@ describe('plugin settings', () => {
 
   it('keeps the selected plugin when filtering and discards a late response for another plugin', async () => {
     let resolveFirst!: (data: unknown) => void
-    mocks.getSettings.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveFirst = resolve
-        })
-    )
-    mocks.getSettings.mockResolvedValueOnce({
+    mocks.getSettings.mockResolvedValue({
       schema: [{ key: 'greeting', type: 'string', default: 'hello' }],
       values: { greeting: 'second' },
       revision: 0,
@@ -156,6 +150,13 @@ describe('plugin settings', () => {
     })
     try {
       await flushPromises()
+      mocks.getSettings.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirst = resolve
+          })
+      )
+      mocks.subscribeSettingsChanges.mock.calls[0]![0]()
       await wrapper.findAll('.plugin-settings-choice')[1]!.trigger('click')
       await flushPromises()
       resolveFirst({ schema: [], values: { greeting: 'stale' }, revision: 0 })
@@ -167,7 +168,7 @@ describe('plugin settings', () => {
     }
   })
 
-  it('shows an unavailable schema without enabling or executing the plugin', async () => {
+  it('omits plugins without a registered schema without enabling or executing them', async () => {
     mocks.getSettings.mockResolvedValueOnce({ schema: [], values: {}, revision: 0, editable: false })
     const wrapper = mount(PluginSettingsModal, {
       props: { visible: true, plugin: { ...plugin, status: 'disabled' }, plugins: [{ ...plugin, status: 'disabled' }] },
@@ -175,8 +176,94 @@ describe('plugin settings', () => {
     })
     try {
       await flushPromises()
-      expect(wrapper.text()).toContain(i18n.global.t('plugins.settingsUnavailable'))
+      expect(wrapper.find('.plugin-settings-choice').exists()).toBe(false)
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.noSettings'))
       expect(mocks.updateSetting).not.toHaveBeenCalled()
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('filters empty schemas and selects a disabled plugin with published settings', async () => {
+    const configured = { ...plugin, name: 'configured', title: 'Configured', status: 'disabled', settings: [] }
+    mocks.getSettings.mockImplementation(async (name: string) => ({
+      schema: name === 'configured' ? [{ key: 'greeting', type: 'string', default: 'hello' }] : [],
+      values: name === 'configured' ? { greeting: 'published' } : {},
+      editable: true,
+      revision: 0,
+    }))
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin, configured] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      expect(wrapper.findAll('.plugin-settings-choice').map((choice) => choice.text())).toEqual(['Configured'])
+      expect(wrapper.get('.plugin-settings-heading').text()).toContain('Configured')
+      expect((wrapper.get('input[aria-label="greeting"]').element as HTMLInputElement).value).toBe('published')
+      expect(mocks.getSettings).toHaveBeenCalledTimes(2)
+      expect(mocks.updateSetting).not.toHaveBeenCalled()
+      await wrapper.setProps({ plugin })
+      expect(wrapper.get('.plugin-settings-heading').text()).toContain('Configured')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('shows a retryable discovery failure instead of reporting no settings', async () => {
+    mocks.getSettings.mockRejectedValueOnce(new Error('unavailable'))
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      expect(wrapper.find('.plugin-settings-choice').exists()).toBe(false)
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.settingLoadFailed'))
+      expect(wrapper.text()).not.toContain(i18n.global.t('plugins.noSettings'))
+      await wrapper.get('.plugin-settings-navigation button').trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.plugin-settings-choice').text()).toBe('Demo')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('does not let a pending catalog read replace an active save', async () => {
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      let resolveRefresh!: (value: unknown) => void
+      mocks.getSettings.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveRefresh = resolve
+          })
+      )
+      mocks.subscribeSettingsChanges.mock.calls[0]![0]()
+      mocks.updateSetting.mockImplementationOnce(async () => {
+        resolveRefresh({
+          schema: [{ key: 'greeting', type: 'string', default: 'hello' }],
+          values: { greeting: 'hello' },
+          revision: 0,
+        })
+        await Promise.resolve()
+        mocks.getSettings.mockResolvedValueOnce({
+          schema: [{ key: 'greeting', type: 'string', default: 'hello' }],
+          values: { greeting: 'changed' },
+          revision: 1,
+        })
+      })
+      const control = wrapper.findAllComponents(NInput).find((item) => item.props('value') === 'hello')!
+      control.vm.$emit('update:value', 'changed')
+      control.vm.$emit('change', 'changed')
+      await flushPromises()
+      expect((wrapper.get('input[aria-label="greeting"]').element as HTMLInputElement).value).toBe('changed')
+      expect(mocks.updateSetting).toHaveBeenCalledOnce()
+      expect(wrapper.text()).toContain(i18n.global.t('plugins.settingSaved'))
     } finally {
       wrapper.unmount()
     }

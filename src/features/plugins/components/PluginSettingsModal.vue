@@ -37,7 +37,16 @@
             <UiIcon class="plugin-settings-choice-icon" :name="item.icon || 'plugin'" :size="22" />
             <span class="plugin-settings-choice-name">{{ item.title || item.name }}</span>
           </button>
-          <NEmpty v-if="!filteredPlugins.length" :description="t('plugins.noPlugins')" size="small" />
+          <UiLoading v-if="catalogLoading" mode="inline" />
+          <NAlert v-if="catalogError" type="error" :showIcon="false">
+            {{ t('plugins.settingLoadFailed') }}
+            <NButton text @click="refreshSettingsCatalog">{{ t('common.retry') }}</NButton>
+          </NAlert>
+          <NEmpty
+            v-if="!catalogLoading && !catalogError && !filteredPlugins.length"
+            :description="t(search.trim() ? 'plugins.noPlugins' : 'plugins.noSettings')"
+            size="small"
+          />
         </nav>
       </aside>
       <section class="plugin-settings-detail ecl-surface" :aria-label="t('plugins.configuration')">
@@ -67,7 +76,7 @@
               >
                 <UiLoading v-if="loading" mode="inline" />
                 <NAlert v-else-if="loadError" type="error" :showIcon="false">
-                  {{ loadError }} <NButton text @click="load">{{ t('common.retry') }}</NButton>
+                  {{ loadError }} <NButton text @click="load()">{{ t('common.retry') }}</NButton>
                 </NAlert>
                 <NAlert v-else-if="data?.editable === false" type="info" :showIcon="false">
                   {{ t('plugins.settingsUnavailable') }}
@@ -125,7 +134,7 @@
                 <NAlert v-if="saveError" class="plugin-settings-feedback" type="error" :showIcon="false">
                   {{ saveError }}
                   <NButton v-if="failedWrite" text @click="retrySave">{{ t('common.retry') }}</NButton>
-                  <NButton text @click="load">{{ t('plugins.reloadSettings') }}</NButton>
+                  <NButton text @click="load()">{{ t('plugins.reloadSettings') }}</NButton>
                 </NAlert>
                 <p v-if="isSaving" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaving') }}</p>
                 <p v-else-if="saved" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaved') }}</p>
@@ -162,13 +171,24 @@ const { t } = useI18n()
 const store = usePluginStore()
 const search = ref('')
 const selectedId = ref('')
-const candidates = computed(() => props.plugins.filter((item) => !item.is_system))
+const sourcePlugins = computed(() => props.plugins.filter((item) => !item.is_system))
+const catalogLoading = ref(false)
+const catalogError = ref(false)
+const settingsCatalog = ref<Record<string, PluginSettingsData>>({})
+const catalogTarget = computed(() => JSON.stringify([props.visible, sourcePlugins.value.map(settingsIdentity)]))
+const catalogScope = useRequestScope(() => catalogTarget.value)
+const candidates = computed(() =>
+  sourcePlugins.value.filter((item) => (settingsCatalog.value[settingsIdentity(item)]?.schema.length ?? 0) > 0)
+)
 const filteredPlugins = computed(() => {
   const query = search.value.trim().toLocaleLowerCase()
   return candidates.value.filter((item) => `${item.title} ${item.name}`.toLocaleLowerCase().includes(query))
 })
 function identity(plugin: PluginInfo): string {
   return plugin.installation_id ?? plugin.name
+}
+function settingsIdentity(plugin: PluginInfo): string {
+  return JSON.stringify([identity(plugin), plugin.content_digest, plugin.status, plugin.development?.reload_count])
 }
 const selected = computed(() => candidates.value.find((item) => identity(item) === selectedId.value))
 const target = computed(
@@ -188,7 +208,9 @@ const saved = ref(false)
 let unlisten: (() => void) | null = null
 
 function select(plugin: PluginInfo): void {
-  selectedId.value = identity(plugin)
+  const id = identity(plugin)
+  if (catalogLoading.value || candidates.value.some((item) => identity(item) === id)) selectedId.value = id
+  else selectedId.value = candidates.value[0] ? identity(candidates.value[0]) : ''
 }
 function disableLeavingSettings(element: Element): void {
   // 离场期间仍显示旧表单，不能让它向新选中的插件提交操作。
@@ -205,7 +227,34 @@ function saveNumber(key: string, value: number | null): void {
   if (value !== null && Number.isFinite(value)) void save(key, value)
 }
 
-async function load(): Promise<void> {
+async function refreshSettingsCatalog(): Promise<void> {
+  if (!props.visible) return
+  const current = catalogScope.begin()
+  const plugins = [...sourcePlugins.value]
+  const activeKeys = new Set(plugins.map(settingsIdentity))
+  settingsCatalog.value = Object.fromEntries(
+    Object.entries(settingsCatalog.value).filter(([key]) => activeKeys.has(key))
+  )
+  catalogLoading.value = true
+  catalogError.value = false
+  const results = await Promise.allSettled(
+    plugins.map(async (plugin) => {
+      const settings = await store.getSettings(plugin.name)
+      if (!current()) return
+      const previous = settingsCatalog.value[settingsIdentity(plugin)]
+      if (previous?.revision !== undefined && settings.revision !== undefined && previous.revision > settings.revision)
+        return
+      const wasSelected = selected.value?.name === plugin.name
+      settingsCatalog.value = { ...settingsCatalog.value, [settingsIdentity(plugin)]: settings }
+      if (wasSelected && !isSaving.value) await load(true)
+    })
+  )
+  if (!current()) return
+  catalogError.value = results.some((result) => result.status === 'rejected')
+  catalogLoading.value = false
+}
+
+async function load(useCatalog = false): Promise<void> {
   const plugin = selected.value
   if (!props.visible || !plugin) return
   const current = scope.begin()
@@ -217,8 +266,10 @@ async function load(): Promise<void> {
   data.value = null
   values.value = {}
   try {
-    const settings = await store.getSettings(plugin.name)
+    let settings = useCatalog ? settingsCatalog.value[settingsIdentity(plugin)] : undefined
+    if (!settings) settings = await store.getSettings(plugin.name)
     if (!current()) return
+    settingsCatalog.value = { ...settingsCatalog.value, [settingsIdentity(plugin)]: settings }
     data.value = settings
     values.value = { ...settings.values }
   } catch {
@@ -244,6 +295,7 @@ async function save(key: string, value: unknown): Promise<void> {
     const updated = await store.getSettings(plugin.name)
     if (!current()) return
     data.value = updated
+    settingsCatalog.value = { ...settingsCatalog.value, [settingsIdentity(plugin)]: updated }
     values.value = { ...updated.values }
     saved.value = true
   } catch (cause) {
@@ -266,10 +318,10 @@ watch(
     unlisten?.()
     unlisten = null
     if (visible) {
-      const initial = props.plugin ?? candidates.value[0]
+      const initial = props.plugin ?? sourcePlugins.value[0]
       selectedId.value = initial ? identity(initial) : ''
       unlisten = store.subscribeSettingsChanges(() => {
-        if (!isSaving.value && props.visible) void load()
+        if (!isSaving.value && props.visible) void refreshSettingsCatalog()
       })
     }
   },
@@ -281,9 +333,19 @@ watch(
     if (props.visible && plugin) select(plugin)
   }
 )
-watch(candidates, (items) => {
+watch([candidates, catalogLoading], ([items, isDiscovering]) => {
+  if (isDiscovering) return
   if (!items.some((item) => identity(item) === selectedId.value)) selectedId.value = items[0] ? identity(items[0]) : ''
 })
+watch(
+  catalogTarget,
+  () => {
+    catalogScope.invalidate()
+    if (props.visible) void refreshSettingsCatalog()
+    else catalogLoading.value = false
+  },
+  { immediate: true }
+)
 watch(
   target,
   () => {
@@ -293,7 +355,7 @@ watch(
     saveError.value = ''
     saved.value = false
     failedWrite.value = null
-    if (props.visible && selected.value) void load()
+    if (props.visible && selected.value) void load(true)
   },
   { immediate: true }
 )
