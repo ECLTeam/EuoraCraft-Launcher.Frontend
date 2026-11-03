@@ -34,7 +34,8 @@
             :title="`${item.title || item.name}\n${item.name}`"
             @click="select(item)"
           >
-            <span>{{ item.title || item.name }}</span>
+            <UiIcon class="plugin-settings-choice-icon" :name="item.icon || 'plugin'" :size="22" />
+            <span class="plugin-settings-choice-name">{{ item.title || item.name }}</span>
           </button>
           <NEmpty v-if="!filteredPlugins.length" :description="t('plugins.noPlugins')" size="small" />
         </nav>
@@ -341,6 +342,7 @@ onUnmounted(() => unlisten?.())
 .plugin-settings-choice {
   display: flex;
   align-items: center;
+  gap: var(--s-sm);
   min-height: var(--ecl-control-height);
   width: 100%;
   min-width: 0;
@@ -367,7 +369,11 @@ onUnmounted(() => unlisten?.())
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
-.plugin-settings-choice span {
+.plugin-settings-choice-icon {
+  flex-shrink: 0;
+}
+.plugin-settings-choice-name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
