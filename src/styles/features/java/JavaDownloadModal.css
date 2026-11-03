@@ -65,8 +65,8 @@
   display: flex;
   align-items: center;
   gap: var(--s-lg);
-  min-height: 64px;
-  padding: var(--s-sm) var(--s-md);
+  min-height: 60px;
+  padding: var(--s-xs) var(--s-md);
   border-bottom: 1px solid var(--divider);
   transition: background var(--duration-fast) var(--ease-emphasized);
 }

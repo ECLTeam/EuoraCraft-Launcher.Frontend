@@ -84,12 +84,13 @@
 }
 .java-runtime-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) minmax(0, 0.7fr) auto;
-  gap: var(--s-md);
+  grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) minmax(100px, 0.7fr) minmax(0, auto);
+  column-gap: var(--s-md);
+  row-gap: var(--s-xs);
   align-items: center;
   min-width: 0;
-  min-height: 64px;
-  padding: var(--s-sm) var(--s-md);
+  min-height: 60px;
+  padding: var(--s-xs) var(--s-md);
   border-bottom: 1px solid var(--divider);
   transition: background var(--duration-fast) var(--ease-emphasized);
 }
@@ -140,6 +141,15 @@
   justify-content: flex-end;
   gap: var(--s-xs);
 }
+.java-runtime-status :deep(.n-tag) {
+  max-width: 100%;
+  height: auto;
+  min-height: var(--n-height);
+}
+.java-runtime-status :deep(.n-tag__content) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .java-runtime-full-path {
   max-width: min(420px, calc(100vw - 64px));
   color: var(--text-primary);
@@ -149,12 +159,23 @@
   user-select: text;
 }
 .java-runtime-actions {
+  min-width: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
   max-width: 320px;
   gap: var(--s-xs);
 }
 @container (max-width: 760px) {
+  .java-runtime-row:has(.java-runtime-status .n-tag + .n-tag) {
+    grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) auto;
+  }
+  .java-runtime-row:has(.java-runtime-status .n-tag + .n-tag) .java-runtime-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+}
+@container (max-width: 640px) {
   .java-runtime-row {
     grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) auto;
   }
@@ -168,6 +189,6 @@
   }
   .java-runtime-actions {
     grid-column: 3;
-    grid-row: 1 / span 2;
+    grid-row: 1;
   }
 }
