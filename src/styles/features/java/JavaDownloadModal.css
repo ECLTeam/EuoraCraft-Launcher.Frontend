@@ -1,0 +1,96 @@
+.java-download-page {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  padding: var(--ecl-page-padding);
+}
+.java-download-card {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.java-download-card :deep(.java-download-card-body) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+.java-catalog-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-sm);
+  min-height: 48px;
+  padding: var(--s-sm) var(--s-lg);
+  border-bottom: 1px solid var(--divider);
+}
+.java-catalog-controls .n-select {
+  flex: 1;
+  min-width: 140px;
+  max-width: 260px;
+}
+.java-catalog-controls .ui-btn {
+  margin-left: auto;
+}
+.java-download-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--s-lg);
+  min-height: 0;
+  padding: var(--s-lg);
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+.java-download-content > * {
+  flex-shrink: 0;
+}
+.java-download-content > .ui-loading,
+.java-download-content > .ui-empty-state {
+  flex: 1;
+  min-height: 180px;
+  justify-content: center;
+}
+.java-catalog-hint,
+.java-runtime-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-xs);
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.java-package-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-lg);
+  min-height: 64px;
+  padding: var(--s-sm) var(--s-md);
+  border-bottom: 1px solid var(--divider);
+  transition: background var(--duration-fast) var(--ease-emphasized);
+}
+.java-package-row:last-child {
+  border-bottom: 0;
+}
+.java-package-row:hover {
+  background: var(--ecl-surface-muted);
+}
+.java-runtime-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+.java-runtime-copy {
+  flex: 1;
+}
+.java-runtime-copy strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.java-package-row .ui-btn {
+  flex-shrink: 0;
+}

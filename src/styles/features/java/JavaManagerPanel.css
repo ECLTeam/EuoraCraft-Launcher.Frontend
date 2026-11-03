@@ -6,64 +6,37 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
+  container-type: inline-size;
 }
 .java-manager-toolbar,
-.java-manager-tabs,
+.java-manager-title,
 .java-manager-actions,
-.java-runtime-heading,
-.java-runtime-metadata,
-.java-runtime-actions,
-.java-catalog-controls {
+.java-runtime-identity,
+.java-runtime-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: var(--s-sm);
 }
 .java-manager-toolbar {
   flex-shrink: 0;
+  flex-wrap: wrap;
   min-height: 48px;
   justify-content: space-between;
   padding: var(--s-sm) var(--s-lg);
   border-bottom: 1px solid var(--divider);
 }
-.java-manager-tabs {
-  flex-wrap: nowrap;
-  gap: 2px;
-  padding: 2px;
-  border-radius: var(--ecl-radius-control);
-  background: var(--control-bg);
-}
-.java-manager-tabs button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-xs);
-  height: calc(var(--ecl-control-height-sm) - 4px);
-  padding: 0 12px;
-  border: 0;
-  border-radius: var(--ecl-radius-control);
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
+.java-manager-title {
   font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast),
-    color var(--duration-fast);
-}
-.java-manager-tabs button:hover {
-  background: var(--control-bg-hover);
+  font-weight: 600;
   color: var(--text-primary);
 }
-.java-manager-tabs button[aria-pressed='true'] {
-  background: var(--primary-alpha);
+.java-manager-title :deep(.icon) {
   color: var(--primary);
 }
-.java-manager-tabs button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.java-manager-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 .java-manager-content {
   display: flex;
@@ -85,10 +58,6 @@
   min-height: 180px;
   justify-content: center;
 }
-.java-manager-empty :deep(.empty-icon svg) {
-  width: 32px;
-  height: 32px;
-}
 .java-manager-empty :deep(.empty-text) {
   max-width: 420px;
   line-height: 1.6;
@@ -96,57 +65,70 @@
 .java-manager-empty :deep(.ui-btn) {
   margin-top: var(--s-xs);
 }
+.java-manager-empty :deep(.empty-icon svg) {
+  width: 32px;
+  height: 32px;
+}
 .java-runtime-list {
   min-width: 0;
 }
 .java-runtime-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: var(--s-lg);
-  row-gap: 4px;
+  grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) minmax(0, 0.7fr) auto;
+  gap: var(--s-md);
   align-items: center;
   min-width: 0;
-  padding: 10px 0;
+  min-height: 64px;
+  padding: var(--s-sm) var(--s-md);
+  border-bottom: 1px solid var(--divider);
+  transition: background var(--duration-fast) var(--ease-emphasized);
 }
-.java-runtime-row + .java-runtime-row {
-  border-top: 1px solid var(--divider);
+.java-runtime-row:last-child {
+  border-bottom: 0;
 }
-.java-runtime-heading {
-  grid-column: 1;
-  grid-row: 1;
-  flex-wrap: nowrap;
+.java-runtime-row:hover {
+  background: var(--ecl-surface-muted);
+}
+.java-runtime-identity {
   min-width: 0;
-  gap: 10px;
-  color: var(--text-primary);
+  gap: var(--s-lg);
 }
-.java-runtime-heading strong {
+.java-runtime-icon {
   flex-shrink: 0;
+  color: var(--primary);
 }
-.java-runtime-heading span {
+.java-runtime-copy,
+.java-runtime-version {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-xs);
   min-width: 0;
+}
+.java-runtime-copy strong,
+.java-runtime-copy span,
+.java-runtime-version strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.java-runtime-metadata {
-  grid-column: 1;
-  grid-row: 2;
-  min-width: 0;
-  gap: 4px 8px;
-}
-.java-runtime-heading strong {
-  font-size: 14px;
+.java-runtime-copy strong,
+.java-runtime-version strong {
+  color: var(--text-primary);
+  font-size: 13px;
   font-weight: 600;
 }
-.java-runtime-heading span {
-  font-size: 13px;
-}
-.java-runtime-metadata,
-.java-manager-content > small,
-.java-runtime-copy span {
+.java-runtime-copy span,
+.java-runtime-version span,
+.java-runtime-status {
   color: var(--text-secondary);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+.java-runtime-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-xs);
 }
 .java-runtime-full-path {
   max-width: min(420px, calc(100vw - 64px));
@@ -157,52 +139,25 @@
   user-select: text;
 }
 .java-runtime-actions {
-  grid-column: 2;
-  grid-row: 1 / span 2;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  max-width: 360px;
-  gap: 4px;
-}
-.java-runtime-more :deep(.btn-content) {
-  display: flex;
-  align-items: center;
+  max-width: 320px;
   gap: var(--s-xs);
 }
-.java-package-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--s-lg);
-  padding: var(--s-lg) 0;
-  border-bottom: 1px solid var(--divider);
-}
-.java-runtime-copy {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 5px;
-  min-width: min(260px, 100%);
-  overflow-wrap: anywhere;
-}
-.java-runtime-copy strong {
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-}
-.java-catalog-controls .n-select {
-  flex: 1;
-  min-width: 120px;
-  max-width: 260px;
-}
-.java-operation-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--s-md);
-  background: var(--control-bg);
-  border-radius: var(--ecl-radius-control);
-  font-size: 12px;
-  color: var(--text-secondary);
-  overflow-wrap: anywhere;
+@container (max-width: 760px) {
+  .java-runtime-row {
+    grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) auto;
+  }
+  .java-runtime-status {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    justify-content: flex-start;
+  }
+  .java-runtime-status:empty {
+    display: none;
+  }
+  .java-runtime-actions {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
 }

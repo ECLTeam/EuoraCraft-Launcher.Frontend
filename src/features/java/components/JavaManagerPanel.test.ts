@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/app/queryClient'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { javaApi } from '@/features/java/api/javaApi'
+import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import { i18n } from '@/i18n'
 import { javaInventory, javaRuntime } from '@/test/javaFixtures'
+import JavaDownloadModal from './JavaDownloadModal.vue'
 import JavaManagerPanel from './JavaManagerPanel.vue'
 
 vi.mock('@/api/client', async () => (await import('@/test/mockBackend')).createMockBackend().backend)
@@ -29,9 +31,13 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-async function render() {
+async function render(props = {}) {
   const wrapper = mount(JavaManagerPanel, {
-    global: { plugins: [createPinia(), i18n], stubs: { Teleport: true, ConfirmDialog: true, UiIcon: true } },
+    props,
+    global: {
+      plugins: [createPinia(), i18n],
+      stubs: { Teleport: true, ConfirmDialog: true, UiIcon: true, JavaDownloadModal: true },
+    },
   })
   wrappers.push(wrapper)
   await flushPromises()
@@ -39,7 +45,7 @@ async function render() {
 }
 
 describe('Java 管理与拥有权提示', () => {
-  it('空清单提供下载入口，只切换视图而不提交安装', async () => {
+  it('空清单打开独立下载弹窗，保留管理内容且不提交安装', async () => {
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory())
     vi.spyOn(javaApi, 'catalog').mockResolvedValue({
       availableMajorVersions: [21],
@@ -54,8 +60,12 @@ describe('Java 管理与拥有权提示', () => {
     expect(wrapper.get('.ui-empty-state').text()).toContain('没有登记的 Java')
     await wrapper.get('.ui-empty-state button').trigger('click')
     await flushPromises()
-    expect(wrapper.find('.java-catalog-controls').exists()).toBe(true)
-    expect(wrapper.get('.java-manager-tabs button[aria-pressed="true"]').text()).toBe('下载')
+    expect(wrapper.find('.java-manager-tabs').exists()).toBe(false)
+    expect(wrapper.find('.ui-empty-state').exists()).toBe(true)
+    expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(true)
+    wrapper.getComponent(JavaDownloadModal).vm.$emit('close')
+    await flushPromises()
+    expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(false)
     expect(install).not.toHaveBeenCalled()
   })
 
@@ -97,7 +107,7 @@ describe('Java 管理与拥有权提示', () => {
     expect(wrapper.getComponent(NPopover).props('show')).toBe(false)
     const actions = wrapper.get('.java-runtime-actions')
     expect(actions.text()).toContain('设为全局 Java')
-    expect(actions.text()).toContain('更多')
+    expect(wrapper.get('.java-runtime-more').attributes('aria-label')).toContain('更多操作')
     expect(actions.findAll('button').some((button) => button.text() === '停用')).toBe(false)
     expect(actions.findAll('button').some((button) => button.text() === '移除登记')).toBe(false)
   })
@@ -154,51 +164,21 @@ describe('Java 管理与拥有权提示', () => {
     expect(javaApi.inventory).toHaveBeenCalledTimes(2)
   })
 
-  it('先审阅不可变安装计划，确认后才提交后台安装', async () => {
-    vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory())
-    const candidate = {
-      packageId: 'b'.repeat(24),
-      distributionSource: 'temurin' as const,
-      releaseName: 'jdk-21.0.2+1',
-      majorVersion: 21,
-      runtimeKind: 'JRE' as const,
-      platform: 'windows',
-      architecture: 'x64',
-      filename: 'java.zip',
-      downloadBytes: 50_000_000,
-      checksum: 'a'.repeat(64),
-    }
-    vi.spyOn(javaApi, 'catalog').mockResolvedValue({
-      availableMajorVersions: [8, 17, 21, 25],
-      recommendedMajorVersion: 25,
-      majorVersion: 21,
-      platform: 'windows',
-      architecture: 'x64',
-      packages: [candidate],
-    })
-    vi.spyOn(javaApi, 'plan').mockResolvedValue({
-      planId: 'p'.repeat(32),
-      package: candidate,
-      installPath: 'C:/JavaManaged',
-      estimatedFreeBytes: 300_000_000,
-      expiresAt: 1_999_999_999,
-    })
-    const install = vi.spyOn(javaApi, 'install').mockResolvedValue({ operationId: 'java-operation', status: 'pending' })
+  it('下载入口保留实例要求，目标改变时关闭旧目录', async () => {
+    const wrapper = await render({ initialView: 'download', requiredMajor: 21, scopeKey: 'A' })
+    expect(wrapper.getComponent(JavaDownloadModal).props('requiredMajor')).toBe(21)
+    await wrapper.setProps({ scopeKey: 'B' })
+    expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(false)
+    expect(wrapper.find('.java-runtime-row').exists()).toBe(true)
+  })
+
+  it('Java 任务继续由全局维护，管理列表不显示重复进度', async () => {
     const wrapper = await render()
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === '下载')!
-      .trigger('click')
+    const operations = useApplicationOperationStore()
+    operations.accept({ operationId: 'java-layout', kind: 'java_install', status: 'running', percent: 40 })
     await flushPromises()
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === '下载并安装')!
-      .trigger('click')
-    await flushPromises()
-    expect(install).not.toHaveBeenCalled()
-    expect(wrapper.getComponent(ConfirmDialog).props('content')).toContain('C:/JavaManaged')
-    wrapper.getComponent(ConfirmDialog).vm.$emit('confirm')
-    await flushPromises()
-    expect(install).toHaveBeenCalledWith('p'.repeat(32))
+    expect(wrapper.find('.java-operation-row').exists()).toBe(false)
+    expect(operations.operations['java-layout']?.status).toBe('running')
+    expect(wrapper.find('[role="progressbar"]').exists()).toBe(false)
   })
 })

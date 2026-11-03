@@ -2,6 +2,7 @@ import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { javaApi } from '@/features/java/api/javaApi'
+import JavaDownloadModal from '@/features/java/components/JavaDownloadModal.vue'
 import JavaManagerPanel from '@/features/java/components/JavaManagerPanel.vue'
 import { i18n } from '@/i18n'
 import { javaInventory } from '@/test/javaFixtures'
@@ -32,7 +33,10 @@ afterEach(() => vi.restoreAllMocks())
 
 async function render(component: typeof JavaTab | typeof JavaManagerPanel = JavaTab) {
   const wrapper = mount(component, {
-    global: { plugins: [createPinia(), i18n], stubs: { Teleport: true, ConfirmDialog: true, UiIcon: true } },
+    global: {
+      plugins: [createPinia(), i18n],
+      stubs: { Teleport: true, ConfirmDialog: true, UiIcon: true, JavaDownloadModal: true },
+    },
   })
   await flushPromises()
   return wrapper
@@ -48,18 +52,18 @@ describe('Java 管理页卡片承托', () => {
     expect(card.find('.ui-empty-state').exists()).toBe(true)
   })
 
-  it('切换下载视图后筛选、来源和无包提示仍在同一卡片内', async () => {
+  it('下载打开独立弹窗，原卡片和已安装列表保持不变', async () => {
     const wrapper = await render()
     const card = wrapper.get('[data-theme-component="card"]').element
     await wrapper
       .findAll('button')
-      .find((button) => button.text() === '下载')!
+      .find((button) => button.text() === '下载 Java')!
       .trigger('click')
     await flushPromises()
     expect(wrapper.get('[data-theme-component="card"]').element).toBe(card)
     const content = wrapper.get('[data-theme-component="card"]')
-    expect(content.find('.java-catalog-controls').exists()).toBe(true)
-    expect(content.text()).toContain('Eclipse Temurin')
+    expect(content.find('.java-catalog-controls').exists()).toBe(false)
+    expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(true)
     expect(content.find('.ui-empty-state').exists()).toBe(true)
   })
 
