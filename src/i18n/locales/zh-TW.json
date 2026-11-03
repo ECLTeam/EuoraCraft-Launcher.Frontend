@@ -2551,5 +2551,25 @@
     "developmentMode": "開發模式：Vite 開發組建",
     "showcaseMode": "展示模式：使用本機示範資料，不連線後端",
     "prerelease": "{channel} 預先發行版本"
+  },
+  "littleskin": {
+    "intro": "透過 LittleSkin 官方網頁授權登入，無需向啟動器提供密碼。",
+    "deviceCode": "授權碼登入（建議）",
+    "authorizationCode": "瀏覽器登入",
+    "authorize": "請在瀏覽器中完成 LittleSkin 授權，完成後啟動器將自動繼續。",
+    "expiresAt": "授權有效至 {time}",
+    "chooseProfile": "選擇遊戲角色",
+    "preparing": "正在準備 LittleSkin 登入…",
+    "saving": "正在儲存帳戶…",
+    "missingClientId": "尚未設定 LittleSkin 應用程式 ID，請聯絡發行版維護者或設定 LITTLESKIN_CLIENT_ID。",
+    "missingSecret": "瀏覽器登入需要設定用戶端密鑰；你仍可使用授權碼登入。",
+    "failed": "LittleSkin 登入失敗，請重試；若仍失敗，請查看啟動器記錄中的原因。",
+    "noProfiles": "你的 LittleSkin 帳戶沒有可用角色，請先建立遊戲角色。",
+    "createProfile": "建立角色",
+    "denied": "你已拒絕 LittleSkin 授權，可以重新嘗試。",
+    "expired": "授權已過期，請重新登入。",
+    "notApproved": "LittleSkin 應用程式或所需權限尚未獲准，請聯絡維護者。",
+    "callbackFailed": "無法使用本機授權回呼，請檢查回呼網址及連接埠占用情況。",
+    "scopeRejected": "LittleSkin 拒絕了應用程式請求的權限。請聯絡維護者，確認已獲准讀取角色及建立 Minecraft 權杖。"
   }
 }

@@ -1,5 +1,8 @@
 import type {
   AccountListData,
+  LittleSkinLoginConfig,
+  LittleSkinLoginSnapshot,
+  LittleSkinLoginMethod,
   AccountChangedEvent,
   AccountTextures,
   AuthlibLoginConfigData,
@@ -154,6 +157,7 @@ export interface BackendEvents {
   'game:instances_changed': GameInstancesChangedEvent
   'mods:install_progress': { phase: 'resolving' | 'downloading'; projectId?: string; filename?: string }
   accounts_changed: AccountChangedEvent
+  accounts_littleskin_login_status: LittleSkinLoginSnapshot
   accounts_microsoft_login_status: MicrosoftLoginStatusEvent
   'plugin:status_changed': {
     plugin?: string
@@ -323,6 +327,12 @@ export interface CommandPayloadMap {
   authlib_resolve_server: { server_url: string }
   accounts_microsoft_login_config: undefined
   accounts_authlib_login_config: undefined
+  accounts_littleskin_login_config: undefined
+  accounts_start_littleskin_login: { method: LittleSkinLoginMethod }
+  accounts_poll_littleskin_login: { session_id: string }
+  accounts_select_littleskin_profile: { session_id: string; profile_id: string }
+  accounts_complete_littleskin_login: { session_id: string }
+  accounts_cancel_littleskin_login: { session_id: string }
   accounts_start_microsoft_login: undefined
   accounts_poll_microsoft_login: undefined
   accounts_cancel_microsoft_login: undefined
@@ -774,6 +784,12 @@ export const COMMAND_NAMES = {
   authlib_resolve_server: 'authlib_resolve_server',
   accounts_microsoft_login_config: 'accounts_microsoft_login_config',
   accounts_authlib_login_config: 'accounts_authlib_login_config',
+  accounts_littleskin_login_config: 'accounts_littleskin_login_config',
+  accounts_start_littleskin_login: 'accounts_start_littleskin_login',
+  accounts_poll_littleskin_login: 'accounts_poll_littleskin_login',
+  accounts_select_littleskin_profile: 'accounts_select_littleskin_profile',
+  accounts_complete_littleskin_login: 'accounts_complete_littleskin_login',
+  accounts_cancel_littleskin_login: 'accounts_cancel_littleskin_login',
   accounts_start_microsoft_login: 'accounts_start_microsoft_login',
   accounts_poll_microsoft_login: 'accounts_poll_microsoft_login',
   accounts_cancel_microsoft_login: 'accounts_cancel_microsoft_login',
@@ -1039,6 +1055,12 @@ export interface CommandResponseMap {
   authlib_resolve_server: string
   accounts_microsoft_login_config: MicrosoftLoginConfigData
   accounts_authlib_login_config: AuthlibLoginConfigData
+  accounts_littleskin_login_config: LittleSkinLoginConfig
+  accounts_start_littleskin_login: LittleSkinLoginSnapshot
+  accounts_poll_littleskin_login: LittleSkinLoginSnapshot
+  accounts_select_littleskin_profile: LittleSkinLoginSnapshot
+  accounts_complete_littleskin_login: MinecraftAccount
+  accounts_cancel_littleskin_login: LittleSkinLoginSnapshot
   accounts_start_microsoft_login: MicrosoftLoginData
   accounts_poll_microsoft_login: MicrosoftPollData
   accounts_cancel_microsoft_login: void

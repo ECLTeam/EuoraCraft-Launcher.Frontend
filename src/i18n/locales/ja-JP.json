@@ -2668,5 +2668,25 @@
     "developmentMode": "開発モード：Vite 開発ビルド",
     "showcaseMode": "デモモード：ローカルのデモデータを使用し、バックエンドには接続しません",
     "prerelease": "{channel} プレリリース"
+  },
+  "littleskin": {
+    "intro": "LittleSkin 公式サイトで認証します。ランチャーにパスワードを渡す必要はありません。",
+    "deviceCode": "コードでログイン（推奨）",
+    "authorizationCode": "ブラウザーでログイン",
+    "authorize": "ブラウザーで LittleSkin の認証を完了してください。ランチャーは自動的に続行します。",
+    "expiresAt": "認証の有効期限：{time}",
+    "chooseProfile": "ゲームプロフィールを選択",
+    "preparing": "LittleSkin ログインを準備中…",
+    "saving": "アカウントを保存中…",
+    "missingClientId": "LittleSkin のクライアント ID が未設定です。配布元に連絡するか LITTLESKIN_CLIENT_ID を設定してください。",
+    "missingSecret": "ブラウザーログインにはクライアントシークレットが必要です。コードによるログインは利用できます。",
+    "failed": "LittleSkin ログインに失敗しました。再試行するか、ランチャーのログで原因を確認してください。",
+    "noProfiles": "LittleSkin アカウントにゲームプロフィールがありません。先に作成してください。",
+    "createProfile": "プロフィールを作成",
+    "denied": "LittleSkin の認証を拒否しました。再試行できます。",
+    "expired": "認証の有効期限が切れました。再度ログインしてください。",
+    "notApproved": "LittleSkin アプリまたは必要な権限が未承認です。管理者に連絡してください。",
+    "callbackFailed": "ローカル認証コールバックを利用できません。アドレスとポートの使用状況を確認してください。",
+    "scopeRejected": "LittleSkin が要求された権限を拒否しました。プロフィールの読み取りと Minecraft トークン作成の権限が承認されているか、アプリ管理者に確認してください。"
   }
 }

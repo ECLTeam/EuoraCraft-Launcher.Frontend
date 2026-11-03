@@ -8,7 +8,7 @@ export const CONFIG = {
 } as const
 
 /** 高频轮询命令：不打印 [API] 成功日志，避免开发控制台刷屏 */
-export const SILENT_COMMANDS = new Set(['launcher_errors_pending'])
+export const SILENT_COMMANDS = new Set(['launcher_errors_pending', 'accounts_poll_littleskin_login'])
 
 export class Logger {
   static log(...args: unknown[]) {

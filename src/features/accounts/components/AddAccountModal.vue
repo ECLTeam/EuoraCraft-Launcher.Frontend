@@ -5,7 +5,7 @@
     :parentId="parentId"
     :title="modalTitle"
     :icon="modalIcon"
-    :showFooter="step !== 'select'"
+    :showFooter="step !== 'select' && step !== 'littleskin'"
     :closable="!isBusy"
     width="480px"
     @update:visible="handleVisibilityChange"
@@ -187,6 +187,12 @@
           </NButton>
         </div>
       </div>
+      <LittleSkinLoginPanel
+        v-else-if="step === 'littleskin'"
+        @busyChange="isLittleSkinBusy = $event"
+        @completed="closeAddAccount"
+        @cancel="returnToSelection"
+      />
       <MicrosoftLoginPanel
         v-else
         :status="account.microsoftLoginStatus"
@@ -230,16 +236,19 @@ import Modal from '@/components/modals/Modal.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import type { useAccountManager } from '@/composables/useAccountManager'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
+import { isSimplifiedChinese } from '@/i18n'
 import { getAccountTypeLabelKey } from '@/utils/enums'
+import LittleSkinLoginPanel from './LittleSkinLoginPanel.vue'
 import MicrosoftLoginPanel from './MicrosoftLoginPanel.vue'
 
 defineProps<{ parentId?: string }>()
 const account = defineModel<ReturnType<typeof useAccountManager>>('account', { required: true })
 const visible = defineModel<boolean>('visible', { required: true })
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const modalRef = ref<InstanceType<typeof Modal> | null>(null)
 const stepContentRef = ref<HTMLElement | null>(null)
-const step = ref<'select' | 'form' | 'microsoft'>('select')
+const step = ref<'select' | 'form' | 'microsoft' | 'littleskin'>('select')
+const isLittleSkinBusy = ref(false)
 const modalStack = useGlobalModalStack()
 const isCancellingMicrosoft = ref(false)
 let cancellation: Promise<boolean> | null = null
@@ -258,6 +267,7 @@ const isSubmitting = ref(false)
 const isBusy = computed(
   () =>
     isSubmitting.value ||
+    isLittleSkinBusy.value ||
     account.value.startingMicrosoftLogin ||
     account.value.completingMicrosoftLogin ||
     isCancellingMicrosoft.value
@@ -266,6 +276,7 @@ const accountTypeOptions = computed(() => [
   { value: 'microsoft', label: t(getAccountTypeLabelKey('microsoft')), icon: 'microsoft' },
   { value: 'offline', label: t(getAccountTypeLabelKey('offline')), icon: 'user-circle' },
   { value: 'authlib', label: t(getAccountTypeLabelKey('authlib')), icon: 'server' },
+  ...(isSimplifiedChinese(locale.value) ? [{ value: 'littleskin', label: 'LittleSkin', icon: 'server' }] : []),
   ...account.value.authProviders.map((provider) => ({
     value: `plugin:${provider.id}`,
     label: provider.title,
@@ -313,6 +324,13 @@ function returnToSelection(): void {
   step.value = 'select'
 }
 
+watch(locale, () => {
+  if (!isSimplifiedChinese(locale.value) && step.value === 'littleskin') {
+    step.value = 'select'
+    isLittleSkinBusy.value = false
+  }
+})
+
 async function cancelMicrosoftSession(): Promise<boolean> {
   if (cancellation) return cancellation
   isCancellingMicrosoft.value = true
@@ -346,6 +364,7 @@ watch(
   visible,
   (isVisible) => {
     flowGeneration += 1
+    isLittleSkinBusy.value = false
     const hasMicrosoftSession = account.value.showMicrosoftLoginModal
     step.value = 'select'
     if (!isVisible) {
@@ -394,6 +413,11 @@ onUnmounted(() => {
 
 async function chooseAccountType(type: string): Promise<void> {
   if (!visible.value || step.value !== 'select' || isBusy.value) return
+  if (type === 'littleskin') {
+    selectedAccountType.value = type
+    step.value = 'littleskin'
+    return
+  }
   if (type !== 'microsoft') {
     selectedAccountType.value = type
     step.value = 'form'

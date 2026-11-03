@@ -3,6 +3,7 @@ import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { assertParams } from '@/app/validation'
 import { parseAccountList, parseAccountSnapshot } from '@/features/accounts/model/accountSnapshot'
+import { parseLittleSkinConfig, parseLittleSkinSnapshot } from '@/features/accounts/model/littleSkinLogin'
 import type {
   AccountListData,
   AccountTextures,
@@ -10,6 +11,7 @@ import type {
   AuthlibLoginConfigData,
   AuthlibServer,
   DefaultSkin,
+  LittleSkinLoginMethod,
   MicrosoftCompleteData,
   MicrosoftLoginConfigData,
   MicrosoftLoginData,
@@ -24,6 +26,52 @@ import type {
 } from '@/types/accounts'
 
 export const accountsApi = {
+  async littleSkinConfig() {
+    return parseLittleSkinConfig(assertSuccess(await backend.command('accounts_littleskin_login_config'), 'LittleSkin'))
+  },
+
+  async startLittleSkinLogin(method: LittleSkinLoginMethod) {
+    return parseLittleSkinSnapshot(
+      assertSuccess(await backend.command('accounts_start_littleskin_login', { method }), 'LittleSkin')
+    )
+  },
+
+  async pollLittleSkinLogin(sessionId: string) {
+    return parseLittleSkinSnapshot(
+      assertSuccess(await backend.command('accounts_poll_littleskin_login', { session_id: sessionId }), 'LittleSkin')
+    )
+  },
+
+  async selectLittleSkinProfile(sessionId: string, profileId: string) {
+    return parseLittleSkinSnapshot(
+      assertSuccess(
+        await backend.command('accounts_select_littleskin_profile', {
+          session_id: sessionId,
+          profile_id: profileId,
+        }),
+        'LittleSkin'
+      )
+    )
+  },
+
+  async completeLittleSkinLogin(sessionId: string): Promise<MinecraftAccount> {
+    return parseAccountSnapshot(
+      assertSuccess(
+        await backend.command('accounts_complete_littleskin_login', { session_id: sessionId }),
+        'LittleSkin'
+      )
+    )
+  },
+
+  async cancelLittleSkinLogin(sessionId: string) {
+    return parseLittleSkinSnapshot(
+      assertSuccess(
+        await backend.command('accounts_cancel_littleskin_login', { session_id: sessionId }, 30_000),
+        'LittleSkin'
+      )
+    )
+  },
+
   async list(): Promise<AccountListData> {
     return parseAccountList(assertSuccess(await backend.command('accounts_list'), '读取账户列表'))
   },

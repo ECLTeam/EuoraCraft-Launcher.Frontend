@@ -238,7 +238,10 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     void handleMicrosoftLoginStatus(event)
   })
 
-  const accountTypeLabel = computed(() => t(getAccountTypeLabelKey(currentAccount.value?.type)))
+  const accountTypeLabel = computed(() => {
+    if (currentAccount.value?.auth_provider === 'littleskin') return 'LittleSkin'
+    return t(getAccountTypeLabelKey(currentAccount.value?.type))
+  })
 
   async function loadAccounts(force = false) {
     try {

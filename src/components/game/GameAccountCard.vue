@@ -73,7 +73,7 @@ const isAccountMenuOpen = ref(false)
 const accountOptions = computed(() =>
   props.accounts.map((savedAccount) => ({
     label: `${savedAccount.id === props.account?.id ? '✓ ' : ''}${savedAccount.alias} · ${getAccountTypeLabel(
-      savedAccount.type
+      savedAccount
     )}`,
     key: savedAccount.id,
     icon: () =>
@@ -88,8 +88,9 @@ const accountOptions = computed(() =>
   }))
 )
 
-function getAccountTypeLabel(type: MinecraftAccount['type']) {
-  return t(getAccountTypeLabelKey(type))
+function getAccountTypeLabel(account: MinecraftAccount) {
+  if (account.auth_provider === 'littleskin') return 'LittleSkin'
+  return t(getAccountTypeLabelKey(account.type))
 }
 
 function selectAccount(accountId: string | number) {

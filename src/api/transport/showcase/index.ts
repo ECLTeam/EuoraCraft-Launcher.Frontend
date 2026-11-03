@@ -1,4 +1,4 @@
-import type { MinecraftAccount, WardrobeItem } from '@/types/accounts'
+import type { LittleSkinLoginSnapshot, MinecraftAccount, WardrobeItem } from '@/types/accounts'
 import type { ApiResponse, BackendEvents } from '@/types/api'
 import type { ConnectorStatus } from '@/types/connect'
 import type { InstallationSnapshot } from '@/types/installation'
@@ -63,6 +63,8 @@ export function createShowcaseTransport(): BackendTransport {
   const plugins = structuredClone(showcasePlugins)
   const pluginSettings = new Map<string, { revision: number; values: Record<string, unknown> }>()
   const wardrobe: WardrobeItem[] = []
+  let littleSkinSession: LittleSkinLoginSnapshot | null = null
+  let littleSkinStartedAt = 0
   const runningInstances: GameInstance[] = []
   const versionStats = new Map<string, VersionRunStats>()
   // 实例工作区可变状态：存档 / 备份 / 截图 / 服务器 / 资源
@@ -515,6 +517,74 @@ export function createShowcaseTransport(): BackendTransport {
           textureInvalidatedAccountIds: [String(payload.account_id)],
         })
         return success(structuredClone(accounts.accounts.find((item) => item.id === payload.account_id)))
+      case 'accounts_littleskin_login_config':
+        return success({ device_code: true, authorization_code: true, needs_client_id: false })
+      case 'accounts_start_littleskin_login': {
+        if (payload.method !== 'device_code' && payload.method !== 'authorization_code')
+          return failure('Invalid login method', 'INVALID_REQUEST')
+        if (littleSkinSession && !['cancelled', 'completed', 'error'].includes(littleSkinSession.status))
+          return failure('Login already active', 'LITTLESKIN_LOGIN_BUSY')
+        littleSkinStartedAt = Date.now()
+        littleSkinSession = {
+          session_id: crypto.randomUUID().replaceAll('-', ''),
+          method: payload.method,
+          status: 'pending',
+          user_code: payload.method === 'device_code' ? 'ECL-DEMO' : '',
+          verification_uri:
+            payload.method === 'device_code'
+              ? 'https://open.littleskin.cn/oauth/link'
+              : 'https://littleskin.cn/oauth/authorize',
+          expires_at: Date.now() / 1000 + 300,
+          profiles: [],
+          error_code: '',
+        }
+        return success(structuredClone(littleSkinSession))
+      }
+      case 'accounts_poll_littleskin_login': {
+        if (!littleSkinSession || payload.session_id !== littleSkinSession.session_id)
+          return failure('Login session expired', 'LITTLESKIN_SESSION_EXPIRED')
+        if (littleSkinSession.status === 'pending' && Date.now() - littleSkinStartedAt > 8000) {
+          littleSkinSession.status = 'selecting'
+          littleSkinSession.profiles = [
+            { id: '0123456789abcdef0123456789abcdef', name: 'LittleSkinPlayer' },
+            { id: 'f123456789abcdef0123456789abcdef', name: 'LittleSkinSecondProfile' },
+          ]
+        }
+        return success(structuredClone(littleSkinSession))
+      }
+      case 'accounts_select_littleskin_profile': {
+        if (
+          !littleSkinSession ||
+          payload.session_id !== littleSkinSession.session_id ||
+          littleSkinSession.status !== 'selecting' ||
+          !littleSkinSession.profiles.some((profile) => profile.id === payload.profile_id)
+        )
+          return failure('Invalid profile', 'LITTLESKIN_INVALID_PROFILE')
+        littleSkinSession.profiles = littleSkinSession.profiles.filter((profile) => profile.id === payload.profile_id)
+        littleSkinSession.status = 'ready'
+        return success(structuredClone(littleSkinSession))
+      }
+      case 'accounts_cancel_littleskin_login':
+        if (!littleSkinSession || payload.session_id !== littleSkinSession.session_id)
+          return failure('Login session expired', 'LITTLESKIN_SESSION_EXPIRED')
+        littleSkinSession.status = 'cancelled'
+        return success(structuredClone(littleSkinSession))
+      case 'accounts_complete_littleskin_login': {
+        if (
+          !littleSkinSession ||
+          payload.session_id !== littleSkinSession.session_id ||
+          littleSkinSession.status !== 'ready'
+        )
+          return failure('Login is not ready', 'LITTLESKIN_NOT_READY')
+        const profile = littleSkinSession.profiles[0]!
+        const account = createShowcaseAccount(profile.name, 'authlib', profile.id)
+        account.auth_provider = 'littleskin'
+        account.auth_server = 'https://littleskin.cn/api/yggdrasil'
+        accounts.accounts.push(account)
+        littleSkinSession.status = 'completed'
+        setCurrentAccount(account.id)
+        return success(structuredClone(account))
+      }
       case 'accounts_start_microsoft_login': {
         const stages = ['authorization_confirmed', 'minecraft_token', 'profile', 'saving'] as const
         stages.forEach((stage, index) => {

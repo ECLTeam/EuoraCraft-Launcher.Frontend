@@ -20,6 +20,7 @@ const accountSchema = object({
   skinUrl: text,
   skinId: text,
   auth_server: text,
+  auth_provider: text,
   provider: text,
   providerTitle: text,
   profile_selection_required: optional(boolean()),

@@ -9,6 +9,7 @@ import type {
   AuthlibLoginConfigData,
   AuthlibServer,
   DefaultSkin,
+  LittleSkinLoginSnapshot,
   MicrosoftCompleteData,
   MicrosoftLoginConfigData,
   MicrosoftLoginData,
@@ -23,6 +24,7 @@ export const useAccountStore = defineStore('accounts', () => {
   const currentAccount = ref<MinecraftAccount | null>(null)
   const authlibServers = ref<AuthlibServer[]>([])
   const authProviders = ref<AuthProvider[]>([])
+  const littleSkinLoginSession = ref<LittleSkinLoginSnapshot | null>(null)
   const microsoftLoginConfig = ref<MicrosoftLoginConfigData>({
     available: false,
     needs_client_id: false,
@@ -273,6 +275,7 @@ export const useAccountStore = defineStore('accounts', () => {
     currentAccount,
     authlibServers,
     authProviders,
+    littleSkinLoginSession,
     microsoftLoginConfig,
     authlibLoginConfig,
     status,

@@ -39,6 +39,7 @@ export interface MinecraftAccount {
   skinId?: string
   capes?: MicrosoftCape[]
   auth_server?: string
+  auth_provider?: string
   provider?: string
   providerTitle?: string
   profile_selection_required?: boolean
@@ -49,6 +50,25 @@ export interface DefaultSkin {
   id: string
   name: string
   skinUrl: string
+}
+
+export type LittleSkinLoginMethod = 'device_code' | 'authorization_code'
+
+export interface LittleSkinLoginConfig {
+  device_code: boolean
+  authorization_code: boolean
+  needs_client_id: boolean
+}
+
+export interface LittleSkinLoginSnapshot {
+  session_id: string
+  method: LittleSkinLoginMethod
+  status: 'starting' | 'pending' | 'selecting' | 'ready' | 'saving' | 'completed' | 'error' | 'cancelled'
+  user_code: string
+  verification_uri: string
+  expires_at: number
+  profiles: Array<{ id: string; name: string }>
+  error_code: string
 }
 
 export interface OfflineUuidPreview {

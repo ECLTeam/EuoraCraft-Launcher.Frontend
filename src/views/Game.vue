@@ -150,7 +150,7 @@
 
                 <div class="account-type-cell">
                   <NTag size="small" :bordered="false">
-                    {{ accountTypeName(savedAccount.type) }}
+                    {{ accountTypeName(savedAccount) }}
                   </NTag>
                 </div>
 
@@ -254,7 +254,7 @@
             <div class="account-details-grid">
               <div class="account-detail-item">
                 <span class="account-detail-label">{{ t('game.accountType') }}</span>
-                <span class="account-detail-value">{{ accountTypeName(detailAccount.type) }}</span>
+                <span class="account-detail-value">{{ accountTypeName(detailAccount) }}</span>
               </div>
               <div v-if="detailTextures?.skinModel" class="account-detail-item">
                 <span class="account-detail-label">{{ t('game.skinType') }}</span>
@@ -496,9 +496,10 @@ async function returnToAccountManagement() {
   returningFromWardrobe = false
 }
 
-function accountTypeName(type: string): string {
-  if (type === 'plugin') return detailAccount.value?.providerTitle || t('game.pluginAccount')
-  return t(getAccountTypeShortLabelKey(type))
+function accountTypeName(savedAccount: MinecraftAccount): string {
+  if (savedAccount.auth_provider === 'littleskin') return 'LittleSkin'
+  if (savedAccount.type === 'plugin') return savedAccount.providerTitle || t('game.pluginAccount')
+  return t(getAccountTypeShortLabelKey(savedAccount.type))
 }
 
 // 启动成功的阶段 key 集合（'launched' 是 useInstanceManager 成功路径写入的 stage）。

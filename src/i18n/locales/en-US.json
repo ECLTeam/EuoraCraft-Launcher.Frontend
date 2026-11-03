@@ -2685,5 +2685,25 @@
     "developmentMode": "Development mode: Vite development build",
     "showcaseMode": "Showcase mode: local demo data, no backend connection",
     "prerelease": "{channel} prerelease"
+  },
+  "littleskin": {
+    "intro": "Sign in through the official LittleSkin website without sharing your password with the launcher.",
+    "deviceCode": "Sign in with a code (recommended)",
+    "authorizationCode": "Sign in with browser",
+    "authorize": "Complete LittleSkin authorization in your browser. The launcher will continue automatically.",
+    "expiresAt": "Authorization expires at {time}",
+    "chooseProfile": "Choose a game profile",
+    "preparing": "Preparing LittleSkin sign-in…",
+    "saving": "Saving account…",
+    "missingClientId": "LittleSkin client ID is missing. Contact the distributor or configure LITTLESKIN_CLIENT_ID.",
+    "missingSecret": "Browser sign-in requires a client secret. You can still sign in with a code.",
+    "failed": "LittleSkin sign-in failed. Try again or check the launcher logs for the cause.",
+    "noProfiles": "Your LittleSkin account has no game profiles. Create one first.",
+    "createProfile": "Create profile",
+    "denied": "You denied LittleSkin authorization. You can try again.",
+    "expired": "Authorization expired. Please sign in again.",
+    "notApproved": "The LittleSkin app or requested permissions have not been approved. Contact the maintainer.",
+    "callbackFailed": "The local authorization callback is unavailable. Check its address and whether the port is in use.",
+    "scopeRejected": "LittleSkin rejected the requested permissions. Ask the app maintainer to confirm approval for reading profiles and creating Minecraft tokens."
   }
 }

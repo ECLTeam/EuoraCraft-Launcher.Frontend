@@ -81,10 +81,11 @@ describe('添加账户弹窗', () => {
     vi.restoreAllMocks()
   })
 
-  it('选择页仅展示三个入口，不包含表单或额外的登录按钮', async () => {
+  it('简体中文选择页展示 LittleSkin 入口，不包含表单或额外的登录按钮', async () => {
     await openDialog()
     const dialog = activeDialog()
-    expect(dialog.querySelectorAll('.account-type-option')).toHaveLength(3)
+    expect(dialog.querySelectorAll('.account-type-option')).toHaveLength(4)
+    expect(dialog.querySelector('[data-account-type="littleskin"]')).not.toBeNull()
     expect(dialog.querySelector('input')).toBeNull()
     expect(dialog.querySelector('.account-form')).toBeNull()
     expect(dialog.textContent).not.toContain(i18n.global.t('game.continueMicrosoftLogin'))
@@ -130,7 +131,7 @@ describe('添加账户弹窗', () => {
     ).toBe(true)
   })
 
-  it.each([1, 2, 3])('登录入口 %s 在同一个弹窗内切换，返回后恢复选择焦点', async (index) => {
+  it.each([1, 2, 4])('登录入口 %s 在同一个弹窗内切换，返回后恢复选择焦点', async (index) => {
     account.authProviders = [
       {
         id: 'demo',
@@ -403,9 +404,35 @@ describe('添加账户弹窗', () => {
       },
     ]
     await openDialog()
-    choice(3).click()
+    choice(4).click()
     await settle()
     expect(activeDialog().textContent).toContain('Username')
     expect(activeDialog().textContent).not.toContain(i18n.global.t('auth.selectProfileHint'))
+  })
+
+  it('其他语言隐藏 LittleSkin 专用入口', async () => {
+    i18n.global.locale.value = 'en-US'
+    await openDialog()
+    expect(activeDialog().querySelector('[data-account-type="littleskin"]')).toBeNull()
+  })
+
+  it('LittleSkin 在同一弹窗内显示两种方式，语言切换返回选择页', async () => {
+    vi.spyOn(accountsApi, 'littleSkinConfig').mockResolvedValue({
+      device_code: true,
+      authorization_code: true,
+      needs_client_id: false,
+    })
+    await openDialog()
+    const original = activeDialog()
+    original.querySelector<HTMLButtonElement>('[data-account-type="littleskin"]')!.click()
+    await settle()
+    expect(activeDialog()).toBe(original)
+    expect(original.textContent).toContain(i18n.global.t('littleskin.deviceCode'))
+    expect(original.textContent).toContain(i18n.global.t('littleskin.authorizationCode'))
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1)
+    i18n.global.locale.value = 'en-US'
+    await settle()
+    expect(activeDialog().querySelector('.littleskin-login-content')).toBeNull()
+    expect(activeDialog().querySelector('.account-type-options')).not.toBeNull()
   })
 })

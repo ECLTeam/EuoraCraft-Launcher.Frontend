@@ -2668,5 +2668,25 @@
     "developmentMode": "Entwicklungsmodus: Vite-Entwicklungsbuild",
     "showcaseMode": "Demomodus: lokale Beispieldaten ohne Backend-Verbindung",
     "prerelease": "{channel}-Vorabversion"
+  },
+  "littleskin": {
+    "intro": "Melde dich auf der offiziellen LittleSkin-Website an, ohne dein Passwort an den Launcher weiterzugeben.",
+    "deviceCode": "Mit Code anmelden (empfohlen)",
+    "authorizationCode": "Im Browser anmelden",
+    "authorize": "Bestätige die LittleSkin-Freigabe im Browser. Der Launcher fährt automatisch fort.",
+    "expiresAt": "Freigabe gültig bis {time}",
+    "chooseProfile": "Spielprofil auswählen",
+    "preparing": "LittleSkin-Anmeldung wird vorbereitet…",
+    "saving": "Konto wird gespeichert…",
+    "missingClientId": "Die LittleSkin-Client-ID fehlt. Kontaktiere den Anbieter oder konfiguriere LITTLESKIN_CLIENT_ID.",
+    "missingSecret": "Die Browseranmeldung benötigt ein Client-Secret. Die Anmeldung mit Code ist weiterhin verfügbar.",
+    "failed": "Die LittleSkin-Anmeldung ist fehlgeschlagen. Versuche es erneut oder prüfe das Launcher-Protokoll.",
+    "noProfiles": "Dein LittleSkin-Konto hat keine Spielprofile. Erstelle zuerst eines.",
+    "createProfile": "Profil erstellen",
+    "denied": "Du hast die LittleSkin-Freigabe abgelehnt. Du kannst es erneut versuchen.",
+    "expired": "Die Freigabe ist abgelaufen. Melde dich erneut an.",
+    "notApproved": "Die LittleSkin-App oder die benötigten Berechtigungen sind noch nicht freigegeben. Kontaktiere den Anbieter.",
+    "callbackFailed": "Der lokale Anmelderückruf ist nicht verfügbar. Prüfe die Adresse und ob der Port belegt ist.",
+    "scopeRejected": "LittleSkin hat die angeforderten Berechtigungen abgelehnt. Bitte den App-Anbieter prüfen lassen, ob das Lesen von Profilen und das Erstellen von Minecraft-Tokens freigegeben sind."
   }
 }
