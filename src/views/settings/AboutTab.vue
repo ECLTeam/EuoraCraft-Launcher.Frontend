@@ -121,7 +121,13 @@
       </div>
       <div class="card-body">
         <div v-for="category in technologyCategories" :key="category.id" class="technology-category">
-          <button class="technology-category__toggle" @click="toggleTechnologyCategory(category.id)">
+          <button
+            type="button"
+            class="technology-category__toggle"
+            :aria-expanded="isTechnologyCategoryExpanded(category.id)"
+            :aria-controls="`about-technology-${category.id}`"
+            @click="toggleTechnologyCategory(category.id)"
+          >
             <span class="technology-category__name">
               {{ t(`settings.aboutTab.technologyCategories.${category.titleKey}`) }}
             </span>
@@ -130,8 +136,8 @@
               <UiIcon :name="isTechnologyCategoryExpanded(category.id) ? 'chevron-up' : 'chevron-down'" :size="14" />
             </span>
           </button>
-          <Transition name="technology-expand">
-            <div v-if="isTechnologyCategoryExpanded(category.id)" class="technology-category__entries">
+          <CollapsiblePanel :id="`about-technology-${category.id}`" :open="isTechnologyCategoryExpanded(category.id)">
+            <div class="technology-category__entries">
               <AboutEntryRow
                 v-for="entry in category.entries"
                 :key="entry.id"
@@ -140,7 +146,7 @@
                 :licenseUrl="licenseById[entry.id]?.license"
               />
             </div>
-          </Transition>
+          </CollapsiblePanel>
         </div>
       </div>
     </div>
@@ -177,6 +183,7 @@ import { useI18n } from 'vue-i18n'
 import { launcherInfoQuery } from '@/app/data'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import AboutEntryRow from '@/components/settings/AboutEntryRow.vue'
+import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useDebugMode } from '@/composables/useDebugMode'

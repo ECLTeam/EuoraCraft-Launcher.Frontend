@@ -93,6 +93,30 @@ it('六张卡片标题均使用对应的本地图标并保留标题文字', () =
   expect(titles.every((title) => title.text().trim().length > 0)).toBe(true)
 })
 
+it('技术栈通过公共折叠面板独立展开和收起，隐藏内容不能聚焦', async () => {
+  const wrapper = mountAboutTab()
+  const categories = wrapper.findAll('.technology-category')
+  const first = categories[0]!
+  const second = categories[1]!
+  const toggle = first.get('button')
+  const panel = first.get('.collapsible-panel')
+  expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(toggle.attributes('aria-controls')).toBe(panel.attributes('id'))
+  expect(panel.attributes('inert')).toBeDefined()
+  expect(panel.classes()).not.toContain('is-open')
+  await toggle.trigger('click')
+  expect(toggle.attributes('aria-expanded')).toBe('true')
+  expect(panel.classes()).toContain('is-open')
+  expect(panel.attributes('inert')).toBeUndefined()
+  expect(first.findAll('about-entry-row-stub').length).toBeGreaterThan(0)
+  expect(second.get('.collapsible-panel').classes()).not.toContain('is-open')
+  await second.get('button').trigger('click')
+  await toggle.trigger('click')
+  expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(panel.attributes('inert')).toBeDefined()
+  expect(second.get('.collapsible-panel').classes()).toContain('is-open')
+})
+
 it('关于页文档入口使用集中定义的文档链接及原外部打开方式', async () => {
   const wrapper = mountAboutTab()
   await flushPromises()
