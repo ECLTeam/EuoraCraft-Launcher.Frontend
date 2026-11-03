@@ -41,7 +41,7 @@
         </nav>
       </aside>
       <section class="plugin-settings-detail ecl-surface" :aria-label="t('plugins.configuration')">
-        <Transition name="fade" mode="out-in" @beforeLeave="disableLeavingSettings">
+        <Transition name="page" mode="out-in" @beforeLeave="disableLeavingSettings">
           <div :key="selectedId" class="plugin-settings-detail-view">
             <template v-if="selected">
               <header class="plugin-settings-heading">
