@@ -4,6 +4,12 @@ import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation
 import { assertParams } from '@/app/validation'
 import { parseAccountList, parseAccountSnapshot } from '@/features/accounts/model/accountSnapshot'
 import { parseLittleSkinConfig, parseLittleSkinSnapshot } from '@/features/accounts/model/littleSkinLogin'
+import {
+  parseLittleSkinCloset,
+  parseLittleSkinManagement,
+  parseLittleSkinPlayer,
+} from '@/features/accounts/model/littleSkinManagement'
+import { i18n } from '@/i18n'
 import type {
   AccountListData,
   AccountTextures,
@@ -30,9 +36,48 @@ export const accountsApi = {
     return parseLittleSkinConfig(assertSuccess(await backend.command('accounts_littleskin_login_config'), 'LittleSkin'))
   },
 
-  async startLittleSkinLogin(method: LittleSkinLoginMethod) {
+  async startLittleSkinLogin(method: LittleSkinLoginMethod, accountId?: string) {
     return parseLittleSkinSnapshot(
-      assertSuccess(await backend.command('accounts_start_littleskin_login', { method }), 'LittleSkin')
+      assertSuccess(
+        await backend.command(
+          'accounts_start_littleskin_login',
+          accountId ? { method, purpose: 'management', account_id: accountId } : { method }
+        ),
+        'LittleSkin'
+      )
+    )
+  },
+
+  async littleSkinManagement(accountId: string) {
+    return parseLittleSkinManagement(
+      assertSuccess(
+        await backend.command('accounts_littleskin_management', { account_id: accountId }, 130_000),
+        'LittleSkin'
+      )
+    )
+  },
+  async littleSkinCloset(accountId: string, kind: WardrobeKind, page: number) {
+    const result = parseLittleSkinCloset(
+      assertSuccess(
+        await backend.command('accounts_littleskin_closet', { account_id: accountId, kind, page }, 130_000),
+        'LittleSkin'
+      )
+    )
+    if (result.current_page !== page || result.data.some((item) => (item.type === 'cape') !== (kind === 'cape')))
+      throw new Error(i18n.global.t('dataSync.invalid'))
+    return result
+  },
+  async setLittleSkinTexture(accountId: string, kind: WardrobeKind, tid?: number) {
+    const result =
+      tid === undefined
+        ? await backend.command('accounts_littleskin_reset_texture', { account_id: accountId, kind }, 130_000)
+        : await backend.command('accounts_littleskin_set_texture', { account_id: accountId, kind, tid }, 130_000)
+    return parseLittleSkinPlayer(assertSuccess(result, 'LittleSkin'))
+  },
+  async importLittleSkinTexture(accountId: string, kind: WardrobeKind, tid: number): Promise<WardrobeImportResult> {
+    return assertSuccess(
+      await backend.command('wardrobe_import_littleskin_texture', { account_id: accountId, kind, tid }, 130_000),
+      'LittleSkin'
     )
   },
 
@@ -195,8 +240,11 @@ export const accountsApi = {
     return assertSuccess(await backend.command('wardrobe_list'), '读取本地衣柜') ?? []
   },
 
-  async syncAccountSkin(accountId: string): Promise<WardrobeImportResult> {
-    return assertSuccess(await backend.command('wardrobe_sync_account_skin', { account_id: accountId }), '下载皮肤')
+  async syncAccountTexture(accountId: string, kind: WardrobeKind): Promise<WardrobeImportResult> {
+    return assertSuccess(
+      await backend.command('wardrobe_sync_account_texture', { account_id: accountId, kind }),
+      '下载账户材质'
+    )
   },
 
   async selectWardrobeImage(kind: WardrobeKind): Promise<string | null> {

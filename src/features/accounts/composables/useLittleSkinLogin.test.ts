@@ -20,6 +20,7 @@ vi.mock('@/features/accounts/api/accountsApi', () => ({
 
 const initial: LittleSkinLoginSnapshot = {
   session_id: '0123456789abcdef0123456789abcdef',
+  account_id: null,
   method: 'device_code',
   status: 'pending',
   user_code: 'ABCD-EFGH',
@@ -103,7 +104,7 @@ describe('LittleSkin login lifecycle', () => {
     await login.start('authorization_code')
     expect(accountsApi.startLittleSkinLogin).not.toHaveBeenCalled()
     await login.start('device_code')
-    expect(accountsApi.startLittleSkinLogin).toHaveBeenCalledWith('device_code')
+    expect(accountsApi.startLittleSkinLogin).toHaveBeenCalledWith('device_code', undefined)
     wrapper.unmount()
     await flushPromises()
   })

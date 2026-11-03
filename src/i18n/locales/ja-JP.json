@@ -2688,5 +2688,31 @@
     "notApproved": "LittleSkin アプリまたは必要な権限が未承認です。管理者に連絡してください。",
     "callbackFailed": "ローカル認証コールバックを利用できません。アドレスとポートの使用状況を確認してください。",
     "scopeRejected": "LittleSkin が要求された権限を拒否しました。プロフィールの読み取りと Minecraft トークン作成の権限が承認されているか、アプリ管理者に確認してください。"
+  },
+  "littleskinManagement": {
+    "cloud": "LittleSkin クラウド",
+    "manage": "LittleSkin テクスチャを管理",
+    "capes": "マント",
+    "refresh": "更新",
+    "authorizationRequired": "スキンとマントの管理には追加の認可が必要です。",
+    "authorize": "アカウント管理を認可",
+    "downloadCurrent": "現在のテクスチャを保存",
+    "resetSkin": "スキンをリセット",
+    "removeCape": "マントを外す",
+    "wear": "着用",
+    "download": "ローカル衣装庫に保存",
+    "empty": "この種類のテクスチャはありません",
+    "previous": "前へ",
+    "next": "次へ",
+    "page": "{current} / {total} ページ",
+    "rateLimited": "リクエストが多すぎます。後で再試行してください。",
+    "accountMismatch": "認可したアカウントに対象のキャラクターがありません。正しいアカウントで認可してください。",
+    "textureUnavailable": "このテクスチャはクラウド衣装庫に存在しません。",
+    "unconfirmed": "変更結果を確認できません。更新して現在の着用を確認してください。",
+    "closetLimit": "衣装庫が確認上限を超えています。ウェブサイトで整理して再試行してください。",
+    "failed": "操作に失敗しました。接続を確認して更新してください。",
+    "updated": "テクスチャを更新しました",
+    "downloaded": "ローカル衣装庫に保存しました",
+    "updatedRefreshFailed": "変更は完了しましたが、プレビューを更新できません。再読み込みしてください。"
   }
 }

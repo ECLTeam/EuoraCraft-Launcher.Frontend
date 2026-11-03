@@ -2705,5 +2705,31 @@
     "notApproved": "The LittleSkin app or requested permissions have not been approved. Contact the maintainer.",
     "callbackFailed": "The local authorization callback is unavailable. Check its address and whether the port is in use.",
     "scopeRejected": "LittleSkin rejected the requested permissions. Ask the app maintainer to confirm approval for reading profiles and creating Minecraft tokens."
+  },
+  "littleskinManagement": {
+    "cloud": "LittleSkin cloud",
+    "manage": "Manage LittleSkin textures",
+    "capes": "Capes",
+    "refresh": "Refresh",
+    "authorizationRequired": "Managing this account’s skin and cape requires additional authorization.",
+    "authorize": "Authorize account management",
+    "downloadCurrent": "Download current texture",
+    "resetSkin": "Reset skin",
+    "removeCape": "Remove cape",
+    "wear": "Wear",
+    "download": "Save to local wardrobe",
+    "empty": "No textures of this kind in your cloud wardrobe",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {current} / {total}",
+    "rateLimited": "Too many requests. Please try again later.",
+    "accountMismatch": "The authorized account does not own this character. Authorize with the matching account.",
+    "textureUnavailable": "This texture is no longer in this account’s cloud wardrobe.",
+    "unconfirmed": "The change is unconfirmed. Refresh to check what is currently worn.",
+    "closetLimit": "The cloud wardrobe exceeds the verification limit. Organize it on the website and retry.",
+    "failed": "The operation failed. Check your connection and refresh to retry.",
+    "updated": "Character texture updated",
+    "downloaded": "Texture saved to local wardrobe",
+    "updatedRefreshFailed": "Texture changed, but the preview could not refresh. Refresh to check it."
   }
 }

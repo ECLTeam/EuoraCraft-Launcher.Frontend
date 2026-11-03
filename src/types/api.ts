@@ -5,6 +5,9 @@ import type {
   LittleSkinLoginMethod,
   AccountChangedEvent,
   AccountTextures,
+  LittleSkinManagement,
+  LittleSkinPlayer,
+  LittleSkinClosetPage,
   AuthlibLoginConfigData,
   AuthlibServer,
   AuthProvider,
@@ -327,8 +330,17 @@ export interface CommandPayloadMap {
   authlib_resolve_server: { server_url: string }
   accounts_microsoft_login_config: undefined
   accounts_authlib_login_config: undefined
+  accounts_littleskin_management: { account_id: string }
+  accounts_littleskin_closet: { account_id: string; kind: WardrobeKind; page: number }
+  accounts_littleskin_set_texture: { account_id: string; kind: WardrobeKind; tid: number }
+  accounts_littleskin_reset_texture: { account_id: string; kind: WardrobeKind }
+  wardrobe_import_littleskin_texture: { account_id: string; kind: WardrobeKind; tid: number }
   accounts_littleskin_login_config: undefined
-  accounts_start_littleskin_login: { method: LittleSkinLoginMethod }
+  accounts_start_littleskin_login: {
+    method: LittleSkinLoginMethod
+    purpose?: 'login' | 'management'
+    account_id?: string
+  }
   accounts_poll_littleskin_login: { session_id: string }
   accounts_select_littleskin_profile: { session_id: string; profile_id: string }
   accounts_complete_littleskin_login: { session_id: string }
@@ -344,7 +356,7 @@ export interface CommandPayloadMap {
   accounts_refresh_profile: { account_id: string }
   accounts_texture_urls: { account_id: string }
   wardrobe_list: undefined
-  wardrobe_sync_account_skin: { account_id: string }
+  wardrobe_sync_account_texture: { account_id: string; kind: WardrobeKind }
   wardrobe_import: {
     path: string
     kind: WardrobeKind
@@ -784,6 +796,11 @@ export const COMMAND_NAMES = {
   authlib_resolve_server: 'authlib_resolve_server',
   accounts_microsoft_login_config: 'accounts_microsoft_login_config',
   accounts_authlib_login_config: 'accounts_authlib_login_config',
+  accounts_littleskin_management: 'accounts_littleskin_management',
+  accounts_littleskin_closet: 'accounts_littleskin_closet',
+  accounts_littleskin_set_texture: 'accounts_littleskin_set_texture',
+  accounts_littleskin_reset_texture: 'accounts_littleskin_reset_texture',
+  wardrobe_import_littleskin_texture: 'wardrobe_import_littleskin_texture',
   accounts_littleskin_login_config: 'accounts_littleskin_login_config',
   accounts_start_littleskin_login: 'accounts_start_littleskin_login',
   accounts_poll_littleskin_login: 'accounts_poll_littleskin_login',
@@ -801,7 +818,7 @@ export const COMMAND_NAMES = {
   accounts_refresh_profile: 'accounts_refresh_profile',
   accounts_texture_urls: 'accounts_texture_urls',
   wardrobe_list: 'wardrobe_list',
-  wardrobe_sync_account_skin: 'wardrobe_sync_account_skin',
+  wardrobe_sync_account_texture: 'wardrobe_sync_account_texture',
   wardrobe_import: 'wardrobe_import',
   wardrobe_update: 'wardrobe_update',
   wardrobe_delete: 'wardrobe_delete',
@@ -1055,6 +1072,11 @@ export interface CommandResponseMap {
   authlib_resolve_server: string
   accounts_microsoft_login_config: MicrosoftLoginConfigData
   accounts_authlib_login_config: AuthlibLoginConfigData
+  accounts_littleskin_management: LittleSkinManagement
+  accounts_littleskin_closet: LittleSkinClosetPage
+  accounts_littleskin_set_texture: LittleSkinPlayer
+  accounts_littleskin_reset_texture: LittleSkinPlayer
+  wardrobe_import_littleskin_texture: WardrobeImportResult
   accounts_littleskin_login_config: LittleSkinLoginConfig
   accounts_start_littleskin_login: LittleSkinLoginSnapshot
   accounts_poll_littleskin_login: LittleSkinLoginSnapshot
@@ -1072,7 +1094,7 @@ export interface CommandResponseMap {
   accounts_set_favorite: AccountListData
   accounts_set_pinned: AccountListData
   wardrobe_list: WardrobeItem[]
-  wardrobe_sync_account_skin: WardrobeImportResult
+  wardrobe_sync_account_texture: WardrobeImportResult
   wardrobe_import: WardrobeImportResult
   wardrobe_update: WardrobeItem
   wardrobe_delete: void

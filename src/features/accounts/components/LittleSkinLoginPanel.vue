@@ -72,6 +72,7 @@ import { useClipboard } from '@/composables/useClipboard'
 import { useLittleSkinLogin } from '@/features/accounts/composables/useLittleSkinLogin'
 import { openExternalUrl } from '@/utils/openExternal'
 
+const props = defineProps<{ accountId?: string }>()
 const emit = defineEmits<{ completed: []; cancel: []; busyChange: [busy: boolean] }>()
 const { t, locale } = useI18n()
 const {
@@ -86,7 +87,7 @@ const {
   selectProfile,
   cancel,
   retry,
-} = useLittleSkinLogin(() => emit('completed'))
+} = useLittleSkinLogin(() => emit('completed'), props.accountId)
 const { copy, copied } = useClipboard()
 const profileInputId = `littleskin-profile-${useId()}`
 const contentRef = ref<HTMLElement | null>(null)

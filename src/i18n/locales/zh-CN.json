@@ -2600,5 +2600,31 @@
     "notApproved": "LittleSkin 应用或所需权限尚未获得准入，请联系维护者。",
     "callbackFailed": "本机授权回调无法使用，请检查回调地址和端口占用。",
     "scopeRejected": "LittleSkin 拒绝了应用请求的权限。请联系应用维护者，确认已获角色读取和 Minecraft 令牌创建权限。"
+  },
+  "littleskinManagement": {
+    "cloud": "LittleSkin 云端",
+    "manage": "管理 LittleSkin 材质",
+    "capes": "披风",
+    "refresh": "刷新",
+    "authorizationRequired": "管理此账户的皮肤和披风需要补充授权。",
+    "authorize": "授权账户管理",
+    "downloadCurrent": "下载当前材质",
+    "resetSkin": "重置皮肤",
+    "removeCape": "移除披风",
+    "wear": "穿戴",
+    "download": "下载到本地衣柜",
+    "empty": "云端衣柜暂无此类材质",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第 {current} / {total} 页",
+    "rateLimited": "请求过于频繁，请稍后重试。",
+    "accountMismatch": "授权账户与当前角色不匹配，请使用对应账户重新授权。",
+    "textureUnavailable": "该材质已不在当前账户的云端衣柜中。",
+    "unconfirmed": "修改结果尚未确认，请点击刷新核对当前穿戴。",
+    "closetLimit": "云端衣柜超过本次核对上限，请在网站整理后重试。",
+    "failed": "操作失败，请检查网络并刷新重试。",
+    "updated": "角色材质已更新",
+    "downloaded": "材质已下载到本地衣柜",
+    "updatedRefreshFailed": "材质已修改，但预览刷新失败，请刷新核对。"
   }
 }

@@ -18,17 +18,25 @@
                 class="wardrobe-account-select"
                 size="small"
                 :options="accountOptions"
+                :disabled="cloudBusy"
                 :placeholder="t('wardrobe.selectAccount')"
                 clearable
               />
             </div>
             <div class="wardrobe-category-row">
               <NTabs v-if="isFolia" :value="activeTab" type="segment" size="small" @update:value="handleTabChange">
+                <NTab v-if="isLittleSkin" name="cloud">{{ t('littleskinManagement.cloud') }}</NTab>
                 <NTab name="skin">{{ t('wardrobe.skins') }}</NTab>
                 <NTab name="cape">{{ t('wardrobe.localCapes') }}</NTab>
                 <NTab name="official">{{ t('wardrobe.officialCapes') }}</NTab>
               </NTabs>
               <NButtonGroup v-else size="small">
+                <NButton
+                  v-if="isLittleSkin"
+                  :type="activeTab === 'cloud' ? 'primary' : 'default'"
+                  @click="activeTab = 'cloud'"
+                  >{{ t('littleskinManagement.cloud') }}</NButton
+                >
                 <NButton :type="activeTab === 'skin' ? 'primary' : 'default'" @click="activeTab = 'skin'">
                   {{ t('wardrobe.skins') }}
                 </NButton>
@@ -55,7 +63,7 @@
                   <template #icon><UiIcon name="refresh" :size="16" /></template>
                 </NButton>
                 <NButton
-                  v-if="activeTab !== 'official'"
+                  v-if="activeTab === 'skin' || activeTab === 'cape'"
                   size="small"
                   type="primary"
                   :loading="importing"
@@ -65,11 +73,11 @@
                   {{ t('wardrobe.import') }}
                 </NButton>
                 <NButton
-                  v-if="activeTab === 'skin' && canDownloadSkin"
+                  v-if="(activeTab === 'skin' || activeTab === 'cape') && canDownloadSkin"
                   quaternary
                   circle
                   size="small"
-                  :title="t('wardrobe.downloadSkin')"
+                  :title="t('littleskinManagement.downloadCurrent')"
                   :loading="applying"
                   @click="downloadSkin"
                 >
@@ -83,7 +91,16 @@
           </NAlert>
 
           <UiLoading :show="loading" mode="overlay" class="wardrobe-library-content">
-            <div v-if="activeTab !== 'official' && filteredItems.length" class="wardrobe-grid">
+            <LittleSkinClosetPanel
+              v-if="visible && activeTab === 'cloud' && isLittleSkin && targetAccountId"
+              :key="targetAccountId"
+              :accountId="targetAccountId"
+              @preview="cloudPreview = $event"
+              @changed="handleCloudChanged"
+              @downloaded="loadItems"
+              @busyChange="cloudBusy = $event"
+            />
+            <div v-else-if="activeTab !== 'official' && filteredItems.length" class="wardrobe-grid">
               <div
                 v-for="item in filteredItems"
                 :key="item.id"
@@ -139,14 +156,7 @@
                   <NButton quaternary circle size="tiny" :title="t('wardrobe.edit')" @click.stop="openEditModal(item)">
                     <template #icon><UiIcon name="edit" :size="14" /></template>
                   </NButton>
-                  <NButton
-                    v-if="item.kind === 'skin'"
-                    quaternary
-                    circle
-                    size="tiny"
-                    :title="t('wardrobe.saveAs')"
-                    @click.stop="exportItem(item)"
-                  >
+                  <NButton quaternary circle size="tiny" :title="t('wardrobe.saveAs')" @click.stop="exportItem(item)">
                     <template #icon><UiIcon name="file-download" :size="14" /></template>
                   </NButton>
                   <NButton
@@ -324,13 +334,15 @@ import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
+import LittleSkinClosetPanel from '@/features/accounts/components/LittleSkinClosetPanel.vue'
 import SkinViewer3D from '@/features/accounts/components/SkinViewer3D.vue'
 import { detectSkinModel } from '@/features/accounts/composables/useSkinModelDetector'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
-import type { MicrosoftCape, MinecraftAccount, SkinModel, WardrobeItem } from '@/types/accounts'
+import type { AccountTextures, MicrosoftCape, MinecraftAccount, SkinModel, WardrobeItem } from '@/types/accounts'
 
 const props = defineProps<{
   visible: boolean
+  initialAccountId?: string
   accounts: MinecraftAccount[]
   currentAccount: MinecraftAccount | null
 }>()
@@ -348,10 +360,15 @@ const accountStore = useAccountStore()
 const items = ref<WardrobeItem[]>([])
 const textureUrls = ref<Record<string, string>>({})
 const officialCapeUrls = ref<Record<string, string>>({})
-const activeTab = ref<'skin' | 'cape' | 'official'>('skin')
+const activeTab = ref<'skin' | 'cape' | 'official' | 'cloud'>('skin')
+const cloudBusy = ref(false)
+const cloudUpdatePending = ref(false)
+const cloudPreview = ref<AccountTextures>({})
+const isLittleSkin = computed(() => targetAccount.value?.auth_provider === 'littleskin')
 
 function handleTabChange(value: string | number) {
-  if (value === 'skin' || value === 'cape' || value === 'official') activeTab.value = value
+  if (value === 'skin' || value === 'cape' || value === 'official' || (value === 'cloud' && isLittleSkin.value))
+    activeTab.value = value
 }
 
 const selectedLocal = ref<WardrobeItem | null>(null)
@@ -388,10 +405,12 @@ const officialCapes = computed(() =>
   targetAccount.value?.type === 'microsoft' ? (targetAccount.value.capes ?? []) : []
 )
 const filteredItems = computed(() => items.value.filter((item) => item.kind === activeTab.value))
-const previewSkinUrl = computed(() => selectedSkinUrl.value || accountSkinUrl.value)
-const previewCapeUrl = computed(() => selectedCapeUrl.value || accountCapeUrl.value)
-const previewModel = computed<SkinModel>(() =>
-  selectedLocal.value?.kind === 'skin' ? (selectedLocal.value.model ?? editModel.value) : accountModel.value
+const previewSkinUrl = computed(() => cloudPreview.value.skinUrl || selectedSkinUrl.value || accountSkinUrl.value)
+const previewCapeUrl = computed(() => cloudPreview.value.capeUrl || selectedCapeUrl.value || accountCapeUrl.value)
+const previewModel = computed<SkinModel>(
+  () =>
+    cloudPreview.value.skinModel ??
+    (selectedLocal.value?.kind === 'skin' ? (selectedLocal.value.model ?? editModel.value) : accountModel.value)
 )
 const isStandardSkin = computed(
   () => selectedLocal.value?.kind === 'skin' && selectedLocal.value.width === 64 && selectedLocal.value.height === 64
@@ -436,6 +455,7 @@ async function loadLocalTexture(item: WardrobeItem): Promise<string> {
 async function loadTargetTextures(): Promise<void> {
   if (!props.visible) return
   const accountId = targetAccountId.value
+  const afterCloudWrite = cloudUpdatePending.value
   const isCurrent = accountTextureRequests.begin()
   localTextureRequests.invalidate()
   accountSkinUrl.value = ''
@@ -463,7 +483,13 @@ async function loadTargetTextures(): Promise<void> {
     accountSkinUrl.value = skinUrl
   } catch (reason) {
     if (!isCurrent()) return
-    message.warning(reason instanceof Error ? reason.message : t('wardrobe.textureFailed'))
+    message.warning(
+      afterCloudWrite
+        ? t('littleskinManagement.updatedRefreshFailed')
+        : reason instanceof Error
+          ? reason.message
+          : t('wardrobe.textureFailed')
+    )
   }
 }
 
@@ -700,8 +726,10 @@ watch(
     }
     activeTab.value = 'skin'
     const previousAccountId = targetAccountId.value
-    const defaultAccountId = props.currentAccount?.id || props.accounts[0]?.id || null
+    const defaultAccountId = props.initialAccountId || props.currentAccount?.id || props.accounts[0]?.id || null
     targetAccountId.value = defaultAccountId
+    if (props.accounts.find((account) => account.id === defaultAccountId)?.auth_provider === 'littleskin')
+      activeTab.value = 'cloud'
     await loadItems()
     if (props.visible && targetAccountId.value === defaultAccountId && previousAccountId === defaultAccountId)
       await loadTargetTextures()
@@ -709,19 +737,35 @@ watch(
 )
 
 watch([targetAccountId, targetTextureRevision], loadTargetTextures)
+watch([targetAccountId, activeTab], () => {
+  cloudPreview.value = {}
+  if (activeTab.value === 'cloud' && !isLittleSkin.value) activeTab.value = 'skin'
+})
+async function handleCloudChanged(): Promise<void> {
+  emit('accountsChanged')
+  cloudUpdatePending.value = true
+  try {
+    await loadTargetTextures()
+  } finally {
+    cloudUpdatePending.value = false
+  }
+}
 
 async function downloadSkin(): Promise<void> {
   if (!targetAccountId.value || !canDownloadSkin.value) return
   applying.value = true
   try {
     // 后端已按账户皮肤变体写入模型，前端不再重新检测覆盖，避免细手臂被误判为经典。
-    const result = await accountsApi.syncAccountSkin(targetAccountId.value)
+    const result = await accountsApi.syncAccountTexture(
+      targetAccountId.value,
+      activeTab.value === 'cape' ? 'cape' : 'skin'
+    )
     const item = result.item
     items.value = [item, ...items.value.filter((candidate) => candidate.id !== item.id)]
     emit('accountsChanged')
     await loadTargetTextures()
     await selectLocal(item)
-    message.success(t('wardrobe.skinDownloaded'))
+    message.success(t('littleskinManagement.downloaded'))
   } catch (reason) {
     message.error(reason instanceof Error ? reason.message : t('wardrobe.applyFailed'))
   } finally {

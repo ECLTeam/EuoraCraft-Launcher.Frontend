@@ -63,6 +63,8 @@ export function createShowcaseTransport(): BackendTransport {
   const plugins = structuredClone(showcasePlugins)
   const pluginSettings = new Map<string, { revision: number; values: Record<string, unknown> }>()
   const wardrobe: WardrobeItem[] = []
+  const littleSkinAuthorized = new Set<string>()
+  const littleSkinWorn = new Map<string, { pid: number; name: string; tid_skin: number; tid_cape: number }>()
   let littleSkinSession: LittleSkinLoginSnapshot | null = null
   let littleSkinStartedAt = 0
   const runningInstances: GameInstance[] = []
@@ -451,18 +453,20 @@ export function createShowcaseTransport(): BackendTransport {
       }
       case 'wardrobe_list':
         return success(structuredClone(wardrobe))
-      case 'wardrobe_sync_account_skin': {
-        let item = wardrobe.find((candidate) => candidate.kind === 'skin')
+      case 'wardrobe_import_littleskin_texture':
+      case 'wardrobe_sync_account_texture': {
+        const kind = payload.kind === 'cape' ? 'cape' : 'skin'
+        let item = wardrobe.find((candidate) => candidate.kind === kind)
         const deduplicated = Boolean(item)
         if (!item) {
           item = {
-            id: 'showcase-account-skin',
-            kind: 'skin',
+            id: `showcase-account-${kind}`,
+            kind,
             name: 'CloudMaple685 当前皮肤',
-            model: 'classic',
+            model: kind === 'skin' ? 'classic' : null,
             favorite: false,
             width: 64,
-            height: 64,
+            height: kind === 'skin' ? 64 : 32,
             byteSize: 1024,
             sha256: 'showcase-account-skin',
             createdAt: new Date().toISOString(),
@@ -517,6 +521,46 @@ export function createShowcaseTransport(): BackendTransport {
           textureInvalidatedAccountIds: [String(payload.account_id)],
         })
         return success(structuredClone(accounts.accounts.find((item) => item.id === payload.account_id)))
+      case 'accounts_littleskin_management': {
+        const id = String(payload.account_id)
+        const player = littleSkinWorn.get(id) ?? { pid: 1, name: 'LittleSkinPlayer', tid_skin: 0, tid_cape: 0 }
+        littleSkinWorn.set(id, player)
+        return success({
+          needs_authorization: !littleSkinAuthorized.has(id),
+          player: littleSkinAuthorized.has(id) ? structuredClone(player) : null,
+        })
+      }
+      case 'accounts_littleskin_closet':
+        if (!littleSkinAuthorized.has(String(payload.account_id)))
+          return failure('Additional authorization required', 'LITTLESKIN_PERMISSION_REQUIRED')
+        return success({
+          current_page: Number(payload.page),
+          last_page: 1,
+          total: payload.kind === 'skin' ? 1 : 0,
+          data:
+            payload.kind === 'skin'
+              ? [
+                  {
+                    tid: 923711,
+                    name: 'LittleSkin Demo',
+                    type: 'steve',
+                    hash: '5268e954863f30b007bc69be08bf214d82e415c565eca92c5d838ae8f2a11092',
+                  },
+                ]
+              : [],
+        })
+      case 'accounts_littleskin_set_texture':
+      case 'accounts_littleskin_reset_texture': {
+        const id = String(payload.account_id)
+        if (!littleSkinAuthorized.has(id))
+          return failure('Additional authorization required', 'LITTLESKIN_PERMISSION_REQUIRED')
+        const player = littleSkinWorn.get(id) ?? { pid: 1, name: 'LittleSkinPlayer', tid_skin: 0, tid_cape: 0 }
+        if (payload.kind === 'skin') player.tid_skin = Number(payload.tid ?? 0)
+        else player.tid_cape = Number(payload.tid ?? 0)
+        littleSkinWorn.set(id, player)
+        emit('accounts_changed', { ...structuredClone(accounts), textureInvalidatedAccountIds: [id] })
+        return success(structuredClone(player))
+      }
       case 'accounts_littleskin_login_config':
         return success({ device_code: true, authorization_code: true, needs_client_id: false })
       case 'accounts_start_littleskin_login': {
@@ -527,6 +571,7 @@ export function createShowcaseTransport(): BackendTransport {
         littleSkinStartedAt = Date.now()
         littleSkinSession = {
           session_id: crypto.randomUUID().replaceAll('-', ''),
+          account_id: typeof payload.account_id === 'string' ? payload.account_id : null,
           method: payload.method,
           status: 'pending',
           user_code: payload.method === 'device_code' ? 'ECL-DEMO' : '',
@@ -544,7 +589,7 @@ export function createShowcaseTransport(): BackendTransport {
         if (!littleSkinSession || payload.session_id !== littleSkinSession.session_id)
           return failure('Login session expired', 'LITTLESKIN_SESSION_EXPIRED')
         if (littleSkinSession.status === 'pending' && Date.now() - littleSkinStartedAt > 8000) {
-          littleSkinSession.status = 'selecting'
+          littleSkinSession.status = littleSkinSession.account_id ? 'ready' : 'selecting'
           littleSkinSession.profiles = [
             { id: '0123456789abcdef0123456789abcdef', name: 'LittleSkinPlayer' },
             { id: 'f123456789abcdef0123456789abcdef', name: 'LittleSkinSecondProfile' },
@@ -576,6 +621,13 @@ export function createShowcaseTransport(): BackendTransport {
           littleSkinSession.status !== 'ready'
         )
           return failure('Login is not ready', 'LITTLESKIN_NOT_READY')
+        if (littleSkinSession.account_id) {
+          const target = accounts.accounts.find((account) => account.id === littleSkinSession?.account_id)
+          if (!target) return failure('Account missing', 'ACCOUNT_NOT_FOUND')
+          littleSkinSession.status = 'completed'
+          littleSkinAuthorized.add(target.id)
+          return success(structuredClone(target))
+        }
         const profile = littleSkinSession.profiles[0]!
         const account = createShowcaseAccount(profile.name, 'authlib', profile.id)
         account.auth_provider = 'littleskin'

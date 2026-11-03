@@ -1,9 +1,10 @@
-import { array, boolean, number, object, picklist, pipe, regex, safeParse, string } from 'valibot'
+import { array, boolean, nullable, number, object, picklist, pipe, regex, safeParse, string } from 'valibot'
 import { i18n } from '@/i18n'
 import type { LittleSkinLoginConfig, LittleSkinLoginSnapshot } from '@/types/accounts'
 
 const configSchema = object({ device_code: boolean(), authorization_code: boolean(), needs_client_id: boolean() })
 const snapshotSchema = object({
+  account_id: nullable(string()),
   session_id: pipe(string(), regex(/^[0-9a-f]{32}$/)),
   method: picklist(['device_code', 'authorization_code']),
   status: picklist(['starting', 'pending', 'selecting', 'ready', 'saving', 'completed', 'error', 'cancelled']),

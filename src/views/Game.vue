@@ -109,7 +109,7 @@
               </NTag>
             </div>
             <div class="account-panel-actions">
-              <NButton size="small" @click="openWardrobeModal">
+              <NButton size="small" @click="openWardrobeModal()">
                 <template #icon><UiIcon name="shirt" :size="14" /></template>
                 {{ t('wardrobe.title') }}
               </NButton>
@@ -164,6 +164,15 @@
                 </div>
 
                 <div class="account-actions">
+                  <button
+                    v-if="savedAccount.auth_provider === 'littleskin'"
+                    class="account-action-btn"
+                    :title="t('littleskinManagement.manage')"
+                    :aria-label="t('littleskinManagement.manage')"
+                    @click="openWardrobeModal(savedAccount.id)"
+                  >
+                    <UiIcon name="shirt" :size="14" />
+                  </button>
                   <button
                     class="account-action-btn"
                     :title="t('game.accountDetails')"
@@ -299,6 +308,7 @@
     <WardrobeModal
       v-model:visible="showWardrobeModal"
       :accounts="account.accounts"
+      :initialAccountId="wardrobeInitialAccountId"
       :currentAccount="account.currentAccount"
       @back="returnToAccountManagement"
       @accountsChanged="account.loadAccounts(true)"
@@ -433,6 +443,7 @@ const {
 const showAddAccountModal = ref(false)
 const accountModalRef = ref<InstanceType<typeof FullscreenModal> | null>(null)
 const showWardrobeModal = ref(false)
+const wardrobeInitialAccountId = ref<string>()
 const showRunningInstances = ref(false)
 const showAccountDetailsModal = ref(false)
 const detailAccount = ref<MinecraftAccount | null>(null)
@@ -465,7 +476,8 @@ function openAddAccountModal(): void {
   showAddAccountModal.value = true
 }
 
-function openWardrobeModal() {
+function openWardrobeModal(accountId?: string) {
+  wardrobeInitialAccountId.value = accountId
   returningFromWardrobe = false
   showWardrobeModal.value = true
 }

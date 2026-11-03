@@ -3,7 +3,7 @@ import { accountsApi } from '@/features/accounts/api/accountsApi'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import type { LittleSkinLoginConfig, LittleSkinLoginMethod, LittleSkinLoginSnapshot } from '@/types/accounts'
 
-export function useLittleSkinLogin(onCompleted: () => void) {
+export function useLittleSkinLogin(onCompleted: () => void, accountId?: string) {
   const accountStore = useAccountStore()
   const config = ref<LittleSkinLoginConfig>({ device_code: false, authorization_code: false, needs_client_id: false })
   const configLoading = ref(true)
@@ -18,6 +18,7 @@ export function useLittleSkinLogin(onCompleted: () => void) {
 
   const errorKey = computed(() => {
     const code = session.value?.error_code
+    if (code === 'LITTLESKIN_ACCOUNT_MISMATCH') return 'littleskinManagement.accountMismatch'
     if (code === 'LITTLESKIN_NO_PROFILES') return 'littleskin.noProfiles'
     if (code === 'LITTLESKIN_ACCESS_DENIED') return 'littleskin.denied'
     if (code === 'LITTLESKIN_EXPIRED_TOKEN' || code === 'LITTLESKIN_INVALID_GRANT') return 'littleskin.expired'
@@ -66,6 +67,11 @@ export function useLittleSkinLogin(onCompleted: () => void) {
 
   async function accept(result: LittleSkinLoginSnapshot): Promise<void> {
     if (disposed || session.value?.session_id !== result.session_id) return
+    if (result.account_id !== (accountId ?? null)) {
+      hasError.value = true
+      stopPolling()
+      return
+    }
     session.value = result
     selectedProfileId.value ||= result.profiles[0]?.id ?? ''
     if (result.status === 'error') {
@@ -105,7 +111,7 @@ export function useLittleSkinLogin(onCompleted: () => void) {
     hasError.value = false
     const requestGeneration = ++generation
     try {
-      const result = await accountsApi.startLittleSkinLogin(method)
+      const result = await accountsApi.startLittleSkinLogin(method, accountId)
       if (disposed || requestGeneration !== generation) {
         if (!session.value) session.value = result
         const cancelled = await accountsApi.cancelLittleSkinLogin(result.session_id)
@@ -165,6 +171,10 @@ export function useLittleSkinLogin(onCompleted: () => void) {
     hasError.value = false
     const current = session.value
     if (!current) return loadConfig()
+    if (current.account_id !== (accountId ?? null)) {
+      if (await cancel()) await loadConfig()
+      return
+    }
     if (current.status === 'ready') return finish(current.session_id)
     if (current.status === 'error' || current.status === 'cancelled') {
       if (await cancel()) await start(current.method)
@@ -193,7 +203,9 @@ export function useLittleSkinLogin(onCompleted: () => void) {
   })
 
   void loadConfig()
-  if (session.value) schedulePoll(session.value.session_id)
+  if (session.value && session.value.account_id !== (accountId ?? null)) {
+    hasError.value = true
+  } else if (session.value) schedulePoll(session.value.session_id)
   return {
     config,
     configLoading,

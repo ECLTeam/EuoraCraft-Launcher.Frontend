@@ -61,6 +61,7 @@ export interface LittleSkinLoginConfig {
 }
 
 export interface LittleSkinLoginSnapshot {
+  account_id: string | null
   session_id: string
   method: LittleSkinLoginMethod
   status: 'starting' | 'pending' | 'selecting' | 'ready' | 'saving' | 'completed' | 'error' | 'cancelled'
@@ -202,4 +203,27 @@ export interface ImageSaveUrlResult {
 
 export interface ImageListResult {
   files: string[]
+}
+
+export interface LittleSkinPlayer {
+  pid: number
+  name: string
+  tid_skin: number
+  tid_cape: number
+}
+export interface LittleSkinManagement {
+  needs_authorization: boolean
+  player: LittleSkinPlayer | null
+}
+export interface LittleSkinTexture {
+  tid: number
+  name: string
+  type: 'steve' | 'alex' | 'cape'
+  hash: string
+}
+export interface LittleSkinClosetPage {
+  current_page: number
+  last_page: number
+  total: number
+  data: LittleSkinTexture[]
 }

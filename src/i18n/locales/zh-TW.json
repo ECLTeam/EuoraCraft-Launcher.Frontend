@@ -2571,5 +2571,31 @@
     "notApproved": "LittleSkin 應用程式或所需權限尚未獲准，請聯絡維護者。",
     "callbackFailed": "無法使用本機授權回呼，請檢查回呼網址及連接埠占用情況。",
     "scopeRejected": "LittleSkin 拒絕了應用程式請求的權限。請聯絡維護者，確認已獲准讀取角色及建立 Minecraft 權杖。"
+  },
+  "littleskinManagement": {
+    "cloud": "LittleSkin 雲端",
+    "manage": "管理 LittleSkin 材質",
+    "capes": "披風",
+    "refresh": "重新整理",
+    "authorizationRequired": "管理此帳戶的造型和披風需要補充授權。",
+    "authorize": "授權帳戶管理",
+    "downloadCurrent": "下載目前材質",
+    "resetSkin": "重設造型",
+    "removeCape": "移除披風",
+    "wear": "穿戴",
+    "download": "下載至本機衣櫃",
+    "empty": "雲端衣櫃暫無此類材質",
+    "previous": "上一頁",
+    "next": "下一頁",
+    "page": "第 {current} / {total} 頁",
+    "rateLimited": "請求過於頻繁，請稍後再試。",
+    "accountMismatch": "授權帳戶與目前角色不符，請使用對應帳戶重新授權。",
+    "textureUnavailable": "此材質已不在目前帳戶的雲端衣櫃中。",
+    "unconfirmed": "尚未確認修改結果，請重新整理並核對目前穿戴。",
+    "closetLimit": "雲端衣櫃超過本次核對上限，請在網站整理後重試。",
+    "failed": "操作失敗，請檢查網路並重新整理。",
+    "updated": "角色材質已更新",
+    "downloaded": "材質已下載至本機衣櫃",
+    "updatedRefreshFailed": "材質已修改，但預覽更新失敗，請重新整理確認。"
   }
 }

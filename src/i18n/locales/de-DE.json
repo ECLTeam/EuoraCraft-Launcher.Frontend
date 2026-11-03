@@ -2688,5 +2688,31 @@
     "notApproved": "Die LittleSkin-App oder die benötigten Berechtigungen sind noch nicht freigegeben. Kontaktiere den Anbieter.",
     "callbackFailed": "Der lokale Anmelderückruf ist nicht verfügbar. Prüfe die Adresse und ob der Port belegt ist.",
     "scopeRejected": "LittleSkin hat die angeforderten Berechtigungen abgelehnt. Bitte den App-Anbieter prüfen lassen, ob das Lesen von Profilen und das Erstellen von Minecraft-Tokens freigegeben sind."
+  },
+  "littleskinManagement": {
+    "cloud": "LittleSkin-Cloud",
+    "manage": "LittleSkin-Texturen verwalten",
+    "capes": "Umhänge",
+    "refresh": "Aktualisieren",
+    "authorizationRequired": "Zum Verwalten von Skin und Umhang ist eine zusätzliche Autorisierung erforderlich.",
+    "authorize": "Kontoverwaltung autorisieren",
+    "downloadCurrent": "Aktuelle Textur herunterladen",
+    "resetSkin": "Skin zurücksetzen",
+    "removeCape": "Umhang ablegen",
+    "wear": "Anlegen",
+    "download": "In lokaler Garderobe speichern",
+    "empty": "Keine Texturen dieser Art in der Cloud-Garderobe",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {current} / {total}",
+    "rateLimited": "Zu viele Anfragen. Bitte später erneut versuchen.",
+    "accountMismatch": "Das autorisierte Konto besitzt diese Figur nicht. Bitte das passende Konto autorisieren.",
+    "textureUnavailable": "Diese Textur ist nicht mehr in der Cloud-Garderobe dieses Kontos.",
+    "unconfirmed": "Die Änderung ist unbestätigt. Bitte aktualisieren und die angelegte Textur prüfen.",
+    "closetLimit": "Die Garderobe überschreitet die Prüfgrenze. Bitte auf der Website aufräumen und erneut versuchen.",
+    "failed": "Vorgang fehlgeschlagen. Verbindung prüfen und aktualisieren.",
+    "updated": "Textur aktualisiert",
+    "downloaded": "Textur in lokaler Garderobe gespeichert",
+    "updatedRefreshFailed": "Textur geändert, aber die Vorschau konnte nicht aktualisiert werden. Bitte erneut aktualisieren."
   }
 }

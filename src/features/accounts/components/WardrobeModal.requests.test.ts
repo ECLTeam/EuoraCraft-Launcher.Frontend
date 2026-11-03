@@ -48,6 +48,7 @@ function mountWardrobe() {
         UiIcon: true,
         UiLoading: { template: '<div><slot /></div>' },
         SkinViewer3D: preview,
+        LittleSkinClosetPanel: { template: '<div data-test="cloud-panel" />' },
       },
     },
   })
@@ -72,6 +73,16 @@ beforeEach(() => {
 afterEach(() => wrappers.splice(0).forEach((wrapper) => wrapper.unmount()))
 
 describe('衣柜预览请求归属', () => {
+  it('关闭全屏衣柜时卸载云端面板，以结束其授权与查询资源', async () => {
+    const wrapper = mountWardrobe()
+    const account: MinecraftAccount = { id: 'little', alias: 'Little', type: 'authlib', auth_provider: 'littleskin' }
+    await wrapper.setProps({ accounts: [account], currentAccount: account, visible: true })
+    await flushPromises()
+    expect(wrapper.find('[data-test="cloud-panel"]').exists()).toBe(true)
+    await wrapper.setProps({ visible: false })
+    await flushPromises()
+    expect(wrapper.find('[data-test="cloud-panel"]').exists()).toBe(false)
+  })
   it('官方披风的迟到纹理不能覆盖新选择', async () => {
     const wrapper = mountWardrobe()
     await wrapper.setProps({ visible: true })

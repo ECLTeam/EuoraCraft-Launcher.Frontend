@@ -3,6 +3,7 @@ import { parseLittleSkinConfig, parseLittleSkinSnapshot } from './littleSkinLogi
 
 const snapshot = {
   session_id: '0123456789abcdef0123456789abcdef',
+  account_id: null,
   method: 'device_code',
   status: 'pending',
   user_code: 'ABCD',
