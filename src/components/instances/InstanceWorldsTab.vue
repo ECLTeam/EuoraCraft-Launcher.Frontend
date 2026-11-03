@@ -573,7 +573,8 @@ watch(
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  min-height: 48px;
+  padding: var(--s-sm) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
 }
 

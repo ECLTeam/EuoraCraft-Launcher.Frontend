@@ -198,11 +198,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  min-height: var(--row-h);
+  padding: var(--s-md) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
   color: var(--ecl-text);
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .info-grid {
@@ -250,11 +251,14 @@
 }
 
 .actions-card__header {
-  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  min-height: var(--row-h);
+  padding: var(--s-md) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
   color: var(--ecl-text);
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .overview-actions {
