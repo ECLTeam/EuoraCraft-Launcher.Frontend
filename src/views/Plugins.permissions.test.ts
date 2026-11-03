@@ -52,7 +52,9 @@ describe('plugin permission entry', () => {
     try {
       await flushPromises()
       const buttons = wrapper.findAll('.plugin-actions button')
-      expect(buttons.some((button) => button.text() === i18n.global.t('plugins.permissions'))).toBe(false)
+      expect(buttons.some((button) => button.attributes('aria-label') === i18n.global.t('plugins.permissions'))).toBe(
+        false
+      )
     } finally {
       wrapper.unmount()
     }
@@ -71,7 +73,7 @@ describe('plugin permission entry', () => {
       await flushPromises()
       const button = wrapper
         .findAll('.plugin-actions button')
-        .find((item) => item.text() === i18n.global.t('plugins.permissions'))!
+        .find((item) => item.attributes('aria-label') === i18n.global.t('plugins.permissions'))!
       expect(button).toBeDefined()
       await button.trigger('click')
       expect(wrapper.getComponent({ name: 'PluginPermissionsModal' }).props('visible')).toBe(true)
@@ -91,7 +93,7 @@ describe('plugin permission entry', () => {
         await flushPromises()
         await wrapper
           .findAll('.plugin-actions button')
-          .find((button) => button.text() === i18n.global.t('plugins.enable'))!
+          .find((button) => button.attributes('aria-label') === i18n.global.t('plugins.enable'))!
           .trigger('click')
         await flushPromises()
         expect(wrapper.getComponent({ name: 'PluginPermissionsModal' }).props('visible')).toBe(requested)
@@ -109,12 +111,40 @@ describe('plugin permission entry', () => {
       await flushPromises()
       await wrapper
         .findAll('.plugin-actions button')
-        .find((button) => button.text() === i18n.global.t('plugins.disable'))!
+        .find((button) => button.attributes('aria-label') === i18n.global.t('plugins.disable'))!
         .trigger('click')
       await flushPromises()
       expect(store.toggle).toHaveBeenCalledOnce()
       expect(store.enableBasic).not.toHaveBeenCalled()
       expect(wrapper.getComponent({ name: 'PluginPermissionsModal' }).props('visible')).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('keeps every icon-only action named and updates the enable action with plugin status', async () => {
+    const { wrapper, store } = mountPlugins({
+      ...basicPlugin,
+      status: 'enabled',
+      requested_permissions: ['network.read'],
+    })
+    try {
+      await flushPromises()
+      const actions = ['permissions', 'panel', 'settings', 'disable', 'reload', 'unload']
+      expect(wrapper.findAll('.plugin-actions button')).toHaveLength(actions.length)
+      for (const action of actions) {
+        const name = i18n.global.t(`plugins.${action}`)
+        const button = wrapper.get(`.plugin-actions button[aria-label="${name}"]`)
+        expect(button.text()).toBe('')
+        expect(button.attributes('title')).toBe(name)
+        expect(button.find('svg').exists()).toBe(true)
+      }
+      expect(wrapper.find('.plugin-actions .icon-stop').exists()).toBe(true)
+      store.plugins = [{ ...basicPlugin, status: 'disabled' }]
+      await flushPromises()
+      const enable = wrapper.get(`.plugin-actions button[aria-label="${i18n.global.t('plugins.enable')}"]`)
+      expect(enable.attributes('title')).toBe(i18n.global.t('plugins.enable'))
+      expect(enable.find('.icon-play').exists()).toBe(true)
     } finally {
       wrapper.unmount()
     }

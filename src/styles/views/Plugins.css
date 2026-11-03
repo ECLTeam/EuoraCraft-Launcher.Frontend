@@ -69,7 +69,7 @@
   display: grid;
   height: 32px;
   flex-shrink: 0;
-  grid-template-columns: minmax(0, 1fr) 64px 96px 210px;
+  grid-template-columns: minmax(0, 1fr) 64px 80px 184px;
   align-items: center;
   gap: var(--s-md);
   padding: 0 12px;
@@ -88,7 +88,7 @@
   position: relative;
   display: grid;
   min-height: 60px;
-  grid-template-columns: minmax(0, 1fr) 64px 96px 210px;
+  grid-template-columns: minmax(0, 1fr) 64px 80px 184px;
   align-items: center;
   gap: var(--s-md);
   padding: 8px 12px;
@@ -170,6 +170,12 @@
   display: flex;
   flex-shrink: 0;
   justify-content: flex-end;
+}
+
+.plugin-actions :deep(.n-button) {
+  width: 28px;
+  height: 28px;
+  padding: 0;
 }
 
 .plugin-status {

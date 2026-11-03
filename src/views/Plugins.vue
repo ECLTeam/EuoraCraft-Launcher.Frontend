@@ -119,34 +119,49 @@
                 </NTag>
               </div>
 
-              <NSpace class="plugin-actions" :size="3" :wrap="true">
+              <NSpace class="plugin-actions" justify="end" :size="3" :wrap="false">
                 <NButton
                   v-if="plugin.installation_id && plugin.requested_permissions?.length"
                   quaternary
                   size="tiny"
+                  :title="t('plugins.permissions')"
+                  :aria-label="t('plugins.permissions')"
                   @click="openPermissions(plugin)"
                 >
-                  {{ t('plugins.permissions') }}
+                  <template #icon><UiIcon name="shield" :size="16" /></template>
                 </NButton>
                 <NButton
                   v-if="plugin.status === 'enabled' && !plugin.is_system"
                   quaternary
                   size="tiny"
                   :title="t('plugins.panel')"
+                  :aria-label="t('plugins.panel')"
                   @click="openPanel(plugin)"
                 >
-                  {{ t('plugins.panel') }}
+                  <template #icon><UiIcon name="layout-grid" :size="16" /></template>
                 </NButton>
-                <NButton quaternary size="tiny" :title="t('plugins.settings')" @click="openSettings(plugin)">
-                  <template #icon><UiIcon name="settings" :size="13" /></template>
+                <NButton
+                  quaternary
+                  size="tiny"
+                  :title="t('plugins.settings')"
+                  :aria-label="t('plugins.settings')"
+                  @click="openSettings(plugin)"
+                >
+                  <template #icon><UiIcon name="settings" :size="16" /></template>
                 </NButton>
                 <NButton
                   quaternary
                   size="tiny"
                   :disabled="plugin.pending_restart && plugin.status !== 'enabled'"
+                  :title="t(['enabled', 'stopping'].includes(plugin.status) ? 'plugins.disable' : 'plugins.enable')"
+                  :aria-label="
+                    t(['enabled', 'stopping'].includes(plugin.status) ? 'plugins.disable' : 'plugins.enable')
+                  "
                   @click="togglePlugin(plugin)"
                 >
-                  {{ ['enabled', 'stopping'].includes(plugin.status) ? t('plugins.disable') : t('plugins.enable') }}
+                  <template #icon>
+                    <UiIcon :name="['enabled', 'stopping'].includes(plugin.status) ? 'stop' : 'play'" :size="16" />
+                  </template>
                 </NButton>
                 <NButton
                   quaternary
@@ -154,14 +169,21 @@
                   :loading="reloadingPlugins.includes(plugin.name)"
                   :disabled="plugin.pending_restart"
                   :title="t('plugins.reload')"
+                  :aria-label="t('plugins.reload')"
                   @click="reloadPlugin(plugin)"
                 >
-                  <template #icon><UiIcon name="refresh" :size="13" /></template>
+                  <template #icon><UiIcon name="refresh" :size="16" /></template>
                 </NButton>
                 <NPopconfirm v-if="!plugin.is_system" @positiveClick="unloadPlugin(plugin)">
                   <template #trigger>
-                    <NButton quaternary size="tiny" type="error" :title="t('plugins.unload')">
-                      <template #icon><UiIcon name="trash" :size="13" /></template>
+                    <NButton
+                      quaternary
+                      size="tiny"
+                      type="error"
+                      :title="t('plugins.unload')"
+                      :aria-label="t('plugins.unload')"
+                    >
+                      <template #icon><UiIcon name="trash" :size="16" /></template>
                     </NButton>
                   </template>
                   {{ t('plugins.unload') }} {{ plugin.title || plugin.name }}?
