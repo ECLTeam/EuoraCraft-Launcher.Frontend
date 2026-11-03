@@ -120,7 +120,12 @@
               </div>
 
               <NSpace class="plugin-actions" :size="3" :wrap="true">
-                <NButton v-if="plugin.installation_id" quaternary size="tiny" @click="openPermissions(plugin)">
+                <NButton
+                  v-if="plugin.installation_id && plugin.requested_permissions?.length"
+                  quaternary
+                  size="tiny"
+                  @click="openPermissions(plugin)"
+                >
                   {{ t('plugins.permissions') }}
                 </NButton>
                 <NButton
