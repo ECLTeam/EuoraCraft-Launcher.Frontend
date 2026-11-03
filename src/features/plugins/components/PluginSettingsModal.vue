@@ -31,11 +31,10 @@
             class="plugin-settings-choice"
             :class="{ selected: identity(item) === selectedId }"
             :aria-current="identity(item) === selectedId ? 'true' : undefined"
-            :title="item.title || item.name"
+            :title="`${item.title || item.name}\n${item.name}`"
             @click="select(item)"
           >
-            <strong>{{ item.title || item.name }}</strong>
-            <span :title="item.name">{{ item.name }}</span>
+            <span>{{ item.title || item.name }}</span>
           </button>
           <NEmpty v-if="!filteredPlugins.length" :description="t('plugins.noPlugins')" size="small" />
         </nav>
@@ -43,9 +42,11 @@
       <section class="plugin-settings-detail ecl-surface" :aria-label="t('plugins.configuration')">
         <template v-if="selected">
           <header class="plugin-settings-heading">
-            <div>
-              <h2 :title="selected.title || selected.name">{{ selected.title || selected.name }}</h2>
-              <p>{{ selected.name }} · {{ selected.version }}</p>
+            <div class="plugin-settings-title">
+              <h2 :title="`${selected.title || selected.name}\n${selected.name}`">
+                {{ selected.title || selected.name }}
+              </h2>
+              <NTag class="plugin-settings-version" size="small" :bordered="false">v{{ selected.version }}</NTag>
             </div>
             <NButton
               v-if="selected.source === 'directory' && selected.installation_id"
@@ -134,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NButton, NEmpty, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
+import { NAlert, NButton, NEmpty, NInput, NInputNumber, NSelect, NSwitch, NTag } from 'naive-ui'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
@@ -338,8 +339,9 @@ onUnmounted(() => unlisten?.())
   padding: 0 var(--s-sm) var(--s-sm);
 }
 .plugin-settings-choice {
-  display: grid;
-  gap: var(--s-xs);
+  display: flex;
+  align-items: center;
+  min-height: var(--ecl-control-height);
   width: 100%;
   min-width: 0;
   flex-shrink: 0;
@@ -351,6 +353,7 @@ onUnmounted(() => unlisten?.())
   background: transparent;
   font: inherit;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
 .plugin-settings-choice:hover {
@@ -364,59 +367,61 @@ onUnmounted(() => unlisten?.())
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
-.plugin-settings-choice strong,
 .plugin-settings-choice span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.plugin-settings-choice span,
-.plugin-settings-heading p,
 .plugin-setting-label span {
   font-size: 12px;
   color: var(--ecl-text-secondary);
 }
-.plugin-settings-choice.selected span {
-  color: inherit;
-}
 .plugin-settings-detail {
   display: flex;
   flex-direction: column;
-  padding: var(--s-lg);
+  overflow: hidden;
 }
 .plugin-settings-heading {
   display: flex;
   flex-shrink: 0;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--s-md);
-  padding-bottom: var(--s-md);
+  min-height: 44px;
+  padding: var(--s-sm) var(--s-lg);
   border-bottom: 1px solid var(--ecl-border);
 }
-.plugin-settings-heading > div {
+.plugin-settings-title {
+  display: flex;
+  flex: 1;
   min-width: 0;
+  align-items: center;
+  gap: var(--s-sm);
+}
+.plugin-settings-version,
+.plugin-settings-heading > .n-button {
+  flex-shrink: 0;
 }
 .plugin-settings-heading h2 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-.plugin-settings-heading p {
-  margin: var(--s-xs) 0 0;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .plugin-settings-content {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  padding: 0 var(--s-lg) var(--s-lg);
 }
 .plugin-settings-content--state {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: var(--s-lg) 0;
+  padding: var(--s-lg);
 }
 .plugin-setting-list {
   list-style: none;

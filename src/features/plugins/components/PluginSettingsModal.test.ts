@@ -27,6 +27,35 @@ const plugin: PluginInfo = {
 }
 
 describe('plugin settings', () => {
+  it('shows a single navigation label and a compact title with version while retaining identity and directory access', async () => {
+    const item = {
+      ...plugin,
+      title: 'Human plugin',
+      name: 'technical_identifier',
+      source: 'directory',
+      installation_id: 'a'.repeat(32),
+    } as const
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin: item, plugins: [item] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      const choice = wrapper.get('.plugin-settings-choice')
+      expect(choice.text()).toBe('Human plugin')
+      expect(choice.attributes('title')).toContain('Human plugin')
+      expect(choice.attributes('title')).toContain('technical_identifier')
+      const heading = wrapper.get('.plugin-settings-heading')
+      expect(heading.get('h2').text()).toBe('Human plugin')
+      expect(heading.get('.plugin-settings-version').text()).toContain('1')
+      expect(heading.find('p').exists()).toBe(false)
+      await heading.get('button').trigger('click')
+      expect(wrapper.emitted('openDirectory')?.[0]).toEqual([item])
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('unchanged text does not submit, refetch or announce saved', async () => {
     const wrapper = mount(PluginSettingsModal, {
       props: { visible: true, plugin, plugins: [plugin] },

@@ -70,9 +70,6 @@
                   <div class="plugin-description" :title="pluginDescription(plugin)">
                     {{ pluginDescription(plugin) }}
                   </div>
-                  <div v-if="plugin.error" class="plugin-error" :title="pluginError(plugin)">
-                    {{ pluginError(plugin) }}
-                  </div>
                 </div>
               </div>
 
@@ -81,9 +78,39 @@
               </div>
 
               <div class="plugin-status">
-                <NTag size="small" :type="statusType(plugin.status)">
+                <NTooltip
+                  v-if="plugin.error"
+                  trigger="manual"
+                  :show="hoveredErrorName === plugin.name || focusedErrorName === plugin.name"
+                  class="plugin-error-tooltip"
+                >
+                  <template #trigger>
+                    <span
+                      class="plugin-status-hint"
+                      role="note"
+                      tabindex="0"
+                      :aria-label="t(`plugins.${plugin.status}`)"
+                      :aria-describedby="`${errorHintPrefix}-${plugin.name}`"
+                      @mouseenter="hoveredErrorName = plugin.name"
+                      @mouseleave="hoveredErrorName = null"
+                      @focus="focusedErrorName = plugin.name"
+                      @blur="focusedErrorName = null"
+                      @keydown.esc.stop.prevent="dismissErrorHints"
+                    >
+                      <NTag size="small" :type="statusType(plugin.status)">{{ t(`plugins.${plugin.status}`) }}</NTag>
+                    </span>
+                  </template>
+                  {{ pluginError(plugin) }}
+                </NTooltip>
+                <NTag v-else size="small" :type="statusType(plugin.status)">
                   {{ t(`plugins.${plugin.status}`) }}
                 </NTag>
+                <span
+                  v-if="plugin.error"
+                  :id="`${errorHintPrefix}-${plugin.name}`"
+                  class="plugin-status-description sr-only"
+                  >{{ pluginError(plugin) }}</span
+                >
                 <NTag v-if="plugin.pending_restart && plugin.status !== 'pending_restart'" size="small" type="warning">
                   {{ t('plugins.pending_restart') }}
                 </NTag>
@@ -190,10 +217,11 @@ import {
   NTab,
   NTabs,
   NTag,
+  NTooltip,
   type DropdownOption,
 } from 'naive-ui'
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
@@ -217,6 +245,16 @@ const permissionsVisible = ref(false)
 const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
+const errorHintPrefix = useId()
+const hoveredErrorName = ref<string | null>(null)
+const focusedErrorName = ref<string | null>(null)
+
+function dismissErrorHints(): void {
+  hoveredErrorName.value = null
+  focusedErrorName.value = null
+}
+
+watch([searchQuery, activeFilter], dismissErrorHints)
 const settingsModalVisible = ref(false)
 const settingsTarget = ref<PluginInfo | null>(null)
 const panelVisible = ref(false)

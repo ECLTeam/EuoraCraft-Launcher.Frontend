@@ -1,12 +1,89 @@
 import { createTestingPinia } from '@pinia/testing'
 import { flushPromises, mount } from '@vue/test-utils'
-import { NDropdown, NRadioGroup } from 'naive-ui'
+import { NDropdown, NRadioGroup, NTooltip } from 'naive-ui'
 import { describe, expect, it, vi } from 'vitest'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import { i18n } from '@/i18n'
 import Plugins from './Plugins.vue'
 
 describe('plugin management entry points', () => {
+  it.each([
+    ['review_required', 'PLUGIN_GRANT_REVIEW_REQUIRED', 'plugins.errors.PLUGIN_GRANT_REVIEW_REQUIRED'],
+    ['error', 'PLUGIN_WORKER_EXECUTION_FAILED', 'plugins.errors.PLUGIN_WORKER_EXECUTION_FAILED'],
+    ['error', 'PLUGIN_UNKNOWN_TEST_FAILURE', 'plugins.runtimeError'],
+    ['enabled', null, null],
+  ])('keeps %s reasons in the accessible status hint instead of the plugin identity', async (status, error, key) => {
+    const pinia = createTestingPinia({ createSpy: vi.fn })
+    const store = usePluginStore(pinia)
+    vi.mocked(store.start).mockResolvedValue()
+    store.plugins = [
+      {
+        name: 'demo',
+        title: 'Demo',
+        version: '1',
+        status: status!,
+        error,
+        description: 'Description',
+        author: '',
+        icon: '',
+        dependencies: {},
+        services: [],
+        is_system: false,
+      },
+    ]
+    const wrapper = mount(Plugins, {
+      global: {
+        plugins: [pinia, i18n],
+        stubs: {
+          PluginSettingsModal: true,
+          PluginPermissionsModal: true,
+          PluginPanelModal: true,
+          PluginPackageInstallModal: true,
+          PluginSlotHost: true,
+          Teleport: true,
+        },
+      },
+    })
+    try {
+      await flushPromises()
+      expect(wrapper.find('.plugin-error').exists()).toBe(false)
+      if (!key) {
+        expect(wrapper.find('[role="note"]').exists()).toBe(false)
+        expect(wrapper.findComponent(NTooltip).exists()).toBe(false)
+        return
+      }
+      const message = i18n.global.t(key)
+      expect(wrapper.get('.plugin-identity').text()).not.toContain(message)
+      const note = wrapper.get('[role="note"]')
+      expect(note.attributes('tabindex')).toBe('0')
+      const describedBy = note.attributes('aria-describedby')
+      const description = wrapper
+        .findAll('.plugin-status-description')
+        .find((item) => item.attributes('id') === describedBy)!
+      expect(description.text()).toBe(message)
+      const hint = wrapper.getComponent(NTooltip)
+      expect(hint.props('show')).toBe(false)
+      await note.trigger('mouseenter')
+      expect(hint.props('show')).toBe(true)
+      await note.trigger('focus')
+      await note.trigger('mouseleave')
+      expect(hint.props('show')).toBe(true)
+      await note.trigger('keydown', { key: 'Escape' })
+      expect(hint.props('show')).toBe(false)
+      await note.trigger('blur')
+      await note.trigger('focus')
+      expect(hint.props('show')).toBe(true)
+      await note.trigger('blur')
+      expect(hint.props('show')).toBe(false)
+      await note.trigger('mouseenter')
+      await wrapper.get('.plugins-search input').setValue('no matches')
+      await wrapper.get('.plugins-search input').setValue('')
+      expect(wrapper.getComponent(NTooltip).props('show')).toBe(false)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('keeps settings and installation available without a development switch', async () => {
     const pinia = createTestingPinia({ createSpy: vi.fn })
     const store = usePluginStore(pinia)

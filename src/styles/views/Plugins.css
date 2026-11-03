@@ -146,14 +146,20 @@
   white-space: nowrap;
 }
 
-.plugin-error {
-  overflow: hidden;
-  margin-top: 2px;
-  color: var(--error);
-  font-size: 10px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.plugin-status-hint {
+  display: inline-flex;
+  max-width: 100%;
+  border-radius: var(--ecl-radius-control);
+}
+
+.plugin-status-hint:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.plugin-error-tooltip {
+  max-width: min(320px, calc(100vw - var(--ecl-page-padding) * 2));
+  overflow-wrap: anywhere;
 }
 
 .plugin-version,
