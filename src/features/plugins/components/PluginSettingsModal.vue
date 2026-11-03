@@ -41,95 +41,99 @@
         </nav>
       </aside>
       <section class="plugin-settings-detail ecl-surface" :aria-label="t('plugins.configuration')">
-        <template v-if="selected">
-          <header class="plugin-settings-heading">
-            <div class="plugin-settings-title">
-              <h2 :title="`${selected.title || selected.name}\n${selected.name}`">
-                {{ selected.title || selected.name }}
-              </h2>
-              <NTag class="plugin-settings-version" size="small" :bordered="false">v{{ selected.version }}</NTag>
-            </div>
-            <NButton
-              v-if="selected.source === 'directory' && selected.installation_id"
-              size="small"
-              @click="emit('openDirectory', selected)"
-              >{{ t('plugins.openDirectory') }}</NButton
-            >
-          </header>
-          <div
-            class="plugin-settings-content"
-            :class="{
-              'plugin-settings-content--state':
-                loading || loadError || !data?.schema.length || data?.editable === false,
-            }"
-          >
-            <UiLoading v-if="loading" mode="inline" />
-            <NAlert v-else-if="loadError" type="error" :showIcon="false">
-              {{ loadError }} <NButton text @click="load">{{ t('common.retry') }}</NButton>
-            </NAlert>
-            <NAlert v-else-if="data?.editable === false" type="info" :showIcon="false">
-              {{ t('plugins.settingsUnavailable') }}
-              <NButton v-if="selected.status !== 'enabled'" text @click="emit('activate', selected)">
-                {{ t('plugins.enable') }}</NButton
+        <Transition name="fade" mode="out-in" @beforeLeave="disableLeavingSettings">
+          <div :key="selectedId" class="plugin-settings-detail-view">
+            <template v-if="selected">
+              <header class="plugin-settings-heading">
+                <div class="plugin-settings-title">
+                  <h2 :title="`${selected.title || selected.name}\n${selected.name}`">
+                    {{ selected.title || selected.name }}
+                  </h2>
+                  <NTag class="plugin-settings-version" size="small" :bordered="false">v{{ selected.version }}</NTag>
+                </div>
+                <NButton
+                  v-if="selected.source === 'directory' && selected.installation_id"
+                  size="small"
+                  @click="emit('openDirectory', selected)"
+                  >{{ t('plugins.openDirectory') }}</NButton
+                >
+              </header>
+              <div
+                class="plugin-settings-content"
+                :class="{
+                  'plugin-settings-content--state':
+                    loading || loadError || !data?.schema.length || data?.editable === false,
+                }"
               >
-            </NAlert>
-            <NEmpty v-else-if="!data?.schema.length" :description="t('plugins.noSettings')" />
-            <ul v-else class="plugin-setting-list">
-              <li v-for="item in data.schema" :key="item.key" class="plugin-setting-row">
-                <div class="plugin-setting-label">
-                  <strong>{{ item.description || item.key }}</strong> <span>{{ item.key }}</span>
-                </div>
-                <div class="plugin-setting-value">
-                  <NSwitch
-                    v-if="item.type === 'bool'"
-                    size="small"
-                    :aria-label="item.description || item.key"
-                    :disabled="isSaving"
-                    :value="values[item.key] === true"
-                    @update:value="save(item.key, $event)"
-                  />
-                  <NInputNumber
-                    v-else-if="item.type === 'number'"
-                    size="small"
-                    class="setting-control"
-                    :disabled="isSaving"
-                    :inputProps="{ 'aria-label': item.description || item.key }"
-                    :value="numberValue(values[item.key])"
-                    @update:value="saveNumber(item.key, $event)"
-                  />
-                  <NSelect
-                    v-else-if="item.type === 'select'"
-                    size="small"
-                    class="setting-control"
-                    :disabled="isSaving"
-                    :aria-label="item.description || item.key"
-                    :value="stringValue(values[item.key])"
-                    :options="(item.options ?? []).map((value) => ({ label: value, value }))"
-                    @update:value="save(item.key, $event)"
-                  />
-                  <NInput
-                    v-else
-                    size="small"
-                    class="setting-control"
-                    :disabled="isSaving"
-                    :inputProps="{ 'aria-label': item.description || item.key }"
-                    :value="stringValue(values[item.key])"
-                    @update:value="values[item.key] = $event"
-                    @change="save(item.key, $event)"
-                  />
-                </div>
-              </li>
-            </ul>
-            <NAlert v-if="saveError" class="plugin-settings-feedback" type="error" :showIcon="false">
-              {{ saveError }}
-              <NButton v-if="failedWrite" text @click="retrySave">{{ t('common.retry') }}</NButton>
-              <NButton text @click="load">{{ t('plugins.reloadSettings') }}</NButton>
-            </NAlert>
-            <p v-if="isSaving" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaving') }}</p>
-            <p v-else-if="saved" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaved') }}</p>
+                <UiLoading v-if="loading" mode="inline" />
+                <NAlert v-else-if="loadError" type="error" :showIcon="false">
+                  {{ loadError }} <NButton text @click="load">{{ t('common.retry') }}</NButton>
+                </NAlert>
+                <NAlert v-else-if="data?.editable === false" type="info" :showIcon="false">
+                  {{ t('plugins.settingsUnavailable') }}
+                  <NButton v-if="selected.status !== 'enabled'" text @click="emit('activate', selected)">
+                    {{ t('plugins.enable') }}</NButton
+                  >
+                </NAlert>
+                <NEmpty v-else-if="!data?.schema.length" :description="t('plugins.noSettings')" />
+                <ul v-else class="plugin-setting-list">
+                  <li v-for="item in data.schema" :key="item.key" class="plugin-setting-row">
+                    <div class="plugin-setting-label">
+                      <strong>{{ item.description || item.key }}</strong> <span>{{ item.key }}</span>
+                    </div>
+                    <div class="plugin-setting-value">
+                      <NSwitch
+                        v-if="item.type === 'bool'"
+                        size="small"
+                        :aria-label="item.description || item.key"
+                        :disabled="isSaving"
+                        :value="values[item.key] === true"
+                        @update:value="save(item.key, $event)"
+                      />
+                      <NInputNumber
+                        v-else-if="item.type === 'number'"
+                        size="small"
+                        class="setting-control"
+                        :disabled="isSaving"
+                        :inputProps="{ 'aria-label': item.description || item.key }"
+                        :value="numberValue(values[item.key])"
+                        @update:value="saveNumber(item.key, $event)"
+                      />
+                      <NSelect
+                        v-else-if="item.type === 'select'"
+                        size="small"
+                        class="setting-control"
+                        :disabled="isSaving"
+                        :aria-label="item.description || item.key"
+                        :value="stringValue(values[item.key])"
+                        :options="(item.options ?? []).map((value) => ({ label: value, value }))"
+                        @update:value="save(item.key, $event)"
+                      />
+                      <NInput
+                        v-else
+                        size="small"
+                        class="setting-control"
+                        :disabled="isSaving"
+                        :inputProps="{ 'aria-label': item.description || item.key }"
+                        :value="stringValue(values[item.key])"
+                        @update:value="values[item.key] = $event"
+                        @change="save(item.key, $event)"
+                      />
+                    </div>
+                  </li>
+                </ul>
+                <NAlert v-if="saveError" class="plugin-settings-feedback" type="error" :showIcon="false">
+                  {{ saveError }}
+                  <NButton v-if="failedWrite" text @click="retrySave">{{ t('common.retry') }}</NButton>
+                  <NButton text @click="load">{{ t('plugins.reloadSettings') }}</NButton>
+                </NAlert>
+                <p v-if="isSaving" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaving') }}</p>
+                <p v-else-if="saved" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaved') }}</p>
+              </div>
+            </template>
+            <NEmpty v-else :description="t('plugins.selectPlugin')" />
           </div>
-        </template>
-        <NEmpty v-else :description="t('plugins.selectPlugin')" />
+        </Transition>
       </section>
     </div>
   </FullscreenModal>
@@ -185,6 +189,11 @@ let unlisten: (() => void) | null = null
 
 function select(plugin: PluginInfo): void {
   selectedId.value = identity(plugin)
+}
+function disableLeavingSettings(element: Element): void {
+  // 离场期间仍显示旧表单，不能让它向新选中的插件提交操作。
+  element.setAttribute('inert', '')
+  element.setAttribute('aria-hidden', 'true')
 }
 function stringValue(value: unknown): string {
   return typeof value === 'string' ? value : ''
@@ -311,6 +320,12 @@ onUnmounted(() => unlisten?.())
   flex-direction: column;
   overflow: hidden;
 }
+.plugin-settings-detail-view {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
 .plugin-settings-nav-title {
   display: flex;
   align-items: center;
@@ -357,6 +372,9 @@ onUnmounted(() => unlisten?.())
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-emphasized),
+    color var(--duration-fast) var(--ease-emphasized);
 }
 .plugin-settings-choice:hover {
   background: var(--ecl-hover);
