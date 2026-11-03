@@ -217,6 +217,7 @@
         <SettingRow :label="t('settings.preLaunchCommand')" :description="inheritedDescription('pre_launch_command')">
           <NInput
             :value="versionSettings.preLaunchCommand ?? ''"
+            class="argument-input"
             :placeholder="settingsStore.game.pre_launch_command || t('instanceSettings.inherit')"
             type="textarea"
             :autosize="{ minRows: 2, maxRows: 6 }"
