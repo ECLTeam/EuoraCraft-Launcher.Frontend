@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { NSelect, NSwitch, NInput, NInputNumber } from 'naive-ui'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { reactive } from 'vue'
+import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { createDefaultVersionSettings } from '@/features/instances/model/instanceSettings'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import { i18n } from '@/i18n'
@@ -37,7 +38,7 @@ const wrappers: ReturnType<typeof mount>[] = []
 function mountSettings(id = 'A') {
   const wrapper = mount(InstanceDetailSettingsTab, {
     props: { version: version(id), visible: true },
-    global: { plugins: [i18n], stubs: { JavaRuntimeSelector: true } },
+    global: { plugins: [i18n], stubs: { JavaRuntimeSelector: true, ConfirmDialog: true } },
   })
   wrappers.push(wrapper)
   return wrapper
@@ -57,15 +58,17 @@ describe('InstanceDetailSettingsTab', () => {
     mocks.get.mockResolvedValue({ ...createDefaultVersionSettings(), memory: 8192, javaPath: 'global-java' })
     const wrapper = mountSettings()
     await flushPromises()
-    expect(wrapper.get('.settings-summary-copy strong').text()).toBe(
-      i18n.global.t('versions.detail.usingGlobalSettings')
+    expect(wrapper.find('.settings-summary').exists()).toBe(false)
+    expect(wrapper.get('.instance-launch-config .card-header').text()).toContain(
+      i18n.global.t('versions.detail.launchConfig')
     )
-    expect(wrapper.get('.settings-summary button').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.instance-launch-config .card-header button').attributes('disabled')).toBeDefined()
   })
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.get.mockResolvedValue(createDefaultVersionSettings())
     mocks.save.mockResolvedValue(undefined)
+    mocks.reset.mockReset().mockResolvedValue(undefined)
     i18n.global.locale.value = 'zh-CN'
   })
   afterEach(() => {
@@ -138,10 +141,77 @@ describe('InstanceDetailSettingsTab', () => {
       .find((button) => button.text().includes('恢复全局设置'))!
       .trigger('click')
     await flushPromises()
+    const confirmation = wrapper.getComponent(ConfirmDialog)
+    expect(confirmation.props('visible')).toBe(true)
+    expect(mocks.reset).not.toHaveBeenCalled()
+    confirmation.vm.$emit('confirm')
+    await flushPromises()
     await vi.advanceTimersByTimeAsync(350)
     expect(mocks.reset).toHaveBeenCalledWith({ path: 'C:/Game', versionId: 'A' })
     expect(mocks.save).not.toHaveBeenCalled()
     expect(memory.props('value')).toBe(true)
+  })
+
+  it('keeps custom settings when the restore confirmation is cancelled', async () => {
+    mocks.get.mockResolvedValue({ ...createDefaultVersionSettings(), memoryMode: 'manual', memory: 8192 })
+    const wrapper = mountSettings()
+    await flushPromises()
+    await wrapper.get('.instance-launch-config .card-header button').trigger('click')
+    const confirmation = wrapper.getComponent(ConfirmDialog)
+    expect(confirmation.props('visible')).toBe(true)
+    expect(confirmation.props('content')).toContain('A')
+    expect(mocks.reset).not.toHaveBeenCalled()
+    confirmation.vm.$emit('update:visible', false)
+    await flushPromises()
+    expect(confirmation.props('visible')).toBe(false)
+    expect(control(wrapper, 'settings.memoryAuto', NSwitch).props('value')).toBe(false)
+    expect(mocks.reset).not.toHaveBeenCalled()
+  })
+
+  it('rejects duplicate confirmation and keeps a failed restore retryable', async () => {
+    mocks.get.mockResolvedValue({ ...createDefaultVersionSettings(), memoryMode: 'manual', memory: 8192 })
+    let rejectReset!: (reason: Error) => void
+    mocks.reset.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectReset = reject
+        })
+    )
+    const wrapper = mountSettings()
+    await flushPromises()
+    await wrapper.get('.instance-launch-config .card-header button').trigger('click')
+    const confirmation = wrapper.getComponent(ConfirmDialog)
+    confirmation.vm.$emit('confirm')
+    await flushPromises()
+    expect(confirmation.props('loading')).toBe(true)
+    confirmation.vm.$emit('confirm')
+    await flushPromises()
+    expect(mocks.reset).toHaveBeenCalledOnce()
+    rejectReset(new Error('Reset failed'))
+    await flushPromises()
+    expect(confirmation.props('visible')).toBe(true)
+    expect(confirmation.props('loading')).toBe(false)
+    expect(control(wrapper, 'settings.memoryAuto', NSwitch).props('value')).toBe(false)
+    confirmation.vm.$emit('confirm')
+    await flushPromises()
+    expect(mocks.reset).toHaveBeenCalledTimes(2)
+    expect(confirmation.props('visible')).toBe(false)
+    expect(control(wrapper, 'settings.memoryAuto', NSwitch).props('value')).toBe(true)
+  })
+
+  it('closes an old confirmation when its instance changes', async () => {
+    mocks.get.mockResolvedValue({ ...createDefaultVersionSettings(), memoryMode: 'manual', memory: 8192 })
+    const wrapper = mountSettings('A')
+    await flushPromises()
+    await wrapper.get('.instance-launch-config .card-header button').trigger('click')
+    const confirmation = wrapper.getComponent(ConfirmDialog)
+    expect(confirmation.props('visible')).toBe(true)
+    await wrapper.setProps({ version: version('B') })
+    await flushPromises()
+    expect(confirmation.props('visible')).toBe(false)
+    confirmation.vm.$emit('confirm')
+    await flushPromises()
+    expect(mocks.reset).not.toHaveBeenCalled()
   })
 
   it('saves false distinctly, restores equal global values and clears command overrides', async () => {

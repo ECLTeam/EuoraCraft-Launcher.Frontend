@@ -4,25 +4,18 @@
     <span>{{ t('versions.detail.loadingSettings') }}</span>
   </div>
   <template v-else>
-    <div class="settings-summary">
-      <div class="settings-summary-copy">
-        <strong>{{
-          isCustomized ? t('versions.detail.customizedSettings') : t('versions.detail.usingGlobalSettings')
-        }}</strong>
-        <span>{{ t('versions.detail.settings') }} · {{ version?.versionId || '-' }}</span>
-      </div>
-      <NButton
-        size="small"
-        secondary
-        :disabled="settingsSaving || !isCustomized"
-        :loading="settingsSaving"
-        @click="resetSettings"
-      >
-        {{ t('versions.detail.inheritGlobal') }}
-      </NButton>
-    </div>
-
-    <SettingSection :title="t('versions.detail.launchConfig')">
+    <UiCard class="instance-launch-config" :title="t('versions.detail.launchConfig')" icon="settings">
+      <template #actions>
+        <NButton
+          size="small"
+          secondary
+          :disabled="settingsSaving || !isCustomized"
+          :loading="settingsSaving"
+          @click="requestSettingsReset"
+        >
+          {{ t('versions.detail.inheritGlobal') }}
+        </NButton>
+      </template>
       <div class="settings-subgroup">
         <div class="settings-subgroup__title">{{ t('versions.detail.launchOptions') }}</div>
         <SettingRow :label="t('versions.detail.isolated')" :description="t('versions.detail.isolatedDesc')">
@@ -203,13 +196,15 @@
               :min="320"
               :max="16384"
               :placeholder="String(settingsStore.game.game_width ?? 854)"
+              :inputProps="{ 'aria-label': t('settings.windowWidth') }"
             />
-            <span>×</span>
+            <span class="instance-window-separator" aria-hidden="true">×</span>
             <NInputNumber
               v-model:value="heightInput"
               :min="240"
               :max="16384"
               :placeholder="String(settingsStore.game.game_height ?? 480)"
+              :inputProps="{ 'aria-label': t('settings.windowHeight') }"
             />
           </div>
         </SettingRow>
@@ -261,6 +256,8 @@
         <SettingRow :label="t('settings.windowTitle')" :description="inheritedDescription('window_title_template')">
           <NInput
             :value="versionSettings.windowTitle"
+            class="instance-wide-control"
+            :inputProps="{ 'aria-label': t('settings.windowTitle') }"
             @update:value="setCommandText('windowTitle', 'window_title_template', $event)"
           />
         </SettingRow>
@@ -268,17 +265,35 @@
           :label="t('settings.launcherVisibility')"
           :description="inheritedDescription('launcher_visibility')"
         >
-          <NSelect v-model:value="launcherVisibilityInput" :consistentMenuWidth="false" :options="visibilityOptions" />
+          <NSelect
+            v-model:value="launcherVisibilityInput"
+            class="instance-wide-control"
+            :aria-label="t('settings.launcherVisibility')"
+            :consistentMenuWidth="false"
+            :options="visibilityOptions"
+          />
         </SettingRow>
       </div>
-    </SettingSection>
+    </UiCard>
   </template>
+  <ConfirmDialog
+    v-model:visible="resetConfirmationVisible"
+    :title="t('versions.detail.inheritGlobal')"
+    :content="t('versions.detail.confirmInheritGlobal', { name: version?.displayName || version?.versionId || '' })"
+    :confirmText="t('versions.detail.inheritGlobal')"
+    :loading="settingsSaving"
+    :confirmDisabled="!isCustomized"
+    :closeOnConfirm="false"
+    @confirm="resetSettings"
+  />
 </template>
 
 <script setup lang="ts">
 import { NButton, NInput, NInputNumber, NSelect, NSwitch } from 'naive-ui'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
+import UiCard from '@/components/ui/Card.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceSettingsApi } from '@/features/instances/api/instanceSettingsApi'
@@ -297,7 +312,6 @@ import {
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import JavaRuntimeSelector from '@/features/settings/components/JavaRuntimeSelector.vue'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
-import SettingSection from '@/features/settings/components/SettingSection.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import type { SystemMemoryInfo } from '@/types/config'
 import type { ScannedVersion } from '@/types/instances'
@@ -486,6 +500,7 @@ function setCommandText(
 
 const settingsLoading = ref(false)
 const settingsSaving = ref(false)
+const resetConfirmationVisible = ref(false)
 const systemMemory = ref<SystemMemoryInfo>({ totalMb: 16384, usedMb: 4096, freeMb: 12288, percentUsed: 25 })
 const systemMemoryError = ref(false)
 
@@ -679,9 +694,20 @@ watch(
   { deep: true }
 )
 
+function requestSettingsReset(): void {
+  if (props.visible && loadedSettingsTarget && !settingsSaving.value && isCustomized.value)
+    resetConfirmationVisible.value = true
+}
+
+watch(
+  () => JSON.stringify([props.visible, getSettingsTarget()]),
+  () => (resetConfirmationVisible.value = false),
+  { flush: 'sync' }
+)
+
 async function resetSettings() {
   const target = loadedSettingsTarget
-  if (!target) return
+  if (!target || !resetConfirmationVisible.value || settingsSaving.value || !isCustomized.value) return
   if (settingsSaveTimer) {
     clearTimeout(settingsSaveTimer)
     settingsSaveTimer = null
@@ -699,6 +725,7 @@ async function resetSettings() {
     skipSettingsWatch = true
     if (JSON.stringify(versionSettings) === beforeReset) Object.assign(versionSettings, defaults)
     savedSettingsSnapshot.value = JSON.stringify(defaults)
+    resetConfirmationVisible.value = false
     message.success(t('versions.detail.settingsReset'))
   } catch (error) {
     message.error(error instanceof Error ? error.message : t('versions.detail.saveSettingsFailed'))
@@ -730,9 +757,35 @@ onBeforeUnmount(() => {
 <style scoped src="@/styles/views/instances/InstanceDetailModal.css"></style>
 
 <style scoped>
+.instance-launch-config :deep(.card-header) {
+  min-height: 48px;
+  padding: var(--s-sm) var(--s-lg);
+  gap: var(--s-sm);
+  flex-wrap: wrap;
+}
+.instance-launch-config :deep(.header-actions) {
+  margin-left: auto;
+}
+.instance-launch-config :deep(.card-body) {
+  padding: 0;
+}
 .instance-window-controls {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: var(--s-sm);
+}
+.instance-window-separator {
+  flex-shrink: 0;
+  line-height: 1;
+}
+:deep(.setting-control:has(.instance-wide-control)) {
+  flex-shrink: 1;
+  min-width: 0;
+  width: min(600px, 60%);
+}
+:deep(.instance-wide-control) {
+  min-width: 0;
+  width: 100%;
 }
 :deep(.argument-input) {
   min-width: 260px;
