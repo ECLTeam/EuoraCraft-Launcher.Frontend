@@ -6,6 +6,7 @@ import { queryClient } from '@/app/queryClient'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import { javaApi } from '@/features/java/api/javaApi'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
+import { settingsApi } from '@/features/settings/api/settingsApi'
 import { i18n } from '@/i18n'
 import { javaInventory, javaRuntime } from '@/test/javaFixtures'
 import JavaDownloadModal from './JavaDownloadModal.vue'
@@ -45,6 +46,63 @@ async function render(props = {}) {
 }
 
 describe('Java 管理与拥有权提示', () => {
+  it('搜索位于标题栏，扫描和检查更新使用有名称的纯图标', async () => {
+    const wrapper = await render()
+    expect(wrapper.find('.java-manager-toolbar input').exists()).toBe(true)
+    expect(wrapper.find('.java-manager-content input').exists()).toBe(false)
+    for (const label of ['重新扫描', '检查更新']) {
+      const button = wrapper.get(`.java-manager-toolbar button[aria-label="${label}"]`)
+      expect(button.attributes('title')).toBe(label)
+      expect(button.text()).toBe('')
+      expect(button.classes()).toContain('is-icon-only')
+    }
+  })
+
+  it('合并菜单可用 Esc 关闭，选择下载仅打开全屏目录', async () => {
+    const wrapper = await render()
+    const menu = wrapper.get('.java-manager-toolbar').getComponent(NDropdown)
+    expect(menu.props('options')).toEqual([
+      expect.objectContaining({ key: 'download', label: '下载 Java' }),
+      expect.objectContaining({ key: 'register', label: '添加现有 Java' }),
+    ])
+    menu.vm.$emit('update:show', true)
+    await flushPromises()
+    expect(wrapper.get('.java-add-button').attributes('aria-expanded')).toBe('true')
+    await wrapper.get('.java-add-button').trigger('keydown', { key: 'Escape' })
+    expect(menu.props('show')).toBe(false)
+    menu.vm.$emit('select', 'download')
+    await flushPromises()
+    expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(true)
+  })
+
+  it('合并入口阻止重复登记，失败后允许重新选择并登记', async () => {
+    let rejectRegister!: (error: Error) => void
+    vi.spyOn(settingsApi, 'selectJava').mockResolvedValue('C:/SelectedJava/bin/java.exe')
+    const register = vi.spyOn(javaApi, 'register').mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectRegister = reject
+        })
+    )
+    const wrapper = await render()
+    const menu = wrapper.get('.java-manager-toolbar').getComponent(NDropdown)
+    menu.vm.$emit('select', 'register')
+    await flushPromises()
+    menu.vm.$emit('select', 'register')
+    await flushPromises()
+    expect(register).toHaveBeenCalledExactlyOnceWith('C:/SelectedJava/bin/java.exe')
+    expect(menu.props('options')!.every((option) => option.disabled)).toBe(true)
+    rejectRegister(new Error('登记失败'))
+    await flushPromises()
+    expect(wrapper.text()).toContain('登记失败')
+    expect(wrapper.get('.java-add-button').attributes('disabled')).toBeUndefined()
+    register.mockResolvedValueOnce(javaRuntime())
+    menu.vm.$emit('select', 'register')
+    await flushPromises()
+    expect(register).toHaveBeenCalledTimes(2)
+    expect(javaApi.inventory).toHaveBeenCalledTimes(2)
+  })
+
   it('空清单打开独立下载弹窗，保留管理内容且不提交安装', async () => {
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory())
     vi.spyOn(javaApi, 'catalog').mockResolvedValue({
@@ -82,7 +140,7 @@ describe('Java 管理与拥有权提示', () => {
     const wrapper = await render()
     expect(wrapper.text()).toContain('使用中')
     expect(wrapper.text()).toContain('已被 1 项设置引用')
-    const menu = wrapper.getComponent(NDropdown)
+    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
     expect(menu.props('options')!.find((option) => option.key === 'remove')).toMatchObject({ disabled: true })
     menu.vm.$emit('select', 'remove')
     await flushPromises()
@@ -95,7 +153,7 @@ describe('Java 管理与拥有权提示', () => {
     const wrapper = await render()
     expect(wrapper.get('.java-runtime-path-trigger').attributes('title')).toBe(executablePath)
     expect(wrapper.get('.java-runtime-path-trigger').attributes('aria-label')).toBe('查看完整路径')
-    const popover = wrapper.getComponent(NPopover)
+    const popover = wrapper.get('.java-runtime-actions').getComponent(NPopover)
     popover.vm.$emit('update:show', true)
     await flushPromises()
     expect(popover.props('show')).toBe(true)
@@ -104,7 +162,7 @@ describe('Java 管理与拥有权提示', () => {
     popover.vm.$emit('update:show', true)
     await wrapper.get('input').setValue('no-matching-runtime')
     await wrapper.get('input').setValue('')
-    expect(wrapper.getComponent(NPopover).props('show')).toBe(false)
+    expect(wrapper.get('.java-runtime-actions').getComponent(NPopover).props('show')).toBe(false)
     const actions = wrapper.get('.java-runtime-actions')
     expect(actions.text()).toContain('设为全局 Java')
     expect(wrapper.get('.java-runtime-more').attributes('aria-label')).toContain('更多操作')
@@ -114,7 +172,7 @@ describe('Java 管理与拥有权提示', () => {
 
   it('更多菜单可用 Esc 关闭，搜索后不会重新展开', async () => {
     const wrapper = await render()
-    const menu = wrapper.getComponent(NDropdown)
+    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
     menu.vm.$emit('update:show', true)
     await flushPromises()
     expect(menu.props('show')).toBe(true)
@@ -123,7 +181,7 @@ describe('Java 管理与拥有权提示', () => {
     menu.vm.$emit('update:show', true)
     await wrapper.get('input').setValue('no-matching-runtime')
     await wrapper.get('input').setValue('')
-    expect(wrapper.getComponent(NDropdown).props('show')).toBe(false)
+    expect(wrapper.get('.java-runtime-actions').getComponent(NDropdown).props('show')).toBe(false)
   })
 
   it.each(['managed', 'manual', 'system'] as const)('更多菜单保留 %s 来源的移除权限和确认流程', async (origin) => {
@@ -132,7 +190,7 @@ describe('Java 管理与拥有权提示', () => {
     const remove = vi.spyOn(javaApi, 'remove').mockResolvedValue({ operationId: 'remove-java', status: 'pending' })
     const forget = vi.spyOn(javaApi, 'forget').mockResolvedValue({ removed: true })
     const wrapper = await render()
-    const menu = wrapper.getComponent(NDropdown)
+    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
     const removal = menu.props('options')!.find((option) => option.key === 'remove')
     if (origin === 'system') {
       expect(removal).toBeUndefined()
@@ -158,7 +216,7 @@ describe('Java 管理与拥有权提示', () => {
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory([runtime]))
     const setEnabled = vi.spyOn(javaApi, 'setEnabled').mockResolvedValue({ ...runtime, isEnabled: false })
     const wrapper = await render()
-    wrapper.getComponent(NDropdown).vm.$emit('select', 'toggle')
+    wrapper.get('.java-runtime-actions').getComponent(NDropdown).vm.$emit('select', 'toggle')
     await flushPromises()
     expect(setEnabled).toHaveBeenCalledWith(runtime.runtimeId, false)
     expect(javaApi.inventory).toHaveBeenCalledTimes(2)

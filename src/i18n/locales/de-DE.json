@@ -2492,6 +2492,7 @@
     "unknownRequirement": "Java-Versionsanforderung unbekannt"
   },
   "javaManager": {
+    "addJava": "Java hinzufügen",
     "title": "Java-Verwaltung",
     "installed": "Installiert",
     "download": "Download",

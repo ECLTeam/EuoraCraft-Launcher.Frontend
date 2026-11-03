@@ -1,4 +1,5 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
+import { NDropdown } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { javaApi } from '@/features/java/api/javaApi'
@@ -55,10 +56,7 @@ describe('Java 管理页卡片承托', () => {
   it('下载打开独立弹窗，原卡片和已安装列表保持不变', async () => {
     const wrapper = await render()
     const card = wrapper.get('[data-theme-component="card"]').element
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === '下载 Java')!
-      .trigger('click')
+    wrapper.get('.java-manager-toolbar').getComponent(NDropdown).vm.$emit('select', 'download')
     await flushPromises()
     expect(wrapper.get('[data-theme-component="card"]').element).toBe(card)
     const content = wrapper.get('[data-theme-component="card"]')

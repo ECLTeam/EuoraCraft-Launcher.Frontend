@@ -1,20 +1,61 @@
 <template>
   <section class="java-manager">
     <header class="java-manager-toolbar">
-      <div class="java-manager-title"><UiIcon name="cube" :size="16" />{{ t('javaManager.title') }}</div>
+      <div class="java-manager-title"><JavaRuntimeIcon :size="18" />{{ t('javaManager.title') }}</div>
+      <NInput
+        v-model:value="query"
+        class="java-manager-search"
+        clearable
+        size="small"
+        :placeholder="t('javaManager.search')"
+        :aria-label="t('javaManager.search')"
+      >
+        <template #prefix><UiIcon name="search" :size="15" /></template>
+      </NInput>
       <div class="java-manager-actions">
-        <UiButton size="sm" variant="primary" icon="download" @click="downloadVisible = true">{{
-          t('javaManager.downloadJava')
-        }}</UiButton>
-        <UiButton size="sm" variant="ghost" icon="refresh" :loading="store.isLoading" @click="load(true)">{{
-          t('javaManager.rescan')
-        }}</UiButton>
-        <UiButton size="sm" variant="ghost" icon="download" :loading="isCheckingUpdates" @click="checkUpdates">{{
-          t('javaManager.checkUpdates')
-        }}</UiButton>
-        <UiButton size="sm" variant="secondary" icon="plus" :loading="isRegistering" @click="register">{{
-          t('javaManager.add')
-        }}</UiButton>
+        <UiButton
+          size="sm"
+          variant="ghost"
+          shape="square"
+          icon="refresh"
+          :loading="store.isLoading"
+          :title="t('javaManager.rescan')"
+          :aria-label="t('javaManager.rescan')"
+          @click="load(true)"
+        />
+        <UiButton
+          size="sm"
+          variant="ghost"
+          shape="square"
+          icon="download"
+          :loading="isCheckingUpdates"
+          :title="t('javaManager.checkUpdates')"
+          :aria-label="t('javaManager.checkUpdates')"
+          @click="checkUpdates"
+        />
+        <NDropdown
+          trigger="click"
+          placement="bottom-end"
+          :options="addJavaOptions"
+          :show="addMenuVisible"
+          to="#app"
+          @update:show="addMenuVisible = $event"
+          @select="handleAddJava"
+        >
+          <UiButton
+            class="java-add-button"
+            size="sm"
+            variant="primary"
+            icon="plus"
+            :loading="isRegistering"
+            :disabled="isActing"
+            aria-haspopup="menu"
+            :aria-expanded="addMenuVisible"
+            @keydown.esc="closeRuntimeOverlayOnEscape"
+          >
+            {{ t('javaManager.addJava') }}<UiIcon name="chevron-down" :size="14" />
+          </UiButton>
+        </NDropdown>
       </div>
     </header>
 
@@ -28,15 +69,6 @@
         }}</UiButton></NAlert
       >
 
-      <NInput
-        v-model:value="query"
-        clearable
-        size="small"
-        :placeholder="t('javaManager.search')"
-        :aria-label="t('javaManager.search')"
-      >
-        <template #prefix><UiIcon name="search" :size="15" /></template>
-      </NInput>
       <UiLoading v-if="store.isLoading && !store.runtimes.length" :label="t('javaManager.scanning')" />
       <UiEmptyState
         v-else-if="!filteredRuntimes.length"
@@ -54,7 +86,7 @@
       <div v-else class="java-runtime-list">
         <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
           <div class="java-runtime-identity">
-            <UiIcon name="cube" :size="36" class="java-runtime-icon" />
+            <JavaRuntimeIcon class="java-runtime-icon" />
             <div class="java-runtime-copy">
               <strong>Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</strong>
               <span :title="runtime.vendor || t('javaManager.unknownVendor')">{{
@@ -179,6 +211,7 @@ import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { javaApi } from '@/features/java/api/javaApi'
 import JavaDownloadModal from '@/features/java/components/JavaDownloadModal.vue'
+import JavaRuntimeIcon from '@/features/java/components/JavaRuntimeIcon.vue'
 import { useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
@@ -203,6 +236,7 @@ const settingsStore = useSettingsStore()
 const message = useLauncherMessage()
 const downloadVisible = ref(props.initialView === 'download')
 const query = ref('')
+const addMenuVisible = ref(false)
 const visiblePathId = ref<string | null>(null)
 const visibleMenuId = ref<string | null>(null)
 const error = ref('')
@@ -216,6 +250,17 @@ const confirmVisible = ref(false)
 let generation = 0
 let planGeneration = 0
 let isMounted = true
+
+const addJavaOptions = computed<DropdownOption[]>(() => [
+  { key: 'download', label: t('javaManager.downloadJava'), disabled: isRegistering.value || isActing.value },
+  { key: 'register', label: t('javaManager.add'), disabled: isRegistering.value || isActing.value },
+])
+function handleAddJava(action: string): void {
+  if (isRegistering.value || isActing.value) return
+  addMenuVisible.value = false
+  if (action === 'download') downloadVisible.value = true
+  else if (action === 'register') void register()
+}
 
 const filteredRuntimes = computed(() => {
   const needle = query.value.trim().toLowerCase()
@@ -320,8 +365,9 @@ async function openFolder(runtime: JavaRuntime) {
 }
 
 function closeRuntimeOverlayOnEscape(event: KeyboardEvent) {
-  if (visiblePathId.value === null && visibleMenuId.value === null) return
+  if (!addMenuVisible.value && visiblePathId.value === null && visibleMenuId.value === null) return
   event.stopPropagation()
+  addMenuVisible.value = false
   visiblePathId.value = null
   visibleMenuId.value = null
 }
@@ -435,6 +481,7 @@ async function retryCleanup() {
   }
 }
 watch([downloadVisible, query], () => {
+  addMenuVisible.value = false
   visiblePathId.value = null
   visibleMenuId.value = null
 })
@@ -442,6 +489,7 @@ watch(
   () => JSON.stringify([props.scopeKey, props.gamePath, props.versionId, props.requiredMajor]),
   () => {
     generation++
+    addMenuVisible.value = false
     confirmVisible.value = false
     isActing.value = false
     isRegistering.value = false

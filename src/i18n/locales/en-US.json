@@ -2509,6 +2509,7 @@
     "unknownRequirement": "Java version requirement is unknown"
   },
   "javaManager": {
+    "addJava": "Add Java",
     "title": "Java management",
     "installed": "Installed",
     "download": "Download",

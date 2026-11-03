@@ -2492,6 +2492,7 @@
     "unknownRequirement": "必要なJavaバージョンは不明です"
   },
   "javaManager": {
+    "addJava": "Java を追加",
     "title": "Java管理",
     "installed": "インストール済み",
     "download": "ダウンロード",

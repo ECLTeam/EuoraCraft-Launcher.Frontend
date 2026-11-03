@@ -18,8 +18,9 @@
   gap: var(--s-sm);
 }
 .java-manager-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) auto;
   flex-shrink: 0;
-  flex-wrap: wrap;
   min-height: 48px;
   justify-content: space-between;
   padding: var(--s-sm) var(--s-lg);
@@ -30,13 +31,22 @@
   font-weight: 600;
   color: var(--text-primary);
 }
-.java-manager-title :deep(.icon) {
+.java-manager-title svg {
   color: var(--primary);
 }
+.java-manager-search {
+  min-width: 0;
+  width: 100%;
+}
 .java-manager-actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   margin-left: auto;
+}
+.java-add-button :deep(.btn-content) {
+  display: flex;
+  align-items: center;
+  gap: var(--s-xs);
 }
 .java-manager-content {
   display: flex;

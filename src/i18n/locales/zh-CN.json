@@ -2404,6 +2404,7 @@
     "unknownRequirement": "Java 版本要求尚未识别"
   },
   "javaManager": {
+    "addJava": "添加 Java",
     "title": "Java 管理",
     "installed": "已安装",
     "download": "下载",

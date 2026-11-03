@@ -2489,6 +2489,7 @@
     "unknownRequirement": "Требуемая версия Java неизвестна"
   },
   "javaManager": {
+    "addJava": "Добавить Java",
     "title": "Управление Java",
     "installed": "Установленные",
     "download": "Загрузка",

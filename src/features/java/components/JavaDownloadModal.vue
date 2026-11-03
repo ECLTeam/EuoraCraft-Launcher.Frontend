@@ -31,12 +31,14 @@
           <UiButton
             size="sm"
             variant="ghost"
+            shape="square"
             icon="refresh"
+            :title="t('common.refresh')"
+            :aria-label="t('common.refresh')"
             :loading="isLoadingCatalog"
             :disabled="isInstalling"
             @click="loadCatalog(true)"
-            >{{ t('common.refresh') }}</UiButton
-          >
+          />
         </div>
         <div class="java-download-content">
           <NAlert v-if="error" type="error" role="alert">{{ error }}</NAlert>
@@ -56,7 +58,7 @@
           />
           <div v-else class="java-package-list">
             <article v-for="candidate in catalog?.packages || []" :key="candidate.packageId" class="java-package-row">
-              <UiIcon name="cube" :size="36" class="java-runtime-icon" />
+              <JavaRuntimeIcon class="java-runtime-icon" />
               <div class="java-runtime-copy">
                 <strong :title="candidate.releaseName"
                   >{{ candidate.releaseName }} · {{ candidate.runtimeKind }}</strong
@@ -97,10 +99,10 @@ import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import UiButton from '@/components/ui/Button.vue'
 import UiCard from '@/components/ui/Card.vue'
 import UiEmptyState from '@/components/ui/EmptyState.vue'
-import UiIcon from '@/components/ui/Icon.vue'
 import UiLoading from '@/components/ui/Loading.vue'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { javaApi } from '@/features/java/api/javaApi'
+import JavaRuntimeIcon from '@/features/java/components/JavaRuntimeIcon.vue'
 import type { JavaCatalog, JavaInstallPlan, JavaPackage } from '@/types/java'
 import { getErrorMessage } from '@/utils/error'
 
