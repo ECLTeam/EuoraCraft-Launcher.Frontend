@@ -12,16 +12,59 @@
         <section class="wardrobe-library ecl-surface">
           <div class="wardrobe-toolbar">
             <div class="wardrobe-account-row">
-              <span>{{ t('wardrobe.accountLabel') }}</span>
-              <NSelect
-                v-model:value="targetAccountId"
-                class="wardrobe-account-select"
-                size="small"
-                :options="accountOptions"
-                :disabled="cloudBusy"
-                :placeholder="t('wardrobe.selectAccount')"
-                clearable
-              />
+              <div class="wardrobe-account-picker">
+                <span>{{ t('wardrobe.accountLabel') }}</span>
+                <NSelect
+                  v-model:value="targetAccountId"
+                  class="wardrobe-account-select"
+                  size="small"
+                  :options="accountOptions"
+                  :disabled="cloudBusy"
+                  :placeholder="t('wardrobe.selectAccount')"
+                  :aria-label="t('wardrobe.accountLabel')"
+                  :title="targetAccount?.alias"
+                  clearable
+                />
+              </div>
+              <div class="wardrobe-account-actions">
+                <NButton
+                  v-if="activeTab === 'official'"
+                  quaternary
+                  circle
+                  size="small"
+                  :title="t('wardrobe.refreshCapes')"
+                  :aria-label="t('wardrobe.refreshCapes')"
+                  :loading="refreshingCapes"
+                  @click="refreshOfficialCapes"
+                >
+                  <template #icon><UiIcon name="refresh" :size="16" /></template>
+                </NButton>
+                <NButton v-if="isLocalTab" size="small" type="primary" :loading="importing" @click="importItem">
+                  <template #icon><UiIcon name="upload" :size="14" /></template>
+                  {{ t('wardrobe.import') }}
+                </NButton>
+                <NDropdown
+                  v-model:show="showWardrobeMenu"
+                  trigger="click"
+                  placement="bottom-end"
+                  :options="wardrobeMenuOptions"
+                  @select="selectWardrobeAction"
+                >
+                  <NButton
+                    quaternary
+                    circle
+                    size="small"
+                    :loading="isLocalTab && applying"
+                    :title="t('common.more')"
+                    :aria-label="t('common.more')"
+                    aria-haspopup="menu"
+                    :aria-expanded="showWardrobeMenu"
+                    @keydown="handleWardrobeMenuKeydown"
+                  >
+                    <template #icon><UiIcon name="menu" :size="16" /></template>
+                  </NButton>
+                </NDropdown>
+              </div>
             </div>
             <div class="wardrobe-category-row">
               <NTabs v-if="isFolia" :value="activeTab" type="segment" size="small" @update:value="handleTabChange">
@@ -49,50 +92,13 @@
                   {{ t(tab.label) }}
                 </NButton>
               </NButtonGroup>
-              <div class="wardrobe-category-actions">
-                <NButton quaternary circle size="small" :title="t('wardrobe.options')" @click="showOptionsModal = true">
-                  <template #icon><UiIcon name="menu" :size="16" /></template>
-                </NButton>
-                <NButton
-                  v-if="activeTab === 'official'"
-                  quaternary
-                  circle
-                  size="small"
-                  :title="t('wardrobe.refreshCapes')"
-                  :loading="refreshingCapes"
-                  @click="refreshOfficialCapes"
-                >
-                  <template #icon><UiIcon name="refresh" :size="16" /></template>
-                </NButton>
-                <NButton
-                  v-if="activeTab === 'skin' || activeTab === 'cape'"
-                  size="small"
-                  type="primary"
-                  :loading="importing"
-                  @click="importItem"
-                >
-                  <template #icon><UiIcon name="upload" :size="14" /></template>
-                  {{ t('wardrobe.import') }}
-                </NButton>
-                <NButton
-                  v-if="(activeTab === 'skin' || activeTab === 'cape') && canDownloadSkin"
-                  quaternary
-                  circle
-                  size="small"
-                  :title="t('littleskinManagement.downloadCurrent')"
-                  :loading="applying"
-                  @click="downloadSkin"
-                >
-                  <template #icon><UiIcon name="file-download" :size="16" /></template>
-                </NButton>
-              </div>
             </div>
           </div>
           <NAlert v-if="activeTab === 'cape'" class="wardrobe-cape-notice" type="info" :showIcon="false">
             {{ t('wardrobe.localCapePreviewOnly') }}
           </NAlert>
 
-          <UiLoading :show="loading" mode="overlay" class="wardrobe-library-content">
+          <UiLoading :show="loading && activeTab !== 'cloud'" mode="overlay" class="wardrobe-library-content">
             <LittleSkinClosetPanel
               v-if="visible && activeTab === 'cloud' && isLittleSkin && targetAccountId"
               :key="targetAccountId"
@@ -324,6 +330,7 @@ import {
   NButton,
   NButtonGroup,
   NCheckbox,
+  NDropdown,
   NEmpty,
   NInput,
   NPopconfirm,
@@ -418,6 +425,7 @@ const refreshingCapes = ref(false)
 const showEditModal = ref(false)
 const showUploadModal = ref(false)
 const showOptionsModal = ref(false)
+const showWardrobeMenu = ref(false)
 const targetTextureRevision = computed(() => getAvatarRevision(targetAccountId.value || ''))
 const accountTextureRequests = useRequestScope(
   () => `${props.visible}\0${targetAccountId.value}\0${targetTextureRevision.value}`
@@ -442,7 +450,32 @@ const isStandardSkin = computed(
   () => selectedLocal.value?.kind === 'skin' && selectedLocal.value.width === 64 && selectedLocal.value.height === 64
 )
 const canApplySkin = computed(() => targetAccount.value?.type === 'microsoft' && isStandardSkin.value)
-const canDownloadSkin = computed(() => Boolean(targetAccountId.value))
+const isLocalTab = computed(() => activeTab.value === 'skin' || activeTab.value === 'cape')
+const wardrobeMenuOptions = computed(() => [
+  { key: 'options', label: t('wardrobe.options') },
+  ...(isLocalTab.value
+    ? [
+        {
+          key: 'download',
+          label: t('littleskinManagement.downloadCurrent'),
+          disabled: !targetAccountId.value || applying.value,
+        },
+      ]
+    : []),
+])
+
+function selectWardrobeAction(key: string | number): void {
+  if (key === 'options') showOptionsModal.value = true
+  if (key === 'download' && isLocalTab.value) void downloadSkin()
+}
+
+function handleWardrobeMenuKeydown(event: KeyboardEvent): void {
+  if (!showWardrobeMenu.value) return
+  if (event.key === 'Tab') showWardrobeMenu.value = false
+  if (event.key !== 'Escape') return
+  event.preventDefault()
+  showWardrobeMenu.value = false
+}
 const modelOptions = computed(() => [
   { label: t('wardrobe.classic'), value: 'classic' },
   { label: t('wardrobe.slim'), value: 'slim' },
@@ -748,6 +781,7 @@ watch(
       showEditModal.value = false
       showUploadModal.value = false
       showOptionsModal.value = false
+      showWardrobeMenu.value = false
       return
     }
     activeTab.value = 'skin'
@@ -764,6 +798,7 @@ watch(
 
 watch([targetAccountId, targetTextureRevision], loadTargetTextures)
 watch([targetAccountId, activeTab], () => {
+  showWardrobeMenu.value = false
   cloudPreview.value = {}
   if (activeTab.value === 'cloud' && !isLittleSkin.value) activeTab.value = 'skin'
 })
@@ -778,7 +813,7 @@ async function handleCloudChanged(): Promise<void> {
 }
 
 async function downloadSkin(): Promise<void> {
-  if (!targetAccountId.value || !canDownloadSkin.value) return
+  if (!targetAccountId.value || applying.value) return
   applying.value = true
   try {
     // 后端已按账户皮肤变体写入模型，前端不再重新检测覆盖，避免细手臂被误判为经典。
@@ -842,28 +877,45 @@ async function downloadSkin(): Promise<void> {
   margin-bottom: var(--s-md);
 }
 
-.wardrobe-account-row,
-.wardrobe-category-row {
+.wardrobe-account-row {
   display: flex;
   min-width: 0;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--s-sm);
   flex-wrap: wrap;
-  row-gap: var(--s-xs);
+  gap: var(--s-xs) var(--s-sm);
 }
 
-.wardrobe-account-row > span {
+.wardrobe-account-picker {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: min(220px, 100%);
+  gap: var(--s-sm);
+}
+
+.wardrobe-account-picker > span {
   flex: 0 0 auto;
   color: var(--text-secondary);
   font-size: 13px;
 }
 
-.wardrobe-category-actions {
+.wardrobe-account-actions {
   display: flex;
   align-items: center;
   gap: var(--s-xs);
   flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+.wardrobe-category-row {
+  display: flex;
+  min-width: 0;
+}
+
+.wardrobe-category-row :deep(.n-button-group) {
+  max-width: 100%;
+  flex-wrap: wrap;
+  row-gap: var(--s-xs);
 }
 
 .wardrobe-category-row :deep(.n-tabs) {
@@ -907,9 +959,8 @@ html[data-theme='dark'] .wardrobe-category-row :deep(.n-button.n-button--primary
 }
 
 .wardrobe-account-select {
-  width: min(280px, 100%);
-  min-width: 180px;
-  flex: 1 1 220px;
+  min-width: 0;
+  flex: 1;
 }
 
 .wardrobe-library-content {
@@ -1026,14 +1077,6 @@ html[data-theme='dark'] .wardrobe-category-row :deep(.n-button.n-button--primary
 
   .wardrobe-preview {
     min-height: 360px;
-  }
-
-  .wardrobe-category-row {
-    justify-content: space-between;
-  }
-
-  .wardrobe-account-select {
-    width: min(100%, 320px);
   }
 }
 </style>

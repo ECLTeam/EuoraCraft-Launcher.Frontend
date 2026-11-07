@@ -53,34 +53,32 @@
             :loading="loading"
             :title="t('littleskinManagement.refresh')"
             :aria-label="t('littleskinManagement.refresh')"
-            @click="load"
+            @click="load(true)"
           >
             <template #icon><UiIcon name="refresh" :size="16" /></template>
           </NButton>
-          <template v-if="!needsAuthorization && !errorKey">
+          <NDropdown
+            v-if="!needsAuthorization && !errorKey"
+            v-model:show="showCloudMenu"
+            trigger="click"
+            placement="bottom-end"
+            :options="cloudMenuOptions"
+            @select="selectCloudAction"
+          >
             <NButton
               quaternary
               circle
               size="small"
-              :disabled="busy || loading || !currentTid"
-              :title="t('littleskinManagement.downloadCurrent')"
-              :aria-label="t('littleskinManagement.downloadCurrent')"
-              @click="download()"
+              :loading="busy"
+              :title="t('common.more')"
+              :aria-label="t('common.more')"
+              aria-haspopup="menu"
+              :aria-expanded="showCloudMenu"
+              @keydown="handleCloudMenuKeydown"
             >
-              <template #icon><UiIcon name="file-download" :size="16" /></template>
+              <template #icon><UiIcon name="menu" :size="16" /></template>
             </NButton>
-            <NButton
-              quaternary
-              circle
-              size="small"
-              :disabled="busy || loading || !currentTid"
-              :title="t(currentTextureResetLabel)"
-              :aria-label="t(currentTextureResetLabel)"
-              @click="apply()"
-            >
-              <template #icon><UiIcon name="minus" :size="16" /></template>
-            </NButton>
-          </template>
+          </NDropdown>
         </div>
       </div>
       <NAlert v-if="needsAuthorization" type="warning" :showIcon="false">
@@ -131,7 +129,7 @@
             </template>
           </WardrobeCard>
         </WardrobeGrid>
-        <div v-else-if="!loading" class="littleskin-empty">
+        <div v-else-if="closet" class="littleskin-empty">
           <NEmpty :description="t('littleskinManagement.empty')" />
         </div>
         <div v-if="closet && closet.last_page > 1" class="littleskin-pagination">
@@ -149,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NButton, NButtonGroup, NEmpty, NTab, NTabs, NTag } from 'naive-ui'
+import { NAlert, NButton, NButtonGroup, NDropdown, NEmpty, NTab, NTabs, NTag } from 'naive-ui'
 import { computed, onScopeDispose, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BackendCommandError } from '@/app/runtime/errorPresentation'
@@ -160,6 +158,11 @@ import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
+import {
+  invalidateLittleSkinWardrobe,
+  isLittleSkinAuthorizationError,
+  isLittleSkinWardrobeCached,
+} from '@/features/accounts/api/littleSkinWardrobeCache'
 import LittleSkinLoginPanel from '@/features/accounts/components/LittleSkinLoginPanel.vue'
 import WardrobeCard from '@/features/accounts/components/WardrobeCard.vue'
 import WardrobeGrid from '@/features/accounts/components/WardrobeGrid.vue'
@@ -196,9 +199,16 @@ const authorizing = ref(false)
 const needsAuthorization = ref(false)
 const errorKey = ref('')
 const currentTid = computed(() => (kind.value === 'skin' ? player.value?.tid_skin : player.value?.tid_cape))
-const currentTextureResetLabel = computed(() =>
-  kind.value === 'skin' ? 'littleskinManagement.resetSkin' : 'littleskinManagement.removeCape'
-)
+const showCloudMenu = ref(false)
+const canManageCurrent = computed(() => !busy.value && !loading.value && Boolean(currentTid.value))
+const cloudMenuOptions = computed(() => [
+  { key: 'download', label: t('littleskinManagement.downloadCurrent'), disabled: !canManageCurrent.value },
+  {
+    key: 'reset',
+    label: t(kind.value === 'skin' ? 'littleskinManagement.resetSkin' : 'littleskinManagement.removeCape'),
+    disabled: !canManageCurrent.value,
+  },
+])
 const thumbnailUrls = ref<Record<number, string>>({})
 const thumbnailRequests = useRequestScope(() => `${props.accountId}:${kind.value}:${page.value}`)
 let generation = 0
@@ -229,7 +239,7 @@ async function loadThumbnails(items: LittleSkinTexture[]): Promise<void> {
 
 function failure(reason: unknown): void {
   const code = reason instanceof BackendCommandError ? reason.errorCode : ''
-  if (code === 'LITTLESKIN_PERMISSION_REQUIRED' || code === 'LITTLESKIN_AUTH_REQUIRED') {
+  if (isLittleSkinAuthorizationError(reason)) {
     needsAuthorization.value = true
     closet.value = null
     return
@@ -244,24 +254,30 @@ function failure(reason: unknown): void {
   errorKey.value = `littleskinManagement.${keys[code ?? ''] ?? 'failed'}`
 }
 
-async function load(): Promise<void> {
+async function load(force = false): Promise<void> {
   const current = ++generation
   const accountId = props.accountId
+  const requestedKind = kind.value
+  const requestedPage = page.value
   thumbnailRequests.invalidate()
   thumbnailUrls.value = {}
   closet.value = null
+  player.value = null
   selected.value = null
+  showCloudMenu.value = false
   emit('preview', {})
   errorKey.value = ''
   needsAuthorization.value = false
-  loading.value = true
+  loading.value = force || !isLittleSkinWardrobeCached(accountId, requestedKind, requestedPage)
   try {
+    if (force) await invalidateLittleSkinWardrobe(accountId)
+    if (disposed || current !== generation) return
     const management = await accountsApi.littleSkinManagement(accountId)
     if (disposed || current !== generation) return
     needsAuthorization.value = management.needs_authorization
     player.value = management.player
     if (management.needs_authorization) return
-    const result = await accountsApi.littleSkinCloset(accountId, kind.value, page.value)
+    const result = await accountsApi.littleSkinCloset(accountId, requestedKind, requestedPage)
     if (disposed || current !== generation) return
     closet.value = result
     void loadThumbnails(result.data)
@@ -270,6 +286,20 @@ async function load(): Promise<void> {
   } finally {
     if (!disposed && current === generation) loading.value = false
   }
+}
+
+function selectCloudAction(key: string | number): void {
+  if (!canManageCurrent.value) return
+  if (key === 'download') void download()
+  if (key === 'reset') void apply()
+}
+
+function handleCloudMenuKeydown(event: KeyboardEvent): void {
+  if (!showCloudMenu.value) return
+  if (event.key === 'Tab') showCloudMenu.value = false
+  if (event.key !== 'Escape') return
+  event.preventDefault()
+  showCloudMenu.value = false
 }
 
 function changeKind(value: string | number): void {
@@ -375,6 +405,10 @@ onScopeDispose(() => {
 
 .littleskin-toolbar {
   justify-content: space-between;
+}
+
+.littleskin-toolbar-actions {
+  margin-inline-start: auto;
 }
 
 .littleskin-kind-tabs {

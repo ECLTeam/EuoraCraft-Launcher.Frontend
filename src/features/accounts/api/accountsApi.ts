@@ -1,6 +1,8 @@
 import { minLength, nonEmpty, object, pipe, string } from 'valibot'
 import backend from '@/api/client'
-import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
+import { invalidateResource, readResource, setResourceSnapshot } from '@/app/data/refreshCoordinator'
+import { queryClient } from '@/app/queryClient'
+import { BackendCommandError, unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { assertParams } from '@/app/validation'
 import { parseAccountList, parseAccountSnapshot } from '@/features/accounts/model/accountSnapshot'
 import { parseLittleSkinConfig, parseLittleSkinSnapshot } from '@/features/accounts/model/littleSkinLogin'
@@ -17,6 +19,7 @@ import type {
   AuthlibLoginConfigData,
   AuthlibServer,
   DefaultSkin,
+  LittleSkinManagement,
   LittleSkinLoginMethod,
   MicrosoftCompleteData,
   MicrosoftLoginConfigData,
@@ -30,6 +33,14 @@ import type {
   WardrobeItem,
   WardrobeKind,
 } from '@/types/accounts'
+import {
+  clearLittleSkinWardrobe,
+  isLittleSkinAuthorizationError,
+  littleSkinClosetKey,
+  littleSkinManagementKey,
+  littleSkinWardrobeStaleTime,
+  withLittleSkinWardrobeAccess,
+} from './littleSkinWardrobeCache'
 
 export const accountsApi = {
   async littleSkinConfig() {
@@ -48,36 +59,73 @@ export const accountsApi = {
     )
   },
 
-  async littleSkinManagement(accountId: string) {
-    return parseLittleSkinManagement(
-      assertSuccess(
-        await backend.command('accounts_littleskin_management', { account_id: accountId }, 130_000),
-        'LittleSkin'
+  async littleSkinManagement(accountId: string): Promise<LittleSkinManagement> {
+    try {
+      return await withLittleSkinWardrobeAccess(accountId, () =>
+        readResource({
+          queryKey: littleSkinManagementKey(accountId),
+          staleTime: littleSkinWardrobeStaleTime,
+          load: async () => {
+            const response = await backend.command('accounts_littleskin_management', { account_id: accountId }, 130_000)
+            const management = parseLittleSkinManagement(assertSuccess(response, 'LittleSkin'))
+            // 补充授权状态不能当作有效角色快照进入缓存。
+            if (management.needs_authorization) {
+              throw new BackendCommandError(
+                { success: false, errorCode: 'LITTLESKIN_PERMISSION_REQUIRED' },
+                'LittleSkin'
+              )
+            }
+            return management
+          },
+        })
       )
-    )
+    } catch (reason) {
+      if (isLittleSkinAuthorizationError(reason)) return { needs_authorization: true, player: null }
+      throw reason
+    }
   },
   async littleSkinCloset(accountId: string, kind: WardrobeKind, page: number) {
-    const result = parseLittleSkinCloset(
-      assertSuccess(
-        await backend.command('accounts_littleskin_closet', { account_id: accountId, kind, page }, 130_000),
-        'LittleSkin'
-      )
+    return withLittleSkinWardrobeAccess(accountId, () =>
+      readResource({
+        queryKey: littleSkinClosetKey(accountId, kind, page),
+        staleTime: littleSkinWardrobeStaleTime,
+        load: async () => {
+          const response = await backend.command(
+            'accounts_littleskin_closet',
+            { account_id: accountId, kind, page },
+            130_000
+          )
+          const result = parseLittleSkinCloset(assertSuccess(response, 'LittleSkin'))
+          if (result.current_page !== page || result.data.some((item) => (item.type === 'cape') !== (kind === 'cape')))
+            throw new Error(i18n.global.t('dataSync.invalid'))
+          return result
+        },
+      })
     )
-    if (result.current_page !== page || result.data.some((item) => (item.type === 'cape') !== (kind === 'cape')))
-      throw new Error(i18n.global.t('dataSync.invalid'))
-    return result
   },
   async setLittleSkinTexture(accountId: string, kind: WardrobeKind, tid?: number) {
-    const result =
-      tid === undefined
-        ? await backend.command('accounts_littleskin_reset_texture', { account_id: accountId, kind }, 130_000)
-        : await backend.command('accounts_littleskin_set_texture', { account_id: accountId, kind, tid }, 130_000)
-    return parseLittleSkinPlayer(assertSuccess(result, 'LittleSkin'))
+    const queryKey = littleSkinManagementKey(accountId)
+    const query = queryClient.getQueryCache().find({ queryKey })
+    return withLittleSkinWardrobeAccess(accountId, async () => {
+      const response =
+        tid === undefined
+          ? await backend.command('accounts_littleskin_reset_texture', { account_id: accountId, kind }, 130_000)
+          : await backend.command('accounts_littleskin_set_texture', { account_id: accountId, kind, tid }, 130_000)
+      const isCurrent = query && queryClient.getQueryCache().find({ queryKey }) === query
+      if (isCurrent && response.errorCode === 'LITTLESKIN_WRITE_UNCONFIRMED') await invalidateResource(queryKey)
+      const player = parseLittleSkinPlayer(assertSuccess(response, 'LittleSkin'))
+      // 删除或重新授权已移除原查询时，旧写入结果不能重建它。
+      if (isCurrent)
+        setResourceSnapshot(queryKey, { needs_authorization: false, player } satisfies LittleSkinManagement)
+      return player
+    })
   },
   async importLittleSkinTexture(accountId: string, kind: WardrobeKind, tid: number): Promise<WardrobeImportResult> {
-    return assertSuccess(
-      await backend.command('wardrobe_import_littleskin_texture', { account_id: accountId, kind, tid }, 130_000),
-      'LittleSkin'
+    return withLittleSkinWardrobeAccess(accountId, async () =>
+      assertSuccess(
+        await backend.command('wardrobe_import_littleskin_texture', { account_id: accountId, kind, tid }, 130_000),
+        'LittleSkin'
+      )
     )
   },
 
@@ -100,12 +148,14 @@ export const accountsApi = {
   },
 
   async completeLittleSkinLogin(sessionId: string): Promise<MinecraftAccount> {
-    return parseAccountSnapshot(
+    const account = parseAccountSnapshot(
       assertSuccess(
         await backend.command('accounts_complete_littleskin_login', { session_id: sessionId }),
         'LittleSkin'
       )
     )
+    clearLittleSkinWardrobe(account.id)
+    return account
   },
 
   async cancelLittleSkinLogin(sessionId: string) {
@@ -215,6 +265,7 @@ export const accountsApi = {
 
   async remove(accountId: string): Promise<void> {
     assertSuccess(await backend.command('accounts_remove', { account_id: accountId }), '删除账户')
+    clearLittleSkinWardrobe(accountId)
   },
 
   async setFavorite(accountId: string, favorite: boolean): Promise<AccountListData> {
