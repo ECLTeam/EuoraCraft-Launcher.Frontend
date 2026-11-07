@@ -2,34 +2,49 @@
   <div ref="containerRef" class="skin-viewer-shell">
     <canvas ref="canvasRef" class="skin-viewer-canvas" />
     <div v-if="error" class="skin-viewer-error">{{ error }}</div>
-    <NButtonGroup class="skin-viewer-actions" size="small">
-      <NButton
-        v-for="animation in visibleAnimations"
-        :key="animation.key"
-        quaternary
-        :type="activeAnimation === animation.key ? 'primary' : 'default'"
-        :data-testid="`animation-${animation.key}`"
-        @click="setAnimation(animation.key)"
-      >
-        {{ animation.label }}
-      </NButton>
-    </NButtonGroup>
-    <NButtonGroup class="skin-viewer-controls" size="small">
-      <NButton quaternary :title="t('wardrobe.rotateLeft')" data-testid="rotate-left" @click="rotatePlayer(-1)">
-        <template #icon><UiIcon name="rotate-left" :size="17" /></template>
-      </NButton>
-      <NButton
-        quaternary
-        :title="autoRotateEnabled ? t('wardrobe.pauseAutoRotate') : t('wardrobe.resumeAutoRotate')"
-        data-testid="toggle-auto-rotate"
-        @click="toggleAutoRotate"
-      >
-        <template #icon><UiIcon :name="autoRotateEnabled ? 'pause' : 'play'" :size="17" /></template>
-      </NButton>
-      <NButton quaternary :title="t('wardrobe.rotateRight')" data-testid="rotate-right" @click="rotatePlayer(1)">
-        <template #icon><UiIcon name="rotate-right" :size="17" /></template>
-      </NButton>
-    </NButtonGroup>
+    <div class="skin-viewer-toolbar">
+      <NButtonGroup class="skin-viewer-actions" size="small">
+        <NButton
+          v-for="animation in visibleAnimations"
+          :key="animation.key"
+          quaternary
+          :type="activeAnimation === animation.key ? 'primary' : 'default'"
+          :data-testid="`animation-${animation.key}`"
+          @click="setAnimation(animation.key)"
+        >
+          {{ animation.label }}
+        </NButton>
+      </NButtonGroup>
+      <NButtonGroup class="skin-viewer-controls" size="small">
+        <NButton
+          quaternary
+          :title="t('wardrobe.rotateLeft')"
+          :aria-label="t('wardrobe.rotateLeft')"
+          data-testid="rotate-left"
+          @click="rotatePlayer(-1)"
+        >
+          <template #icon><UiIcon name="rotate-left" :size="17" /></template>
+        </NButton>
+        <NButton
+          quaternary
+          :title="autoRotateEnabled ? t('wardrobe.pauseAutoRotate') : t('wardrobe.resumeAutoRotate')"
+          :aria-label="autoRotateEnabled ? t('wardrobe.pauseAutoRotate') : t('wardrobe.resumeAutoRotate')"
+          data-testid="toggle-auto-rotate"
+          @click="toggleAutoRotate"
+        >
+          <template #icon><UiIcon :name="autoRotateEnabled ? 'pause' : 'play'" :size="17" /></template>
+        </NButton>
+        <NButton
+          quaternary
+          :title="t('wardrobe.rotateRight')"
+          :aria-label="t('wardrobe.rotateRight')"
+          data-testid="rotate-right"
+          @click="rotatePlayer(1)"
+        >
+          <template #icon><UiIcon name="rotate-right" :size="17" /></template>
+        </NButton>
+      </NButtonGroup>
+    </div>
   </div>
 </template>
 
@@ -212,11 +227,19 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
-.skin-viewer-actions {
+.skin-viewer-toolbar {
   position: absolute;
-  left: var(--s-md);
-  bottom: var(--s-md);
+  inset: auto var(--s-md) var(--s-md);
   z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-sm);
+}
+
+.skin-viewer-actions,
+.skin-viewer-controls {
   padding: 2px;
   border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
   border-radius: var(--r-md);
@@ -225,16 +248,14 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(8px);
 }
 
+.skin-viewer-actions {
+  min-width: 0;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
 .skin-viewer-controls {
-  position: absolute;
-  right: var(--s-md);
-  bottom: var(--s-md);
-  z-index: 1;
-  padding: 2px;
-  border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
-  border-radius: var(--r-md);
-  background: var(--ecl-surface);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+  margin-inline-start: auto;
 }
 </style>
