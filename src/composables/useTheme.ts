@@ -646,8 +646,9 @@ export const useThemeStore = defineStore('theme', () => {
   const derivedPrimary = ref('')
   /** 从背景图提取出的 Monet 种子色（hex，Material You）。 */
   const derivedMonetSeed = ref('')
-  /** 图片分支当前解析出的显示地址；视频封面不会覆盖它。 */
+  /** 图片分支的源地址；保留原始 Data URL，避免视频封面转换时使其 Blob 缓存失效。 */
   const backgroundImageSourceUrl = ref('')
+  let backgroundActivationRevision = 0
   const backgroundImage = ref('')
   const backgroundImagePath = ref('')
   /** 图片/视频背景的持久化类型；旧配置缺省时视为图片。 */
@@ -1111,12 +1112,13 @@ export const useThemeStore = defineStore('theme', () => {
   }
 
   function setBackgroundImage(url: string, path?: string, persist = true) {
+    backgroundActivationRevision++
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
       console.log('[setBackgroundImage] url.length:', url?.length ?? 0, 'path:', path, 'persist:', persist)
     }
-    backgroundImageSourceUrl.value = resolveImageUrl(url)
-    backgroundImage.value = backgroundImageSourceUrl.value
+    backgroundImageSourceUrl.value = url
+    backgroundImage.value = resolveImageUrl(url)
     backgroundMediaType.value = 'image'
     backgroundVideoUrl.value = ''
     if (path !== undefined) backgroundImagePath.value = path
@@ -1136,6 +1138,7 @@ export const useThemeStore = defineStore('theme', () => {
     posterPath = '',
     persist = true
   ): void {
+    backgroundActivationRevision++
     backgroundMediaType.value = 'video'
     backgroundVideoUrl.value = url
     backgroundVideoPath.value = path
@@ -1160,25 +1163,31 @@ export const useThemeStore = defineStore('theme', () => {
 
   /** 切回已保存的图片背景分支，并恢复单张或轮播显示。 */
   async function activateImageBackground(): Promise<void> {
+    const revision = ++backgroundActivationRevision
     backgroundMediaType.value = 'image'
     backgroundVideoUrl.value = ''
-    if (isCarouselMode(bgMode.value) && bgSources.value.length) {
+    backgroundImage.value = ''
+    restartBgRotation()
+    if (isCarouselMode(bgMode.value)) {
+      if (bgFolderPath.value && bgSources.value.length === 0) {
+        const files = await settingsApi.listBackgroundImages(bgFolderPath.value)
+        if (revision !== backgroundActivationRevision) return
+        bgSources.value = files
+      }
       const source = bgSources.value[bgIndex.value] ?? bgSources.value[0]
       if (source) {
         const url = await resolveLocalImageUrl(source)
-        if (url) {
-          backgroundImageSourceUrl.value = resolveImageUrl(url)
-          backgroundImage.value = backgroundImageSourceUrl.value
-        }
+        if (revision !== backgroundActivationRevision) return
+        backgroundImageSourceUrl.value = url ?? ''
+        backgroundImage.value = resolveImageUrl(backgroundImageSourceUrl.value)
       }
     } else if (backgroundImageSourceUrl.value) {
-      backgroundImage.value = backgroundImageSourceUrl.value
+      backgroundImage.value = resolveImageUrl(backgroundImageSourceUrl.value)
     } else if (backgroundImagePath.value) {
       const url = await resolveLocalImageUrl(backgroundImagePath.value)
-      backgroundImageSourceUrl.value = url ? resolveImageUrl(url) : ''
-      backgroundImage.value = backgroundImageSourceUrl.value
-    } else {
-      backgroundImage.value = ''
+      if (revision !== backgroundActivationRevision) return
+      backgroundImageSourceUrl.value = url ?? ''
+      backgroundImage.value = resolveImageUrl(backgroundImageSourceUrl.value)
     }
     updateTheme()
     restartBgRotation()
@@ -1186,15 +1195,21 @@ export const useThemeStore = defineStore('theme', () => {
 
   /** 切回已保存的视频背景分支；流地址始终由后端按已保存配置重新签发。 */
   async function activateVideoBackground(): Promise<void> {
+    const revision = ++backgroundActivationRevision
     backgroundMediaType.value = 'video'
     backgroundVideoUrl.value = ''
+    backgroundImage.value = ''
+    restartBgRotation()
     if (backgroundVideoPosterPath.value) {
       const posterUrl = await resolveLocalImageUrl(backgroundVideoPosterPath.value)
+      if (revision !== backgroundActivationRevision) return
       backgroundImage.value = posterUrl ? resolveImageUrl(posterUrl) : ''
     }
     if (backgroundVideoPath.value) {
       try {
-        backgroundVideoUrl.value = (await settingsApi.openBackgroundVideo()) ?? ''
+        const videoUrl = await settingsApi.openBackgroundVideo()
+        if (revision !== backgroundActivationRevision) return
+        backgroundVideoUrl.value = videoUrl ?? ''
       } catch {
         /* 视频不可用时保留封面或纯色背景。 */
       }
@@ -1221,6 +1236,8 @@ export const useThemeStore = defineStore('theme', () => {
 
   /** 切换并加载下一张背景图；随机/顺序由 bgMode 决定。 */
   async function advanceBackground() {
+    if (backgroundMediaType.value !== 'image') return
+    const revision = backgroundActivationRevision
     const sources = bgSources.value
     if (bgMode.value === 'single' || sources.length < 2) return
     const next = nextBackgroundIndex(bgMode.value, sources.length, bgIndex.value)
@@ -1231,8 +1248,9 @@ export const useThemeStore = defineStore('theme', () => {
       const url = await resolveLocalImageUrl(source)
       if (!url) return
       await preloadBackgroundImage(url)
+      if (revision !== backgroundActivationRevision) return
       if (bgSources.value.length >= 2) {
-        setBackgroundImage(resolveImageUrl(url), undefined, false)
+        setBackgroundImage(url, undefined, false)
       }
     } catch {
       /* 单张加载失败跳过本轮 */
@@ -1280,6 +1298,7 @@ export const useThemeStore = defineStore('theme', () => {
     persist = true
   ): Promise<void> {
     if (!files.length) return
+    const revision = ++backgroundActivationRevision
     bgFolderPath.value = folderPath
     bgSources.value = files
     bgIndex.value = 0
@@ -1287,7 +1306,8 @@ export const useThemeStore = defineStore('theme', () => {
     const first = files[0]
     if (first) {
       const url = await resolveLocalImageUrl(first)
-      if (url) setBackgroundImage(resolveImageUrl(url), undefined, false)
+      if (revision !== backgroundActivationRevision) return
+      if (url) setBackgroundImage(url, undefined, false)
     }
     restartBgRotation()
     if (persist) saveThemeConfig()
@@ -1295,6 +1315,7 @@ export const useThemeStore = defineStore('theme', () => {
 
   /** 移除轮播来源（用于清空背景时同步重置）。 */
   function clearBackgroundSource() {
+    backgroundActivationRevision++
     if (bgRotateTimer) {
       clearInterval(bgRotateTimer)
       bgRotateTimer = null
@@ -1470,33 +1491,18 @@ export const useThemeStore = defineStore('theme', () => {
         backgroundVideoPosterPath.value = videoData.poster_path ?? ''
         backgroundVideo.value = normalizeVideoConfig(videoData.options)
 
-        if (bgMode.value === 'carousel' || bgMode.value === 'random') {
-          if (imageData.path) {
-            bgFolderPath.value = imageData.path
-            try {
-              const files = await settingsApi.listBackgroundImages(imageData.path)
-              bgSources.value = files
-              const first = files[0]
-              if (first) {
-                bgIndex.value = 0
-                const url = await resolveLocalImageUrl(first)
-                if (url) backgroundImageSourceUrl.value = resolveImageUrl(url)
-              }
-            } catch {
-              /* 目录读取失败时保持空来源 */
+        // 先恢复两套设置，再仅激活当前分支；未启用图片不应触发磁盘读取。
+        const hasCustomImage = imageData.type !== 'default' && imageData.type !== 'none'
+        if (hasCustomImage) {
+          if (isCarouselMode(bgMode.value)) {
+            bgFolderPath.value = imageData.path ?? ''
+          } else {
+            backgroundImagePath.value = imageData.path ?? ''
+            backgroundImageSourceUrl.value = imageData.image_base64 ?? ''
+            if (!backgroundImageSourceUrl.value && settingsApi.isShowcase && imageData.path?.startsWith('http')) {
+              backgroundImageSourceUrl.value = imageData.path
             }
           }
-        } else if (imageData.image_base64) {
-          backgroundImagePath.value = imageData.path ?? ''
-          backgroundImageSourceUrl.value = resolveImageUrl(imageData.image_base64)
-        } else if (settingsApi.isShowcase && imageData.path?.startsWith('http')) {
-          backgroundImagePath.value = imageData.path ?? ''
-          backgroundImageSourceUrl.value = imageData.path
-        } else if (imageData.path && imageData.type !== 'default') {
-          // 桌面端统一通过后端读取 Base64，并将大图转换为 Blob URL 供 CSS 使用
-          backgroundImagePath.value = imageData.path
-          const imageUrl = await resolveLocalImageUrl(imageData.path)
-          backgroundImageSourceUrl.value = imageUrl ? resolveImageUrl(imageUrl) : ''
         }
 
         if (backgroundMediaType.value === 'video') {
