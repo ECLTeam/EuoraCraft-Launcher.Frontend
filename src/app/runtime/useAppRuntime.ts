@@ -49,6 +49,14 @@ interface UseAppRuntimeOptions {
   showAgreementModal: Ref<boolean>
 }
 
+interface RuntimeStart {
+  windowVisible: boolean
+  syncingErrors: boolean
+  refreshErrors: boolean
+  errorSyncFailed: boolean
+  errorTimer: number | null
+}
+
 export function useAppRuntime(options: UseAppRuntimeOptions) {
   const isDevMode = ref(false)
   const launcherVersion = ref('')
@@ -84,7 +92,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
 
   const cleanupCallbacks: Array<() => void> = []
   let started = false
-  let syncingPendingErrors = false
+  let activeStart: RuntimeStart | null = null
   let notifySeq = 0
   let settingsRefreshTimer: ReturnType<typeof setTimeout> | null = null
   const changedSettings = new Set<string>()
@@ -413,37 +421,72 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     )
   }
 
-  async function notifyFrontendReady(): Promise<void> {
+  async function notifyFrontendReady(run: RuntimeStart): Promise<boolean> {
     await options.router.isReady()
     await document.fonts.ready
+    if (activeStart !== run) return false
     const result = await backend.command('frontend_ready')
     if (!result.success) console.error('[AppRuntime] 通知后端前端已就绪失败:', result.message)
+    return result.success
   }
 
-  async function syncPendingErrors(): Promise<void> {
-    if (syncingPendingErrors || backend.isShowcaseActive) return
-    syncingPendingErrors = true
+  function clearPendingErrorTimer(run: RuntimeStart): void {
+    if (run.errorTimer !== null) window.clearTimeout(run.errorTimer)
+    run.errorTimer = null
+  }
+
+  function schedulePendingErrors(run: RuntimeStart): void {
+    clearPendingErrorTimer(run)
+    if (activeStart !== run || backend.isShowcaseActive || !run.windowVisible || document.visibilityState === 'hidden')
+      return
+    run.errorTimer = window.setTimeout(() => void syncPendingErrors(run), 30_000)
+  }
+
+  async function syncPendingErrors(run: RuntimeStart): Promise<void> {
+    if (activeStart !== run || backend.isShowcaseActive) return
+    if (run.syncingErrors) {
+      run.refreshErrors = true
+      return
+    }
+    clearPendingErrorTimer(run)
+    run.syncingErrors = true
     try {
       const result = await backend.command('launcher_errors_pending')
-      if (!result.success || !Array.isArray(result.data) || result.data.length === 0) return
+      if (activeStart !== run || !result.success || !Array.isArray(result.data)) return
       const errorIds: string[] = []
       for (const error of result.data) {
         launcherErrorQueue.enqueue(error)
         if (error.error_id) errorIds.push(error.error_id)
       }
       if (errorIds.length > 0) {
-        await backend.command('launcher_errors_ack', { error_ids: errorIds })
+        const acknowledgement = await backend.command('launcher_errors_ack', { error_ids: errorIds })
+        if (!acknowledgement.success) return
+      }
+      run.errorSyncFailed = false
+    } catch (error) {
+      // command 通常将传输失败转换成响应；这里兜住意外拒绝，并按失败周期限频。
+      if (activeStart === run && !run.errorSyncFailed) {
+        run.errorSyncFailed = true
+        console.warn('[AppRuntime] 补查严重错误失败，将在下次补查时重试:', error)
       }
     } finally {
-      syncingPendingErrors = false
+      run.syncingErrors = false
+      if (activeStart === run) {
+        const shouldRefresh = run.refreshErrors && run.windowVisible && document.visibilityState !== 'hidden'
+        run.refreshErrors = false
+        if (shouldRefresh) void syncPendingErrors(run)
+        else schedulePendingErrors(run)
+      }
     }
   }
 
-  async function loadInitialConfig(): Promise<void> {
+  async function loadInitialConfig(run: RuntimeStart): Promise<void> {
     try {
       const config = await configQuery()
+      if (activeStart !== run) return
       await applyConfig(config as unknown as BackendEvents['config:init'])
     } catch (error) {
+      if (activeStart !== run) return
       notifyLauncherPopup({
         id: 'launcher-config-load-failed',
         title: '读取启动器配置失败',
@@ -453,9 +496,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     }
   }
 
-  async function loadRuntimeLauncherInfo(): Promise<void> {
+  async function loadRuntimeLauncherInfo(run: RuntimeStart): Promise<void> {
     const info = await launcherInfoQuery()
-    if (!info) return
+    if (activeStart !== run || !info) return
 
     launcherVersion.value = info.version || ''
     const versionType = info.version_type
@@ -468,10 +511,30 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
   async function start(): Promise<void> {
     if (started || !backend.runtime.isAvailable) return
     started = true
+    const run: RuntimeStart = {
+      windowVisible: true,
+      syncingErrors: false,
+      refreshErrors: false,
+      errorSyncFailed: false,
+      errorTimer: null,
+    }
+    activeStart = run
+    for (const entry of performance.getEntriesByType('measure')) {
+      if (entry.name.startsWith('ecl-startup:')) performance.clearMeasures(entry.name)
+    }
+    const startedAt = performance.now()
+    let phaseStartedAt = startedAt
+    function measurePhase(name: string): void {
+      const now = performance.now()
+      performance.measure(`ecl-startup:${name}`, { start: phaseStartedAt, end: now })
+      phaseStartedAt = now
+    }
 
     // 必须在 registerBackendEvents 之前检查展示模式，
     // 否则 notifyFrontendReady 后后端发送的 config:init 事件会先于 swap 被处理
     const initialConfig = await configQuery().catch(() => null)
+    if (activeStart !== run) return
+    measurePhase('config')
     if (initialConfig?.launcher?.showcase === true) {
       backend.swapToShowcase()
     }
@@ -485,19 +548,48 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     cleanupCallbacks.push(installDesktopInteractionPolicy(readonly(isDevMode)))
     initPluginBridge(options.router)
     await backend.waitForEventListeners()
-    await loadInitialConfig()
-    await loadRuntimeLauncherInfo()
-    await notifyFrontendReady()
-    await syncPendingErrors()
+    if (activeStart !== run) return
+    measurePhase('listeners')
+    await loadInitialConfig(run)
+    if (activeStart !== run) return
+    measurePhase('apply-config')
+    await loadRuntimeLauncherInfo(run)
+    if (activeStart !== run) return
+    measurePhase('launcher-info')
+    const isReady = await notifyFrontendReady(run)
+    if (activeStart !== run || !isReady) return
+    measurePhase('ready')
+    const onVisibilityChange = (): void => {
+      if (!run.windowVisible || document.visibilityState === 'hidden') clearPendingErrorTimer(run)
+      else void syncPendingErrors(run)
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    cleanupCallbacks.push(() => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      clearPendingErrorTimer(run)
+    })
+    if (!backend.isShowcaseActive) {
+      const unsubscribe = await desktopWindow.onVisibilityChanged((visible) => {
+        if (activeStart !== run || run.windowVisible === visible) return
+        run.windowVisible = visible
+        onVisibilityChange()
+      })
+      if (activeStart !== run) {
+        unsubscribe()
+        return
+      }
+      cleanupCallbacks.push(unsubscribe)
+    }
+    await syncPendingErrors(run)
+    if (activeStart !== run) return
+    measurePhase('pending-errors')
+    performance.measure('ecl-startup:total', { start: startedAt, end: performance.now() })
     // 首屏与事件监听已就绪后再预热低优先级数据，任何失败均不影响启动器可用性。
     if (backend.runtime.isDesktop) {
       void useGameHomeStore()
         .load()
         .catch(() => undefined)
     }
-    // 启动时同步一次积压错误；此后依赖 launcher:error 事件实时推送，低频轮询仅作兜底
-    const pendingErrorTimer = window.setInterval(() => void syncPendingErrors(), 1_000)
-    cleanupCallbacks.push(() => window.clearInterval(pendingErrorTimer))
   }
 
   function stop(): void {
@@ -505,9 +597,10 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     settingsRefreshTimer = null
     changedSettings.clear()
     if (!started) return
+    started = false
+    activeStart = null
     cleanupCallbacks.splice(0).forEach((cleanup) => cleanup())
     destroyPluginBridge()
-    started = false
   }
 
   return {
