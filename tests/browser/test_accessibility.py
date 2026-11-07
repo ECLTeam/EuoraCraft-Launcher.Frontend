@@ -147,7 +147,9 @@ def open_scenario(page, scenario, locale):
     if scenario == "permissions":
         page.evaluate("""async () => {
           const fixtures = await import('/src/api/transport/showcase/fixtures.ts');
-          fixtures.showcasePlugins[0].installation_id = 'a'.repeat(32);
+          const plugin = fixtures.showcasePlugins[0];
+          plugin.installation_id = 'a'.repeat(32);
+          plugin.requested_permissions = ['instances.read'];
           const {pluginManagementApi} = await import('/src/features/plugins/api/pluginManagementApi.ts');
           pluginManagementApi.list = async () => structuredClone(fixtures.showcasePlugins);
           pluginManagementApi.permissions = async () => ({installation_id:'a'.repeat(32),
@@ -163,7 +165,7 @@ def open_scenario(page, scenario, locale):
         }""")
         # Hash navigation keeps the in-memory test fixture and real component intact.
         page.evaluate("location.hash = '#/more/plugins'")
-        page.get_by_role("button", name=translations["plugins"]["permissions"], exact=True).first.click()
+        page.get_by_role("button", name=translations["plugins"]["permissions"], exact=True).click()
         page.locator(".plugin-permissions [role='checkbox']").wait_for()
         return page.locator(".plugin-permissions")
     if scenario == "update":
