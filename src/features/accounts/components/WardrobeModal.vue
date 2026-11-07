@@ -25,26 +25,28 @@
             </div>
             <div class="wardrobe-category-row">
               <NTabs v-if="isFolia" :value="activeTab" type="segment" size="small" @update:value="handleTabChange">
-                <NTab v-if="isLittleSkin" name="cloud">{{ t('littleskinManagement.cloud') }}</NTab>
-                <NTab name="skin">{{ t('wardrobe.skins') }}</NTab>
-                <NTab name="cape">{{ t('wardrobe.localCapes') }}</NTab>
-                <NTab name="official">{{ t('wardrobe.officialCapes') }}</NTab>
+                <NTab
+                  v-for="tab in wardrobeTabs"
+                  :key="tab.name"
+                  :name="tab.name"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="activeTab === tab.name"
+                  @keydown.enter.prevent="handleTabChange(tab.name)"
+                  @keydown.space.prevent="handleTabChange(tab.name)"
+                >
+                  {{ t(tab.label) }}
+                </NTab>
               </NTabs>
               <NButtonGroup v-else size="small">
                 <NButton
-                  v-if="isLittleSkin"
-                  :type="activeTab === 'cloud' ? 'primary' : 'default'"
-                  @click="activeTab = 'cloud'"
-                  >{{ t('littleskinManagement.cloud') }}</NButton
+                  v-for="tab in wardrobeTabs"
+                  :key="tab.name"
+                  :type="activeTab === tab.name ? 'primary' : 'default'"
+                  :aria-pressed="activeTab === tab.name"
+                  @click="handleTabChange(tab.name)"
                 >
-                <NButton :type="activeTab === 'skin' ? 'primary' : 'default'" @click="activeTab = 'skin'">
-                  {{ t('wardrobe.skins') }}
-                </NButton>
-                <NButton :type="activeTab === 'cape' ? 'primary' : 'default'" @click="activeTab = 'cape'">
-                  {{ t('wardrobe.localCapes') }}
-                </NButton>
-                <NButton :type="activeTab === 'official' ? 'primary' : 'default'" @click="activeTab = 'official'">
-                  {{ t('wardrobe.officialCapes') }}
+                  {{ t(tab.label) }}
                 </NButton>
               </NButtonGroup>
               <div class="wardrobe-category-actions">
@@ -100,43 +102,41 @@
               @downloaded="loadItems"
               @busyChange="cloudBusy = $event"
             />
-            <div v-else-if="activeTab !== 'official' && filteredItems.length" class="wardrobe-grid">
-              <div
+            <WardrobeGrid v-else-if="activeTab !== 'official' && filteredItems.length">
+              <WardrobeCard
                 v-for="item in filteredItems"
                 :key="item.id"
-                class="wardrobe-card"
-                :class="{ selected: selectedLocal?.id === item.id }"
-                role="button"
-                tabindex="0"
-                @click="selectLocal(item)"
-                @keydown.enter="selectLocal(item)"
-                @keydown.space.prevent="selectLocal(item)"
+                :name="item.name"
+                :imageUrl="textureUrls[item.id]"
+                placeholder="shirt"
+                :detail="`${item.width}×${item.height}`"
+                :selected="selectedLocal?.id === item.id"
+                @select="selectLocal(item)"
               >
-                <img v-if="textureUrls[item.id]" :src="textureUrls[item.id]" :alt="item.name" />
-                <div v-else class="wardrobe-card-placeholder"><UiIcon name="shirt" :size="28" /></div>
-                <strong>{{ item.name }}</strong>
-                <span>{{ item.width }}×{{ item.height }}</span>
-                <NButton
-                  v-if="item.kind === 'skin'"
-                  class="wardrobe-favorite-button"
-                  :class="{ 'wardrobe-favorite-button-active': item.favorite }"
-                  quaternary
-                  circle
-                  size="tiny"
-                  :type="item.favorite ? 'warning' : 'default'"
-                  :title="item.favorite ? t('wardrobe.unfavorite') : t('wardrobe.favorite')"
-                  @click.stop="toggleFavorite(item)"
-                >
-                  <template #icon>
-                    <UiIcon
-                      :class="{ 'wardrobe-favorite-icon-active': item.favorite }"
-                      :name="item.favorite ? 'star-filled' : 'star'"
-                      :size="14"
-                      :style="item.favorite ? { color: '#f5b301' } : {}"
-                    />
-                  </template>
-                </NButton>
-                <div class="wardrobe-card-actions">
+                <template #accessory>
+                  <NButton
+                    v-if="item.kind === 'skin'"
+                    class="wardrobe-favorite-button"
+                    :class="{ 'wardrobe-favorite-button-active': item.favorite }"
+                    quaternary
+                    circle
+                    size="tiny"
+                    :type="item.favorite ? 'warning' : 'default'"
+                    :title="item.favorite ? t('wardrobe.unfavorite') : t('wardrobe.favorite')"
+                    :aria-label="item.favorite ? t('wardrobe.unfavorite') : t('wardrobe.favorite')"
+                    @click.stop="toggleFavorite(item)"
+                  >
+                    <template #icon>
+                      <UiIcon
+                        :class="{ 'wardrobe-favorite-icon-active': item.favorite }"
+                        :name="item.favorite ? 'star-filled' : 'star'"
+                        :size="14"
+                        :style="item.favorite ? { color: '#f5b301' } : {}"
+                      />
+                    </template>
+                  </NButton>
+                </template>
+                <template #actions>
                   <NPopconfirm @positiveClick="deleteItem(item)">
                     <template #trigger>
                       <NButton
@@ -145,6 +145,7 @@
                         size="tiny"
                         type="error"
                         :title="t('wardrobe.delete')"
+                        :aria-label="t('wardrobe.delete')"
                         :loading="deletingId === item.id"
                         @click.stop
                       >
@@ -153,10 +154,24 @@
                     </template>
                     {{ t('wardrobe.deleteConfirm') }}
                   </NPopconfirm>
-                  <NButton quaternary circle size="tiny" :title="t('wardrobe.edit')" @click.stop="openEditModal(item)">
+                  <NButton
+                    quaternary
+                    circle
+                    size="tiny"
+                    :title="t('wardrobe.edit')"
+                    :aria-label="t('wardrobe.edit')"
+                    @click.stop="openEditModal(item)"
+                  >
                     <template #icon><UiIcon name="edit" :size="14" /></template>
                   </NButton>
-                  <NButton quaternary circle size="tiny" :title="t('wardrobe.saveAs')" @click.stop="exportItem(item)">
+                  <NButton
+                    quaternary
+                    circle
+                    size="tiny"
+                    :title="t('wardrobe.saveAs')"
+                    :aria-label="t('wardrobe.saveAs')"
+                    @click.stop="exportItem(item)"
+                  >
                     <template #icon><UiIcon name="file-download" :size="14" /></template>
                   </NButton>
                   <NButton
@@ -166,32 +181,30 @@
                     size="tiny"
                     type="primary"
                     :title="t('wardrobe.applySkin')"
+                    :aria-label="t('wardrobe.applySkin')"
                     @click.stop="openUploadModal(item)"
                   >
                     <template #icon><UiIcon name="cloud-upload" :size="14" /></template>
                   </NButton>
-                </div>
-              </div>
-            </div>
-            <div v-else-if="activeTab === 'official' && officialCapes.length" class="wardrobe-grid">
-              <div
+                </template>
+              </WardrobeCard>
+            </WardrobeGrid>
+            <WardrobeGrid v-else-if="activeTab === 'official' && officialCapes.length">
+              <WardrobeCard
                 v-for="cape in officialCapes"
                 :key="cape.id"
-                class="wardrobe-card"
-                :class="{ selected: selectedOfficialCape?.id === cape.id }"
-                role="button"
-                tabindex="0"
-                @click="selectOfficialCape(cape)"
-                @keydown.enter="selectOfficialCape(cape)"
-                @keydown.space.prevent="selectOfficialCape(cape)"
+                :name="cape.name || cape.id"
+                :imageUrl="officialCapeUrls[cape.id]"
+                placeholder="shield"
+                :selected="selectedOfficialCape?.id === cape.id"
+                @select="selectOfficialCape(cape)"
               >
-                <img v-if="officialCapeUrls[cape.id]" :src="officialCapeUrls[cape.id]" :alt="cape.name || cape.id" />
-                <div v-else class="wardrobe-card-placeholder"><UiIcon name="shield" :size="28" /></div>
-                <strong>{{ cape.name || cape.id }}</strong>
-                <NTag v-if="cape.state.toUpperCase() === 'ACTIVE'" size="small" type="success">
-                  {{ t('wardrobe.active') }}
-                </NTag>
-                <div class="wardrobe-card-actions">
+                <template v-if="cape.state.toUpperCase() === 'ACTIVE'" #status>
+                  <NTag size="small" type="success">
+                    {{ t('wardrobe.active') }}
+                  </NTag>
+                </template>
+                <template #actions>
                   <NButton
                     v-if="cape.state.toUpperCase() !== 'ACTIVE'"
                     quaternary
@@ -199,6 +212,7 @@
                     size="tiny"
                     type="primary"
                     :title="t('wardrobe.applyCape')"
+                    :aria-label="t('wardrobe.applyCape')"
                     :loading="applying"
                     @click.stop="applyCapeItem(cape)"
                   >
@@ -210,14 +224,15 @@
                     circle
                     size="tiny"
                     :title="t('wardrobe.removeCape')"
+                    :aria-label="t('wardrobe.removeCape')"
                     :loading="applying"
                     @click.stop="resetCape"
                   >
                     <template #icon><UiIcon name="minus" :size="14" /></template>
                   </NButton>
-                </div>
-              </div>
-            </div>
+                </template>
+              </WardrobeCard>
+            </WardrobeGrid>
             <div v-else class="wardrobe-empty-state">
               <NEmpty class="wardrobe-empty" :description="emptyDescription" />
             </div>
@@ -336,6 +351,8 @@ import { useUiSkin } from '@/composables/useUiSkin'
 import { accountsApi } from '@/features/accounts/api/accountsApi'
 import LittleSkinClosetPanel from '@/features/accounts/components/LittleSkinClosetPanel.vue'
 import SkinViewer3D from '@/features/accounts/components/SkinViewer3D.vue'
+import WardrobeCard from '@/features/accounts/components/WardrobeCard.vue'
+import WardrobeGrid from '@/features/accounts/components/WardrobeGrid.vue'
 import { detectSkinModel } from '@/features/accounts/composables/useSkinModelDetector'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import type { AccountTextures, MicrosoftCape, MinecraftAccount, SkinModel, WardrobeItem } from '@/types/accounts'
@@ -365,6 +382,15 @@ const cloudBusy = ref(false)
 const cloudUpdatePending = ref(false)
 const cloudPreview = ref<AccountTextures>({})
 const isLittleSkin = computed(() => targetAccount.value?.auth_provider === 'littleskin')
+const wardrobeTabs = computed(() => {
+  const tabs = [
+    { name: 'skin', label: 'wardrobe.skins' },
+    { name: 'cape', label: 'wardrobe.localCapes' },
+    { name: 'official', label: 'wardrobe.officialCapes' },
+  ]
+  if (isLittleSkin.value) tabs.unshift({ name: 'cloud', label: 'littleskinManagement.cloud' })
+  return tabs
+})
 
 function handleTabChange(value: string | number) {
   if (value === 'skin' || value === 'cape' || value === 'official' || (value === 'cloud' && isLittleSkin.value))
@@ -782,8 +808,7 @@ async function downloadSkin(): Promise<void> {
   padding: var(--s-md);
 }
 
-.wardrobe-meta,
-.wardrobe-card span {
+.wardrobe-meta {
   color: var(--text-secondary);
   font-size: 12px;
 }
@@ -845,7 +870,7 @@ async function downloadSkin(): Promise<void> {
   flex: 0 1 auto;
   min-width: 200px;
   width: auto;
-  max-width: 280px;
+  max-width: 100%;
 }
 
 .wardrobe-category-row :deep(.n-tabs-rail) {
@@ -854,11 +879,23 @@ async function downloadSkin(): Promise<void> {
 }
 
 .wardrobe-category-row :deep(.n-tabs-tab-wrapper) {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: min-content;
 }
 
 .wardrobe-category-row :deep(.n-tabs-tab) {
   justify-content: center;
+  white-space: normal;
+  text-align: center;
+}
+
+.wardrobe-category-row :deep(.n-tabs-tab:focus-visible) {
+  outline: 2px solid var(--ecl-primary);
+  outline-offset: -2px;
+}
+
+html[data-theme='light'] .wardrobe-category-row :deep(.n-tabs-tab--active .n-tabs-tab__label) {
+  color: var(--ecl-text);
 }
 
 /* 深色模式：分类行选中项高可读性（实底主色 + 深色文字，兼容亮主色） */
@@ -881,48 +918,11 @@ html[data-theme='dark'] .wardrobe-category-row :deep(.n-button.n-button--primary
   flex: 1;
 }
 
-.wardrobe-library-content > .wardrobe-grid {
-  min-height: 0;
-  flex: 1;
-}
-
 .wardrobe-empty-state {
   display: grid;
   min-height: 0;
   flex: 1;
   place-items: center;
-}
-
-.wardrobe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  align-content: start;
-  gap: var(--s-sm);
-  overflow: auto;
-}
-
-.wardrobe-card {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--s-xs);
-  padding: var(--s-sm) var(--s-sm) 34px;
-  border: 1px solid var(--divider);
-  border-radius: var(--r-md);
-  color: var(--text-primary);
-  background: var(--bg-card);
-  cursor: pointer;
-}
-
-.wardrobe-card-actions {
-  position: absolute;
-  right: 6px;
-  bottom: 5px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }
 
 .wardrobe-favorite-button {
@@ -945,32 +945,6 @@ html[data-theme='dark'] .wardrobe-category-row :deep(.n-button.n-button--primary
 .wardrobe-favorite-icon-active :deep(path) {
   color: #f5b301 !important;
   fill: #f5b301 !important;
-}
-
-.wardrobe-card.selected {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
-}
-
-.wardrobe-card img,
-.wardrobe-card-placeholder {
-  width: 88px;
-  height: 88px;
-  object-fit: contain;
-  image-rendering: pixelated;
-}
-
-.wardrobe-card-placeholder {
-  display: grid;
-  place-items: center;
-  color: var(--text-secondary);
-}
-
-.wardrobe-card strong {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .wardrobe-preview {
