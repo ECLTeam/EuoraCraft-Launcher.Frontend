@@ -40,7 +40,6 @@ import type {
   WindowBounds,
   WindowMetadata,
 } from '@/types/config'
-import type { ConnectorStatus, NatTypeResult } from '@/types/connect'
 import type { InstanceExportRequest } from '@/types/instanceExport'
 import type {
   CrashAnalysisResult,
@@ -253,20 +252,6 @@ export interface CommandPayloadMap {
 
   // 系统信息
   system_memory: undefined
-
-  // 联机（当前仅声明前端契约，后端实现后直接接入）
-  connector_nodes_get: undefined
-  connector_nodes_set: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
-  connector_status: undefined
-  launcher_preload_connector: undefined
-  connector_host_port: { port: number }
-  connector_host_instance: InstanceTargetPayload
-  connector_join: { code: string }
-  connector_leave: undefined
-  connector_kick: { machine_id: string }
-  connector_detect_ports: undefined
-  connector_search_mc_port: { ports: number[] }
-  connector_nat_type: undefined
 
   // Java
   game_java_scan: { paths?: string[] } | undefined
@@ -637,6 +622,7 @@ export interface CommandPayloadMap {
   plugin_get_vue_slots: Record<string, never>
   plugin_get_vue_components: Record<string, never>
   plugin_call_command: { command: string; params?: Record<string, unknown> }
+  plugin_query_command: { command: string; params?: Record<string, unknown> }
   plugin_get_settings: { plugin_name: string }
   plugin_update_setting: {
     plugin_name: string
@@ -750,18 +736,6 @@ export const COMMAND_NAMES = {
   window_update_bounds: 'window_update_bounds',
   frontend_log: 'frontend_log',
   system_memory: 'system_memory',
-  connector_nodes_get: 'connector_nodes_get',
-  connector_nodes_set: 'connector_nodes_set',
-  connector_status: 'connector_status',
-  launcher_preload_connector: 'launcher_preload_connector',
-  connector_host_port: 'connector_host_port',
-  connector_host_instance: 'connector_host_instance',
-  connector_join: 'connector_join',
-  connector_leave: 'connector_leave',
-  connector_kick: 'connector_kick',
-  connector_detect_ports: 'connector_detect_ports',
-  connector_search_mc_port: 'connector_search_mc_port',
-  connector_nat_type: 'connector_nat_type',
   game_java_scan: 'game_java_scan',
   game_java_inventory: 'game_java_inventory',
   game_java_register: 'game_java_register',
@@ -954,6 +928,7 @@ export const COMMAND_NAMES = {
   plugin_get_vue_slots: 'plugin_get_vue_slots',
   plugin_get_vue_components: 'plugin_get_vue_components',
   plugin_call_command: 'plugin_call_command',
+  plugin_query_command: 'plugin_query_command',
   plugin_get_settings: 'plugin_get_settings',
   plugin_update_setting: 'plugin_update_setting',
   plugin_panels_get: 'plugin_panels_get',
@@ -1021,19 +996,6 @@ export interface CommandResponseMap {
   frontend_log: void
 
   system_memory: SystemMemoryInfo
-
-  connector_nodes_get: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
-  connector_nodes_set: { mode: 'automatic' | 'append' | 'custom'; nodes: string[] }
-  connector_status: ConnectorStatus
-  launcher_preload_connector: void
-  connector_host_port: { roomCode: string }
-  connector_host_instance: { status: string }
-  connector_join: { mcHost: string; mcPort: number }
-  connector_leave: { status: string }
-  connector_kick: { status: string }
-  connector_detect_ports: { ports: number[] }
-  connector_search_mc_port: { port: number | null }
-  connector_nat_type: NatTypeResult
 
   game_java_scan: JavaInstallation[]
   game_java_inventory: JavaInventory
@@ -1259,6 +1221,7 @@ export interface CommandResponseMap {
   plugin_get_vue_slots: Record<string, VueSlotItem[]>
   plugin_get_vue_components: Record<string, VueComponentDef>
   plugin_call_command: unknown
+  plugin_query_command: unknown
   plugin_get_settings: PluginSettingsData
   plugin_update_setting: { revision: number } | undefined
   plugin_panels_get: { panels: PluginPanelDefinition[] }

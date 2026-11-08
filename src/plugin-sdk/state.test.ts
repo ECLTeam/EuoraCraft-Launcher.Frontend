@@ -19,7 +19,6 @@ function themeSnapshot(theme: Record<string, unknown>): ConfigSnapshot {
     game: { minecraft_paths: [] },
     download: { mirror_source: 'official' },
     launcher: {},
-    connector: { mode: 'automatic', nodes: [] },
   } as unknown as ConfigSnapshot
 }
 

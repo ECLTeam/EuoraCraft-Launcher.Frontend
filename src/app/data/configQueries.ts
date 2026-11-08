@@ -41,14 +41,7 @@ export function acceptConfigSnapshot(payload: unknown): boolean {
   )
     return false
   const section = payload.section
-  if (
-    section !== 'ui' &&
-    section !== 'game' &&
-    section !== 'launcher' &&
-    section !== 'download' &&
-    section !== 'connector'
-  )
-    return false
+  if (section !== 'ui' && section !== 'game' && section !== 'launcher' && section !== 'download') return false
   const previous = queryClient.getQueryData<SettingsSnapshot>(queryKeys.config.all)
   if (!previous) return false
   const next = parseSettingsSnapshot({ ...previous, [section]: payload.data })

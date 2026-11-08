@@ -183,7 +183,6 @@ describe('双平台搜索页面', () => {
         game: { minecraft_paths: [] },
         download: { mirror_source: 'official' },
         launcher: {},
-        connector: { mode: 'automatic', nodes: [] },
       },
     })
   })

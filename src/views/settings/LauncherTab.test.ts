@@ -24,15 +24,6 @@ let nextFrame: number
 let scroll: ReturnType<typeof vi.fn>
 let animations: ReturnType<typeof vi.fn>
 
-async function advanceFrames() {
-  for (let index = 0; index < 2; index++) {
-    const pending = [...frames.values()]
-    frames.clear()
-    pending.forEach((callback) => callback(performance.now()))
-    await flushPromises()
-  }
-}
-
 async function mountSettings(query: Record<string, string> = {}) {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -136,57 +127,6 @@ describe('LauncherTab 联机设置定位', () => {
     expect(useDebugToolsWindowStore().mode).toBe('closed')
   })
 
-  it('挂载联机表单，普通进入和未知参数不滚动', async () => {
-    const { wrapper, router } = await mountSettings()
-    expect(wrapper.find('[data-settings-section="connector"] .node-settings-form').exists()).toBe(true)
-    await advanceFrames()
-    expect(scroll).not.toHaveBeenCalled()
-    await router.push({ query: { section: 'unknown' } })
-    await advanceFrames()
-    expect(scroll).not.toHaveBeenCalled()
-  })
-
-  it('快捷进入后定位并聚焦，已挂载页面更新参数也能定位', async () => {
-    const { wrapper, router } = await mountSettings({ section: 'connector' })
-    await advanceFrames()
-    const target = wrapper.get('[data-settings-section="connector"]').element
-    expect(scroll).toHaveBeenCalledWith({ block: 'start', behavior: 'instant' })
-    expect(document.activeElement).toBe(target)
-    scroll.mockClear()
-    await router.push({ query: {} })
-    await router.push({ query: { section: 'connector' } })
-    await flushPromises()
-    await advanceFrames()
-    expect(scroll).toHaveBeenCalledTimes(1)
-  })
-
-  it('等待进入动画完成，取消定位后不会因动画完成而抢焦点', async () => {
-    let finishAnimation!: () => void
-    animations.mockReturnValue([
-      {
-        finished: new Promise<void>((resolve) => {
-          finishAnimation = resolve
-        }),
-      },
-    ])
-    const { router } = await mountSettings({ section: 'connector' })
-    await advanceFrames()
-    expect(scroll).not.toHaveBeenCalled()
-    await router.push({ query: {} })
-    finishAnimation()
-    await flushPromises()
-    expect(scroll).not.toHaveBeenCalled()
-  })
-
-  it('页面卸载清理待执行定位', async () => {
-    const { wrapper } = await mountSettings({ section: 'connector' })
-    expect(frames.size).toBe(1)
-    wrapper.unmount()
-    await advanceFrames()
-    expect(frames.size).toBe(0)
-    expect(scroll).not.toHaveBeenCalled()
-  })
-
   it('模组源下拉展示官方与 MCIM，切换后提交下载配置补丁', async () => {
     const { wrapper } = await mountSettings()
     const rows = wrapper.findAll('.setting-item')
@@ -215,7 +155,7 @@ describe('LauncherTab 联机设置定位', () => {
     expect(hasText(i18n.global.t('settings.downloadSettings'))).toBe(true)
     expect(hasText(i18n.global.t('settings.gameDownloadSource'))).toBe(true)
     expect(hasText(i18n.global.t('settings.modSource'))).toBe(true)
-    expect(hasText(i18n.global.t('advanced.nodesTitle'))).toBe(true)
+    expect(hasText(i18n.global.t('advanced.nodesTitle'))).toBe(false)
 
     i18n.global.locale.value = 'en-US'
     await flushPromises()
@@ -230,7 +170,7 @@ describe('LauncherTab 联机设置定位', () => {
 
     expect(hasText(i18n.global.t('settings.gameDownloadSource'))).toBe(true)
     expect(hasText(i18n.global.t('settings.modSource'))).toBe(true)
-    expect(hasText(i18n.global.t('advanced.nodesTitle'))).toBe(true)
+    expect(hasText(i18n.global.t('advanced.nodesTitle'))).toBe(false)
   })
 
   it('代理重要影响常驻显示，查看详情不提交设置', async () => {

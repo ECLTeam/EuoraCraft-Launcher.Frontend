@@ -1,8 +1,9 @@
 /* eslint-disable vue/one-component-per-file -- 动态工厂按需 createApp 生成组件，单文件多组件属必要设计 */
 import DOMPurify from 'dompurify'
-import { compile, createApp, defineComponent, h, ref } from 'vue'
+import { compile, computed, createApp, defineComponent, h, ref, watch } from 'vue'
 import { invalidatePluginRegistry, pluginRegistryQuery } from '@/app/data'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
+import { i18n } from '@/i18n'
 import * as api from '@/plugin-sdk/api'
 import * as component from '@/plugin-sdk/component'
 import '@/plugin-sdk/styles/plugin-base.css'
@@ -29,6 +30,7 @@ import { getToken, watchToken, getMode, watchMode } from '@/plugin-sdk/theme'
 import { transpileTS } from '@/plugin-sdk/transpile'
 import type { PluginSdkContext } from '@/plugin-sdk/types'
 import * as ui from '@/plugin-sdk/ui'
+import { pluginVueControls } from '@/plugin-sdk/vue-runtime'
 import * as widgets from '@/plugin-sdk/widgets'
 import type { PluginRoute, PluginSlotItem, VueComponentDef, VueSlotItem } from '@/types/plugins'
 import type { useRouter } from 'vue-router'
@@ -132,6 +134,25 @@ function getPluginSdk(pluginName: string): PluginSdkInstance {
 ;(window as unknown as PluginSdkGlobal).__plugin_sdk__ = createPluginSdk('__global__')
 
 const pluginRoutes = ref<PluginRoute[]>([])
+
+/** 宿主容器页面的导航入口，只暴露已校验、当前语言可用且文案存在的声明。 */
+export const pluginNavItems = computed(() =>
+  pluginRoutes.value
+    .filter(
+      (route) =>
+        route.container === 'more' &&
+        route.nav &&
+        (!route.locales?.length || route.locales.includes(i18n.global.locale.value)) &&
+        i18n.global.te(route.nav.label_key)
+    )
+    .sort((left, right) => (left.nav?.order ?? 0) - (right.nav?.order ?? 0))
+    .map((route) => ({
+      path: `/more/${route.nav!.path}`,
+      icon: route.nav!.icon,
+      label: String(i18n.global.t(route.nav!.label_key)),
+    }))
+)
+
 const pluginSlots = ref<Record<string, PluginSlotItem[]>>({})
 const pluginVueSlots = ref<Record<string, VueSlotItem[]>>({})
 const vueComponentRegistry = ref<Record<string, VueComponentDef>>({})
@@ -348,8 +369,8 @@ function evaluateVueScript(script: string, plugin: string): Record<string, unkno
     return module.exports.default || module.exports;
   `
   try {
-    const fn = new Function(wrapped)
-    const result = fn()
+    const fn = new Function('Controls', wrapped)
+    const result = fn(pluginVueControls)
     return result && typeof result === 'object' ? (result as Record<string, unknown>) : {}
   } catch (e) {
     console.error(`[PluginBridge] Vue 组件脚本执行失败 [${plugin}]:`, e)
@@ -491,9 +512,10 @@ function setupRoutes(router: ReturnType<typeof useRouter>) {
     router.removeRoute(route.name!)
   }
 
+  const occupiedHostPaths = new Set<string>()
   for (const route of pluginRoutes.value) {
+    if (route.locales?.length && !route.locales.includes(i18n.global.locale.value)) continue
     const pluginName = route.plugin
-    const path = `/plugin/${pluginName}${route.path}`
     const routeMeta = route as unknown as Record<string, unknown>
     const isVueRoute = routeMeta.type === 'vue'
     const componentName = typeof routeMeta.component === 'string' ? routeMeta.component : undefined
@@ -511,12 +533,30 @@ function setupRoutes(router: ReturnType<typeof useRouter>) {
       }
     }
 
-    router.addRoute({
-      path,
-      name: `plugin-${pluginName}-${route.path}`,
-      component: routeComponent,
-      meta: { pluginRoute: true, pluginName, title: route.title },
-    })
+    const inHostContainer = route.container === 'more' && !!route.nav
+    let path = `/plugin/${pluginName}${route.path}`
+    let parentName: string | undefined
+    if (inHostContainer && route.nav) {
+      const hostPath = `/more/${route.nav.path}`
+      const conflict = router
+        .getRoutes()
+        .some((candidate) => candidate.path === hostPath && !candidate.meta?.pluginRoute)
+      if (occupiedHostPaths.has(route.nav.path) || conflict) {
+        console.warn(`[PluginBridge] 宿主容器导航路径冲突，已跳过: ${hostPath}`)
+        continue
+      }
+      occupiedHostPaths.add(route.nav.path)
+      path = route.nav.path
+      parentName = 'more'
+    }
+
+    const routeName = `plugin-${pluginName}-${inHostContainer ? route.nav!.path : route.path}`
+    const meta = { pluginRoute: true, pluginName, title: route.title }
+    if (parentName) {
+      router.addRoute(parentName, { path, name: routeName, component: routeComponent, meta })
+    } else {
+      router.addRoute({ path, name: routeName, component: routeComponent, meta })
+    }
   }
 }
 
@@ -535,7 +575,8 @@ function cleanupPlugin(pluginName: string) {
       el.remove()
     }
   })
-  document.querySelectorAll(`[data-plugin="${pluginName}"]`).forEach((el) => {
+  // Vue 页面和 Teleport 由 Vue 卸载；只移除 SDK 明确创建的原生 DOM。
+  document.querySelectorAll(`[data-plugin="${pluginName}"][data-plugin-dom]`).forEach((el) => {
     if (el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return
     if (el.id && el.id.startsWith('plugin-slot-')) return
     el.remove()
@@ -564,7 +605,7 @@ async function fullCleanupPlugin(pluginName: string, appRouter: ReturnType<typeo
     }
   }
   if (wasViewingPlugin) {
-    await appRouter.replace('/')
+    await appRouter.replace('/more/plugins')
   }
 }
 
@@ -586,6 +627,15 @@ let cleanupState: (() => void) | null = null
 
 export function initPluginBridge(router: ReturnType<typeof useRouter>) {
   cleanupState = initPluginState()
+  unlistenFns.push(
+    watch(i18n.global.locale, () => {
+      setupRoutes(router)
+      const active = router.currentRoute.value
+      if (active.meta?.pluginRoute && !router.getRoutes().some((route) => route.path === active.path)) {
+        void router.replace('/more/plugins')
+      }
+    })
+  )
 
   // 插槽容器挂载后补渲染已注册的 HTML/Vue 内容（插件可能在容器出现前就完成注册）。
   const onSlotHostMounted = (event: Event) => {

@@ -59,11 +59,21 @@ export interface PluginPackageSelection {
   preflight: PluginPackagePreflight
 }
 
+export interface PluginPageNav {
+  path: string
+  label_key: string
+  icon: string
+  order?: number
+}
+
 export interface PluginRoute {
+  locales?: string[]
   plugin: string
   path: string
   title: string
   icon?: string
+  container?: 'top' | 'more'
+  nav?: PluginPageNav
 }
 
 export interface PluginSlotItem {
@@ -206,7 +216,7 @@ export interface PluginSettingSchema {
   options?: string[]
   default: unknown
   description: string
-  type: 'bool' | 'string' | 'number' | 'select'
+  type: 'bool' | 'string' | 'number' | 'select' | 'readonly_file'
 }
 
 export interface PluginPermissionItem {
@@ -288,8 +298,6 @@ export const pluginBusinessCapabilities = [
   'ui.inject',
   'ui.custom.execute',
   'auth.provider',
-  'connector.extend',
-  'connector.manage',
 ] as const
 export type PluginBusinessCapability = (typeof pluginBusinessCapabilities)[number]
 

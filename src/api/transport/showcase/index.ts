@@ -1,6 +1,5 @@
 import type { LittleSkinLoginSnapshot, MinecraftAccount, WardrobeItem } from '@/types/accounts'
 import type { ApiResponse, BackendEvents } from '@/types/api'
-import type { ConnectorStatus } from '@/types/connect'
 import type { InstallationSnapshot } from '@/types/installation'
 import type { CrashAnalysisResult, GameInstance, GameResource, VersionRunStats } from '@/types/instances'
 import type { ApplicationOperation } from '@/types/operations'
@@ -78,17 +77,6 @@ export function createShowcaseTransport(): BackendTransport {
   const servers = structuredClone(showcaseServers)
   const screenshots = structuredClone(showcaseScreenshots)
   const resources: Record<string, GameResource[]> = structuredClone(showcaseResources)
-  let connectorStatus: ConnectorStatus = {
-    mode: 'idle',
-    roomCode: null,
-    mcHost: null,
-    mcPort: null,
-    gameInfo: null,
-    hostName: 'HostPlayer',
-    players: [],
-    nodes: [],
-    error: null,
-  }
   let packVersionName = 'Showcase Pack'
   let packExcludedCount = 0
   let packSource = 'local'
@@ -96,8 +84,6 @@ export function createShowcaseTransport(): BackendTransport {
   const packPrepareOperationId = 'a'.repeat(32)
   const packInstallOperationId = 'b'.repeat(32)
   const exportOperations = new Map<string, ApplicationOperation>()
-  let portScanCount = 0
-  let connectorStartTimer: ReturnType<typeof setTimeout> | null = null
 
   /** 演示用已完成操作（GameOperation 消费方期待可直接完成的任务） */
   const demoOperation = (kind: string) => ({
@@ -107,36 +93,6 @@ export function createShowcaseTransport(): BackendTransport {
     percent: 100,
     message: '展示模式操作已即时完成',
   })
-
-  const hostPlayer = {
-    name: 'CloudMaple685',
-    vendor: 'EuoraCraft Launcher',
-    iconBase64: null,
-    kind: 'host' as const,
-    machineId: 'showcase-host',
-  }
-  const guestPlayer = {
-    name: 'SkyBuilder',
-    vendor: 'Qomicex Launcher',
-    iconBase64: null,
-    kind: 'guest' as const,
-    machineId: 'showcase-guest',
-  }
-
-  const setHostedRoom = () => {
-    connectorStartTimer = null
-    connectorStatus = {
-      mode: 'host',
-      roomCode: 'U/ECL7-W9KM-4R2P-X8QA',
-      mcHost: '127.0.0.1',
-      mcPort: 25565,
-      gameInfo: { gameVersion: '1.21.5', loader: 'Fabric', loaderVersion: '0.16.10' },
-      hostName: 'HostPlayer',
-      players: [hostPlayer, guestPlayer],
-      nodes: [],
-      error: null,
-    }
-  }
   const showcaseCrashReport: CrashAnalysisResult = {
     reportId: '5c0a5eca5e0a4eaf8f465ad0f42d89b1',
     versionId: 'Showcase-1.21.5-Fabric',
@@ -255,75 +211,6 @@ export function createShowcaseTransport(): BackendTransport {
         return success({ status: 'ok', message: 'Showcase Transport 已连接' })
       case 'system_memory':
         return success({ totalMb: 32768, usedMb: 8192, freeMb: 24576, percentUsed: 25 })
-      case 'connector_status':
-        return success(structuredClone(connectorStatus))
-      case 'connector_host_port':
-        if (connectorStartTimer) clearTimeout(connectorStartTimer)
-        setHostedRoom()
-        connectorStatus.mcPort = Number(payload.port || 25565)
-        return success({ roomCode: connectorStatus.roomCode })
-      case 'connector_host_instance':
-        if (connectorStartTimer) clearTimeout(connectorStartTimer)
-        connectorStatus = {
-          mode: 'starting',
-          roomCode: null,
-          mcHost: null,
-          mcPort: null,
-          gameInfo: null,
-          hostName: 'HostPlayer',
-          players: [],
-          nodes: [],
-          error: null,
-        }
-        connectorStartTimer = setTimeout(setHostedRoom, 900)
-        return success({ status: 'starting' })
-      case 'connector_join':
-        if (connectorStartTimer) clearTimeout(connectorStartTimer)
-        connectorStartTimer = null
-        connectorStatus = {
-          mode: 'guest',
-          roomCode: String(payload.code || 'U/ECL7-W9KM-4R2P-X8QA'),
-          mcHost: '127.0.0.1',
-          mcPort: 25566,
-          gameInfo: { gameVersion: '1.21.5', loader: 'Fabric', loaderVersion: '0.16.10' },
-          hostName: 'HostPlayer',
-          players: [hostPlayer, { ...guestPlayer, name: 'ShowcasePlayer', machineId: 'showcase-local' }],
-          nodes: [],
-          error: null,
-        }
-        return success({ mcHost: connectorStatus.mcHost, mcPort: connectorStatus.mcPort })
-      case 'connector_leave':
-        if (connectorStartTimer) clearTimeout(connectorStartTimer)
-        connectorStartTimer = null
-        connectorStatus = {
-          mode: 'idle',
-          roomCode: null,
-          mcHost: null,
-          mcPort: null,
-          gameInfo: null,
-          hostName: 'HostPlayer',
-          players: [],
-          nodes: [],
-          error: null,
-        }
-        return success({ status: 'idle' })
-      case 'connector_kick':
-        connectorStatus.players = connectorStatus.players.filter((player) => player.machineId !== payload.machine_id)
-        return success({ status: 'ok' })
-      case 'connector_detect_ports':
-        portScanCount += 1
-        return success({ ports: portScanCount >= 2 ? [25565] : [] })
-      case 'connector_search_mc_port':
-        return success({ port: portScanCount >= 2 ? 25565 : null })
-      case 'connector_nat_type':
-        return success({
-          type: 'cone',
-          detailType: 'portRestricted',
-          publicIp: '203.0.113.42',
-          publicPort: 51820,
-          publicPortEnd: 51820,
-          supportsIpv6: true,
-        })
       case 'frontend_ready':
         return success()
       case 'debug_reset_launcher_data':

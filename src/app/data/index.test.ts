@@ -32,7 +32,6 @@ const configSnapshot = {
   game: { minecraft_paths: [] },
   download: { mirror_source: 'official' as const },
   launcher: {},
-  connector: { mode: 'automatic' as const, nodes: [] },
 }
 
 describe('统一启动数据层', () => {

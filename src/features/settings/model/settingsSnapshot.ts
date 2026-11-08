@@ -142,7 +142,6 @@ const game = looseObject({
   last_install_path: optionalString,
   last_manage_path: optionalString,
   active_path: optionalString,
-  qomicex_instances_path: optionalString,
 })
 const launcher = looseObject({
   debug: optionalBoolean,
@@ -162,20 +161,15 @@ const download = looseObject({
   resourceInstallCache: optional(record(string(), looseObject({ gamePath: string(), versionId: string() }))),
   resourceSaveDirectories: optional(record(string(), string())),
 })
-const connector = looseObject({
-  mode: optional(picklist(['automatic', 'append', 'custom']), 'automatic'),
-  nodes: optional(array(string()), []),
-})
 const schema = looseObject({
   ui: optional(ui, {}),
   game: optional(game, {}),
   launcher: optional(launcher, {}),
   download: optional(download, {}),
-  connector: optional(connector, {}),
 })
 
 export type SettingsSnapshot = InferOutput<typeof schema>
-export type SettingsSection = 'ui' | 'game' | 'launcher' | 'download' | 'connector'
+export type SettingsSection = 'ui' | 'game' | 'launcher' | 'download'
 
 /** IPC 的外部值在进入共享配置数据层之前验证已知字段，并保留历史扩展字段。 */
 export function parseSettingsSnapshot(value: unknown): SettingsSnapshot {

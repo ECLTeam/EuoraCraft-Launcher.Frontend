@@ -3,14 +3,7 @@ import { confirmConfigWrite, setConfigSectionSnapshot } from '@/app/data/configQ
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import { parseSettingsSnapshot } from '@/features/settings/model/settingsSnapshot'
 import type { ImageSaveUrlResult } from '@/types/accounts'
-import type {
-  ConnectorConfig,
-  DownloadConfig,
-  GameConfig,
-  LauncherConfig,
-  SystemMemoryInfo,
-  UiConfig,
-} from '@/types/config'
+import type { DownloadConfig, GameConfig, LauncherConfig, SystemMemoryInfo, UiConfig } from '@/types/config'
 import type { JavaInstallation } from '@/types/instances'
 import type { ImageSaveAsPayload } from '@/types/system'
 
@@ -96,7 +89,7 @@ export const settingsApi = {
   },
 
   async load() {
-    const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher', 'connector'])
+    const result = await backend.config.getMany(['ui', 'game', 'download', 'launcher'])
     return parseSettingsSnapshot(assertSuccess(result, '读取设置'))
   },
 
@@ -131,12 +124,6 @@ export const settingsApi = {
     const download = parseSettingsSnapshot({ download: data }).download
     setConfigSectionSnapshot('download', download)
     return download
-  },
-
-  async saveConnector(config: ConnectorConfig): Promise<ConnectorConfig | void> {
-    const response = await backend.config.set('connector', config)
-    assertSuccess(response, '保存联机设置')
-    return confirmConfigWrite(response.data)?.connector
   },
 
   async getSystemMemory(): Promise<SystemMemoryInfo> {

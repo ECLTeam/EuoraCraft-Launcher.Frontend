@@ -18,7 +18,6 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
     saveGame: vi.fn(),
     saveLauncher: vi.fn(),
     patchDownload: vi.fn(),
-    saveConnector: vi.fn(),
     listJava: vi.fn(),
     selectImage: vi.fn(),
     selectBackgroundVideo: vi.fn(),
@@ -63,19 +62,12 @@ describe('settingsStore', () => {
     await store.patchGame({ memory_size: 6144, fullscreen: false })
     await store.patchLauncher({ request_timeout: 15, request_retries: 2 })
     await store.patchDownload({ mirror_source: 'bmclapi' })
-    await store.patchConnector({ mode: 'automatic', nodes: [] })
     await store.patchUi({})
     await store.patchUiTheme({})
     await store.patchUiDebugTools({})
     await store.patchUiBackground({})
     await store.updateUi((current) => ({ ...current }))
-    for (const save of [
-      settingsApi.saveGame,
-      settingsApi.saveLauncher,
-      settingsApi.patchDownload,
-      settingsApi.saveConnector,
-      settingsApi.saveUi,
-    ])
+    for (const save of [settingsApi.saveGame, settingsApi.saveLauncher, settingsApi.patchDownload, settingsApi.saveUi])
       expect(save).not.toHaveBeenCalled()
     expect(settingsApi.load).toHaveBeenCalledOnce()
   })
@@ -128,7 +120,6 @@ describe('settingsStore', () => {
         game: { minecraft_paths: [] },
         launcher: {},
         download: { mirror_source: 'official' },
-        connector: { mode: 'automatic', nodes: [] },
       })
     )
     const reloaded = useSettingsStore(createPinia())
@@ -219,16 +210,7 @@ describe('settingsStore', () => {
       },
       download: { mirror_source: 'bmclapi', mod_source: 'mcim' },
       launcher: {},
-      connector: { mode: 'automatic', nodes: [] },
     })
-  })
-
-  it('联机配置沿用共用队列，策略和原始地址更新不会相互覆盖', async () => {
-    const store = useSettingsStore()
-    await store.load()
-    await Promise.all([store.patchConnector({ mode: 'custom' }), store.patchConnector({ nodes: ['draft', ''] })])
-    expect(store.connector).toEqual({ mode: 'custom', nodes: ['draft', ''] })
-    expect(settingsApi.saveConnector).toHaveBeenLastCalledWith(store.connector)
   })
 
   it('加载时补齐默认值但保留后端配置', async () => {
@@ -345,7 +327,6 @@ describe('settingsStore', () => {
       game: { minecraft_paths: [] },
       download: { mirror_source: 'official' },
       launcher: {},
-      connector: { mode: 'automatic', nodes: [] },
     })
     const store = useSettingsStore()
     await store.load()

@@ -114,6 +114,7 @@ import { useTopNav } from '@/composables/useTopNav'
 import { MENU_ITEMS } from '@/constants/menu'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
+import { i18n } from '@/i18n'
 import { setSidebarState } from '@/plugin-sdk/state'
 
 defineOptions({ name: 'SideBar', inheritAttrs: false })
@@ -125,7 +126,9 @@ const isCollapsed = computed({
   set: (val) => setSidebarCollapsed(val),
 })
 const isExpanded = ref(false)
-const pluginRoutesList = computed(() => pluginRoutes.value)
+const pluginRoutesList = computed(() =>
+  pluginRoutes.value.filter((item) => !item.locales?.length || item.locales.includes(i18n.global.locale.value))
+)
 const route = useRoute()
 const router = useRouter()
 const message = useLauncherMessage()
