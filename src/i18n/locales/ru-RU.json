@@ -806,6 +806,8 @@
     "settingsTitle": "Настройки для {name}",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "Плагину требуется поддерживаемый манифест API v2.",
+      "PLUGIN_DEPENDENCY_PREPARATION_FAILED": "Не удалось подготовить зависимости плагина. Добавьте офлайн-wheel или разрешите доступ к сети и повторите.",
+      "PLUGIN_MANIFEST_INVALID": "Недействительный манифест плагина. Проверьте поля name, version и entry_point.",
       "PLUGIN_DISABLED_FOR_SESSION": "Плагин отключён аргументами запуска. Измените аргументы и перезапустите приложение.",
       "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "Обязательная зависимость отключена аргументами запуска. Измените аргументы и перезапустите приложение.",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "Сначала проверьте разрешения плагина.",

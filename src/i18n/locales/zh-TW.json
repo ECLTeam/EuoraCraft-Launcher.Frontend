@@ -806,6 +806,8 @@
     "settingsTitle": "{name} 的設定",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "此外掛需要受支援的 API v2。",
+      "PLUGIN_DEPENDENCY_PREPARATION_FAILED": "外掛依賴準備失敗：請補齊離線 wheel 或允許連網後重試。",
+      "PLUGIN_MANIFEST_INVALID": "外掛資訊檔無效，請檢查 name、version 與 entry_point。",
       "PLUGIN_DISABLED_FOR_SESSION": "本次啟動參數已停用此外掛，調整參數並重新啟動後才能啟用。",
       "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "此外掛必要的相依外掛已被本次啟動參數停用，調整參數並重新啟動後才能啟用。",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "請先審閱外掛權限。",

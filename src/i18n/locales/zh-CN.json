@@ -810,6 +810,8 @@
     "settingsTitle": "{name} 的设置",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "此插件需要受支持的 API v2。",
+      "PLUGIN_DEPENDENCY_PREPARATION_FAILED": "插件依赖准备失败：请补齐离线 wheel 或允许联网后重试。",
+      "PLUGIN_MANIFEST_INVALID": "插件清单无效，请检查 name、version 与 entry_point。",
       "PLUGIN_DISABLED_FOR_SESSION": "本次启动参数已停用此插件，调整参数并重启后才能启用。",
       "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "此插件必需的依赖已被本次启动参数停用，调整参数并重启后才能启用。",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "请先审阅插件权限。",

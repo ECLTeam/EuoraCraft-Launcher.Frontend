@@ -10,6 +10,7 @@ describe('plugin management entry points', () => {
   it.each([
     ['error', 'PLUGIN_WORKER_EXECUTION_FAILED', 'plugins.errors.PLUGIN_WORKER_EXECUTION_FAILED'],
     ['error', 'PLUGIN_UNKNOWN_TEST_FAILURE', 'plugins.runtimeError'],
+    ['error', 'PLUGIN_DEPENDENCY_PREPARATION_FAILED', 'plugins.errors.PLUGIN_DEPENDENCY_PREPARATION_FAILED'],
     ['disabled', 'PLUGIN_DISABLED_FOR_SESSION', 'plugins.errors.PLUGIN_DISABLED_FOR_SESSION'],
     ['disabled', 'PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION', 'plugins.errors.PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION'],
     ['enabled', null, null],
