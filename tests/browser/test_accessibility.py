@@ -22,6 +22,12 @@ frontend = Path(__file__).resolve().parents[2]
 scenarios = ("settings", "tasks", "account-login", "instance", "permissions", "update")
 themes = (("classic", "light"), ("classic", "dark"), ("folia", "light"), ("folia", "dark"))
 locales = ("zh-CN", "zh-TW", "en-US", "ja-JP", "ru-RU", "de-DE")
+# 页面存在按 UA 判断的平台分支（如实例详情的 Windows 快捷方式区块）。固定 UA 后
+# Linux CI 与 Windows 本机扫描同一份 DOM，例外基线才能跨平台复用。
+windows_user_agent = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/145.0.0.0 Safari/537.36"
+)
 
 
 def write_report(target, value):
@@ -79,7 +85,9 @@ def stop_server(process):
 
 
 def prepare_page(browser, url, skin, mode, locale, width=1200, height=800):
-    context = browser.new_context(viewport={"width": width, "height": height}, color_scheme=mode)
+    context = browser.new_context(
+        viewport={"width": width, "height": height}, color_scheme=mode, user_agent=windows_user_agent
+    )
     # 外部网络不参与验收，也不上传展示账户等合成数据。
     context.route("**/*", lambda route: route.continue_() if route.request.url.startswith(url) else route.abort())
     config = {"version": 1, "config": {"launcher": {"debug": False}, "ui": {
@@ -106,7 +114,9 @@ def verify_engine(browser):
     try:
         page.set_content('<html lang="en"><head><title>Engine check</title></head><body style="background:white">'
                          '<button></button><p id="good" style="color:black">Readable</p>'
-                         '<p id="bad" style="color:#aaaaaa">Unacceptable contrast</p></body></html>')
+                         '<p id="bad" style="color:#aaaaaa">Unacceptable contrast</p>'
+                         '<div data-theme-component="setting-row"><span class="setting-label">Label</span></div>'
+                         '</body></html>')
         page.add_script_tag(path=str(frontend / "node_modules/axe-core/axe.min.js"))
         failed = page.evaluate("async () => (await axe.run(document)).violations.map(rule => rule.id)")
         assert "button-name" in failed
@@ -119,10 +129,18 @@ def verify_engine(browser):
         node = result["incomplete"][0]["nodes"][0]
         original = node["governance_target"]
         assert node["target"] == ["#good"]
+        assert node["locator_kind"] in ("semantic-anchored", "structural")
         page.locator("#good").evaluate("element => element.id='next-generated-id'")
         node["target"] = ["#next-generated-id"]
         stabilize_targets(page, result)
         assert node["governance_target"] == original
+        # 语义锚点优先，且不携带构建期样式哈希，界面改版后仍可复用。
+        semantic_result = {"violations": [], "incomplete": [{"id": "color-contrast", "nodes": [
+            {"target": [".setting-label"]}]}]}
+        stabilize_targets(page, semantic_result)
+        semantic_node = semantic_result["incomplete"][0]["nodes"][0]
+        assert semantic_node["locator_kind"] == "semantic"
+        assert "data-v-" not in semantic_node["governance_target"][0]
     finally:
         page.close()
 
@@ -204,26 +222,105 @@ def scan(page, name, target, output_directory=None):
             "screenshot": f"accessibility/{name}.png", "scan_context": "active-dialog" if dialog.count() else "page"}
 
 
+locator_script = r"""
+targets => {
+  // 优先使用语义属性与稳定类名，避免 data-v 构建哈希和整链位置随界面改版失效。
+  const stableAttributes = ["data-testid", "data-theme-component", "aria-label", "title", "name"];
+  const escapeAttribute = value => String(value).replace(/"/g, '\\"');
+  const classesOf = element => Array.from(element.classList).filter(name => !name.startsWith("data-v-"));
+  const signature = element =>
+      element.tagName.toLowerCase() + classesOf(element).map(name => "." + CSS.escape(name)).join("");
+  const attributeSelector = (element, attribute) =>
+      element.tagName.toLowerCase() + "[" + attribute + '="' + escapeAttribute(element.getAttribute(attribute)) + '"]';
+  const tagPosition = element => {
+    const parent = element.parentElement;
+    if (!parent) return 1;
+    const peers = Array.from(parent.children).filter(child => child.tagName === element.tagName);
+    return peers.indexOf(element) + 1;
+  };
+  const step = element => {
+    const base = signature(element);
+    const parent = element.parentElement;
+    if (!parent) return base;
+    const peers = Array.from(parent.children).filter(child => child.tagName === element.tagName);
+    const ambiguous = peers.some(child => child !== element && signature(child) === base);
+    return ambiguous ? base + ":nth-of-type(" + tagPosition(element) + ")" : base;
+  };
+  const anchorCandidates = element => {
+    const candidates = [];
+    for (const attribute of stableAttributes) {
+      if (!element.getAttribute(attribute)) continue;
+      const selector = attributeSelector(element, attribute);
+      candidates.push(selector, selector + ":nth-of-type(" + tagPosition(element) + ")");
+    }
+    const base = signature(element);
+    candidates.push(base, base + ":nth-of-type(" + tagPosition(element) + ")");
+    return candidates;
+  };
+  const matchesOnly = (selector, element) => {
+    try {
+      const found = document.querySelectorAll(selector);
+      return found.length === 1 && found[0] === element;
+    } catch (error) {
+      return false;
+    }
+  };
+  const taken = new Set();
+  return targets.map(target => {
+    // 跨 iframe 或 shadow DOM 的组合定位保留 axe 原始值。
+    if (target.length !== 1 || typeof target[0] !== "string") return null;
+    const element = document.querySelector(target[0]);
+    if (!element) return null;
+    const accept = (selector, kind) => {
+      if (!selector || taken.has(selector) || !matchesOnly(selector, element)) return null;
+      taken.add(selector);
+      return {selector, kind};
+    };
+    for (const attribute of stableAttributes) {
+      if (!element.getAttribute(attribute)) continue;
+      const found = accept(attributeSelector(element, attribute), "semantic");
+      if (found) return found;
+    }
+    const bySignature = accept(signature(element), "semantic");
+    if (bySignature) return bySignature;
+    let depth = 0;
+    for (
+        let anchor = element.parentElement;
+        anchor && anchor !== document.documentElement && depth < 12;
+        anchor = anchor.parentElement, depth++
+    ) {
+      const anchorSelector = anchorCandidates(anchor).find(candidate => matchesOnly(candidate, anchor));
+      if (!anchorSelector) continue;
+      const parts = [];
+      for (let node = element; node && node !== anchor; node = node.parentElement) parts.unshift(step(node));
+      const found = accept([anchorSelector, ...parts].join(" > "), "semantic-anchored");
+      if (found) return found;
+    }
+    // 兜底：保留完整结构链，仅用于语义锚点无法区分同位置元素的场景。
+    const structural = [];
+    for (let node = element; node; node = node.parentElement) {
+      structural.unshift(node.tagName.toLowerCase() + ":nth-of-type(" + tagPosition(node) + ")");
+    }
+    const fallback = accept(structural.join(" > "), "structural");
+    if (!fallback) throw new Error("Node locator is not unique: " + structural.join(" > "));
+    return fallback;
+  });
+}
+"""
+
+
 def stabilize_targets(page, result):
-    """保留原始 axe 定位，为含组件生成 ID 的节点另存唯一结构定位。"""
-    for rule in result["violations"] + result["incomplete"]:
-        for node in rule["nodes"]:
-            target = node["target"]
-            if len(target) != 1 or not isinstance(target[0], str) or "#" not in target[0]:
-                continue
-            selector = page.locator(target[0]).evaluate("""element => {
-              const parts=[];
-              for(let current=element;current;current=current.parentElement){
-                const tag=current.tagName.toLowerCase();
-                const peers=current.parentElement ? [...current.parentElement.children].filter(e=>e.tagName===current.tagName) : [current];
-                parts.unshift(tag+':nth-of-type('+(peers.indexOf(current)+1)+')');
-              }
-              const selector=parts.join(' > ');
-              if(document.querySelectorAll(selector).length!==1 || document.querySelector(selector)!==element)
-                throw new Error('Structural target is not unique');
-              return selector;
-            }""")
-            node["governance_target"] = [selector]
+    """保留 axe 定位，另存不依赖构建哈希与整链位置的唯一治理定位。"""
+    nodes = [node for rule in result["violations"] + result["incomplete"] for node in rule["nodes"]]
+    if not nodes:
+        return
+    locators = page.evaluate(locator_script, [node["target"] for node in nodes])
+    for node, locator in zip(nodes, locators, strict=True):
+        if locator is None:
+            continue
+        node["governance_target"] = [locator["selector"]]
+        node["locator_kind"] = locator["kind"]
+
 
 
 def review_contrast(page, result):
