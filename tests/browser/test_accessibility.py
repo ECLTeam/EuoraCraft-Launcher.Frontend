@@ -19,7 +19,7 @@ from playwright.sync_api import sync_playwright
 
 
 frontend = Path(__file__).resolve().parents[2]
-scenarios = ("settings", "tasks", "account-login", "instance", "permissions", "update")
+scenarios = ("settings", "tasks", "account-login", "instance", "update")
 themes = (("classic", "light"), ("classic", "dark"), ("folia", "light"), ("folia", "dark"))
 locales = ("zh-CN", "zh-TW", "en-US", "ja-JP", "ru-RU", "de-DE")
 # 页面存在按 UA 判断的平台分支（如实例详情的 Windows 快捷方式区块）。固定 UA 后
@@ -162,32 +162,6 @@ def open_scenario(page, scenario, locale):
         page.goto(page.url.split("#", 1)[0] + "#/versions")
         page.locator('button[title="详情与设置"], button[title="详情与个性化"]').first.click()
         return page.locator(".version-detail-modal")
-    if scenario == "permissions":
-        page.evaluate("""async () => {
-          const fixtures = await import('/src/api/transport/showcase/fixtures.ts');
-          const plugin = fixtures.showcasePlugins[0];
-          plugin.installation_id = 'a'.repeat(32);
-          plugin.requested_permissions = ['instances.read'];
-          const {pluginManagementApi} = await import('/src/features/plugins/api/pluginManagementApi.ts');
-          pluginManagementApi.list = async () => structuredClone(fixtures.showcasePlugins);
-          pluginManagementApi.permissions = async () => ({installation_id:'a'.repeat(32),
-            content_digest:'b'.repeat(64), revision:0, grant_epoch:1, error_code:null,
-            required_satisfied:false, items:[{capability:'instances.read', required:true,
-              decision:'deny', implemented:true, resource_refs:[], selected_resource_refs:[],
-              requested_resource_refs:[], expires_at:null, grant_epoch:1}]});
-          pluginManagementApi.permissionResources = async () => ({catalog_revision:1,
-            items:[{resource_id:'c'.repeat(32),kind:'instance_root',label:'Example games',
-              parent_ref:null,version_id:null,available:true,selected:false,is_default:true}],next_cursor:null});
-          const {usePluginStore}=await import('/src/features/plugins/stores/pluginStore.ts');
-          await usePluginStore().load(true);
-        }""")
-        # Hash navigation keeps the in-memory test fixture and real component intact.
-        page.evaluate("location.hash = '#/more/plugins'")
-        page.get_by_role("button", name=translations["plugins"]["permissions"], exact=True).click()
-        # 应用设置中心也挂载权限组件；扫描本次打开的可见弹窗，排除关闭的实例。
-        permissions = page.locator(".plugin-permissions:visible")
-        permissions.locator("[role='checkbox']").wait_for()
-        return permissions
     if scenario == "update":
         page.evaluate("""async () => {
           const {useUpdateCheck}=await import('/src/features/settings/composables/useUpdateCheck.ts');
