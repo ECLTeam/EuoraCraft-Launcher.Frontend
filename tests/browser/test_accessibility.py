@@ -166,8 +166,10 @@ def open_scenario(page, scenario, locale):
         # Hash navigation keeps the in-memory test fixture and real component intact.
         page.evaluate("location.hash = '#/more/plugins'")
         page.get_by_role("button", name=translations["plugins"]["permissions"], exact=True).click()
-        page.locator(".plugin-permissions [role='checkbox']").wait_for()
-        return page.locator(".plugin-permissions")
+        # 应用设置中心也挂载权限组件；扫描本次打开的可见弹窗，排除关闭的实例。
+        permissions = page.locator(".plugin-permissions:visible")
+        permissions.locator("[role='checkbox']").wait_for()
+        return permissions
     if scenario == "update":
         page.evaluate("""async () => {
           const {useUpdateCheck}=await import('/src/features/settings/composables/useUpdateCheck.ts');
