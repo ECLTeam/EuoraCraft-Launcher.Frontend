@@ -829,6 +829,8 @@
     "settingsTitle": "Settings for {name}",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "This plugin requires a supported API v2 manifest.",
+      "PLUGIN_DISABLED_FOR_SESSION": "This plugin is disabled by the launch arguments. Change the arguments and restart to enable it.",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "A required dependency is disabled by the launch arguments. Change the arguments and restart to enable this plugin.",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "Review the plugin permissions first.",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "Required permissions are missing. Check permission settings.",
       "PLUGIN_RUNTIME_UNSUPPORTED": "Third-party plugins are not supported on this platform yet.",

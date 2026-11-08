@@ -825,6 +825,8 @@
     "settingsTitle": "Einstellungen für {name}",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "Dieses Plugin benötigt ein unterstütztes API-v2-Manifest.",
+      "PLUGIN_DISABLED_FOR_SESSION": "Dieses Plugin ist durch Startargumente deaktiviert. Ändern Sie die Argumente und starten Sie neu.",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "Eine erforderliche Abhängigkeit ist durch Startargumente deaktiviert. Ändern Sie die Argumente und starten Sie neu.",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "Zuerst die Pluginberechtigungen prüfen.",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "Erforderliche Berechtigungen fehlen. Einstellungen prüfen.",
       "PLUGIN_RUNTIME_UNSUPPORTED": "Drittanbieterplugins werden auf dieser Plattform noch nicht unterstützt.",

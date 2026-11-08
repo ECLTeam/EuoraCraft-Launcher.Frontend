@@ -829,6 +829,8 @@
     "settingsTitle": "{name} 的设置",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "此插件需要受支持的 API v2。",
+      "PLUGIN_DISABLED_FOR_SESSION": "本次启动参数已停用此插件，调整参数并重启后才能启用。",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "此插件必需的依赖已被本次启动参数停用，调整参数并重启后才能启用。",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "请先审阅插件权限。",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "必要权限未获准，请检查权限设置。",
       "PLUGIN_RUNTIME_UNSUPPORTED": "当前平台暂不支持第三方插件。",

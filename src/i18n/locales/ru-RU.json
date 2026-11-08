@@ -825,6 +825,8 @@
     "settingsTitle": "Настройки для {name}",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "Плагину требуется поддерживаемый манифест API v2.",
+      "PLUGIN_DISABLED_FOR_SESSION": "Плагин отключён аргументами запуска. Измените аргументы и перезапустите приложение.",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "Обязательная зависимость отключена аргументами запуска. Измените аргументы и перезапустите приложение.",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "Сначала проверьте разрешения плагина.",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "Не хватает обязательных разрешений. Проверьте настройки.",
       "PLUGIN_RUNTIME_UNSUPPORTED": "Сторонние плагины пока не поддерживаются на этой платформе.",

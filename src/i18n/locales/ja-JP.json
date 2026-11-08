@@ -825,6 +825,8 @@
     "settingsTitle": "{name} の設定",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "このプラグインには対応する API v2 マニフェストが必要です。",
+      "PLUGIN_DISABLED_FOR_SESSION": "起動引数によりこのプラグインは無効です。有効にするには引数を変更して再起動してください。",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "起動引数により必須の依存プラグインが無効です。引数を変更して再起動してください。",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "先にプラグインの権限を確認してください。",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "必須権限が不足しています。権限設定を確認してください。",
       "PLUGIN_RUNTIME_UNSUPPORTED": "このプラットフォームではサードパーティ製プラグインはまだ利用できません。",

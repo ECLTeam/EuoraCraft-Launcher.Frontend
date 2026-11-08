@@ -154,7 +154,7 @@
                 <NButton
                   quaternary
                   size="tiny"
-                  :disabled="plugin.pending_restart && plugin.status !== 'enabled'"
+                  :disabled="sessionDisabled(plugin) || (plugin.pending_restart && plugin.status !== 'enabled')"
                   :title="t(['enabled', 'stopping'].includes(plugin.status) ? 'plugins.disable' : 'plugins.enable')"
                   :aria-label="
                     t(['enabled', 'stopping'].includes(plugin.status) ? 'plugins.disable' : 'plugins.enable')
@@ -169,7 +169,7 @@
                   quaternary
                   size="tiny"
                   :loading="reloadingPlugins.includes(plugin.name)"
-                  :disabled="plugin.pending_restart"
+                  :disabled="sessionDisabled(plugin) || plugin.pending_restart"
                   :title="t('plugins.reload')"
                   :aria-label="t('plugins.reload')"
                   @click="reloadPlugin(plugin)"
@@ -328,6 +328,10 @@ function pluginError(plugin: PluginInfo): string {
   if (!plugin.error) return ''
   const key = `plugins.errors.${plugin.error}`
   return te(key) ? t(key) : plugin.error.startsWith('PLUGIN_') ? t('plugins.runtimeError') : plugin.error
+}
+
+function sessionDisabled(plugin: PluginInfo): boolean {
+  return plugin.error === 'PLUGIN_DISABLED_FOR_SESSION' || plugin.error === 'PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION'
 }
 
 function pluginDescription(plugin: PluginInfo): string {

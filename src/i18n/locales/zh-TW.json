@@ -825,6 +825,8 @@
     "settingsTitle": "{name} 的設定",
     "errors": {
       "PLUGIN_API_VERSION_UNSUPPORTED": "此外掛需要受支援的 API v2。",
+      "PLUGIN_DISABLED_FOR_SESSION": "本次啟動參數已停用此外掛，調整參數並重新啟動後才能啟用。",
+      "PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION": "此外掛必要的相依外掛已被本次啟動參數停用，調整參數並重新啟動後才能啟用。",
       "PLUGIN_GRANT_REVIEW_REQUIRED": "請先審閱外掛權限。",
       "PLUGIN_REQUIRED_PERMISSION_DENIED": "必要權限尚未允許，請檢查權限設定。",
       "PLUGIN_RUNTIME_UNSUPPORTED": "目前平台暫不支援第三方外掛。",

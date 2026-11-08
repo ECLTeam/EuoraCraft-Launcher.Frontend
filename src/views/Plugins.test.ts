@@ -11,6 +11,8 @@ describe('plugin management entry points', () => {
     ['review_required', 'PLUGIN_GRANT_REVIEW_REQUIRED', 'plugins.errors.PLUGIN_GRANT_REVIEW_REQUIRED'],
     ['error', 'PLUGIN_WORKER_EXECUTION_FAILED', 'plugins.errors.PLUGIN_WORKER_EXECUTION_FAILED'],
     ['error', 'PLUGIN_UNKNOWN_TEST_FAILURE', 'plugins.runtimeError'],
+    ['disabled', 'PLUGIN_DISABLED_FOR_SESSION', 'plugins.errors.PLUGIN_DISABLED_FOR_SESSION'],
+    ['disabled', 'PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION', 'plugins.errors.PLUGIN_DEPENDENCY_DISABLED_FOR_SESSION'],
     ['enabled', null, null],
   ])('keeps %s reasons in the accessible status hint instead of the plugin identity', async (status, error, key) => {
     const pinia = createTestingPinia({ createSpy: vi.fn })
@@ -53,6 +55,11 @@ describe('plugin management entry points', () => {
         return
       }
       const message = i18n.global.t(key)
+      if (error?.includes('DISABLED_FOR_SESSION')) {
+        for (const name of ['plugins.enable', 'plugins.reload']) {
+          expect(wrapper.get(`button[aria-label="${i18n.global.t(name)}"]`).attributes('disabled')).toBeDefined()
+        }
+      }
       expect(wrapper.get('.plugin-identity').text()).not.toContain(message)
       const note = wrapper.get('[role="note"]')
       expect(note.attributes('tabindex')).toBe('0')
