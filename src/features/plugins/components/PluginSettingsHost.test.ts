@@ -15,7 +15,7 @@ describe('shared plugin settings host', () => {
     const pinia = createTestingPinia({ createSpy: vi.fn })
     const store = usePluginStore(pinia)
     const wrapper = mount(PluginSettingsHost, {
-      global: { plugins: [pinia, i18n], stubs: { PluginSettingsModal: true, PluginPermissionsModal: true } },
+      global: { plugins: [pinia, i18n], stubs: { PluginSettingsModal: true } },
     })
     try {
       expect(pluginManagementApi.onStatusChanged).not.toHaveBeenCalled()

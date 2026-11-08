@@ -56,7 +56,7 @@
         <UiLoading v-if="loading && !plugins.length" mode="block" class="plugins-spin" />
         <NAlert v-else-if="listError" type="error" :showIcon="false">
           {{ t('plugins.loadFailed') }}
-          <NButton text @click="refreshPermissions">{{ t('common.retry') }}</NButton>
+          <NButton text @click="retryLoad">{{ t('common.retry') }}</NButton>
         </NAlert>
         <div v-else class="plugins-list-content">
           <div v-if="filteredPlugins.length" class="plugins-list">
@@ -122,16 +122,6 @@
               </div>
 
               <NSpace class="plugin-actions" justify="end" :size="3" :wrap="false">
-                <NButton
-                  v-if="plugin.installation_id && plugin.requested_permissions?.length"
-                  quaternary
-                  size="tiny"
-                  :title="t('plugins.permissions')"
-                  :aria-label="t('plugins.permissions')"
-                  @click="openPermissions(plugin)"
-                >
-                  <template #icon><UiIcon name="shield" :size="16" /></template>
-                </NButton>
                 <NButton
                   v-if="plugin.status === 'enabled' && !plugin.is_system"
                   quaternary
@@ -210,11 +200,6 @@
       </div>
     </section>
 
-    <PluginPermissionsModal
-      v-model:visible="permissionsVisible"
-      :plugin="permissionsTarget"
-      @saved="refreshPermissions"
-    />
     <PluginPanelModal :visible="panelVisible" :plugin="panelTarget" @close="panelVisible = false" />
     <PluginPackageInstallModal
       v-model:visible="packageModalVisible"
@@ -249,7 +234,6 @@ import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
-import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
@@ -259,13 +243,15 @@ const { isFolia } = useUiSkin()
 const { run, runResult } = useAsyncAction({ showSuccess: false, showError: false })
 const pluginStore = usePluginStore()
 const { plugins, loading, error: listError, reloadingPlugins } = storeToRefs(pluginStore)
-const permissionsVisible = ref(false)
-const permissionsTarget = ref<PluginInfo | null>(null)
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const errorHintPrefix = useId()
 const hoveredErrorName = ref<string | null>(null)
 const focusedErrorName = ref<string | null>(null)
+
+async function retryLoad(): Promise<void> {
+  await pluginStore.load(true).catch(() => undefined)
+}
 
 function dismissErrorHints(): void {
   hoveredErrorName.value = null
@@ -310,7 +296,7 @@ const filteredPlugins = computed(() => {
 
 function statusType(status: string): 'success' | 'error' | 'warning' | 'info' | 'default' {
   if (status === 'enabled') return 'success'
-  if (status === 'disabled' || status === 'permission_denied' || status === 'error') return 'error'
+  if (status === 'disabled' || status === 'error') return 'error'
   if (
     status === 'pending_restart' ||
     status === 'loading' ||
@@ -339,31 +325,7 @@ function pluginDescription(plugin: PluginInfo): string {
   return [pluginId, plugin.description].filter(Boolean).join(' · ')
 }
 
-function openPermissions(plugin: PluginInfo): void {
-  permissionsTarget.value = plugin
-  permissionsVisible.value = true
-}
-
-async function refreshPermissions(): Promise<void> {
-  await pluginStore.load(true)
-}
-
 async function togglePlugin(plugin: PluginInfo) {
-  if (
-    !['enabled', 'stopping'].includes(plugin.status) &&
-    plugin.installation_id &&
-    (plugin.review_required || !plugin.required_satisfied)
-  ) {
-    if (plugin.requested_permissions?.length === 0) {
-      await runResult(() => pluginStore.enableBasic(plugin), {
-        showError: true,
-        errorMessage: t('plugins.enableFailed'),
-      })
-      return
-    }
-    openPermissions(plugin)
-    return
-  }
   const action = ['enabled', 'stopping'].includes(plugin.status) ? 'disable' : 'enable'
   await runResult(async () => pluginStore.toggle(plugin), {
     showSuccess: true,

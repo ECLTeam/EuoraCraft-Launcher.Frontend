@@ -1,67 +1,19 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
-import {
-  pluginBusinessCapabilities,
-  type PluginInfo,
-  type PluginPermissions,
-  type PluginPermissionDecision,
-  type PluginPackageInstallResult,
-  type PluginPackagePreflight,
-  type PluginPanelData,
-  type PluginPanelDefinition,
-  type PluginSettingsData,
-  type PluginResourceQuery,
+import type {
+  PluginInfo,
+  PluginPackageInstallResult,
+  PluginPackagePreflight,
+  PluginPanelData,
+  PluginPanelDefinition,
+  PluginSettingsData,
 } from '@/types/plugins'
-import { parsePermissions, parsePermissionUpdate, parseResourcePage } from './pluginPermissionValidation'
 import { parseDevelopment, parseSettings } from './pluginSettingsValidation'
 
 export const pluginManagementApi = {
   async openDirectory(installationId: string) {
     assertSuccess(await backend.command('plugin_open_directory', { installation_id: installationId }), '打开插件目录')
   },
-  async permissions(installationId: string): Promise<PluginPermissions> {
-    return parsePermissions(
-      assertSuccess(
-        await backend.command('plugin_permissions_get', { installation_id: installationId }),
-        '读取插件权限'
-      )
-    )
-  },
-
-  async permissionResources(query: PluginResourceQuery) {
-    const page = parseResourcePage(
-      assertSuccess(await backend.command('plugin_permission_resources', query), '查询可审阅资源')
-    )
-    const isJava = query.capability === 'java.read' || query.capability === 'java.use'
-    const isAccount = query.capability === 'accounts.read'
-    if (page.items.some((item) => (item.kind === 'java_runtime') !== isJava || (item.kind === 'account') !== isAccount))
-      throw new Error('PLUGIN_SCHEMA_INVALID')
-    return page
-  },
-
-  async updatePermissions(
-    view: PluginPermissions,
-    decisions: PluginPermissionDecision[],
-    resourceRevision?: number,
-    javaResourceRevision?: number,
-    accountResourceRevision?: number
-  ) {
-    return parsePermissionUpdate(
-      assertSuccess(
-        await backend.command('plugin_permissions_update', {
-          installation_id: view.installation_id,
-          content_digest: view.content_digest,
-          expected_revision: view.revision,
-          decisions,
-          resource_revision: resourceRevision,
-          java_resource_revision: javaResourceRevision,
-          account_resource_revision: accountResourceRevision,
-        }),
-        '保存插件权限'
-      )
-    )
-  },
-
   async list(): Promise<PluginInfo[]> {
     const plugins = assertSuccess(await backend.command('plugin_list'), '读取插件列表') ?? []
     for (const plugin of plugins) {
@@ -69,14 +21,6 @@ export const pluginManagementApi = {
       if (
         (plugin.source !== undefined && !['directory', 'package'].includes(plugin.source)) ||
         (plugin.supports_hot_reload !== undefined && typeof plugin.supports_hot_reload !== 'boolean')
-      )
-        throw new Error('PLUGIN_SCHEMA_INVALID')
-      if (
-        plugin.installation_id &&
-        (!Array.isArray(plugin.requested_permissions) ||
-          plugin.requested_permissions.some(
-            (permission) => !pluginBusinessCapabilities.some((capability) => capability === permission)
-          ))
       )
         throw new Error('PLUGIN_SCHEMA_INVALID')
     }

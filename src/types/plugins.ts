@@ -7,9 +7,6 @@ export interface PluginInfo {
   name: string
   installation_id?: string
   content_digest?: string
-  review_required?: boolean
-  requested_permissions?: PluginBusinessCapability[]
-  required_satisfied?: boolean
   cleanup_state?: string
   source?: 'directory' | 'package'
   supports_hot_reload?: boolean
@@ -219,43 +216,6 @@ export interface PluginSettingSchema {
   type: 'bool' | 'string' | 'text' | 'number' | 'select' | 'readonly_file'
 }
 
-export interface PluginPermissionItem {
-  capability: string
-  required: boolean
-  decision: 'allow' | 'deny'
-  resource_refs: string[]
-  selected_resource_refs: string[]
-  requested_resource_refs: string[]
-  implemented: boolean
-  expires_at: number | null
-  grant_epoch: number
-}
-
-export interface PluginPermissions {
-  installation_id: string
-  content_digest: string
-  revision: number
-  grant_epoch: number
-  required_satisfied: boolean
-  error_code: string | null
-  items: PluginPermissionItem[]
-}
-
-export interface PluginPermissionDecision {
-  capability: string
-  resource_refs: string[]
-  decision: 'allow' | 'deny'
-  lifetime: 'session' | 'permanent'
-}
-
-export interface PluginPermissionUpdateResult {
-  revision: number
-  grant_epoch: number
-  persisted: boolean
-  required_satisfied: boolean
-  cleanup_state: string
-}
-
 export interface PluginRuntimeInfo {
   installation_id: string
   run_id: string
@@ -263,50 +223,4 @@ export interface PluginRuntimeInfo {
   pid: number | null
   cleanup_state: string
   last_error: { code: string; message: string } | null
-}
-
-interface PluginResourceFields {
-  resource_id: string
-  label: string
-  available: boolean
-  selected: boolean
-  is_default: boolean
-}
-
-export type PluginResourceCandidate = PluginResourceFields &
-  (
-    | { kind: 'instance_root' | 'instance'; parent_ref: string | null; version_id: string | null }
-    | { kind: 'java_runtime' | 'account'; parent_ref: null; version_id: null }
-  )
-
-export interface PluginResourcePage {
-  catalog_revision: number
-  items: PluginResourceCandidate[]
-  next_cursor: string | null
-}
-
-export type PluginInstanceCapability = 'instances.read' | 'instances.manage'
-export const pluginBusinessCapabilities = [
-  'instances.read',
-  'instances.manage',
-  'network.read',
-  'java.read',
-  'java.use',
-  'java.catalog.read',
-  'java.install',
-  'accounts.read',
-  'ui.inject',
-  'ui.custom.execute',
-  'auth.provider',
-] as const
-export type PluginBusinessCapability = (typeof pluginBusinessCapabilities)[number]
-
-export interface PluginResourceQuery {
-  installation_id: string
-  content_digest: string
-  capability: PluginInstanceCapability | 'java.read' | 'java.use' | 'accounts.read'
-  parent_ref?: string | null
-  search?: string
-  cursor?: string | null
-  limit?: number
 }

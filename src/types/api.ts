@@ -72,11 +72,6 @@ import type { ModInfo, ModInstallResult, ModItem, ModSearchResult, ModSourceConf
 import type {
   PluginInfo,
   PluginDevelopmentState,
-  PluginPermissions,
-  PluginResourcePage,
-  PluginResourceQuery,
-  PluginPermissionDecision,
-  PluginPermissionUpdateResult,
   PluginRuntimeInfo,
   PluginPackagePreflight,
   PluginPanelData,
@@ -593,17 +588,6 @@ export interface CommandPayloadMap {
   }
 
   // 插件
-  plugin_permissions_get: { installation_id: string }
-  plugin_permission_resources: PluginResourceQuery
-  plugin_permissions_update: {
-    installation_id: string
-    content_digest: string
-    expected_revision: number
-    decisions: PluginPermissionDecision[]
-    resource_revision?: number
-    java_resource_revision?: number
-    account_resource_revision?: number
-  }
   plugin_runtime_info: { installation_id: string }
   plugin_development_get: Record<string, never>
   plugin_open_directory: { installation_id: string }
@@ -911,9 +895,6 @@ export const COMMAND_NAMES = {
   process_input: 'process_input',
   process_stop: 'process_stop',
   debug_process_spawn: 'debug_process_spawn',
-  plugin_permissions_get: 'plugin_permissions_get',
-  plugin_permission_resources: 'plugin_permission_resources',
-  plugin_permissions_update: 'plugin_permissions_update',
   plugin_runtime_info: 'plugin_runtime_info',
   plugin_development_get: 'plugin_development_get',
   plugin_open_directory: 'plugin_open_directory',
@@ -1204,9 +1185,6 @@ export interface CommandResponseMap {
   game_crash_output: { name: string; content: string }
   game_crash_export: { path: string }
 
-  plugin_permissions_get: PluginPermissions
-  plugin_permission_resources: PluginResourcePage
-  plugin_permissions_update: PluginPermissionUpdateResult
   plugin_runtime_info: PluginRuntimeInfo
   plugin_development_get: PluginDevelopmentState
   plugin_open_directory: void

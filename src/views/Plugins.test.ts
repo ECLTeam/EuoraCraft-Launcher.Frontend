@@ -8,7 +8,6 @@ import Plugins from './Plugins.vue'
 
 describe('plugin management entry points', () => {
   it.each([
-    ['review_required', 'PLUGIN_GRANT_REVIEW_REQUIRED', 'plugins.errors.PLUGIN_GRANT_REVIEW_REQUIRED'],
     ['error', 'PLUGIN_WORKER_EXECUTION_FAILED', 'plugins.errors.PLUGIN_WORKER_EXECUTION_FAILED'],
     ['error', 'PLUGIN_UNKNOWN_TEST_FAILURE', 'plugins.runtimeError'],
     ['disabled', 'PLUGIN_DISABLED_FOR_SESSION', 'plugins.errors.PLUGIN_DISABLED_FOR_SESSION'],
@@ -38,7 +37,6 @@ describe('plugin management entry points', () => {
         plugins: [pinia, i18n],
         stubs: {
           PluginSettingsModal: true,
-          PluginPermissionsModal: true,
           PluginPanelModal: true,
           PluginPackageInstallModal: true,
           PluginSlotHost: true,
@@ -100,7 +98,6 @@ describe('plugin management entry points', () => {
         plugins: [pinia, i18n],
         stubs: {
           PluginSettingsModal: true,
-          PluginPermissionsModal: true,
           PluginPanelModal: true,
           PluginPackageInstallModal: true,
           PluginSlotHost: true,
@@ -155,7 +152,6 @@ describe('plugin management entry points', () => {
         plugins: [pinia, i18n],
         stubs: {
           PluginSettingsModal: true,
-          PluginPermissionsModal: true,
           PluginPanelModal: true,
           PluginPackageInstallModal: true,
           PluginSlotHost: true,
