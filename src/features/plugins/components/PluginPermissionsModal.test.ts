@@ -88,7 +88,7 @@ describe('simplified plugin permission review', () => {
     }
   })
 
-  it.each(['ui.custom.execute', 'connector.manage'])(
+  it.each(['ui.custom.execute', 'auth.provider'])(
     'requires an explicit choice for %s and saves that capability',
     async (capability) => {
       mocks.permissions.mockResolvedValue({ ...view, items: [{ ...item, capability, required: true }] })

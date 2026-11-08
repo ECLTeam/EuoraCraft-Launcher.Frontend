@@ -121,6 +121,8 @@
                       <NInput
                         v-else
                         size="small"
+                        :type="item.type === 'text' ? 'textarea' : 'text'"
+                        :autosize="item.type === 'text' ? { minRows: 3, maxRows: 8 } : undefined"
                         class="setting-control"
                         :disabled="isSaving"
                         :inputProps="{ 'aria-label': item.description || item.key }"

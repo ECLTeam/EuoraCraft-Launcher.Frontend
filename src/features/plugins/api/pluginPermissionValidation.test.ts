@@ -64,8 +64,6 @@ describe('plugin permission boundary', () => {
     'accounts.read',
     'ui.custom.execute',
     'auth.provider',
-    'connector.extend',
-    'connector.manage',
   ])('accepts the current declared domain capability %s', (capability) => {
     expect(parsePermissions({ ...valid, items: [{ ...valid.items[0], capability }] }).items[0]?.capability).toBe(
       capability

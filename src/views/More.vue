@@ -13,29 +13,23 @@ import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import SectionLayout from '@/components/layout/SectionLayout.vue'
-import { useConnector } from '@/features/connect/composables/useConnector'
-import { provideConnector } from '@/features/connect/connectorContext'
-import { isSimplifiedChinese } from '@/i18n'
+import { pluginNavItems } from '@/composables/usePluginBridge'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-// 外壳只提供应用会话，联机页首次进入时才初始化。
-provideConnector(useConnector())
-
-// 联机只面向简体中文用户，其他语言不展示该子页入口。
-const isConnectorAvailable = computed(() => isSimplifiedChinese(locale.value))
-
 const navItems = computed(() => [
-  ...(isConnectorAvailable.value ? [{ path: '/more/room', icon: 'wifi', label: t('more.nav.room') }] : []),
+  ...pluginNavItems.value,
   { path: '/more/plugins', icon: 'puzzle', label: t('more.nav.plugins') },
   { path: '/more/tools', icon: 'toolbox', label: t('more.nav.tools') },
 ])
 
-// 在当前页切换语言时立即离开已隐藏的联机页。
-watch(isConnectorAvailable, (available) => {
-  if (available || !route.path.startsWith('/more/room')) return
-  void router.replace('/more/plugins')
+// 语言切换或插件撤销后，当前插件页若已不在可见入口内，回到插件管理页。
+watch(pluginNavItems, (items) => {
+  if (!route.meta?.pluginRoute) return
+  if (!items.some((item) => item.path === route.path)) {
+    void router.replace('/more/plugins')
+  }
 })
 </script>

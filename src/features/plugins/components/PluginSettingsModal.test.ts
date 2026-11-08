@@ -27,6 +27,29 @@ const plugin: PluginInfo = {
 }
 
 describe('plugin settings', () => {
+  it('uses the standard textarea for multiline settings and preserves the submitted lines', async () => {
+    mocks.getSettings.mockResolvedValue({
+      schema: [{ key: 'nodes', type: 'text', default: '', description: 'Nodes' }],
+      values: { nodes: 'first' },
+      revision: 0,
+    })
+    mocks.updateSetting.mockResolvedValue({ revision: 1 })
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      const input = wrapper.findAllComponents(NInput).find((field) => field.props('type') === 'textarea')!
+      expect(input).toBeDefined()
+      await input.vm.$emit('update:value', 'first\nsecond')
+      await input.vm.$emit('change', 'first\nsecond')
+      await flushPromises()
+      expect(mocks.updateSetting).toHaveBeenCalledWith('demo', 'nodes', 'first\nsecond', expect.anything())
+    } finally {
+      wrapper.unmount()
+    }
+  })
   it('shows a single navigation label and a compact title with version while retaining identity and directory access', async () => {
     const item = {
       ...plugin,

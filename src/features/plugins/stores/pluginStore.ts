@@ -18,6 +18,12 @@ export const usePluginStore = defineStore('plugins', () => {
   const error = ref('')
   const settingsCache = ref<Record<string, PluginSettingsData>>({})
   const isListStale = ref(true)
+  const settingsModalVisible = ref(false)
+  const settingsTargetName = ref<string | null>(null)
+  const settingsTarget = computed(
+    () => plugins.value.find((plugin) => plugin.name === settingsTargetName.value) ?? null
+  )
+  let settingsRequest = 0
   let unlistenStatus: (() => void) | null = null
   let refreshTimer: ReturnType<typeof setTimeout> | null = null
   let loadPromise: Promise<void> | null = null
@@ -198,6 +204,22 @@ export const usePluginStore = defineStore('plugins', () => {
     }
   }
 
+  async function openSettings(pluginName: string | null = null): Promise<void> {
+    const request = ++settingsRequest
+    await load(true)
+    if (request !== settingsRequest) return
+    if (pluginName !== null && !plugins.value.some((plugin) => plugin.name === pluginName && !plugin.is_system)) {
+      throw new Error('PLUGIN_NOT_FOUND')
+    }
+    settingsTargetName.value = pluginName
+    settingsModalVisible.value = true
+  }
+
+  function closeSettings(): void {
+    settingsRequest += 1
+    settingsModalVisible.value = false
+  }
+
   function scheduleRefresh(): void {
     isListStale.value = true
     if (loadPromise) reloadRequested = true
@@ -230,6 +252,10 @@ export const usePluginStore = defineStore('plugins', () => {
     error,
     settingsCache,
     isListStale,
+    settingsModalVisible,
+    settingsTarget,
+    openSettings,
+    closeSettings,
     load,
     toggle,
     enableBasic,

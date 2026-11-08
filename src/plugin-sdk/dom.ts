@@ -26,6 +26,7 @@ function wrapPluginData(el: HTMLElement): void {
   const ctx = getActiveContext()
   if (ctx) {
     el.setAttribute('data-plugin', ctx.plugin)
+    el.setAttribute('data-plugin-dom', '')
   }
 }
 

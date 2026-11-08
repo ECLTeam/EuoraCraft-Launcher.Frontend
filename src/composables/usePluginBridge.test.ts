@@ -1,4 +1,6 @@
+import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { defineComponent, onBeforeUnmount } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import {
   clearPluginSlots,
@@ -19,6 +21,38 @@ beforeEach(() => {
 })
 
 describe('plugin frontend styles', () => {
+  it('lets Vue unmount the active page and its teleported modal before removing DOM', async () => {
+    const connectedAtUnmount: boolean[] = []
+    const page = defineComponent({
+      setup() {
+        onBeforeUnmount(() => {
+          connectedAtUnmount.push(!!document.querySelector('.plugin-test-page')?.isConnected)
+          connectedAtUnmount.push(!!document.querySelector('.plugin-test-modal')?.isConnected)
+        })
+      },
+      template:
+        '<div data-plugin="demo" class="plugin-test-page"><Teleport to="body"><div data-plugin="demo" class="plugin-test-modal" /></Teleport></div>',
+    })
+    const appRouter = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        { path: '/more/plugins', component: { template: '<div>插件</div>' } },
+        { path: '/more/room', name: 'plugin-test-page', component: page, meta: { pluginName: 'demo' } },
+      ],
+    })
+    await appRouter.push('/more/room')
+    const wrapper = mount({ template: '<RouterView />' }, { attachTo: document.body, global: { plugins: [appRouter] } })
+    try {
+      await flushPromises()
+      await fullCleanupPlugin('demo', appRouter)
+      await flushPromises()
+      expect(connectedAtUnmount).toEqual([true, true])
+      expect(document.querySelector('.plugin-test-modal')).toBeNull()
+      expect(appRouter.currentRoute.value.path).toBe('/more/plugins')
+    } finally {
+      wrapper.unmount()
+    }
+  })
   it('limits injected CSS to the plugin root', () => {
     expect(scopePluginCss('demo', '.title { color: red; }')).toBe(
       '@scope ([data-plugin="demo"]) {\n.title { color: red; }\n}'
@@ -78,6 +112,6 @@ describe('plugin frontend styles', () => {
 
     expect(pluginRoutes.value).toEqual([{ plugin: 'other', path: '/page', title: 'Other' }])
     expect(appRouter.hasRoute('plugin-demo-page')).toBe(false)
-    expect(appRouter.currentRoute.value.path).toBe('/')
+    expect(appRouter.currentRoute.value.path).toBe('/more/plugins')
   })
 })

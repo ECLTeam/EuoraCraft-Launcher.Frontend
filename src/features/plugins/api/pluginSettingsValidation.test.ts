@@ -13,6 +13,16 @@ const settings = {
 }
 
 describe('plugin settings boundary', () => {
+  it('validates multiline settings without changing their line breaks', () => {
+    const content = 'first\nsecond'
+    const value = {
+      ...settings,
+      schema: [{ key: 'nodes', type: 'text', default: '', description: 'Nodes' }],
+      values: { nodes: content },
+    }
+    expect(parseSettings(value).values.nodes).toBe(content)
+    expect(() => parseSettings({ ...value, values: { nodes: [] } })).toThrow('PLUGIN_SCHEMA_INVALID')
+  })
   it('preserves explicit false and zero revision', () => {
     expect(parseSettings(settings)).toEqual(settings)
   })

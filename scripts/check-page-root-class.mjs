@@ -21,7 +21,6 @@ const pendingMigration = new Set([
   'src/views/instances/ManageTab.vue',
   'src/views/instances/RunningInstancesTab.vue',
   'src/views/more/ToolsTab.vue',
-  'src/views/connect/ConnectRoomTab.vue',
 ])
 
 function listVueFiles(directory) {

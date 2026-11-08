@@ -15,7 +15,8 @@ function schemaItem(value: unknown): value is PluginSettingSchema {
   if (typeof value.description !== 'string') return false
   if (value.type === 'bool') return typeof value.default === 'boolean'
   if (value.type === 'number') return typeof value.default === 'number' && Number.isFinite(value.default)
-  if (value.type === 'string') return typeof value.default === 'string'
+  if (value.type === 'string' || value.type === 'text' || value.type === 'readonly_file')
+    return typeof value.default === 'string'
   return (
     value.type === 'select' &&
     typeof value.default === 'string' &&

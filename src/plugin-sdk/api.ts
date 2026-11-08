@@ -34,6 +34,11 @@ export function callPluginCommand<T = unknown>(command: string, params?: JsonDic
   return pluginHostApi.callCommand(command, params) as Promise<ApiResponse<T>>
 }
 
+/** 调用插件明确登记的查询，轮询成功保持安静。 */
+export function queryPluginCommand<T = unknown>(command: string, params?: JsonDict): Promise<ApiResponse<T>> {
+  return pluginHostApi.queryCommand(command, params) as Promise<ApiResponse<T>>
+}
+
 // ── 插件设置 ──
 
 /**
@@ -78,13 +83,7 @@ export function getPluginRoutes(pluginId?: string): Promise<ApiResponse<PluginRo
  */
 export function getLauncherConfig<T = JsonDict>(section: ConfigSection): Promise<ApiResponse<T>>
 export async function getLauncherConfig(section: ConfigSection): Promise<ApiResponse<unknown>> {
-  if (
-    section === 'ui' ||
-    section === 'game' ||
-    section === 'launcher' ||
-    section === 'download' ||
-    section === 'connector'
-  ) {
+  if (section === 'ui' || section === 'game' || section === 'launcher' || section === 'download') {
     return toApiResponse(configQuery().then((config) => config[section]))
   }
   return backend.config.get(section)
@@ -98,13 +97,7 @@ export async function getLauncherConfig(section: ConfigSection): Promise<ApiResp
 export function setLauncherConfig(section: ConfigSection, data: JsonDict): Promise<ApiResponse<void>> {
   const submitted = copyConfigValue(data)
   return serializeConfigWrite(section, async () => {
-    if (
-      section === 'ui' ||
-      section === 'game' ||
-      section === 'launcher' ||
-      section === 'download' ||
-      section === 'connector'
-    ) {
+    if (section === 'ui' || section === 'game' || section === 'launcher' || section === 'download') {
       const current = (await configQuery())[section]
       if (configValuesEqual(current, submitted)) return { success: true, data: undefined, timestamp: Date.now() }
     }

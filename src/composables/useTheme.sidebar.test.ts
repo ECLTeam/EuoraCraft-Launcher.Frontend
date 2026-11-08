@@ -18,7 +18,6 @@ describe('侧栏折叠状态本地保存', () => {
       game: { minecraft_paths: [] },
       download: { mirror_source: 'official' },
       launcher: {},
-      connector: { mode: 'automatic', nodes: [] },
     })
     vi.spyOn(settingsApi, 'getUi').mockResolvedValue({})
     vi.spyOn(settingsApi, 'saveUi').mockResolvedValue(undefined)

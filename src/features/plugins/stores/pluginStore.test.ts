@@ -35,6 +35,32 @@ const plugin = {
 }
 
 describe('pluginStore', () => {
+  it('opens the shared settings center for the requested plugin and rejects an unknown target', async () => {
+    vi.mocked(pluginManagementApi.list).mockResolvedValue([plugin])
+    const store = usePluginStore()
+    await store.openSettings('demo')
+    expect(store.settingsModalVisible).toBe(true)
+    expect(store.settingsTarget?.name).toBe('demo')
+    store.closeSettings()
+    await expect(store.openSettings('missing')).rejects.toThrow('PLUGIN_NOT_FOUND')
+    expect(store.settingsModalVisible).toBe(false)
+  })
+
+  it('does not reopen settings after a pending open request is closed', async () => {
+    let finish!: (value: Array<typeof plugin>) => void
+    vi.mocked(pluginManagementApi.list).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve
+        })
+    )
+    const store = usePluginStore()
+    const pending = store.openSettings('demo')
+    store.closeSettings()
+    finish([plugin])
+    await pending
+    expect(store.settingsModalVisible).toBe(false)
+  })
   it('操作成功但最终列表尚未返回时仍拒绝重复执行', async () => {
     let finish!: (value: Array<typeof plugin>) => void
     vi.mocked(pluginManagementApi.list).mockImplementationOnce(

@@ -46,7 +46,7 @@ python tests/browser/test_task_queue_toolbar_layout.py
 
 `test_visual.py` 对四个基准页面截图并与已提交的基线逐像素比对，捕获静态检查抓不到的布局塌陷、宽度未撑满、间距失衡和溢出换行错位。
 
-覆盖 `settings-appearance`（分区设置页）、`plugins`（单一管理面板）、`room`（无二级导航入口页）、`instance-detail`（全屏任务页），在 Classic 亮暗两种主题、1280×800 视口下各一张，共 8 张基线。
+覆盖 `settings-appearance`（分区设置页）、`plugins`（单一管理面板）、`instance-detail`（全屏任务页），在 Classic 亮暗两种主题、1280×800 视口下各一张，共 6 张基线。联机页已移入 ECL-OnlineGame 普通插件，由主仓库的真实插件加载、页面和禁用清理验收覆盖。
 
 确定性来自：固定视口与主题（复用 `test_accessibility.py` 的 showcase 配置注入）、拦截外部网络、等待字体与 `data-theme`/`data-ui-skin` 就绪、注入样式关闭动画与过渡、隐藏调试工具浮层（属开发工具而非产品界面）。容差为单通道差值 8、变化像素占比上限 0.1%，抗锯齿噪声不会误报。
 

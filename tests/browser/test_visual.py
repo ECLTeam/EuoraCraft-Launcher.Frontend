@@ -23,11 +23,10 @@ from test_accessibility import prepare_page, start_server, stop_server
 frontend = Path(__file__).resolve().parents[2]
 baselines = Path(__file__).resolve().parent / "visual-baselines"
 
-# 基准页面覆盖四种页面原型：分区设置页、单一管理面板、无二级导航入口页、全屏任务页。
+# 基准页面覆盖宿主的设置、插件管理和全屏任务页；外置联机页由真实插件验收覆盖。
 scenarios = {
     "settings-appearance": {"route": "#/settings/appearance", "wait": ".appearance-settings"},
     "plugins": {"route": "#/more/plugins", "wait": ".plugins-panel"},
-    "room": {"route": "#/more/room", "wait": ".connect-page"},
     "instance-detail": {
         "route": "#/versions",
         "wait": ".version-detail-modal",

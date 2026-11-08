@@ -215,14 +215,6 @@
       :plugin="permissionsTarget"
       @saved="refreshPermissions"
     />
-    <PluginSettingsModal
-      :visible="settingsModalVisible"
-      :plugin="settingsTarget"
-      :plugins="plugins"
-      @close="settingsModalVisible = false"
-      @activate="togglePlugin"
-      @openDirectory="openDirectory"
-    />
     <PluginPanelModal :visible="panelVisible" :plugin="panelTarget" @close="panelVisible = false" />
     <PluginPackageInstallModal
       v-model:visible="packageModalVisible"
@@ -255,11 +247,9 @@ import { useI18n } from 'vue-i18n'
 import { UiIcon, UiLoading } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
-import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
 import PluginPermissionsModal from '@/features/plugins/components/PluginPermissionsModal.vue'
-import PluginSettingsModal from '@/features/plugins/components/PluginSettingsModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
@@ -283,8 +273,6 @@ function dismissErrorHints(): void {
 }
 
 watch([searchQuery, activeFilter], dismissErrorHints)
-const settingsModalVisible = ref(false)
-const settingsTarget = ref<PluginInfo | null>(null)
 const panelVisible = ref(false)
 const panelTarget = ref<PluginInfo | null>(null)
 const packageModalVisible = ref(false)
@@ -425,22 +413,15 @@ function handleInstallSelect(key: string | number) {
 }
 
 function openSettings(plugin: PluginInfo | null) {
-  settingsTarget.value = plugin
-  settingsModalVisible.value = true
+  void run(() => pluginStore.openSettings(plugin?.name ?? null), {
+    showError: true,
+    errorMessage: t('plugins.settingLoadFailed'),
+  })
 }
 
 function openPanel(plugin: PluginInfo) {
   panelTarget.value = plugin
   panelVisible.value = true
-}
-
-async function openDirectory(plugin: PluginInfo): Promise<void> {
-  const installationId = plugin.installation_id
-  if (!installationId) return
-  await run(() => pluginManagementApi.openDirectory(installationId), {
-    showError: true,
-    errorMessage: t('plugins.directoryOpenFailed'),
-  })
 }
 
 onMounted(() => {

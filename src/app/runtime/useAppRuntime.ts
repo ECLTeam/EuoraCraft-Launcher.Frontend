@@ -9,7 +9,6 @@ import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composa
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
-import { useConnector } from '@/features/connect/composables/useConnector'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { useGameHomeStore } from '@/features/game-home/stores/gameHomeStore'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
@@ -22,7 +21,7 @@ import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { globalProcessInstances } from '@/features/terminal/composables/useProcessInstances'
-import { defaultLocale, i18n, isSimplifiedChinese, supportedLocales } from '@/i18n'
+import { i18n, supportedLocales } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
 import { parseInstallation } from '@/types/installation'
@@ -255,14 +254,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     }
   }
 
-  function registerBackendEvents(isConnectorEnabled: boolean): void {
+  function registerBackendEvents(): void {
     globalProcessInstances.init()
     cleanupCallbacks.push(globalProcessInstances.dispose)
-    // 联机只面向简体中文用户，其他语言不注册联机会话与错误处理。
-    if (isConnectorEnabled) {
-      const connector = useConnector({ onError: (error) => options.message.error(error) })
-      cleanupCallbacks.push(connector.dispose)
-    }
     const operationStore = useApplicationOperationStore()
     cleanupCallbacks.push(
       backend.on('java:runtimes_changed', () => {
@@ -387,7 +381,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
         void applyConfig(payload)
       }),
       backend.on('config:updated', (payload) => {
-        if (!['ui', 'game', 'download', 'launcher', 'connector'].includes(payload.section)) return
+        if (!['ui', 'game', 'download', 'launcher'].includes(payload.section)) return
         if (!acceptConfigSnapshot(payload)) void invalidateConfig()
         changedSettings.add(payload.section)
         if (settingsRefreshTimer) clearTimeout(settingsRefreshTimer)
@@ -539,8 +533,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       backend.swapToShowcase()
     }
 
-    // 联机只面向简体中文用户，按配置中的语言判断，避免界面语言尚未应用时误判。
-    registerBackendEvents(isSimplifiedChinese(initialConfig?.ui?.locale ?? defaultLocale))
+    registerBackendEvents()
     cleanupCallbacks.push(
       () => useInstanceStore().dispose(),
       () => instanceInstallApi.disposeChangeListeners()

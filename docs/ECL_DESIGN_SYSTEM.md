@@ -136,17 +136,16 @@ ECL 使用紧凑控件、清楚的信息层级、有限强调色和可配置表�
 
 独立路由页面追加 `ecl-page`，主表面包进 `.ecl-page__body`，滚动交给 `.ecl-page__scroll`：
 
-| 视图                      | 当前根类                      | 目标根类                               |
-| ------------------------- | ----------------------------- | -------------------------------------- |
-| `Download.vue`            | `download-page`               | `download-page ecl-page`               |
-| `Game.vue`                | `game-page`                   | `game-page ecl-page`                   |
-| `Plugins.vue`             | `plugins-page`                | `plugins-page ecl-page`（已完成）      |
-| `Instances.vue`           | `instances-page`              | `instances-page ecl-page`              |
-| `InstancesTab.vue`        | `install-page`                | `install-page ecl-page`                |
-| `ManageTab.vue`           | `manage-page`                 | `manage-page ecl-page`                 |
-| `RunningInstancesTab.vue` | `running-instances-page`      | `running-instances-page ecl-page`      |
-| `ToolsTab.vue`            | `tools-page workspace-page`   | `tools-page workspace-page ecl-page`   |
-| `ConnectRoomTab.vue`      | `connect-page workspace-page` | `connect-page workspace-page ecl-page` |
+| 视图                      | 当前根类                    | 目标根类                             |
+| ------------------------- | --------------------------- | ------------------------------------ |
+| `Download.vue`            | `download-page`             | `download-page ecl-page`             |
+| `Game.vue`                | `game-page`                 | `game-page ecl-page`                 |
+| `Plugins.vue`             | `plugins-page`              | `plugins-page ecl-page`（已完成）    |
+| `Instances.vue`           | `instances-page`            | `instances-page ecl-page`            |
+| `InstancesTab.vue`        | `install-page`              | `install-page ecl-page`              |
+| `ManageTab.vue`           | `manage-page`               | `manage-page ecl-page`               |
+| `RunningInstancesTab.vue` | `running-instances-page`    | `running-instances-page ecl-page`    |
+| `ToolsTab.vue`            | `tools-page workspace-page` | `tools-page workspace-page ecl-page` |
 
 `SectionLayout` 内的设置标签页以 `common.css` 的 `.tab-pane` 为基础，滚动由 `SectionLayout` 的 viewport 负责，只收敛宽度写法，不追加 `ecl-page`：
 

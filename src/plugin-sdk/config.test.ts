@@ -18,7 +18,6 @@ beforeEach(() => {
     game: { minecraft_paths: [] },
     launcher: {},
     download: { mirror_source: 'official' },
-    connector: { mode: 'automatic', nodes: [] },
   })
   mocks.set.mockImplementation(async (section, data) => ({ success: true, data: { section, data, effective: true } }))
 })

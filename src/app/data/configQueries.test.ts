@@ -13,7 +13,6 @@ beforeEach(() => {
     game: { minecraft_paths: [] },
     download: { mirror_source: 'official' },
     launcher: {},
-    connector: { mode: 'automatic', nodes: [] },
   })
 })
 

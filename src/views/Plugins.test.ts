@@ -109,7 +109,7 @@ describe('plugin management entry points', () => {
       expect(settings.attributes('title')).toBe(i18n.global.t('plugins.settingsCenter'))
       expect(wrapper.get('.plugins-search input').attributes('aria-label')).toBe(i18n.global.t('plugins.searchPlugins'))
       await settings.trigger('click')
-      expect(wrapper.findComponent({ name: 'PluginSettingsModal' }).props('visible')).toBe(true)
+      expect(store.openSettings).toHaveBeenCalledWith(null)
       const dropdown = wrapper.getComponent(NDropdown)
       expect(dropdown.props('options')).toHaveLength(2)
       expect(dropdown.text()).toContain(i18n.global.t('plugins.install'))

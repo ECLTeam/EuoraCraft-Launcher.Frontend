@@ -31,6 +31,10 @@ export const pluginHostApi = {
     return backend.command('plugin_call_command', { command, params })
   },
 
+  queryCommand(command: string, params?: Record<string, unknown>) {
+    return backend.command('plugin_query_command', { command, params })
+  },
+
   async notifySidebarState(collapsed: boolean): Promise<void> {
     const result = await backend.command('plugin_notify_sidebar_state', { collapsed })
     if (!result.success) throw new Error(result.message || '通知插件侧栏状态失败')

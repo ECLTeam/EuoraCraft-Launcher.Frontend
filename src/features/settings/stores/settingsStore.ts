@@ -12,7 +12,6 @@ import type {
   BackgroundImageConfig,
   BackgroundVideoConfig,
   BackgroundVideoSource,
-  ConnectorConfig,
   DownloadConfig,
   GameConfig,
   LauncherConfig,
@@ -93,7 +92,6 @@ export const useSettingsStore = defineStore('settings', () => {
   const game = ref<GameConfig>({ ...DEFAULT_GAME_CONFIG })
   const download = ref<DownloadConfig>({ ...DEFAULT_DOWNLOAD_CONFIG })
   const launcher = ref<LauncherConfig>({ ...DEFAULT_LAUNCHER_CONFIG })
-  const connector = ref<ConnectorConfig>({ mode: 'automatic', nodes: [] })
   const { status, isLoading } = useAsyncState()
   const javaStore = useJavaRuntimeStore()
   const { status: javaStatus, isLoading: isJavaLoading, installations: javaInstallations } = storeToRefs(javaStore)
@@ -125,7 +123,6 @@ export const useSettingsStore = defineStore('settings', () => {
         game.value = { ...DEFAULT_GAME_CONFIG, ...config.game }
         download.value = { ...DEFAULT_DOWNLOAD_CONFIG, ...config.download }
         launcher.value = { ...DEFAULT_LAUNCHER_CONFIG, ...config.launcher }
-        connector.value = config.connector ?? { mode: 'automatic', nodes: [] }
         status.value = 'ready'
       } catch (reason) {
         if (loadId === latestLoadId) {
@@ -319,20 +316,6 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
-  async function patchConnector(patch: Partial<ConnectorConfig>): Promise<void> {
-    const submittedPatch = copyConfigValue(patch)
-    if (Object.keys(submittedPatch).length === 0) return
-    await enqueueWrite('connector', async () => {
-      await ensureReady()
-      const next = { ...connector.value, ...submittedPatch }
-      if (configValuesEqual(next, connector.value)) return
-      const saved = await settingsApi.saveConnector(next)
-      connector.value = saved ?? next
-      if (!saved) void invalidateConfig()
-      configRevision += 1
-    })
-  }
-
   async function chooseBackgroundImage(): Promise<{ path: string; imageUrl: string | null } | null> {
     const path = await settingsApi.selectImage()
     if (!path) return null
@@ -375,7 +358,6 @@ export const useSettingsStore = defineStore('settings', () => {
     game,
     download,
     launcher,
-    connector,
     status,
     javaStatus,
     error,
@@ -392,7 +374,6 @@ export const useSettingsStore = defineStore('settings', () => {
     patchGame,
     patchLauncher,
     patchDownload,
-    patchConnector,
     chooseBackgroundImage,
     chooseBackgroundVideo,
     saveRemoteBackground,

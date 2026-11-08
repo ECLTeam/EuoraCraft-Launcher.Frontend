@@ -1,9 +1,5 @@
 import type { InstanceSortKey } from '@/types/instances'
 
-export interface ConnectorConfig {
-  mode: 'automatic' | 'append' | 'custom'
-  nodes: string[]
-}
 /**
  * 领域类型定义。
  * 由 types/api.ts 拆分而来，与后端 ECL/api/models.py 的 Pydantic 模型对齐。
@@ -122,7 +118,6 @@ export interface GameConfig {
   /** 当前激活的游戏路径（用于确定启动哪个路径下的实例） */
   active_path?: string
   /** 手动指定 Qomicex instances.json；为空时由后端自动探测。 */
-  qomicex_instances_path?: string
 }
 
 /**

@@ -64,6 +64,7 @@
 
           <!-- 任务队列全屏面板 -->
           <TaskQueuePanel />
+          <PluginSettingsHost />
 
           <!-- 启动器日志悬浮窗（调试界面开关控制，默认隐藏） -->
           <FloatingLauncherLog />
@@ -179,6 +180,7 @@ import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { useUserAgreement } from '@/composables/useUserAgreement'
 import { useDebugToolsWindowStore } from '@/features/debug/stores/debugToolsWindowStore'
 import { useModpackImportStore, extractPackPath } from '@/features/instances/stores/modpackImportStore'
+import PluginSettingsHost from '@/features/plugins/components/PluginSettingsHost.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import UpdateResultModal from '@/features/settings/components/UpdateResultModal.vue'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'

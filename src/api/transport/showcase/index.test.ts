@@ -137,46 +137,6 @@ describe('ShowcaseTransport', () => {
     expect(result.success).toBe(true)
     expect(result.data?.length).toBeGreaterThan(0)
   })
-
-  it('supports the idle to starting to host showcase flow and room cleanup', async () => {
-    vi.useFakeTimers()
-    const transport = createShowcaseTransport()
-
-    const hostRequest = transport.invoke('connector_host_instance', {
-      game_path: 'Showcase/.minecraft',
-      version_id: 'Showcase-1.21.5-Fabric',
-    })
-    await vi.advanceTimersByTimeAsync(100)
-    await hostRequest
-
-    const startingRequest = transport.invoke('connector_status', {})
-    await vi.advanceTimersByTimeAsync(100)
-    await expect(startingRequest).resolves.toMatchObject({ data: { mode: 'starting' } })
-
-    await vi.advanceTimersByTimeAsync(900)
-    const hostedRequest = transport.invoke('connector_status', {})
-    await vi.advanceTimersByTimeAsync(100)
-    await expect(hostedRequest).resolves.toMatchObject({ data: { mode: 'host', roomCode: expect.any(String) } })
-
-    const leaveRequest = transport.invoke('connector_leave', {})
-    await vi.advanceTimersByTimeAsync(100)
-    await leaveRequest
-    const idleRequest = transport.invoke('connector_status', {})
-    await vi.advanceTimersByTimeAsync(100)
-    await expect(idleRequest).resolves.toMatchObject({ data: { mode: 'idle' } })
-  })
-
-  it('keeps joined-room state isolated between showcase transports', async () => {
-    const first = createShowcaseTransport()
-    const second = createShowcaseTransport()
-
-    await first.invoke('connector_join', { code: 'U/ONLY-FIRST' })
-    const firstStatus = (await first.invoke('connector_status', {})) as ApiResponse<{ mode: string }>
-    const secondStatus = (await second.invoke('connector_status', {})) as ApiResponse<{ mode: string }>
-
-    expect(firstStatus.data?.mode).toBe('guest')
-    expect(secondStatus.data?.mode).toBe('idle')
-  })
   it('工作区读取命令返回演示数据而非空响应', async () => {
     const transport = createShowcaseTransport()
 
