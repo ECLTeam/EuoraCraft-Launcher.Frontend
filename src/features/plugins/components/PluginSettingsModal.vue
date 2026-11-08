@@ -329,9 +329,9 @@ watch(
   { immediate: true }
 )
 watch(
-  () => props.plugin,
-  (plugin) => {
-    if (props.visible && plugin) select(plugin)
+  () => (props.plugin ? identity(props.plugin) : null),
+  () => {
+    if (props.visible && props.plugin) select(props.plugin)
   }
 )
 watch([candidates, catalogLoading], ([items, isDiscovering]) => {

@@ -27,6 +27,28 @@ const plugin: PluginInfo = {
 }
 
 describe('plugin settings', () => {
+  it('keeps the user selection when the original target metadata is refreshed', async () => {
+    const other = { ...plugin, name: 'other', title: 'Other' }
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin, other] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      await wrapper
+        .findAll('.plugin-settings-choice')
+        .find((item) => item.text() === 'Other')!
+        .trigger('click')
+      await flushPromises()
+      expect(wrapper.get('.plugin-settings-heading h2').text()).toBe('Other')
+      const refreshed = { ...plugin, version: '2' }
+      await wrapper.setProps({ plugin: refreshed, plugins: [refreshed, other] })
+      await flushPromises()
+      expect(wrapper.get('.plugin-settings-heading h2').text()).toBe('Other')
+    } finally {
+      wrapper.unmount()
+    }
+  })
   it('uses the standard textarea for multiline settings and preserves the submitted lines', async () => {
     mocks.getSettings.mockResolvedValue({
       schema: [{ key: 'nodes', type: 'text', default: '', description: 'Nodes' }],
