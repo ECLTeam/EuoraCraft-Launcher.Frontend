@@ -6,7 +6,7 @@ interface ImportMetaEnv {
 }
 
 interface TauriCore {
-  pytauri: {
+  pytaruix: {
     pyInvoke: (command: string, payload?: unknown) => Promise<unknown>
   }
   /** 注册事件监听，返回 Promise<unlisten 函数> */

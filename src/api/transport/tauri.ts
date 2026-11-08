@@ -1,7 +1,7 @@
 import type { BackendTransport } from './types'
 
 interface TauriGlobal {
-  pytauri: {
+  pytaruix: {
     pyInvoke: (command: string, payload?: unknown) => Promise<unknown>
   }
   event: {
@@ -29,14 +29,14 @@ function decodeEventPayload<T>(payload: T | string): T {
 export function createTauriTransport(): BackendTransport {
   return {
     mode: 'desktop',
-    // 实时求值：pytauri 全局注入可能晚于前端 bundle 执行，快照会把启动器永久锁在"不可用"状态
+    // 实时求值：pytaruix 全局注入可能晚于前端 bundle 执行，快照会把启动器永久锁在"不可用"状态
     get available() {
-      return !!getTauri()?.pytauri
+      return !!getTauri()?.pytaruix
     },
     async invoke(command, payload) {
       const tauri = getTauri()
-      if (!tauri?.pytauri) throw new Error('PyTauri 运行环境未就绪')
-      return tauri.pytauri.pyInvoke(command, payload)
+      if (!tauri?.pytaruix) throw new Error('PytaruiX 运行环境未就绪')
+      return tauri.pytaruix.pyInvoke(command, payload)
     },
     async listen<T>(event: string, handler: (payload: T) => void) {
       const tauri = getTauri()
