@@ -2,7 +2,7 @@ export type AppRuntimeMode = 'desktop' | 'showcase' | 'browser'
 
 function hasTauriRuntime(): boolean {
   if (typeof window === 'undefined') return false
-  return !!(window as unknown as { __TAURI__?: { pytaruix?: unknown } }).__TAURI__?.pytaruix
+  return !!(window as unknown as { __TAURI__?: { pytaurix?: unknown } }).__TAURI__?.pytaurix
 }
 
 export function hasShowcaseQuery(): boolean {

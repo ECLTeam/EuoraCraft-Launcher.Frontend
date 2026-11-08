@@ -14,7 +14,7 @@ describe('Tauri event transport', () => {
     Object.defineProperty(window, '__TAURI__', {
       configurable: true,
       value: {
-        pytaruix: { pyInvoke: vi.fn() },
+        pytaurix: { pyInvoke: vi.fn() },
         event: { listen },
       },
     })
