@@ -151,6 +151,16 @@
       </div>
     </div>
 
+    <!-- 插件 -->
+    <div v-if="enabledPlugins.length > 0" class="about-card about-plugins">
+      <div class="card-title">
+        <UiIcon name="plugin" :size="16" /><span>{{ t('settings.aboutTab.sections.plugins') }}</span>
+      </div>
+      <div class="card-body">
+        <AboutPluginRow v-for="plugin in enabledPlugins" :key="plugin.name" :plugin="plugin" />
+      </div>
+    </div>
+
     <!-- 法律信息 -->
     <div class="about-card">
       <div class="card-title">
@@ -188,7 +198,9 @@ import { useDebugMode } from '@/composables/useDebugMode'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
+import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import { specialThanksEntries, teamMembers, technologyCategories } from '@/features/settings/about/aboutContent'
+import AboutPluginRow from '@/features/settings/components/AboutPluginRow.vue'
 import DebugInfoModal from '@/features/settings/components/DebugInfoModal.vue'
 import { useDebugModeUnlock } from '@/features/settings/composables/useDebugModeUnlock'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
@@ -320,8 +332,13 @@ const versionText = computed(() => {
   return status ? `${base} · ${status}` : base
 })
 
+// 关于页只读展示已启用插件；加载失败时卡片隐藏，不阻塞页面其余内容。
+const pluginStore = usePluginStore()
+const enabledPlugins = computed(() => pluginStore.plugins.filter((plugin) => plugin.status === 'enabled'))
+
 onMounted(async () => {
   launcherInfo.value = await launcherInfoQuery()
+  pluginStore.load().catch(() => undefined)
 })
 
 // 调试信息弹窗：调试模式未开启时需要连续点击图标才能解锁，开启后单击直接打开
@@ -361,10 +378,10 @@ interface LicenseEntry {
 
 const licenseEntries: LicenseEntry[] = [
   {
-    name: 'PyTauri',
-    text: 'Copyright WSH032. Licensed under Apache 2.0.',
-    repo: URLS.pytauri.repo,
-    license: URLS.pytauri.license,
+    name: 'PyTaruiX',
+    text: 'Copyright ECLTeam. Licensed under Apache 2.0.',
+    repo: URLS.pytaruix.repo,
+    license: URLS.pytaruix.license,
   },
   {
     name: 'Vue 3',
@@ -377,12 +394,6 @@ const licenseEntries: LicenseEntry[] = [
     text: 'Copyright VoidZero Inc. and Vite contributors. Licensed under MIT.',
     repo: URLS.vite.repo,
     license: URLS.vite.license,
-  },
-  {
-    name: 'Tauri',
-    text: 'Copyright Tauri Programme within The Commons Conservancy. Licensed under MIT / Apache 2.0.',
-    repo: URLS.tauri.repo,
-    license: URLS.tauri.license,
   },
   {
     name: 'Naive UI',
@@ -459,12 +470,6 @@ const licenseEntries: LicenseEntry[] = [
 ]
 
 licenseEntries.push(
-  {
-    name: 'pytauri-wheel',
-    text: 'Copyright WSH032. Licensed under Apache 2.0.',
-    repo: URLS.pytauri.repo,
-    license: 'https://pypi.org/project/pytauri-wheel/',
-  },
   {
     name: 'EasyTier-PyO3',
     text: 'Copyright EasyTier-PyO3 contributors. Licensed under LGPL-3.0.',
@@ -776,8 +781,7 @@ licenseEntries.push(
 const licenseByName = new Map(licenseEntries.map((entry) => [entry.name, entry]))
 
 const licenseById: Record<string, LicenseEntry> = {
-  pytauri: licenseByName.get('PyTauri')!,
-  tauri: licenseByName.get('Tauri')!,
+  pytaruix: licenseByName.get('PyTaruiX')!,
   'easy-tier': licenseByName.get('EasyTier')!,
   'authlib-injector': licenseByName.get('Authlib-Injector')!,
   vue: licenseByName.get('Vue 3')!,
@@ -792,7 +796,6 @@ const licenseById: Record<string, LicenseEntry> = {
   'vue-use': licenseByName.get('VueUse')!,
   skinview3d: licenseByName.get('skinview3d')!,
   hmcl: licenseByName.get('HMCL')!,
-  'pytauri-wheel': licenseByName.get('pytauri-wheel')!,
   'easy-tier-pyo3': licenseByName.get('EasyTier-PyO3')!,
   'sass-embedded': licenseByName.get('sass-embedded')!,
   'material-colors': licenseByName.get('Material Color Utilities')!,

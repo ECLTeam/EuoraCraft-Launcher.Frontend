@@ -931,13 +931,15 @@
         "mirror": "镜像站",
         "source": "来源",
         "license": "许可",
-        "openSource": "开源代码"
+        "openSource": "开源代码",
+        "homepage": "主页"
       },
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "特别鸣谢",
         "contributors": "社区贡献者",
         "technologyStack": "技术栈",
+        "plugins": "插件",
         "licenses": "许可与版权声明",
         "legal": "法律信息"
       },
@@ -1007,9 +1009,8 @@
         "luyanci": "EuoraCraft Launcher 开发者，项目管理，负责构建、发布和文档维护",
         "qomicexPublic": "为项目提供了部分思路和联机支持",
         "theMyceliumOfAntan": "为项目开发与改进提供支持",
-        "pytauri": "提供了 Python 与 Tauri 的桥梁，让启动器能用 Python 写后端",
+        "pytaruix": "用 PyO3 将 Tauri 2 桌面能力带到 Python 的独立框架，让启动器能用 Python 写后端",
         "vue3": "渐进式 JavaScript 框架，构建了启动器的前端界面",
-        "tauri": "轻量级桌面应用框架，提供了原生窗口和系统集成能力",
         "vite": "下一代前端构建工具，驱动了开发与打包流程",
         "naiveUi": "Vue 3 组件库，提供了丰富的界面组件",
         "tailwind": "原子化 CSS 框架，加速了界面样式的编写",
@@ -1039,7 +1040,6 @@
         "psutilDesc": "跨平台系统进程与资源信息库，用于监控硬件状态",
         "packagingDesc": "Python 包版本解析与比对库，处理版本号语义",
         "easyTierPyo3Desc": "EasyTier 的 Python 绑定，为联机功能提供底层组网能力",
-        "pytauriWheel": "PyTauri 的预编译轮子，为 pytauri 提供可调用的 Python 接口",
         "materialColors": "Google Material 色彩工具，用于主题色彩计算与动态配色",
         "sass": "Dart Sass 的 Node 嵌入版，负责编译项目中的 Sass/SCSS 样式",
         "iconify": "Vue 图标组件，项目通过 Iconify 离线加载 Tabler 图标",

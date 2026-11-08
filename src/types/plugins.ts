@@ -15,6 +15,8 @@ export interface PluginInfo {
   version: string
   description: string
   author: string
+  homepage: string
+  license: string
   icon: string
   status: string
   pending_restart?: boolean

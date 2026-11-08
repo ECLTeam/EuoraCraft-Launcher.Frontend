@@ -20,6 +20,8 @@ const plugin: PluginInfo = {
   version: '1',
   description: '',
   author: '',
+  homepage: '',
+  license: '',
   icon: '',
   status: 'enabled',
   error: null,

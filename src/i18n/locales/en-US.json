@@ -931,13 +931,15 @@
         "mirror": "Mirror",
         "source": "Source",
         "license": "License",
-        "openSource": "Open Source"
+        "openSource": "Open Source",
+        "homepage": "Homepage"
       },
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "Special Thanks",
         "contributors": "Community Contributors",
         "technologyStack": "Technology Stack",
+        "plugins": "Plugins",
         "licenses": "Licenses & Copyright",
         "legal": "Legal Info"
       },
@@ -1007,9 +1009,8 @@
         "luyanci": "EuoraCraft Launcher developer",
         "qomicexPublic": "Provided ideas and multiplayer support for the project",
         "theMyceliumOfAntan": "Supports project development and improvements",
-        "pytauri": "Bridges Python and Tauri, letting the launcher use Python as its backend",
+        "pytaruix": "Independent framework bringing Tauri 2 desktop capabilities to Python via PyO3, letting the launcher use Python as its backend",
         "vue3": "Progressive JavaScript framework that builds the launcher UI",
-        "tauri": "Lightweight desktop framework providing native windows and system integration",
         "vite": "Next-gen frontend build tool powering development and packaging",
         "naiveUi": "Vue 3 component library offering rich UI components",
         "tailwind": "Atomic CSS framework that speeds up styling",
@@ -1039,7 +1040,6 @@
         "psutilDesc": "Cross-platform system process and resource info library for hardware monitoring",
         "packagingDesc": "Python package version parsing and comparison for semantic versioning",
         "easyTierPyo3Desc": "Python binding of EasyTier providing low-level networking for multiplayer",
-        "pytauriWheel": "Precompiled pytauri wheels providing the Python-side bridge for the desktop runtime",
         "materialColors": "Google Material color utilities used for theme color math and dynamic palettes",
         "sass": "Embedded Dart Sass for Node, compiling Sass/SCSS styles in the project",
         "iconify": "Vue icon component loading Tabler icons offline through Iconify",

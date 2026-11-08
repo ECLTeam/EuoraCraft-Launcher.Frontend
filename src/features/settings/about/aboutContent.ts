@@ -115,8 +115,7 @@ export const specialThanksEntries: AboutEntry[] = [
 ]
 
 const technologies = {
-  pyTauri: createGithubEntry('pytauri', 'PyTauri', 'PT', 'pytauri', URLS.pytauri.repo, 'pytauri.png'),
-  tauri: createGithubEntry('tauri', 'Tauri', 'T', 'tauri', URLS.tauri.repo),
+  pytaruix: createGithubEntry('pytaruix', 'PyTaruiX', 'PX', 'pytaruix', URLS.pytaruix.repo),
   easyTier: createGithubEntry('easy-tier', 'EasyTier', 'ET', 'easyTier', URLS.easyTier.repo),
   authlibInjector: createGithubEntry(
     'authlib-injector',
@@ -162,7 +161,6 @@ const backendRuntimeEntries: AboutEntry[] = [
   createGithubEntry('mcstatus', 'mcstatus', 'MS', 'mcstatusDesc', 'https://github.com/py-mine/mcstatus'),
   createGithubEntry('psutil', 'psutil', 'PS', 'psutilDesc', 'https://github.com/giampaolo/psutil'),
   createGithubEntry('packaging', 'packaging', 'PG', 'packagingDesc', 'https://github.com/pypa/packaging'),
-  createGithubEntry('pytauri-wheel', 'pytauri-wheel', 'PW', 'pytauriWheel', URLS.pytauri.repo),
   createGithubEntry('easy-tier-pyo3', 'EasyTier-PyO3', 'EP', 'easyTierPyo3Desc', URLS.easyTierPyo3.repo),
 ]
 
@@ -289,7 +287,7 @@ export const technologyCategories: TechnologyCategory[] = [
   {
     id: 'runtime-frameworks',
     titleKey: 'runtimeFrameworks',
-    entries: [technologies.pyTauri, technologies.tauri, technologies.easyTier],
+    entries: [technologies.pytaruix, technologies.easyTier],
   },
   { id: 'backend-runtime', titleKey: 'backendRuntime', entries: backendRuntimeEntries },
   { id: 'account-authentication', titleKey: 'accountAuthentication', entries: [technologies.authlibInjector] },

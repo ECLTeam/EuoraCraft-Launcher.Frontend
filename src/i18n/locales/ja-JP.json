@@ -927,13 +927,15 @@
         "mirror": "ミラーサイト",
         "source": "ソース",
         "license": "ライセンス",
-        "openSource": "オープンソース"
+        "openSource": "オープンソース",
+        "homepage": "ホームページ"
       },
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "特別感謝",
         "contributors": "コミュニティの貢献者",
         "technologyStack": "技術スタック",
+        "plugins": "プラグイン",
         "licenses": "ライセンスと著作権表示",
         "legal": "法的情報"
       },
@@ -1003,9 +1005,8 @@
         "luyanci": "EuoraCraft Launcher の開発者、プロジェクト管理者。ビルド、リリース、ドキュメント管理を担当",
         "qomicexPublic": "プロジェクトに一部のアイデアとマルチプレイサポートを提供",
         "theMyceliumOfAntan": "プロジェクトの開発と改善を支援",
-        "pytauri": "Python と Tauri の橋渡しを提供し、ランチャーのバックエンドを Python で書けるようにしました",
+        "pytaruix": "PyO3 によって Tauri 2 のデスクトップ機能を Python に持ち込む独立フレームワーク。ランチャーのバックエンドを Python で書けるようにしました",
         "vue3": "プログレッシブ JavaScript フレームワーク。ランチャーのフロントエンド UI を構築",
-        "tauri": "軽量デスクトップアプリフレームワーク。ネイティブウィンドウとシステム統合機能を提供",
         "vite": "次世代フロントエンドビルドツール。開発とパッケージングの流れを支えています",
         "naiveUi": "Vue 3 コンポーネントライブラリ。豊富な UI コンポーネントを提供",
         "tailwind": "アトミック CSS フレームワーク。スタイルの記述を高速化",
@@ -1035,7 +1036,6 @@
         "psutilDesc": "クロスプラットフォームのシステムプロセス・リソース情報ライブラリ。ハードウェア状態の監視に使用",
         "packagingDesc": "Python パッケージのバージョン解析・比較ライブラリ。バージョン番号のセマンティクスを処理",
         "easyTierPyo3Desc": "EasyTier の Python バインディング。マルチプレイ機能に低レベルのネットワーク機能を提供",
-        "pytauriWheel": "PyTauri のプリコンパイル済みwheel。pytauri に呼び出し可能な Python インターフェースを提供",
         "materialColors": "Google Material カラーツール。テーマカラーの計算とダイナミック配色に使用",
         "sass": "Dart Sass の Node 埋め込み版。プロジェクトの Sass/SCSS スタイルをコンパイル",
         "iconify": "Vue アイコンコンポーネント。Iconify 経由で Tabler アイコンをオフライン読み込み",

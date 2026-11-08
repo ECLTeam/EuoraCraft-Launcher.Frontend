@@ -1,8 +1,9 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, nextTick, reactive, ref } from 'vue'
 import { URLS } from '@/config/urls'
 import { i18n } from '@/i18n'
+import type { PluginInfo } from '@/types/plugins'
 import { openExternalUrl } from '@/utils/openExternal'
 import AboutTab from './AboutTab.vue'
 
@@ -11,9 +12,21 @@ const debugModeMock = vi.hoisted(() => ({
   setDebugMode: vi.fn<(value: boolean) => Promise<void>>(),
 }))
 
+const pluginStoreMock = vi.hoisted(() => ({
+  state: null as null | { plugins: PluginInfo[] },
+  load: vi.fn<() => Promise<void>>(),
+}))
+
 vi.mock('/favicon.ico', () => ({ default: '/favicon.ico' }))
 vi.mock('@/utils/openExternal', () => ({ openExternalUrl: vi.fn() }))
 vi.mock('@/app/data', () => ({ launcherInfoQuery: vi.fn().mockResolvedValue(null) }))
+vi.mock('@/features/plugins/stores/pluginStore', async () => {
+  const { reactive } = await import('vue')
+  pluginStoreMock.state = reactive({ plugins: [] as PluginInfo[] })
+  pluginStoreMock.load.mockResolvedValue(undefined)
+  // 组件读取 state.plugins 并调用 state.load；把 load 并入同一对象模拟 setup store 的解包形态。
+  return { usePluginStore: () => Object.assign(pluginStoreMock.state!, { load: pluginStoreMock.load }) }
+})
 vi.mock('@/composables/useDebugMode', async () => {
   const { computed, ref } = await import('vue')
   debugModeMock.enabledRef = ref(false)
@@ -57,6 +70,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.clearAllMocks()
   debugModeMock.enabledRef!.value = false
+  pluginStoreMock.state!.plugins = []
   debugModeMock.setDebugMode.mockImplementation(async (value: boolean) => {
     debugModeMock.enabledRef!.value = value
   })
@@ -267,4 +281,55 @@ it('调试模式已开启时单击图标直接打开调试信息弹窗', async (
   expect(debugModeMock.setDebugMode).not.toHaveBeenCalled()
   expect(wrapper.getComponent(DebugInfoModalStub).props('visible')).toBe(true)
   expect(wrapper.get('.launcher-summary__logo-cell').classes()).toContain('is-debug')
+})
+
+const enabledPlugin: PluginInfo = {
+  name: 'example-plugin',
+  title: '示例插件',
+  version: '1.0.0',
+  description: '独立提供示例能力。',
+  author: 'ECLTeam',
+  homepage: 'https://github.com/ECLTeam/ECL-Plugin-Example',
+  license: 'GPL-3.0',
+  icon: '',
+  status: 'enabled',
+  error: null,
+  dependencies: {},
+  services: [],
+  is_system: false,
+}
+
+const disabledPlugin: PluginInfo = { ...enabledPlugin, name: 'disabled-plugin', status: 'disabled' }
+
+it('已启用的插件在关于页只读展示，禁用插件不出现', async () => {
+  pluginStoreMock.state!.plugins = [enabledPlugin, disabledPlugin]
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  const card = wrapper.get('.about-plugins')
+  const rows = card.findAll('.about-plugin-row')
+  expect(rows).toHaveLength(1)
+  expect(rows[0]!.text()).toContain('示例插件')
+  expect(rows[0]!.text()).toContain('v1.0.0')
+  expect(rows[0]!.text()).toContain('ECLTeam')
+  expect(rows[0]!.text()).toContain('独立提供示例能力。')
+  expect(rows[0]!.text()).toContain('GPL-3.0')
+  await rows[0]!.get('.about-plugin-row__action').trigger('click')
+  expect(openExternalUrl).toHaveBeenCalledWith('https://github.com/ECLTeam/ECL-Plugin-Example')
+})
+
+it('没有启用插件时不渲染插件卡片，加载失败也不阻塞页面', async () => {
+  pluginStoreMock.state!.plugins = [disabledPlugin]
+  pluginStoreMock.load.mockRejectedValueOnce(new Error('boom'))
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  expect(wrapper.find('.about-plugins').exists()).toBe(false)
+  // 其余卡片照常渲染
+  expect(wrapper.findAll('.about-card > .card-title').length).toBe(6)
+})
+
+it('主页链接仅在 http(s) 地址时渲染，其他值被忽略', async () => {
+  pluginStoreMock.state!.plugins = [{ ...enabledPlugin, homepage: 'javascript:alert(1)' }]
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  expect(wrapper.get('.about-plugins').find('.about-plugin-row__action').exists()).toBe(false)
 })

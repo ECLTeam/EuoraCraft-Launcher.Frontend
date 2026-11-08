@@ -927,13 +927,15 @@
         "mirror": "Spiegelserver",
         "source": "Quelle",
         "license": "Lizenz",
-        "openSource": "Quellcode"
+        "openSource": "Quellcode",
+        "homepage": "Homepage"
       },
       "sections": {
         "team": "ECLTeam",
         "specialThanks": "Besonderer Dank",
         "contributors": "Mitwirkende aus der Community",
         "technologyStack": "Technologie-Stack",
+        "plugins": "Plugins",
         "licenses": "Lizenzen & Urheberrechtshinweise",
         "legal": "Rechtliche Hinweise"
       },
@@ -1003,9 +1005,8 @@
         "luyanci": "Entwickler des EuoraCraft Launchers und Projektleiter; zuständig für Build, Veröffentlichung und Dokumentationspflege",
         "qomicexPublic": "Lieferte Teile der Konzepte und Mehrspieler-Unterstützung für das Projekt",
         "theMyceliumOfAntan": "Unterstützt die Entwicklung und Verbesserung des Projekts",
-        "pytauri": "Bietet eine Brücke zwischen Python und Tauri, damit der Launcher sein Backend in Python schreiben kann",
+        "pytaruix": "Unabhängiges Framework, das Tauri-2-Desktop-Fähigkeiten über PyO3 zu Python bringt, damit der Launcher sein Backend in Python schreiben kann",
         "vue3": "Progressives JavaScript-Framework, das die Frontend-Oberfläche des Launchers aufbaut",
-        "tauri": "Schlankes Desktop-Anwendungsframework mit nativen Fenstern und Systemintegration",
         "vite": "Frontend-Build-Tool der nächsten Generation, das Entwicklung und Paketierung antreibt",
         "naiveUi": "Vue-3-Komponentenbibliothek mit reichhaltigen Oberflächenkomponenten",
         "tailwind": "Atomic-CSS-Framework, das das Schreiben von Oberflächenstilen beschleunigt",
@@ -1035,7 +1036,6 @@
         "psutilDesc": "Plattformübergreifende Bibliothek für Systemprozesse und Ressourceninformationen, überwacht den Hardwarezustand",
         "packagingDesc": "Bibliothek zum Parsen und Vergleichen von Python-Paketversionen, behandelt Versionsnummern semantisch",
         "easyTierPyo3Desc": "Python-Bindings für EasyTier, liefern die zugrunde liegende Vernetzung für die Mehrspieler-Funktion",
-        "pytauriWheel": "Vorkompilierte pytauri-Wheels, stellen die aufrufbare Python-Schnittstelle für pytauri bereit",
         "materialColors": "Googles Material-Farbwerkzeuge für Themenfarbenberechnung und dynamische Paletten",
         "sass": "In Node eingebettetes Dart Sass, kompiliert die Sass-/SCSS-Stile des Projekts",
         "iconify": "Vue-Icon-Komponente; das Projekt lädt Tabler-Symbole offline über Iconify",

@@ -30,9 +30,9 @@ export const URLS = {
 
   // ---- 技术栈链接 ----
 
-  pytauri: {
-    repo: 'https://github.com/WSH032/pytauri',
-    license: 'https://github.com/WSH032/pytauri/blob/main/LICENSE',
+  pytaruix: {
+    repo: 'https://github.com/ECLTeam/PyTauriX',
+    license: 'https://github.com/ECLTeam/PyTauriX/blob/main/LICENSE',
   },
   vue: {
     repo: 'https://github.com/vuejs/core',
@@ -41,10 +41,6 @@ export const URLS = {
   vite: {
     repo: 'https://github.com/vitejs/vite',
     license: 'https://github.com/vitejs/vite/blob/main/LICENSE',
-  },
-  tauri: {
-    repo: 'https://github.com/tauri-apps/tauri',
-    license: 'https://github.com/tauri-apps/tauri/blob/dev/LICENSE_APACHE-2.0',
   },
   naiveUi: {
     repo: 'https://github.com/tusen-ai/naive-ui',
