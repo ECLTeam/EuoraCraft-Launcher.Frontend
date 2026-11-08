@@ -1144,6 +1144,7 @@
     "downloadSettings": "下载设置",
     "language": "语言",
     "languageDesc": "选择启动器界面的显示语言，修改后立即生效。",
+    "sessionLanguageNotice": "本次启动由参数固定为 {language}；保存的语言将在下次未指定参数时使用。",
     "theme": "主题",
     "themeSystem": "系统",
     "themeLight": "浅色",

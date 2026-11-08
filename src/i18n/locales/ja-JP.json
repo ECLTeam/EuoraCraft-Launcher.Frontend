@@ -1140,6 +1140,7 @@
     "downloadSettings": "ダウンロード設定",
     "language": "言語",
     "languageDesc": "ランチャーの表示言語を選択します。変更は即時反映されます。",
+    "sessionLanguageNotice": "起動引数により今回は {language} を使用します。保存した言語は、次回この指定なしで起動した際に適用されます。",
     "theme": "テーマ",
     "themeSystem": "システム",
     "themeLight": "ライト",

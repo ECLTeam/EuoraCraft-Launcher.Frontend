@@ -1144,6 +1144,7 @@
     "downloadSettings": "Download Settings",
     "language": "Language",
     "languageDesc": "Choose the launcher display language. Changes apply immediately.",
+    "sessionLanguageNotice": "This session uses {language} from the launch arguments. Your saved language applies next time without this override.",
     "theme": "Theme",
     "themeSystem": "System",
     "themeLight": "Light",

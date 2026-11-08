@@ -1,6 +1,7 @@
+import { readonly, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 import backend from '@/api/client'
-import { configQuery } from '@/app/data'
+import { configQuery, launcherInfoQuery } from '@/app/data'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import deDE from './locales/de-DE.json'
 import enUS from './locales/en-US.json'
@@ -22,6 +23,18 @@ export const supportedLocales = [
 export type LocaleCode = (typeof supportedLocales)[number]['code']
 
 export const defaultLocale: LocaleCode = 'zh-CN'
+const sessionLocale = ref<LocaleCode | null>(null)
+export const sessionLanguage = readonly(sessionLocale)
+
+/** 验证宿主提供的会话覆盖；不写入持久 UI 设置。 */
+export function applySessionLanguage(value: unknown): void {
+  sessionLocale.value = supportedLocales.find(({ code }) => code === value)?.code ?? null
+}
+
+/** 界面使用本次显式语言覆盖，配置编辑仍持有原保存值。 */
+export function resolveLocale(value: unknown): LocaleCode {
+  return sessionLocale.value ?? supportedLocales.find(({ code }) => code === value)?.code ?? defaultLocale
+}
 
 /**
  * 判断界面语言是否为简体中文。
@@ -57,9 +70,10 @@ export const i18n = createI18n({
 export async function loadLocaleFromBackend(): Promise<LocaleCode> {
   try {
     if (backend.runtime.isAvailable) {
-      const config = await configQuery()
-      const locale = config.ui.locale as LocaleCode | undefined
-      if (locale && supportedLocales.some((l) => l.code === locale)) {
+      const [config, info] = await Promise.all([configQuery(), launcherInfoQuery()])
+      applySessionLanguage(info?.session_language)
+      const locale = resolveLocale(config.ui.locale)
+      if (locale) {
         i18n.global.locale.value = locale
         document.documentElement.setAttribute('lang', locale)
         return locale
@@ -76,8 +90,9 @@ export async function loadLocaleFromBackend(): Promise<LocaleCode> {
  * @param locale - 目标语言代码
  */
 export async function setLocale(locale: LocaleCode): Promise<void> {
-  i18n.global.locale.value = locale
-  document.documentElement.setAttribute('lang', locale)
+  const effective = resolveLocale(locale)
+  i18n.global.locale.value = effective
+  document.documentElement.setAttribute('lang', effective)
 
   try {
     if (backend.runtime.isAvailable) {

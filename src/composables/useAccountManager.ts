@@ -29,6 +29,7 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
   const { copied: copiedUserCode, copy: copyToClipboard } = useClipboard()
   const accountStore = useAccountStore()
   const {
+    showAccountModal,
     accounts,
     currentAccount,
     isLoading: accountsLoading,
@@ -41,7 +42,6 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
     isAuthlibLoginConfigLoading,
   } = storeToRefs(accountStore)
 
-  const showAccountModal = ref(false)
   const newOfflineUsername = ref('')
   const newOfflineUuid = ref('')
   const offlineUuidError = computed(() => {
@@ -272,19 +272,28 @@ export function useAccountManager(t: (key: string, ...args: unknown[]) => string
   }
 
   function openAccountModal() {
+    if (showAccountModal.value) return
     showAccountModal.value = true
-    showAuthlibForm.value = false
-    authlibServerUrl.value = ''
-    authlibEmail.value = ''
-    authlibPassword.value = ''
-    loadAccounts()
-    loadAuthlibServers()
-    loadMicrosoftLoginConfig()
-    loadAuthlibLoginConfig()
-    loadOfflineSkins()
-    loadPluginProviders()
-    resetPluginForm()
   }
+
+  watch(
+    showAccountModal,
+    (visible) => {
+      if (!visible) return
+      showAuthlibForm.value = false
+      authlibServerUrl.value = ''
+      authlibEmail.value = ''
+      authlibPassword.value = ''
+      loadAccounts()
+      loadAuthlibServers()
+      loadMicrosoftLoginConfig()
+      loadAuthlibLoginConfig()
+      loadOfflineSkins()
+      loadPluginProviders()
+      resetPluginForm()
+    },
+    { immediate: true }
+  )
 
   async function addOfflineAccount() {
     const username = newOfflineUsername.value.trim()

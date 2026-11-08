@@ -6,6 +6,7 @@ import backend from '@/api/client'
 import type * as AppData from '@/app/data'
 import { pinia } from '@/app/stores'
 import { globalTaskQueue, useTaskQueueStore } from '@/composables/useTaskQueue'
+import { useAccountStore } from '@/features/accounts/stores/accountStore'
 import { i18n } from '@/i18n'
 import { installationFixture } from '@/types/installation.fixture'
 import { desktopWindow } from './desktopWindow'
@@ -80,6 +81,20 @@ async function startRuntime() {
   expect(handler).toBeTypeOf('function')
   return handler!
 }
+
+it('账户管理请求打开已有弹窗，重复请求不创建另一份状态', async () => {
+  await startRuntime()
+  const handler = mocks.handlers.get('launcher:open_page')!
+  const store = useAccountStore(pinia)
+  store.showAccountModal = false
+  handler({ page: 'accounts' })
+  await vi.waitFor(() => expect(store.showAccountModal).toBe(true))
+  handler({ page: 'accounts' })
+  await Promise.resolve()
+  expect(store.showAccountModal).toBe(true)
+  handler({ page: 'toString' })
+  expect(store.showAccountModal).toBe(true)
+})
 
 function setVisibility(state: DocumentVisibilityState): void {
   Object.defineProperty(document, 'visibilityState', { configurable: true, value: state })

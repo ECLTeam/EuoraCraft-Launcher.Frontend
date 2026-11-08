@@ -1140,6 +1140,7 @@
     "downloadSettings": "Download-Einstellungen",
     "language": "Sprache",
     "languageDesc": "Wählen Sie die Anzeigesprache des Launchers. Änderungen werden sofort übernommen.",
+    "sessionLanguageNotice": "Für diese Sitzung legt das Startargument {language} fest. Die gespeicherte Sprache gilt beim nächsten Start ohne dieses Argument.",
     "theme": "Design",
     "themeSystem": "System",
     "themeLight": "Hell",

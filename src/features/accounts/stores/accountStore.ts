@@ -20,6 +20,7 @@ import type {
 } from '@/types/accounts'
 
 export const useAccountStore = defineStore('accounts', () => {
+  const showAccountModal = ref(false)
   const accounts = ref<MinecraftAccount[]>([])
   const currentAccount = ref<MinecraftAccount | null>(null)
   const authlibServers = ref<AuthlibServer[]>([])
@@ -270,6 +271,7 @@ export const useAccountStore = defineStore('accounts', () => {
   }
 
   return {
+    showAccountModal,
     applySnapshot,
     accounts,
     currentAccount,

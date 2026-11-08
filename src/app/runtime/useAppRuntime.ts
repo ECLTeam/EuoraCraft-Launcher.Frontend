@@ -21,7 +21,7 @@ import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
 import { globalProcessInstances } from '@/features/terminal/composables/useProcessInstances'
-import { i18n, supportedLocales } from '@/i18n'
+import { applySessionLanguage, i18n, resolveLocale } from '@/i18n'
 import type { BackendEvents } from '@/types/api'
 import type { DownloadConfig, GameConfig } from '@/types/config'
 import { parseInstallation } from '@/types/installation'
@@ -144,7 +144,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     const ui = payload.ui
     if (!ui) return
     if (ui.locale) {
-      const locale = supportedLocales.find(({ code }) => code === ui.locale)?.code
+      const locale = resolveLocale(ui.locale)
       if (locale) {
         i18n.global.locale.value = locale
         document.documentElement.setAttribute('lang', locale)
@@ -364,8 +364,14 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
           download: '/download',
           settings: '/settings',
           more: '/more',
+          accounts: '/',
+          java: '/settings/java',
+          plugins: '/more/plugins',
         }
-        if (page in routes) void options.router.push(routes[page])
+        if (!Object.hasOwn(routes, page)) return
+        void options.router.push(routes[page]).then(() => {
+          if (page === 'accounts') useAccountStore().showAccountModal = true
+        })
       }),
       backend.on('launcher:visibility', (payload) => {
         const action = payload?.action
@@ -495,6 +501,9 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     if (activeStart !== run || !info) return
 
     launcherVersion.value = info.version || ''
+    applySessionLanguage(info.session_language)
+    i18n.global.locale.value = resolveLocale(i18n.global.locale.value)
+    document.documentElement.setAttribute('lang', i18n.global.locale.value)
     const versionType = info.version_type
     launcherVersionType.value =
       versionType === 'alpha' || versionType === 'beta' || versionType === 'rc' || versionType === 'release'

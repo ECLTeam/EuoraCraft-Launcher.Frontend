@@ -1140,6 +1140,7 @@
     "downloadSettings": "下載設定",
     "language": "語言",
     "languageDesc": "選擇啟動器介面的顯示語言，修改後立即生效。",
+    "sessionLanguageNotice": "本次啟動由參數固定為 {language}；儲存的語言將在下次未指定參數時使用。",
     "theme": "主題",
     "themeSystem": "系統",
     "themeLight": "淺色",

@@ -6,6 +6,7 @@ import { queryClient } from '@/app/queryClient'
 import { javaApi } from '@/features/java/api/javaApi'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import { parseSettingsSnapshot } from '@/features/settings/model/settingsSnapshot'
+import { applySessionLanguage, resolveLocale } from '@/i18n'
 import { javaInventory, javaRuntime } from '@/test/javaFixtures'
 import { useSettingsStore } from './settingsStore'
 
@@ -28,6 +29,19 @@ vi.mock('@/features/settings/api/settingsApi', () => ({
 }))
 
 describe('settingsStore', () => {
+  it('保存其他界面设置时不保存命令行的临时语言', async () => {
+    const store = useSettingsStore()
+    await store.load()
+    store.ui = { ...store.ui, locale: 'zh-CN' }
+    applySessionLanguage('en-US')
+    try {
+      expect(resolveLocale(store.ui.locale)).toBe('en-US')
+      await store.patchUi({ flowDebug: true })
+      expect(settingsApi.saveUi).toHaveBeenCalledWith(expect.objectContaining({ locale: 'zh-CN', flowDebug: true }))
+    } finally {
+      applySessionLanguage(null)
+    }
+  })
   it('保存前接纳外部已确认快照，保留外部更新且跳过相同值', async () => {
     const store = useSettingsStore()
     await store.load()

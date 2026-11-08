@@ -1,7 +1,14 @@
 <template>
   <div class="tab-pane launcher-settings">
     <SettingSection :title="t('settings.languageRegion')">
-      <SettingRow :label="languageLabel" :description="t('settings.languageDesc')">
+      <SettingRow
+        :label="languageLabel"
+        :description="
+          sessionLanguage
+            ? t('settings.sessionLanguageNotice', { language: sessionLanguage })
+            : t('settings.languageDesc')
+        "
+      >
         <NSelect
           class="setting-select"
           :value="currentLocale"
@@ -181,7 +188,13 @@ import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import SettingRow from '@/features/settings/components/SettingRow.vue'
 import SettingSection from '@/features/settings/components/SettingSection.vue'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
-import { isSimplifiedChinese as isSimplifiedChineseLocale, setLocale, supportedLocales, type LocaleCode } from '@/i18n'
+import {
+  isSimplifiedChinese as isSimplifiedChineseLocale,
+  sessionLanguage,
+  setLocale,
+  supportedLocales,
+  type LocaleCode,
+} from '@/i18n'
 import type { LauncherConfig } from '@/types/config'
 
 type ProxyMode = NonNullable<LauncherConfig['proxy_mode']>

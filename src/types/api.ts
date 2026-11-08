@@ -133,7 +133,9 @@ export interface BackendEvents {
     download: DownloadConfig
     ui: UiConfig
   }
-  'launcher:open_page': { page: 'games' | 'instances' | 'download' | 'settings' | 'more' }
+  'launcher:open_page': {
+    page: 'games' | 'instances' | 'download' | 'settings' | 'more' | 'accounts' | 'java' | 'plugins'
+  }
   'launcher:visibility': {
     action: 'none' | 'minimize' | 'quit'
   }

@@ -23,6 +23,7 @@ export interface SystemSummary {
 }
 
 export interface LauncherInfo {
+  session_language?: string | null
   version: string
   version_type: string
   debug: boolean
