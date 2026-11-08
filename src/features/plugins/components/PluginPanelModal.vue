@@ -47,7 +47,7 @@ import { NAlert, NButton, NEmpty, NTab, NTabs } from 'naive-ui'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiLoading } from '@/components/ui'
 import type {
   PluginInfo,
   PluginPanelData,

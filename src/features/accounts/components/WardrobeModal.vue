@@ -344,8 +344,7 @@ import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import Modal from '@/components/modals/Modal.vue'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiIcon, UiLoading } from '@/components/ui'
 import {
   fetchAccountTextures,
   fetchAccountTextureDataUrl,

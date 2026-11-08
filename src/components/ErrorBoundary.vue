@@ -21,7 +21,7 @@
 import { NButton } from 'naive-ui'
 import { onErrorCaptured, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 defineOptions({ name: 'ErrorBoundary' })
 

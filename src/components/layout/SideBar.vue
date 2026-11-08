@@ -105,7 +105,7 @@
 import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { useFullscreenModal } from '@/composables/useFullscreenModal'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { pluginRoutes } from '@/composables/usePluginBridge'

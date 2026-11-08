@@ -1,8 +1,8 @@
 .about-pane {
   container-type: inline-size;
   container-name: about-page;
-  display: flex;
-  flex-direction: column;
+  height: auto;
+  min-height: 100%;
   gap: 14px;
   padding: 4px 0;
 }

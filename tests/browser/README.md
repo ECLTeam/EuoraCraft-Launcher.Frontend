@@ -41,3 +41,24 @@ python tests/browser/test_instance_mod_list_layout.py
 $env:PLAYWRIGHT_CHANNEL = 'msedge'
 python tests/browser/test_task_queue_toolbar_layout.py
 ```
+
+## 视觉回归基线
+
+`test_visual.py` 对四个基准页面截图并与已提交的基线逐像素比对，捕获静态检查抓不到的布局塌陷、宽度未撑满、间距失衡和溢出换行错位。
+
+覆盖 `settings-appearance`（分区设置页）、`plugins`（单一管理面板）、`room`（无二级导航入口页）、`instance-detail`（全屏任务页），在 Classic 亮暗两种主题、1280×800 视口下各一张，共 8 张基线。
+
+确定性来自：固定视口与主题（复用 `test_accessibility.py` 的 showcase 配置注入）、拦截外部网络、等待字体与 `data-theme`/`data-ui-skin` 就绪、注入样式关闭动画与过渡、隐藏调试工具浮层（属开发工具而非产品界面）。容差为单通道差值 8、变化像素占比上限 0.1%，抗锯齿噪声不会误报。
+
+```powershell
+# 比对（默认自行启动并关闭 showcase 服务）
+$env:PLAYWRIGHT_CHANNEL = 'msedge'
+python tests/browser/test_visual.py
+
+# 确认改动符合预期后重建基线
+python tests/browser/test_visual.py --update
+```
+
+基线是平台相关的：字体渲染和滚动条宽度随操作系统变化。基线在 Windows 上生成，其他平台比对失败时应复核差异后重新生成，不能直接覆盖。运行产物写入 `tests/browser/visual-output/`，不进版本库。
+
+基线有效性的自检方式：临时把已修复的定宽写法加回去，对应页面必须失败且其他页面保持 0 变化；若全部通过说明基线已失效。重建基线前必须确认每一处差异都是预期改动，不吸收无关的页面高度或环境漂移。

@@ -67,7 +67,7 @@
 import { NAlert, NButton, NSelect } from 'naive-ui'
 import { computed, nextTick, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiLoading } from '@/components/ui'
 import { useClipboard } from '@/composables/useClipboard'
 import { useLittleSkinLogin } from '@/features/accounts/composables/useLittleSkinLogin'
 import { openExternalUrl } from '@/utils/openExternal'

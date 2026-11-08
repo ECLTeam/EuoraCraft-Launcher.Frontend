@@ -39,10 +39,10 @@ const createGithubEntry = (
 })
 
 export const teamMembers: AboutEntry[] = [
-  createGithubEntry('aebc08', 'AEBC08', 'A', 'aebc08', 'https://github.com/AEBC08', 'AEBC08.png'),
-  createGithubEntry('wuchang325', 'Wuchang325', 'W', 'wuchang325', 'https://github.com/Wuchang325', 'Wuchang325.png'),
-  createGithubEntry('rate', 'RATE', 'R', 'e2662020', 'https://github.com/e2662020', 'RATE.png'),
-  createGithubEntry('luyanci', 'YC酱luyancib', 'L', 'luyanci', 'https://github.com/Luyanci', 'luyanci.png'),
+  createGithubEntry('aebc08', 'AEBC08', 'A', 'aebc08', 'https://github.com/AEBC08', 'AEBC08.webp'),
+  createGithubEntry('wuchang325', 'Wuchang325', 'W', 'wuchang325', 'https://github.com/Wuchang325', 'Wuchang325.webp'),
+  createGithubEntry('rate', 'RATE', 'R', 'e2662020', 'https://github.com/e2662020', 'RATE.webp'),
+  createGithubEntry('luyanci', 'YC酱luyancib', 'L', 'luyanci', 'https://github.com/Luyanci', 'luyanci.webp'),
 ]
 
 export const specialThanksEntries: AboutEntry[] = [
@@ -52,7 +52,7 @@ export const specialThanksEntries: AboutEntry[] = [
     'QP',
     'qomicexPublic',
     URLS.qomicexPublic,
-    'Qomicex-Public.svg'
+    'Qomicex-Public.webp'
   ),
   createGithubEntry(
     'the-mycelium-of-antan',
@@ -60,7 +60,7 @@ export const specialThanksEntries: AboutEntry[] = [
     'TM',
     'theMyceliumOfAntan',
     'https://github.com/TheMyceliumOfAntan',
-    'TheMyceliumOfAntan.png'
+    'TheMyceliumOfAntan.webp'
   ),
   {
     id: 'bangbang93',
@@ -102,7 +102,7 @@ export const specialThanksEntries: AboutEntry[] = [
     iconName: 'external-site',
     imageUrl: avatarUrl('mcmod.png'),
   },
-  createGithubEntry('hmcl', 'HMCL', 'H', 'hmcl', URLS.hmcl.repo, 'HMCL.png'),
+  createGithubEntry('hmcl', 'HMCL', 'H', 'hmcl', URLS.hmcl.repo, 'HMCL.webp'),
   createGithubEntry(
     'scaffolding-mc',
     'Scaffolding-MC',
@@ -111,7 +111,7 @@ export const specialThanksEntries: AboutEntry[] = [
     URLS.scaffoldingMC.repo,
     'Scaffolding-MC.png'
   ),
-  createGithubEntry('pcl-ce', 'PCL-CE', 'PC', 'pclCe', URLS.pcl.repo, 'pclce.ico'),
+  createGithubEntry('pcl-ce', 'PCL-CE', 'PC', 'pclCe', URLS.pcl.repo, 'pclce.webp'),
 ]
 
 const technologies = {

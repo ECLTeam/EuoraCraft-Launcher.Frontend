@@ -39,7 +39,7 @@
 import { NButton, NButtonGroup, NSlider } from 'naive-ui'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { SchematicSessionViewer } from '@/features/instances/lib/schematicSessionViewer'
 import { buildSchematicAtlas } from '@/features/instances/lib/schematicStructureRenderer'
 import type { SchematicAssetsBundle, SchematicSessionData } from '@/types/api'

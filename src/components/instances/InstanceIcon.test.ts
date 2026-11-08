@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import InstanceIcon from './InstanceIcon.vue'
 
 vi.mock('@/api/client', () => ({

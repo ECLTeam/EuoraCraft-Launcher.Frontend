@@ -51,8 +51,7 @@
 import { NAlert, NButton } from 'naive-ui'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiIcon, UiLoading } from '@/components/ui'
 import type { MicrosoftLoginStage } from '@/types/accounts'
 
 defineOptions({ name: 'MicrosoftLoginPanel' })

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import UiAvatar from '@/components/ui/Avatar.vue'
+import { UiAvatar } from '@/components/ui'
 import { renderSkinAvatar } from '@/composables/useAvatarRenderer'
 
 defineOptions({ name: 'ConnectorPlayerAvatar' })

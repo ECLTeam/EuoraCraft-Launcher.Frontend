@@ -1,5 +1,5 @@
 <template>
-  <div class="about-pane">
+  <div class="tab-pane about-pane">
     <!-- 关于 -->
     <div class="about-card">
       <div class="card-title">
@@ -183,9 +183,7 @@ import { useI18n } from 'vue-i18n'
 import { launcherInfoQuery } from '@/app/data'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import AboutEntryRow from '@/components/settings/AboutEntryRow.vue'
-import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { CollapsiblePanel, UiIcon, UiLoading } from '@/components/ui'
 import { useDebugMode } from '@/composables/useDebugMode'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'

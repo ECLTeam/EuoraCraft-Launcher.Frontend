@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import ProcessInstanceView from './ProcessInstanceView.vue'
 
 defineOptions({ name: 'InstanceTerminalModule' })

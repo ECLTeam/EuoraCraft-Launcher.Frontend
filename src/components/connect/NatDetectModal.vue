@@ -43,9 +43,7 @@ import { NButton } from 'naive-ui'
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modals/Modal.vue'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
-import UiTag from '@/components/ui/Tag.vue'
+import { UiIcon, UiLoading, UiTag } from '@/components/ui'
 import { useNatType } from '@/features/connect/composables/useNatType'
 
 defineOptions({ name: 'NatDetectModal' })

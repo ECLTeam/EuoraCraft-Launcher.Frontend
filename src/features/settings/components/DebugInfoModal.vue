@@ -65,7 +65,7 @@ import { computed, inject, isRef, ref, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { AppRuntimeMode } from '@/app/runtime/mode'
 import Modal from '@/components/modals/Modal.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { aboutApi } from '@/features/settings/api/aboutApi'
 import type { LauncherInfo } from '@/types/system'
 

@@ -26,7 +26,7 @@ import { NMenu, type MenuOption } from 'naive-ui'
 import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { recallSectionScroll, rememberSectionScroll } from '@/app/runtime/sectionMemory'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 export interface SectionNavigationItem {
   key?: string

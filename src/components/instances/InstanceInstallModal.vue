@@ -129,7 +129,7 @@ import { NButton, NInput, NSelect, type SelectOption } from 'naive-ui'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/modals/Modal.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 export interface InstallLoaderOption {
   value: string

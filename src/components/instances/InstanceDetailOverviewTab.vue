@@ -93,8 +93,7 @@
 <script setup lang="ts">
 import { NButton } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiIcon, UiLoading } from '@/components/ui'
 import { getLoaderName } from '@/config/version'
 import { formatRunDuration } from '@/features/instances/model/versionStats'
 import type { ScannedVersion, VersionRunStats } from '@/types/instances'

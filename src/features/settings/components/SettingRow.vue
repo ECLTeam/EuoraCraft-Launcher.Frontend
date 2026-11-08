@@ -43,7 +43,7 @@
 import { NButton, NPopover } from 'naive-ui'
 import { ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 defineProps<{
   label: string

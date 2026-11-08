@@ -407,10 +407,7 @@ import { pinia } from '@/app/stores'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
 import FullscreenModal from '@/components/modals/FullscreenModal.vue'
 import Modal from '@/components/modals/Modal.vue'
-import UiButton from '@/components/ui/Button.vue'
-import UiCard from '@/components/ui/Card.vue'
-import UiInput from '@/components/ui/Input.vue'
-import UiSlider from '@/components/ui/Slider.vue'
+import { UiButton, UiCard, UiInput, UiSlider } from '@/components/ui'
 import {
   resetAnimSpeed,
   setAnimationsDisabled,

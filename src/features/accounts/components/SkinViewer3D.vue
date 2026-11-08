@@ -61,7 +61,7 @@ import {
 } from 'skinview3d'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import type { SkinModel } from '@/types/accounts'
 
 const props = withDefaults(
@@ -164,7 +164,7 @@ onMounted(async () => {
   if (!canvasRef.value) return
   try {
     viewer = new SkinViewer({ canvas: canvasRef.value, width: 360, height: 520, zoom: 0.78 })
-    viewer.loadPanorama('/img/skinview3d.jpg')
+    viewer.loadPanorama('/img/skinview3d.webp')
     autoRotateEnabled.value = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     viewer.autoRotate = autoRotateEnabled.value
     viewer.autoRotateSpeed = 0.5

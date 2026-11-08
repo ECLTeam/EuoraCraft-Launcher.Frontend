@@ -1,7 +1,7 @@
 import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { NPopover } from 'naive-ui'
 import { afterEach, describe, expect, it } from 'vitest'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { i18n, supportedLocales } from '@/i18n'
 import InstanceListToolbar from './InstanceListToolbar.vue'
 

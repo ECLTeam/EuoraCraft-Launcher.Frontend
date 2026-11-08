@@ -17,7 +17,7 @@
 import { NSelect } from 'naive-ui'
 import { computed, h, type VNode } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { instanceKey, type useResourceInstallTarget } from '@/composables/useResourceInstallTarget'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'

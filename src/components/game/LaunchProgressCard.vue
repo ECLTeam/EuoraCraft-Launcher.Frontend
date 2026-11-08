@@ -40,8 +40,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiProgress from '@/components/ui/Progress.vue'
+import { UiIcon, UiProgress } from '@/components/ui'
 
 defineProps<{
   title: string

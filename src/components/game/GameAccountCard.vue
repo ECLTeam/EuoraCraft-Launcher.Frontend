@@ -52,7 +52,7 @@ import { NButton, NCard, NDropdown } from 'naive-ui'
 import { computed, h, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AvatarRenderer from '@/components/game/AvatarRenderer.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import type { MinecraftAccount } from '@/types/accounts'
 import { getAccountTypeLabelKey } from '@/utils/enums'
 

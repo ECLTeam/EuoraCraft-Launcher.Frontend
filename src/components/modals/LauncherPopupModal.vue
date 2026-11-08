@@ -33,7 +33,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { LauncherPopup } from '@/app/runtime/useLauncherPopupQueue'
 import Modal, { type ModalType } from '@/components/modals/Modal.vue'
-import MarkdownContent from '@/components/ui/MarkdownContent.vue'
+import { MarkdownContent } from '@/components/ui'
 
 defineOptions({ name: 'LauncherPopupModal' })
 

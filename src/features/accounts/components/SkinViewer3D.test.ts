@@ -184,7 +184,7 @@ describe('SkinViewer3D', () => {
     await nextTick()
     await nextTick()
 
-    expect(viewerMocks.loadPanorama).toHaveBeenCalledWith('/img/skinview3d.jpg')
+    expect(viewerMocks.loadPanorama).toHaveBeenCalledWith('/img/skinview3d.webp')
     expect(viewerMocks.current?.nameTag).toBe('Steve')
 
     await wrapper.setProps({ nameTag: '' })

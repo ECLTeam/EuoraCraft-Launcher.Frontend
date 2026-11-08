@@ -4,7 +4,7 @@ import importOrder from 'eslint-plugin-import-x/rules/order'
 import vue from 'eslint-plugin-vue'
 import globals from 'globals'
 import ts from 'typescript-eslint'
-import { uiBoundaryRule } from './scripts/eslint-ui-boundaries.mjs'
+import { uiBoundaryRule, uiEntryRule } from './scripts/eslint-ui-boundaries.mjs'
 
 export default ts.config(
   js.configs.recommended,
@@ -84,7 +84,14 @@ export default ts.config(
     rules: { 'ecl-design/ui-boundary': 'error' },
   },
   {
-    files: ['scripts/*design*.mjs', 'scripts/eslint-ui-boundaries.mjs'],
+    // 对外只暴露 `@/components/ui` 一个入口；ui 目录内部允许直接引用文件，避免与 barrel 循环。
+    files: ['src/**/*.{vue,ts,js,mjs}'],
+    ignores: ['src/components/ui/**', '**/*.test.*', '**/*.spec.*'],
+    plugins: { 'ecl-design': { rules: { 'ui-entry': uiEntryRule } } },
+    rules: { 'ecl-design/ui-entry': 'error' },
+  },
+  {
+    files: ['scripts/*design*.mjs', 'scripts/check-page-root-class.mjs', 'scripts/eslint-ui-boundaries.mjs'],
     languageOptions: { globals: globals.node },
     rules: { 'no-console': 'off' },
   },

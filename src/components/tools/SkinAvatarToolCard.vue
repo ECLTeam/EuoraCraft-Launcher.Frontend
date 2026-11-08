@@ -61,10 +61,7 @@ import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { BackendCommandError, unwrapResponse } from '@/app/runtime/errorPresentation'
-import UiButton from '@/components/ui/Button.vue'
-import UiCard from '@/components/ui/Card.vue'
-import CollapsiblePanel from '@/components/ui/CollapsiblePanel.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { CollapsiblePanel, UiButton, UiCard, UiIcon } from '@/components/ui'
 import {
   avatarSizes,
   loadSkinPixels,

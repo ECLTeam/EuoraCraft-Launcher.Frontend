@@ -25,13 +25,19 @@ const colorNames = new Set(
 )
 
 const tokenSources = new Set(['base.css', 'tokens.css', 'folia.css', 'main.css'].map((name) => `src/styles/${name}`))
-const ruleNames = new Set(['literal-color', 'literal-motion', 'keyframe-owner', 'important-owner'])
+const ruleNames = new Set(['literal-color', 'literal-motion', 'keyframe-owner', 'important-owner', 'literal-geometry'])
+
+// 只约束把内容区限死在固定像素的声明：图标、细边框、百分比和布局比例仍可直接表达。
+const geometryProperties = new Set(['max-width', 'min-width', 'max-height'])
+const plainPixelValue = /^[+-]?(?:\d*\.\d+|\d+)px$/i
 
 export const designRuleMessages = {
   'literal-color': '使用现有语义颜色变量；内容固有颜色请说明归属并登记精确例外。',
   'literal-motion': '使用现有 duration/easing 变量；零时长关闭效果允许直接表达。',
   'keyframe-owner': '公共关键帧归入 src/styles/animations.css。',
   'important-owner': '确认级联和所有权边界，移除 !important 或登记有期限的精确例外。',
+  'literal-geometry':
+    '主表面撑满内容区，不要用固定像素 max-width/min-width/max-height 限定；确需限宽请使用语义变量或登记精确例外。',
 }
 
 function unescapeCss(value) {
@@ -169,6 +175,12 @@ function nodeRules(file, node) {
       )
     )
       rules.push('literal-motion')
+    if (
+      geometryProperties.has(property) &&
+      plainPixelValue.test(node.value.trim()) &&
+      Number.parseFloat(node.value) !== 0
+    )
+      rules.push('literal-geometry')
   }
   if (node.important) rules.push('important-owner')
   return rules

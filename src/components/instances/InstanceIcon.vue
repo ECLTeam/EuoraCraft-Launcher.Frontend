@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import backend from '@/api/client'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { getLoaderIcon, getLoaderImage, getVersionImage } from '@/config/version'
 import type { InstanceIconSource } from '@/types/instances'
 

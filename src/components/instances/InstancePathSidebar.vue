@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import type { GamePath } from '@/features/instances/model/gamePath'
 
 const props = defineProps<{

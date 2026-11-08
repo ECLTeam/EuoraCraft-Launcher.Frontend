@@ -41,7 +41,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import OnlineModSearch from '@/components/mods/OnlineModSearch.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import InstancesTab from '@/views/instances/InstancesTab.vue'
 const { t } = useI18n()
 const route = useRoute()

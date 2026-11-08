@@ -46,8 +46,7 @@
 <script setup lang="ts">
 import { NTag } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiIcon, UiLoading } from '@/components/ui'
 import type { ModInfo } from '@/types/mods'
 
 withDefaults(

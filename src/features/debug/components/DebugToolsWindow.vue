@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useGlobalModalStack } from '@/composables/useGlobalModalStack'
 import { modalParentKey } from '@/composables/useModalInteraction'

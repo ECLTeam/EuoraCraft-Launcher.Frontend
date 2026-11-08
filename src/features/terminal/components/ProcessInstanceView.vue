@@ -101,8 +101,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiEmptyState from '@/components/ui/EmptyState.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiEmptyState, UiIcon } from '@/components/ui'
 import type { TerminalSession } from '@/types/system'
 import { useProcessInstances } from '../composables/useProcessInstances'
 defineOptions({ name: 'ProcessInstanceView' })

@@ -45,3 +45,36 @@ export const uiBoundaryRule = {
     }
   },
 }
+
+// 公共 Ui 的对外入口只有 `@/components/ui`。深层引用会让调用方依赖文件布局，
+// 也让「这里能放控件」变成各处自行拼装的入口；`components/ui/` 内部不受此限，
+// 否则与 barrel 形成循环依赖。
+const uiEntryMessage = '公共 Ui 组件统一从 @/components/ui 导入，不直接引用目录内的文件。'
+
+export const uiEntryRule = {
+  meta: {
+    type: 'problem',
+    schema: [],
+    messages: { entry: uiEntryMessage },
+  },
+  create(context) {
+    function check(node, source) {
+      if (!source || typeof source.value !== 'string') return
+      const specifier = source.value
+      if (!specifier.startsWith('@/components/ui/')) return
+      context.report({ node, messageId: 'entry' })
+    }
+    return {
+      ImportDeclaration: (node) => check(node, node.source),
+      TSImportType: (node) => check(node, node.source),
+      ExportAllDeclaration: (node) => check(node, node.source),
+      ExportNamedDeclaration: (node) => {
+        if (node.source) check(node, node.source)
+      },
+      ImportExpression: (node) => check(node, node.source),
+      CallExpression: (node) => {
+        if (node.callee.type === 'Identifier' && node.callee.name === 'require') check(node, node.arguments[0])
+      },
+    }
+  },
+}

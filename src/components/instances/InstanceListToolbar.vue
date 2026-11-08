@@ -213,8 +213,7 @@
 import { NPopover } from 'naive-ui'
 import { computed, nextTick, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiButton from '@/components/ui/Button.vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiButton, UiIcon } from '@/components/ui'
 import type { InstanceCategory, InstanceSortKey } from '@/types/instances'
 
 const props = defineProps<{

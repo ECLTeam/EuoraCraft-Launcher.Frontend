@@ -56,6 +56,28 @@ describe('新增样式约束', () => {
     expect(css('@keyframes wiggle {to {opacity:1}}', 'src/styles/animations.css')).toEqual([])
   })
 
+  it('拦截把内容区限死在固定像素的宽度与高度', () => {
+    expect(rules('.panel {max-width:820px}')).toEqual(['literal-geometry'])
+    expect(rules('.panel {min-width:320px}')).toEqual(['literal-geometry'])
+    expect(rules('.panel {max-height:480px}')).toEqual(['literal-geometry'])
+    expect(rules('.panel {max-width:820px!important}')).toEqual(['literal-geometry', 'important-owner'])
+  })
+
+  it('允许图标尺寸、百分比、零值、变量与响应式断点', () => {
+    expect(
+      rules(`.panel { width:14px; height:14px; min-height:0; max-width:100%;
+        max-width:var(--ecl-content-width); min-width:calc(100% - 2px); max-width:none;
+        max-width:min(320px, calc(100vw - 40px)) }`)
+    ).toEqual([])
+    expect(rules('@media (max-width:820px) { .panel {gap:8px} }')).toEqual([])
+    expect(rules('@container connect-room (max-width:620px) { .panel {gap:8px} }')).toEqual([])
+  })
+
+  it('主题来源仍可定义几何默认值', () => {
+    expect(css(':root {--ecl-page-padding: 20px}', 'src/styles/tokens.css')).toEqual([])
+    expect(css('.panel {max-width:820px}', 'src/styles/tokens.css')[0].rule).toBe('literal-geometry')
+  })
+
   it('解析多个 SFC 样式块并保留源码行号', () => {
     const source = `<template><div /></template>\n<style scoped>\n.card {color:#fff}\n</style>\n<style>\n.badge{color:red!important}\n</style>`
     const findings = analyzeStyles('src/components/Example.vue', source)

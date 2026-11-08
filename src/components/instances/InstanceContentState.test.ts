@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { NEmpty } from 'naive-ui'
 import { describe, expect, it } from 'vitest'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiLoading } from '@/components/ui'
 import { i18n } from '@/i18n'
 import InstanceContentState from './InstanceContentState.vue'
 

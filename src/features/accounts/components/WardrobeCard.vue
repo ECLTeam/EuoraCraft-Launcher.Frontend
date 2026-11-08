@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref, useId, watch } from 'vue'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 const props = defineProps<{
   name: string

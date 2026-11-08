@@ -35,8 +35,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import ConnectorPlayerAvatar from '@/components/connect/ConnectorPlayerAvatar.vue'
-import UiButton from '@/components/ui/Button.vue'
-import UiTag from '@/components/ui/Tag.vue'
+import { UiButton, UiTag } from '@/components/ui'
 import type { ConnectorPlayer } from '@/types/connect'
 
 defineOptions({ name: 'ConnectorPlayerList' })

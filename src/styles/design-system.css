@@ -1,3 +1,32 @@
+/* 页面骨架：三种原型的组合方式，新页面照此结构写，不要自建页面根类。
+ *
+ * 单一管理面板（插件、联机等无二级信息架构的页面）
+ *   <div class="xxx-page ecl-page">
+ *     <section class="ecl-surface xxx-panel">
+ *       <header class="xxx-toolbar">…</header>
+ *       <div class="ecl-page__scroll">…</div>
+ *     </section>
+ *   </div>
+ *
+ * 分区管理页（下载、设置等三个以上稳定分区）
+ *   <SectionLayout>
+ *     <div class="ecl-page">
+ *       <section class="ecl-surface">
+ *         <div class="ecl-page__scroll">…</div>
+ *       </section>
+ *     </div>
+ *   </SectionLayout>
+ *
+ * 沉浸首页（仅游戏页）
+ *   <div class="game-page ecl-page">
+ *     <PageHeader … />
+ *     <div class="ecl-page__body">…</div>
+ *   </div>
+ *
+ * 宽度契约：页面根容器与主表面都撑满内容区，禁止 max-width 加 margin: 0 auto
+ * 居中缩窄；表面内部靠栅格和分栏填充，不靠居中定宽制造留白。
+ */
+
 .ecl-page {
   display: flex;
   width: 100%;
@@ -6,6 +35,24 @@
   flex-direction: column;
   gap: var(--ecl-page-gap);
   overflow: hidden;
+}
+
+/* 承载撑满的主表面：吃掉剩余空间，自身不滚动 */
+.ecl-page__body {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 内容超出可用高度时的滚动容器 */
+.ecl-page__scroll {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
 }
 
 .ecl-page-header {

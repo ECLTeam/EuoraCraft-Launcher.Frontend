@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { useTopNav } from '@/composables/useTopNav'
 import { useTrayItems } from '@/composables/useTrayItems'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'

@@ -35,3 +35,6 @@ vite.config.d.ts
 __pycache__/
 .governance-source/
 build/
+
+# 视觉回归运行产物（基线在 tests/browser/visual-baselines）
+tests/browser/visual-output/

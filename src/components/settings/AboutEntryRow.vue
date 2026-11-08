@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import type { AboutEntry } from '@/features/settings/about/aboutContent'
 import { openExternalUrl } from '@/utils/openExternal'
 

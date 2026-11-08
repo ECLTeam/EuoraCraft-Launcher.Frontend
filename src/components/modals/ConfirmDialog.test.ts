@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { i18n } from '@/i18n'
 import ConfirmDialog from './ConfirmDialog.vue'
 import Modal from './Modal.vue'

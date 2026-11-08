@@ -132,7 +132,7 @@
 import { NButton, NPopover } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { MAX_PINNED_ITEMS, type RecentInstance } from '@/composables/useRecentInstances'
 import { instanceDisplayName } from '@/features/instances/model/instancePresentation'
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'

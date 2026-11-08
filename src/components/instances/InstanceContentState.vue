@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { NEmpty } from 'naive-ui'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiLoading } from '@/components/ui'
 
 defineProps<{ loading: boolean; empty: boolean; emptyDescription: string }>()
 </script>

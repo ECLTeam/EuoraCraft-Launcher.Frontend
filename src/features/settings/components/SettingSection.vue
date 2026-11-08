@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 
 withDefaults(
   defineProps<{

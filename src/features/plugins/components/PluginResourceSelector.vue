@@ -48,7 +48,7 @@
 import { NAlert, NButton, NCheckbox, NEmpty, NInput } from 'naive-ui'
 import { onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiLoading } from '@/components/ui'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type { PluginPermissions, PluginResourceCandidate, PluginInstanceCapability } from '@/types/plugins'

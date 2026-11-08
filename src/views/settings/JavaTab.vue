@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import UiCard from '@/components/ui/Card.vue'
+import { UiCard } from '@/components/ui'
 import JavaManagerPanel from '@/features/java/components/JavaManagerPanel.vue'
 </script>
 

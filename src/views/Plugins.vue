@@ -1,6 +1,6 @@
 <template>
-  <div class="plugins-page">
-    <section class="plugins-panel ecl-surface">
+  <div class="plugins-page ecl-page">
+    <section class="plugins-panel ecl-surface ecl-page__body">
       <header class="plugins-toolbar">
         <NInput
           v-model:value="searchQuery"
@@ -252,8 +252,7 @@ import {
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, onUnmounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
-import UiLoading from '@/components/ui/Loading.vue'
+import { UiIcon, UiLoading } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'

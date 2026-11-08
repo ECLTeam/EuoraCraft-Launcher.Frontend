@@ -23,7 +23,7 @@
 import { NButton } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import UiIcon from '@/components/ui/Icon.vue'
+import { UiIcon } from '@/components/ui'
 import { useClipboard } from '@/composables/useClipboard'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { getLocatorColor } from '@/features/accounts/locatorColor'
