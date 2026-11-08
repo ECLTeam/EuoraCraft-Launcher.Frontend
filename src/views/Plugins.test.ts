@@ -46,6 +46,10 @@ describe('plugin management entry points', () => {
     })
     try {
       await flushPromises()
+      const settingsLabel = i18n.global.t('plugins.settings')
+      const reloadLabel = i18n.global.t('plugins.reload')
+      expect(wrapper.find(`button[aria-label="${settingsLabel}"]`).exists()).toBe(status === 'enabled')
+      expect(wrapper.find(`button[aria-label="${reloadLabel}"]`).exists()).toBe(status === 'enabled')
       expect(wrapper.find('.plugin-error').exists()).toBe(false)
       if (!key) {
         expect(wrapper.find('[role="note"]').exists()).toBe(false)
@@ -54,9 +58,9 @@ describe('plugin management entry points', () => {
       }
       const message = i18n.global.t(key)
       if (error?.includes('DISABLED_FOR_SESSION')) {
-        for (const name of ['plugins.enable', 'plugins.reload']) {
-          expect(wrapper.get(`button[aria-label="${i18n.global.t(name)}"]`).attributes('disabled')).toBeDefined()
-        }
+        expect(
+          wrapper.get(`button[aria-label="${i18n.global.t('plugins.enable')}"]`).attributes('disabled')
+        ).toBeDefined()
       }
       expect(wrapper.get('.plugin-identity').text()).not.toContain(message)
       const note = wrapper.get('[role="note"]')

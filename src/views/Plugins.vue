@@ -133,6 +133,7 @@
                   <template #icon><UiIcon name="layout-grid" :size="16" /></template>
                 </NButton>
                 <NButton
+                  v-if="plugin.status === 'enabled'"
                   quaternary
                   size="tiny"
                   :title="t('plugins.settings')"
@@ -156,10 +157,10 @@
                   </template>
                 </NButton>
                 <NButton
+                  v-if="plugin.status === 'enabled' && !sessionDisabled(plugin)"
                   quaternary
                   size="tiny"
                   :loading="reloadingPlugins.includes(plugin.name)"
-                  :disabled="sessionDisabled(plugin) || plugin.pending_restart"
                   :title="t('plugins.reload')"
                   :aria-label="t('plugins.reload')"
                   @click="reloadPlugin(plugin)"
