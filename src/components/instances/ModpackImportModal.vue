@@ -287,7 +287,8 @@ function goBack() {
 async function selectSourceFile() {
   const result = await backend.command('select_file', { purpose: 'modpack' })
   const path: unknown = result.data?.path
-  if (result.success && typeof path === 'string') store.setSource(path)
+  // 取消选择或对话框已被占用时路径为空，不能覆盖已经选好的来源。
+  if (result.success && typeof path === 'string' && path) store.setSource(path)
 }
 async function handleImport() {
   const result = await store.importPack()
