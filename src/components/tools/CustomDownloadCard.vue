@@ -9,7 +9,7 @@
         <label for="custom-download-folder">{{ t('tools.download.folder') }}</label>
         <div class="custom-download-path">
           <UiInput id="custom-download-folder" v-model="downloadDirectory" :disabled="busy" />
-          <UiButton variant="secondary" icon="folder-open" :disabled="busy" @click="browse">{{
+          <UiButton variant="secondary" icon="folder-open" :disabled="busy" :loading="browsePending" @click="browse">{{
             t('common.browse')
           }}</UiButton>
         </div>
@@ -158,11 +158,13 @@ import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { CollapsiblePanel, UiButton, UiCard, UiIcon, UiInput, UiProgress } from '@/components/ui'
+import { useNativePicker } from '@/composables/useNativePicker'
 import { customDownloadApi } from '@/features/download/api/customDownloadApi'
 import { useCustomDownloadStore } from '@/features/download/stores/customDownloadStore'
 import { toolCheckboxTheme } from '@/features/tools/toolCheckboxTheme'
 import { getErrorMessage } from '@/utils/error'
 const { t } = useI18n()
+const { pending: browsePending, pick: pickDirectory } = useNativePicker()
 const namingTheme = {
   buttonHeightMedium: 'var(--ecl-control-height-sm, 32px)',
   fontSizeMedium: '12px',
@@ -230,8 +232,8 @@ function removeHeader(id: number) {
 
 async function browse() {
   try {
-    const result = await customDownloadApi.browse(downloadDirectory.value)
-    if (active && result.path) downloadDirectory.value = result.path
+    const result = await pickDirectory(() => customDownloadApi.browse(downloadDirectory.value))
+    if (active && result?.path) downloadDirectory.value = result.path
   } catch (cause) {
     if (active) error.value = getErrorMessage(cause)
   }

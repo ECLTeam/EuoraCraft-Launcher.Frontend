@@ -256,7 +256,7 @@
               clearable
               @update:value="handleBgImageInput"
             />
-            <NButton @click="selectLocalImage">{{ t('common.browse') }}</NButton>
+            <NButton :loading="imagePickPending" @click="selectLocalImage">{{ t('common.browse') }}</NButton>
           </NInputGroup>
           <input
             ref="showcaseImageInputRef"
@@ -290,7 +290,7 @@
         <SettingRow :label="t('settings.backgroundVideo')" :description="t('settings.backgroundVideoDesc')">
           <NInputGroup class="background-input-group">
             <NInput :value="backgroundVideoPath" readonly :placeholder="t('settings.backgroundVideoEmpty')" />
-            <NButton @click="selectBackgroundVideo">{{ t('common.browse') }}</NButton>
+            <NButton :loading="videoPickPending" @click="selectBackgroundVideo">{{ t('common.browse') }}</NButton>
           </NInputGroup>
         </SettingRow>
         <SettingRow :label="t('settings.backgroundVideoPoster')" :description="t('settings.backgroundVideoPosterDesc')">
@@ -300,7 +300,9 @@
               readonly
               :placeholder="t('settings.backgroundVideoPosterEmpty')"
             />
-            <NButton @click="selectBackgroundVideoPoster">{{ t('common.browse') }}</NButton>
+            <NButton :loading="posterPickPending" @click="selectBackgroundVideoPoster">{{
+              t('common.browse')
+            }}</NButton>
           </NInputGroup>
         </SettingRow>
         <SettingRow :label="t('settings.backgroundVideoPlay')" :description="t('settings.backgroundVideoPlayDesc')">
@@ -398,6 +400,7 @@ import { useActiveWindowChrome, useSystemShadowSupported } from '@/app/runtime/w
 import { CollapsiblePanel, UiIcon } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
+import { useNativePicker } from '@/composables/useNativePicker'
 import { useTheme, type ThemeMode } from '@/composables/useTheme'
 import { useTopNav } from '@/composables/useTopNav'
 import {
@@ -428,6 +431,9 @@ function debounce<A extends unknown[]>(fn: (...args: A) => void, delay: number) 
 
 const { t } = useI18n()
 const message = useLauncherMessage()
+const { pending: imagePickPending, pick: pickImage } = useNativePicker()
+const { pending: videoPickPending, pick: pickVideo } = useNativePicker()
+const { pending: posterPickPending, pick: pickPoster } = useNativePicker()
 const { run } = useAsyncAction({
   showSuccess: false,
   showError: true,
@@ -791,7 +797,7 @@ async function selectLocalImage() {
     return
   }
 
-  const result = await run(async () => settingsStore.chooseBackgroundImage())
+  const result = await pickImage(async () => run(async () => settingsStore.chooseBackgroundImage()))
   if (!result) return
   if (result.imageUrl) {
     setBackgroundImage(result.imageUrl, result.path, false)
@@ -808,7 +814,7 @@ async function selectBackgroundVideo(): Promise<void> {
     message.error(t('settings.backgroundVideoShowcaseNotSupported'))
     return
   }
-  const result = await run(async () => settingsStore.chooseBackgroundVideo())
+  const result = await pickVideo(async () => run(async () => settingsStore.chooseBackgroundVideo()))
   if (!result) return
   setBackgroundVideo(
     result.videoUrl ?? '',
@@ -821,7 +827,7 @@ async function selectBackgroundVideo(): Promise<void> {
 }
 
 async function selectBackgroundVideoPoster(): Promise<void> {
-  const path = await run(async () => settingsApi.selectImage())
+  const path = await pickPoster(async () => run(async () => settingsApi.selectImage()))
   if (!path) return
   const imageUrl = await run(async () => settingsApi.readImage(path))
   if (!imageUrl) {

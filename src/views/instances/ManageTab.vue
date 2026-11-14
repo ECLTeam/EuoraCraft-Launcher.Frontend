@@ -88,6 +88,7 @@
               variant="secondary"
               size="lg"
               :disabled="isDefaultPath || pathSaving"
+              :loading="browsePending"
               icon="folder"
               @click="browseForPath"
             >
@@ -141,6 +142,7 @@ import Modal from '@/components/modals/Modal.vue'
 import { UiButton, UiInput } from '@/components/ui'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { globalLaunchProgress } from '@/composables/useLaunchProgress'
+import { useNativePicker } from '@/composables/useNativePicker'
 import { useRecentInstances } from '@/composables/useRecentInstances'
 import { useRequestScope } from '@/composables/useRequestScope'
 import { LAUNCH_PROGRESS, LAUNCH_SUCCESS_HIDE_DELAY, LAUNCH_ERROR_HIDE_DELAY } from '@/config/game'
@@ -165,6 +167,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const message = useLauncherMessage()
+const { pending: browsePending, pick: pickDirectory } = useNativePicker()
 const instanceExport = useInstanceExportStore()
 const instanceStore = useInstanceStore()
 const settingsStore = useSettingsStore()
@@ -427,7 +430,7 @@ const openPathFolder = async (index: number) => {
 
 const browseForPath = async () => {
   try {
-    const result = await instanceInstallApi.selectDirectory()
+    const result = await pickDirectory(() => instanceInstallApi.selectDirectory())
     if (result?.path) {
       pathForm.value.path = result.path
       if (!pathForm.value.name) {
