@@ -35,7 +35,7 @@ export function createTauriTransport(): BackendTransport {
     },
     async invoke(command, payload) {
       const tauri = getTauri()
-      if (!tauri?.pytaurix) throw new Error('PytaruiX 运行环境未就绪')
+      if (!tauri?.pytaurix) throw new Error('pytauriX 运行环境未就绪')
       return tauri.pytaurix.pyInvoke(command, payload)
     },
     async listen<T>(event: string, handler: (payload: T) => void) {
