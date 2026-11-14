@@ -64,7 +64,8 @@
   --border-strong: #d0d0d0;
   --border-hover: rgba(var(--primary-rgb), 0.3);
   --border-active: rgba(var(--primary-rgb), 0.5);
-  --border-focus: rgba(var(--primary-rgb), 0.5);
+  /* 输入框聚焦时边框是唯一的焦点指示，同样按 3:1 取实色 */
+  --border-focus: color-mix(in srgb, var(--primary) 92%, var(--ecl-text));
   --divider: #e0e0e0;
 
   --card-bg: rgba(255, 255, 255, calc(0.88 * var(--card-opacity, 1)));
@@ -134,9 +135,11 @@
   --slider-track: #e0e0e0;
   --slider-thumb: var(--primary);
 
-  --glow-focus: 0 0 0 2px rgba(var(--primary-rgb), 0.25);
-  --glow-focus-pink: 0 0 0 2px rgba(var(--primary-rgb), 0.25);
-  --glow-focus-error: 0 0 0 2px rgba(229, 92, 92, 0.25);
+  /* 焦点指示要与相邻底色达到 3:1（WCAG 1.4.11）。半透明主色叠在白底上只有约 1.3:1，
+     因此把主色向文字色偏移 8% 得到实色：最浅的预设色（天空蓝）也有 3.3:1，默认蓝为 4.8:1。 */
+  --glow-focus: 0 0 0 2px color-mix(in srgb, var(--primary) 92%, var(--ecl-text));
+  --glow-focus-pink: 0 0 0 2px color-mix(in srgb, var(--primary) 92%, var(--ecl-text));
+  --glow-focus-error: 0 0 0 2px color-mix(in srgb, var(--error) 92%, var(--ecl-text));
 
   --control-bg: var(--bg-elevated);
   --control-bg-hover: var(--bg-hover);
@@ -200,16 +203,17 @@
   --border-strong: rgba(255, 255, 255, 0.12);
   --border-hover: rgba(var(--primary-rgb), 0.35);
   --border-active: rgba(var(--primary-rgb), 0.55);
-  --border-focus: rgba(var(--primary-rgb), 0.55);
+  /* 深色底上向文字色（浅色）偏移 12%，保证焦点描边与近黑画布仍有 3:1 以上 */
+  --border-focus: color-mix(in srgb, var(--primary) 88%, var(--ecl-text));
   --divider: rgba(255, 255, 255, 0.08);
 
   --card-bg: rgba(35, 38, 45, calc(0.88 * var(--card-opacity, 1)));
   --card-border-top: 1px solid var(--ecl-border);
   --card-border-bottom: 1px solid var(--ecl-border);
 
-  --glow-focus: 0 0 0 2px rgba(var(--primary-rgb), 0.35);
-  --glow-focus-pink: 0 0 0 2px rgba(var(--primary-rgb), 0.35);
-  --glow-focus-error: 0 0 0 2px rgba(229, 92, 92, 0.35);
+  --glow-focus: 0 0 0 2px color-mix(in srgb, var(--primary) 88%, var(--ecl-text));
+  --glow-focus-pink: 0 0 0 2px color-mix(in srgb, var(--primary) 88%, var(--ecl-text));
+  --glow-focus-error: 0 0 0 2px color-mix(in srgb, var(--error) 88%, var(--ecl-text));
 
   --control-bg: var(--bg-elevated);
   --control-bg-hover: var(--bg-hover);

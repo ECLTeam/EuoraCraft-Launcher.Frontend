@@ -39,7 +39,7 @@
   --control-bg-active: rgba(var(--primary-rgb, 91, 111, 245), 0.14);
   --control-border: rgba(var(--primary-rgb, 91, 111, 245), 0.22);
   --control-border-hover: rgba(var(--primary-rgb, 91, 111, 245), 0.45);
-  --control-border-focus: rgba(var(--primary-rgb, 91, 111, 245), 0.6);
+  --control-border-focus: color-mix(in srgb, rgb(var(--primary-rgb, 91, 111, 245)) 92%, var(--ecl-text));
   --control-ring: 0 0 0 2px rgba(var(--primary-rgb, 91, 111, 245), 0.18);
   --control-glow: 0 4px 14px rgba(var(--primary-rgb, 91, 111, 245), 0.16);
   --slider-track: rgba(var(--primary-rgb, 91, 111, 245), 0.18);
@@ -80,7 +80,7 @@
   --control-bg-active: rgba(var(--primary-rgb, 130, 145, 255), 0.2);
   --control-border: rgba(var(--primary-rgb, 130, 145, 255), 0.3);
   --control-border-hover: rgba(var(--primary-rgb, 130, 145, 255), 0.55);
-  --control-border-focus: rgba(var(--primary-rgb, 130, 145, 255), 0.7);
+  --control-border-focus: color-mix(in srgb, rgb(var(--primary-rgb, 130, 145, 255)) 88%, var(--ecl-text));
   --control-ring: 0 0 0 2px rgba(var(--primary-rgb, 130, 145, 255), 0.24);
   --control-glow: 0 4px 16px rgba(var(--primary-rgb, 130, 145, 255), 0.22);
   --slider-track: rgba(var(--primary-rgb, 130, 145, 255), 0.28);

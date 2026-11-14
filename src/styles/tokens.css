@@ -18,7 +18,8 @@
   --ecl-primary-alpha-strong: rgba(var(--primary-rgb), 0.18);
   --ecl-hover: rgba(29, 36, 51, 0.05);
   --ecl-hover-strong: rgba(29, 36, 51, 0.09);
-  --ecl-focus-ring: 0 0 0 2px rgba(var(--primary-rgb), 0.28);
+  /* 与 --glow-focus 同源：2px 实色环，保证与相邻底色达到 3:1（WCAG 1.4.11） */
+  --ecl-focus-ring: 0 0 0 2px color-mix(in srgb, var(--primary) 92%, var(--ecl-text));
   --ecl-shadow-surface: 0 1px 2px rgba(29, 36, 51, 0.04);
   --ecl-shadow-pop: 0 8px 24px rgba(29, 36, 51, 0.1);
   --ecl-control-height: 36px;
@@ -105,7 +106,7 @@
   --ecl-primary-alpha-strong: rgba(var(--primary-rgb), 0.26);
   --ecl-hover: rgba(255, 255, 255, 0.06);
   --ecl-hover-strong: rgba(255, 255, 255, 0.1);
-  --ecl-focus-ring: 0 0 0 2px rgba(var(--primary-rgb), 0.4);
+  --ecl-focus-ring: 0 0 0 2px color-mix(in srgb, var(--primary) 88%, var(--ecl-text));
   --ecl-shadow-surface: 0 1px 2px rgba(0, 0, 0, 0.18);
   --ecl-shadow-pop: 0 8px 24px rgba(0, 0, 0, 0.35);
   --ecl-badge-fabric-fg: #c9a860;
