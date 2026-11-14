@@ -224,6 +224,7 @@
             <PluginSlotHost
               slotId="plugin-slot-task-queue-item-actions"
               :contextKey="task.id"
+              :contextData="taskContextData(task)"
               class="plugin-slot-container"
             />
           </div>
@@ -248,6 +249,20 @@ import { currentInstallationStage, installationPercentage } from '@/types/instal
 import { errorCodeMessageKeys, resolveDisplayMessage } from '@/utils/errorCodeMessages'
 
 defineOptions({ name: 'TaskQueuePanel' })
+
+/** 提供给任务条目插槽的结构化上下文：任务队列已展示的摘要。 */
+function taskContextData(task: TaskItem): Record<string, unknown> {
+  return {
+    task_id: task.id,
+    name: task.name,
+    type: task.type,
+    status: task.status,
+    progress: task.progress,
+    message: task.message,
+    version_id: task.versionId,
+    loader_type: task.loaderType,
+  }
+}
 
 const { t, te } = useI18n()
 const operationStore = useApplicationOperationStore()

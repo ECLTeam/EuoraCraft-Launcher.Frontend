@@ -14,6 +14,7 @@ export interface PluginSlotHostRegistration {
   key: string
   slotId: string
   contextKey?: string
+  contextData?: Record<string, unknown>
   element: HTMLElement
 }
 
@@ -23,9 +24,15 @@ const knownIds = [
   'plugin-slot-game-launch-before',
   'plugin-slot-game-left',
   'plugin-slot-game-right-top',
+  'plugin-slot-game-status-bottom',
+  'plugin-slot-instance-detail-actions',
+  'plugin-slot-instance-summary',
+  'plugin-slot-modal-body-extra',
   'plugin-slot-modal-footer-extra',
   'plugin-slot-online-mods-search-after',
   'plugin-slot-page-bottom',
+  'plugin-slot-plugin-page-bottom',
+  'plugin-slot-plugin-page-top',
   'plugin-slot-plugins-list-bottom',
   'plugin-slot-plugins-toolbar-after',
   'plugin-slot-settings-about-bottom',
@@ -53,11 +60,15 @@ const knownIds = [
 function pageFor(id: string): string {
   if (id.includes('settings')) return 'settings'
   if (id.includes('versions') || id.includes('version-detail')) return 'versions'
+  if (id.includes('instance')) return 'instances'
   if (id.includes('game-')) return 'game'
-  if (id.includes('plugins')) return 'plugins'
+  if (id.includes('plugin-page') || id.includes('plugins')) return 'plugins'
   if (id.includes('online-mods')) return 'mods'
   return 'global'
 }
+
+/** 插件 SDK 按同一规则把插槽 id 归属到页面。 */
+export const pageForSlotId = pageFor
 
 export const pluginSlotDescriptors: PluginSlotDescriptor[] = knownIds.map((id) => ({
   id,
@@ -65,7 +76,8 @@ export const pluginSlotDescriptors: PluginSlotDescriptor[] = knownIds.map((id) =
   windowType: 'main',
   purpose: id.replace('plugin-slot-', '').replaceAll('-', ' '),
   accepts: ['html', 'vue'],
-  cardinality: id === 'plugin-slot-task-queue-item-actions' ? 'multiple' : 'single',
+  cardinality:
+    id === 'plugin-slot-task-queue-item-actions' || id.includes('instance-detail-actions') ? 'multiple' : 'single',
   layout: id.includes('titlebar') || id.includes('actions') ? 'inline' : 'block',
 }))
 

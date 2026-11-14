@@ -125,6 +125,7 @@
       <template #icon><UiIcon name="settings" :size="15" /></template>
       {{ t('game.versionSettings') }}
     </NButton>
+    <PluginSlotHost slotId="plugin-slot-game-status-bottom" class="plugin-slot-container" />
   </div>
 </template>
 

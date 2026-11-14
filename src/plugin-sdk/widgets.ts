@@ -422,3 +422,72 @@ export function group(options: GroupOptions = {}): HTMLElement {
     }
   })
 }
+
+// ---- 指标卡 ----
+
+interface MetricOptions {
+  label: string
+  value: string
+  hint?: string
+  variant?: BadgeVariant
+  class?: string
+}
+
+export function metric(options: MetricOptions): HTMLElement {
+  return defineWidget(
+    'metric',
+    'plugin-metric',
+    (el) => {
+      el.appendChild(createElement('div', { class: 'plugin-metric-value', text: options.value }))
+      el.appendChild(createElement('div', { class: 'plugin-metric-label plugin-text-secondary', text: options.label }))
+      if (options.hint) {
+        el.appendChild(createElement('div', { class: 'plugin-text-sm plugin-text-secondary', text: options.hint }))
+      }
+      if (options.variant && options.variant !== 'default') {
+        el.classList.add(`plugin-metric-${options.variant}`)
+      }
+    },
+    { class: options.class }
+  )
+}
+
+// ---- 表格 ----
+
+interface TableOptions {
+  columns: Array<{ key: string; label: string }>
+  rows: Array<Record<string, string>>
+  emptyText?: string
+  class?: string
+}
+
+export function table(options: TableOptions): HTMLElement {
+  return defineWidget(
+    'table',
+    'plugin-table-wrap',
+    (el) => {
+      if (options.rows.length === 0) {
+        el.appendChild(emptyState({ text: options.emptyText || '暂无数据' }))
+        return
+      }
+      const tableEl = createElement('table', { class: 'plugin-table' })
+      const thead = createElement('thead')
+      const headerRow = createElement('tr')
+      for (const column of options.columns) {
+        headerRow.appendChild(createElement('th', { text: column.label }))
+      }
+      thead.appendChild(headerRow)
+      const tbody = createElement('tbody')
+      for (const row of options.rows) {
+        const tr = createElement('tr')
+        for (const column of options.columns) {
+          tr.appendChild(createElement('td', { text: row[column.key] ?? '' }))
+        }
+        tbody.appendChild(tr)
+      }
+      tableEl.appendChild(thead)
+      tableEl.appendChild(tbody)
+      el.appendChild(tableEl)
+    },
+    { class: options.class }
+  )
+}

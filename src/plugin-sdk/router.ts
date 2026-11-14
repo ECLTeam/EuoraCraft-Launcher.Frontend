@@ -1,10 +1,9 @@
 /**
  * plugin-sdk 路由导航与监听
  * 让插件能够感知路由变化并执行编程式导航。
- * 导航限制在插件自身路由前缀 /plugin/{name} 内。
+ * 按用户决策（2026-11-15 边界开放），导航不再限制在插件自身前缀内，
+ * 可跳转任意宿主路由；路由监听同时消费宿主 page-changed 通知。
  */
-
-import { getActiveContext } from './context'
 
 // ── 路由信息 ──
 
@@ -56,20 +55,12 @@ function updateHashRoute(fullPath: string, replace = false): void {
 // ── 导航 ──
 
 export function navigateTo(path: string, query?: Record<string, string>): void {
-  const ctx = getActiveContext()
-  const pluginPrefix = ctx ? `/plugin/${ctx.plugin}` : ''
-
   let fullPath: string
   if (path.startsWith('/')) {
-    if (pluginPrefix && !path.startsWith(pluginPrefix)) {
-      fullPath = pluginPrefix + path
-    } else {
-      fullPath = path
-    }
+    fullPath = path
   } else {
     const current = parseRoute().path
-    const base = pluginPrefix && current.startsWith(pluginPrefix) ? current : pluginPrefix || '/'
-    fullPath = base.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
+    fullPath = current.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
   }
 
   if (query) {
@@ -83,16 +74,12 @@ export function navigateTo(path: string, query?: Record<string, string>): void {
 }
 
 export function replaceTo(path: string, query?: Record<string, string>): void {
-  const ctx = getActiveContext()
-  const pluginPrefix = ctx ? `/plugin/${ctx.plugin}` : ''
-
   let fullPath: string
   if (path.startsWith('/')) {
-    fullPath = pluginPrefix && !path.startsWith(pluginPrefix) ? pluginPrefix + path : path
+    fullPath = path
   } else {
     const current = parseRoute().path
-    const base = pluginPrefix && current.startsWith(pluginPrefix) ? current : pluginPrefix || '/'
-    fullPath = base.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
+    fullPath = current.replace(/\/$/, '') + '/' + path.replace(/^\//, '')
   }
 
   if (query) {

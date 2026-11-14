@@ -3,10 +3,21 @@
 import { ref, readonly, watch, type DeepReadonly, type Ref } from 'vue'
 import backend from '@/api/client'
 import { accountsQuery, configQuery, launcherInfoQuery } from '@/app/data'
+import { globalTaskQueue } from '@/composables/useTaskQueue'
+import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import type { AccountListData } from '@/types/accounts'
 import type { LauncherConfig } from '@/types/config'
 import type { LauncherInfo } from '@/types/system'
-import type { AccountState, LauncherState, SidebarState, ThemeState } from './types'
+import { getPluginList } from './api'
+import type {
+  AccountState,
+  LauncherState,
+  PluginInstanceState,
+  PluginPluginsState,
+  PluginTasksState,
+  SidebarState,
+  ThemeState,
+} from './types'
 
 // ---- 工厂：统一 ref + readonly + watch + refresh 模板 ----
 
@@ -125,6 +136,56 @@ const accountSlice = createStateSlice<AccountState>(
 
 const sidebarSlice = createStateSlice<SidebarState>({ collapsed: false })
 
+/** 任务队列摘要切片：任务队列 UI 已展示的字段，不含凭据。 */
+const tasksSlice = createStateSlice<PluginTasksState>([], async (state) => {
+  try {
+    state.value = globalTaskQueue.tasks.value.map((task) => ({
+      id: task.id,
+      name: task.name,
+      type: task.type,
+      status: task.status,
+      progress: task.progress,
+      message: task.message,
+    }))
+  } catch {
+    /* 读取失败时保留原任务状态 */
+  }
+})
+
+/** 实例列表摘要切片：实例管理页可见口径（id/名称/版本/加载器/路径）。 */
+const instancesSlice = createStateSlice<PluginInstanceState>([], async (state) => {
+  try {
+    const store = useInstanceStore()
+    await store.ensureLoaded()
+    state.value = store.scannedVersions.map((version) => ({
+      id: version.id,
+      name: version.displayName,
+      versionId: version.versionId,
+      loader: version.primaryLoader,
+      path: version.path,
+    }))
+  } catch {
+    /* 读取失败时保留原实例状态 */
+  }
+})
+
+/** 插件清单摘要切片：插件管理页可见口径。 */
+const pluginsSlice = createStateSlice<PluginPluginsState>([], async (state) => {
+  try {
+    const result = await getPluginList()
+    if (result.success && result.data) {
+      state.value = result.data.map((plugin) => ({
+        name: plugin.name,
+        version: plugin.version,
+        enabled: plugin.status === 'enabled',
+        hasUi: plugin.has_panels,
+      }))
+    }
+  } catch {
+    /* 读取失败时保留原插件状态 */
+  }
+})
+
 // ---- 初始化 ----
 
 let initialized = false
@@ -156,9 +217,29 @@ export function initPluginState(): () => void {
 
   unlistenFns.push(unlistenConfig, unlistenAccount, unlistenUpdates)
 
+  // 任务队列与实例列表是响应式 store，直接订阅保持切片同步。
+  const unlistenTasks = watch(globalTaskQueue.tasks, () => void tasksSlice.refresh())
+  const unlistenInstances = watch(
+    () => useInstanceStore().scannedVersions,
+    () => void instancesSlice.refresh()
+  )
+  const unlistenPluginStatus = backend.on('plugin:status_changed', () => void pluginsSlice.refresh())
+
+  unlistenFns.push(
+    unlistenConfig,
+    unlistenAccount,
+    unlistenUpdates,
+    unlistenTasks,
+    unlistenInstances,
+    unlistenPluginStatus
+  )
+
   themeSlice.refresh()
   launcherSlice.refresh()
   accountSlice.refresh()
+  void tasksSlice.refresh()
+  void instancesSlice.refresh()
+  void pluginsSlice.refresh()
 
   return () => {
     for (const fn of unlistenFns) fn()
@@ -215,4 +296,40 @@ export function refreshLauncher(): Promise<void> {
 
 export function refreshAccounts(): Promise<void> {
   return accountSlice.refresh()
+}
+
+export function getTasksState(): DeepReadonly<Ref<PluginTasksState>> {
+  return tasksSlice.getReadonly()
+}
+
+export function getInstancesState(): DeepReadonly<Ref<PluginInstanceState>> {
+  return instancesSlice.getReadonly()
+}
+
+export function getPluginsState(): DeepReadonly<Ref<PluginPluginsState>> {
+  return pluginsSlice.getReadonly()
+}
+
+export function watchTasks(cb: (state: PluginTasksState) => void): () => void {
+  return tasksSlice.watch(cb)
+}
+
+export function watchInstances(cb: (state: PluginInstanceState) => void): () => void {
+  return instancesSlice.watch(cb)
+}
+
+export function watchPlugins(cb: (state: PluginPluginsState) => void): () => void {
+  return pluginsSlice.watch(cb)
+}
+
+export function refreshTasks(): Promise<void> {
+  return tasksSlice.refresh()
+}
+
+export function refreshInstances(): Promise<void> {
+  return instancesSlice.refresh()
+}
+
+export function refreshPlugins(): Promise<void> {
+  return pluginsSlice.refresh()
 }

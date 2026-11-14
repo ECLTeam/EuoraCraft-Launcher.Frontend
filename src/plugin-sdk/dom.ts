@@ -1,25 +1,17 @@
 /**
  * plugin-sdk DOM 操作模块
- * 开放插件对前端 DOM 的查询与操作能力，通过代理层实现安全边界和可追踪性。
- * 所有查询限制在 #app 容器内，操作通过 SDK 代理可审计。
+ * 开放插件对前端 DOM 的查询与操作能力，操作通过 SDK 代理可审计。
+ * 按用户决策（2026-11-15 边界开放），查询范围不再限制在 #app 容器内，
+ * 覆盖整个窗口文档；归属标记与清理链保留。
  */
 
 import { getActiveContext } from './context'
 
-// ── 安全边界 ──
-
-const APP_SCOPE = '#app'
+// ── 查询范围 ──
 
 function resolveScope(scope?: string): string {
-  return scope || APP_SCOPE
-}
-
-function assertInScope(el: Element): void {
-  const appRoot = document.querySelector(APP_SCOPE)
-  if (!appRoot) return
-  if (!appRoot.contains(el)) {
-    throw new Error(`[PluginSDK] DOM 操作超出允许范围: 元素不在 #app 容器内`)
-  }
+  // 未指定范围时以整份文档为根；归属标记与清理仍由 SDK 代理负责。
+  return scope || ':root'
 }
 
 function wrapPluginData(el: HTMLElement): void {
@@ -33,27 +25,23 @@ function wrapPluginData(el: HTMLElement): void {
 // ── 查询 ──
 
 export function querySelector(selector: string, scope?: string): Element | null {
-  const root = scope ? document.querySelector(resolveScope(scope)) : document.querySelector(APP_SCOPE)
+  const root = scope ? document.querySelector(resolveScope(scope)) : document
   if (!root) return null
   return root.querySelector(selector)
 }
 
 export function querySelectorAll(selector: string, scope?: string): Element[] {
-  const root = scope ? document.querySelector(resolveScope(scope)) : document.querySelector(APP_SCOPE)
+  const root = scope ? document.querySelector(resolveScope(scope)) : document
   if (!root) return []
   return Array.from(root.querySelectorAll(selector))
 }
 
 export function getElementById(id: string): HTMLElement | null {
-  const el = document.getElementById(id)
-  if (!el) return null
-  const appRoot = document.querySelector(APP_SCOPE)
-  if (appRoot && !appRoot.contains(el)) return null
-  return el
+  return document.getElementById(id)
 }
 
 export function getElementsByClassName(className: string, scope?: string): Element[] {
-  const root = scope ? document.querySelector(resolveScope(scope)) : document.querySelector(APP_SCOPE)
+  const root = scope ? document.querySelector(resolveScope(scope)) : document
   if (!root) return []
   return Array.from(root.getElementsByClassName(className))
 }
@@ -122,7 +110,6 @@ export function insertElement(
 ): void {
   const t = typeof target === 'string' ? querySelector(target) : target
   if (!t) throw new Error(`[PluginSDK] 目标元素不存在: ${target}`)
-  assertInScope(t)
   wrapPluginData(element)
 
   switch (position) {
@@ -248,10 +235,7 @@ export function onElementAppear(selector: string, callback: (el: Element) => voi
     }
   })
 
-  const appRoot = document.querySelector(APP_SCOPE)
-  if (appRoot) {
-    observer.observe(appRoot, { childList: true, subtree: true })
-  }
+  observer.observe(document.documentElement, { childList: true, subtree: true })
 
   if (timeout > 0) {
     setTimeout(() => observer.disconnect(), timeout)

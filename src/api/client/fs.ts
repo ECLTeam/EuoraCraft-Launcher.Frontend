@@ -22,13 +22,14 @@ function nextImageUrlRevision(key: string): number {
 }
 
 /**
- * 通过后端读取本地图片并转换为可在 DOM 中直接使用的 Data URL。
+ * 通过后端为本地图片签发 ecl-img 协议地址，前端直接以该地址加载原始字节。
  *
- * 不依赖 Tauri Asset Protocol，避免未启用本地资源服务时生成无法连接的
- * `asset.localhost` 地址，也避免扩大 WebView 可直接读取的文件路径范围。
+ * 地址由随机令牌绑定具体文件，协议处理器不接受任何客户端路径；浏览器按
+ * ETag 协商缓存，文件替换或用户刷新时通过 revision 使会话缓存失效并换取
+ * 新地址。不传输 base64，也不再依赖 Tauri Asset Protocol。
  *
  * @param path - 本地图片路径
- * @returns 图片 Data URL，读取失败时返回 null
+ * @returns 可用于 <img src> 的协议地址，签发失败时返回 null
  */
 async function resolveFileUrl(path: string): Promise<string | null> {
   const key = imagePathKey(path)
@@ -38,10 +39,10 @@ async function resolveFileUrl(path: string): Promise<string | null> {
   let pending = pendingImageUrlRequests.get(key)
   if (!pending) {
     const revision = imageUrlRevisions.get(key) ?? 0
-    const promise = call<{ dataUrl: string }>('image_read_file', { path }).then((res) => {
-      const dataUrl = res.success ? res.data?.dataUrl : null
-      if (dataUrl && (imageUrlRevisions.get(key) ?? 0) === revision) imageUrlCache.set(key, dataUrl)
-      return dataUrl || null
+    const promise = call<{ url: string }>('image_url_resolve', { kind: 'local', path }).then((res) => {
+      const url = res.success ? (res.data?.url ?? null) : null
+      if (url && (imageUrlRevisions.get(key) ?? 0) === revision) imageUrlCache.set(key, url)
+      return url
     })
     pending = { promise, revision }
     pendingImageUrlRequests.set(key, pending)
@@ -78,7 +79,7 @@ export function createFs() {
 
 export function createFile() {
   return {
-    /** 将本地图片路径转为可在 <img> 中直接使用的 Data URL */
+    /** 将本地图片路径转为可在 <img> 中直接使用的协议地址 */
     async toUrl(path: string): Promise<string | null> {
       return resolveFileUrl(path)
     },

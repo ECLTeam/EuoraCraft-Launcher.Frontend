@@ -34,6 +34,11 @@
       </aside>
 
       <main class="vdm-main">
+        <PluginSlotHost
+          slotId="plugin-slot-instance-summary"
+          class="plugin-slot-container"
+          :contextData="instanceContextData"
+        />
         <div class="vdm-content">
           <Transition name="page" mode="out-in">
             <div v-if="activeTab === 'overview'" :key="detailPageKey" class="vdm-page overview-page">
@@ -123,6 +128,11 @@
           </Transition>
         </div>
 
+        <PluginSlotHost
+          slotId="plugin-slot-instance-detail-actions"
+          class="plugin-slot-container"
+          :contextData="instanceContextData"
+        />
         <PluginSlotHost slotId="plugin-slot-version-detail-footer" class="plugin-slot-container" />
       </main>
     </div>
@@ -272,6 +282,20 @@ const showCrashPicker = ref(false)
 let statsRequestId = 0
 
 const isModdedInstance = computed(() => hasModLoader(props.version))
+
+/** 提供给插件插槽的结构化上下文：主窗口详情页已展示的实例信息。 */
+const instanceContextData = computed(() => {
+  const version = props.version
+  if (!version) return undefined
+  return {
+    instance_id: version.id,
+    instance_key: version.instanceKey,
+    name: version.displayName,
+    version_id: version.versionId,
+    loader: version.primaryLoader,
+    path: version.path,
+  }
+})
 const tabs = computed(() => {
   const items: Array<{ id: DetailTab; icon: string; label: string }> = [
     { id: 'overview', icon: 'info', label: t('versions.detail.overview') },

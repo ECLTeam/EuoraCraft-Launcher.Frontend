@@ -96,8 +96,11 @@ router.beforeEach(() => {
 // 记录分区最近停留的子页面：再次点击「设置」「更多」时回到该子页面
 router.afterEach((to) => {
   const sectionRecord = to.matched[0]
-  if (!sectionRecord || to.matched.length < 2) return
-  rememberSectionPath(sectionRecord.path, to.path)
+  if (sectionRecord && to.matched.length >= 2) {
+    rememberSectionPath(sectionRecord.path, to.path)
+  }
+  // 向插件脚本广播只读导航通知，供 SDK onPageChanged 消费。
+  window.dispatchEvent(new CustomEvent('ecl:page-changed', { detail: { path: to.path, name: to.name ?? null } }))
 })
 
 export default router

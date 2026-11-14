@@ -1,5 +1,6 @@
 <template>
   <div class="plugins-page ecl-page">
+    <PluginSlotHost slotId="plugin-slot-plugin-page-top" class="plugin-slot-container" />
     <section class="plugins-panel ecl-surface ecl-page__body">
       <header class="plugins-toolbar">
         <NInput
@@ -201,6 +202,7 @@
       </div>
     </section>
 
+    <PluginSlotHost slotId="plugin-slot-plugin-page-bottom" class="plugin-slot-container" />
     <PluginPanelModal :visible="panelVisible" :plugin="panelTarget" @close="panelVisible = false" />
     <PluginPackageInstallModal
       v-model:visible="packageModalVisible"

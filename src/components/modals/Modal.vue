@@ -67,6 +67,7 @@
                 {{ content }}
               </p>
             </slot>
+            <PluginSlotHost slotId="plugin-slot-modal-body-extra" class="plugin-slot-container" />
           </main>
 
           <footer v-if="showFooter" class="modal-footer">

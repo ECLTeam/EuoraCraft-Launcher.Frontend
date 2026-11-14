@@ -5,6 +5,7 @@
     :class="String($attrs.class || '')"
     :data-plugin-slot="slotId"
     :data-slot-context="contextKey"
+    :data-slot-context-data="contextDataJson"
     :data-slot-label="descriptor?.purpose || slotId"
   />
 </template>
@@ -14,14 +15,21 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { pluginSlotDescriptors, registerPluginSlotHost, unregisterPluginSlotHost } from './slotRegistry'
 
 defineOptions({ name: 'PluginSlotHost', inheritAttrs: false })
-const props = defineProps<{ slotId: string; contextKey?: string }>()
+const props = defineProps<{ slotId: string; contextKey?: string; contextData?: Record<string, unknown> }>()
 const host = ref<HTMLElement | null>(null)
 const key = `${props.slotId}:${props.contextKey || 'all'}:${crypto.randomUUID()}`
 const descriptor = computed(() => pluginSlotDescriptors.find((item) => item.id === props.slotId))
+const contextDataJson = computed(() => (props.contextData ? JSON.stringify(props.contextData) : undefined))
 
 onMounted(() => {
   if (!host.value) return
-  registerPluginSlotHost({ key, slotId: props.slotId, contextKey: props.contextKey, element: host.value })
+  registerPluginSlotHost({
+    key,
+    slotId: props.slotId,
+    contextKey: props.contextKey,
+    contextData: props.contextData,
+    element: host.value,
+  })
   // 保留未迁移插件依赖的单实例 DOM id；多上下文实例只依赖 data-plugin-slot。
   if (!props.contextKey && document.querySelectorAll(`[data-plugin-slot="${props.slotId}"]`).length === 1) {
     host.value.id = props.slotId
