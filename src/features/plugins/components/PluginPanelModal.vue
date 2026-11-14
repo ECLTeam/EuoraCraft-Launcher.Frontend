@@ -92,7 +92,18 @@ const panelTitle = computed(() =>
 
 const activePanel = computed(() => panels.value.find((item) => item.key === activeKey.value) ?? panels.value[0])
 
-const SUPPORTED_NODES = new Set(['text', 'group', 'button', 'setting', 'list', 'task'])
+const SUPPORTED_NODES = new Set([
+  'text',
+  'group',
+  'button',
+  'setting',
+  'list',
+  'task',
+  'heading',
+  'divider',
+  'metric',
+  'badge',
+])
 
 function hasUnknownNode(nodes: PluginPanelNode[]): boolean {
   return nodes.some(
@@ -137,10 +148,31 @@ async function refresh(): Promise<void> {
   settings.value = panelSettings
 }
 
+// ── 面板定时刷新：插件声明 refresh_seconds 后由宿主定时重拉数据 ──
+let refreshTimer: ReturnType<typeof setInterval> | null = null
+
+function stopRefreshTimer(): void {
+  if (refreshTimer !== null) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
+  }
+}
+
+function syncRefreshTimer(): void {
+  stopRefreshTimer()
+  const seconds = activePanel.value?.refresh_seconds ?? 0
+  if (seconds <= 0) return
+  refreshTimer = setInterval(() => {
+    if (busy.value) return
+    void refresh()
+  }, seconds * 1000)
+}
+
 async function selectPanel(key: string): Promise<void> {
   activeKey.value = key
   actionError.value = ''
   await refresh()
+  syncRefreshTimer()
 }
 
 async function runAction(command: string, args: Record<string, unknown>): Promise<void> {
@@ -176,6 +208,7 @@ async function updateSetting(key: string, value: unknown): Promise<void> {
 
 function close(): void {
   if (busy.value) return
+  stopRefreshTimer()
   panels.value = []
   data.value = { lists: {}, tasks: {} }
   settings.value = null
@@ -187,7 +220,11 @@ function close(): void {
 watch(
   () => props.visible,
   (visible) => {
-    if (visible) void load()
+    if (visible) {
+      void load().then(() => syncRefreshTimer())
+    } else {
+      stopRefreshTimer()
+    }
   },
   { immediate: true }
 )

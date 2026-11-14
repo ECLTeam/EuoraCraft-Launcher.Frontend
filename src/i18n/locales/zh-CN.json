@@ -709,6 +709,7 @@
     "panelUnsupported": "该面板包含当前版本不支持的节点，请更新启动器",
     "panelUnsupportedNode": "不支持的节点类型",
     "panelListEmpty": "暂无数据",
+    "panelRowActions": "操作",
     "panelTaskProgress": "任务进度",
     "panelTaskState_pending": "待开始",
     "panelTaskState_running": "进行中",
@@ -1830,9 +1831,7 @@
     "clearPluginsConfirmContent": "下次启动时，所有用户插件和插件配置将被删除。是否继续？",
     "confirmDangerAction": "确认并安排",
     "maintenanceScheduled": "操作已安排，请重启启动器后生效。受影响数据会先备份，可在需要时恢复。",
-    "maintenanceFailed": "安排操作失败：{detail}",
-    "pluginUiInjection": "插件界面注入",
-    "pluginUiInjectionDesc": "关闭后立即撤销全部第三方插件注入的界面内容；重新打开会重载已获准注入的插件，界面随之恢复，无需重启启动器。"
+    "maintenanceFailed": "安排操作失败：{detail}"
   },
   "loader": {
     "fabric": "Fabric",

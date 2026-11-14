@@ -69,16 +69,54 @@
     />
   </div>
 
+  <div v-else-if="node.type === 'heading'" class="panel-heading" :class="`is-l${node.level}`">{{ node.text }}</div>
+
+  <div v-else-if="node.type === 'divider'" class="panel-divider" role="separator" />
+
+  <div v-else-if="node.type === 'metric'" class="panel-metric" :class="`is-${node.tone ?? 'default'}`">
+    <span class="panel-metric-value">{{ node.value }}</span>
+    <span class="panel-metric-label">{{ node.label }}</span>
+    <span v-if="node.hint" class="panel-metric-hint">{{ node.hint }}</span>
+  </div>
+
+  <div v-else-if="node.type === 'badge'" class="panel-badge-row">
+    <span class="panel-badge" :class="`is-${node.tone ?? 'default'}`">{{ node.text }}</span>
+  </div>
+
   <div v-else-if="node.type === 'list'" class="panel-list">
     <table v-if="rows.length" class="panel-table">
       <thead>
         <tr>
           <th v-for="column in node.columns" :key="column.key">{{ column.label }}</th>
+          <th v-if="node.row_actions?.length" class="panel-table-actions">
+            {{ t('plugins.panelRowActions') }}
+          </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="(row, index) in rows" :key="index">
           <td v-for="column in node.columns" :key="column.key">{{ row[column.key] ?? '' }}</td>
+          <td v-if="node.row_actions?.length" class="panel-table-actions">
+            <template v-for="actionItem in node.row_actions" :key="actionItem.label">
+              <NPopconfirm v-if="actionItem.confirm" @positiveClick="runRowAction(row, actionItem)">
+                <template #trigger>
+                  <NButton :type="buttonType(actionItem.tone)" size="tiny" :disabled="busy">
+                    {{ actionItem.label }}
+                  </NButton>
+                </template>
+                {{ actionItem.confirm }}
+              </NPopconfirm>
+              <NButton
+                v-else
+                :type="buttonType(actionItem.tone)"
+                size="tiny"
+                :disabled="busy"
+                @click="runRowAction(row, actionItem)"
+              >
+                {{ actionItem.label }}
+              </NButton>
+            </template>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -107,6 +145,7 @@ import type {
   PluginPanelData,
   PluginPanelListNode,
   PluginPanelNode,
+  PluginPanelRowAction,
   PluginPanelSettingNode,
   PluginPanelTaskNode,
   PluginSettingsData,
@@ -161,6 +200,11 @@ const rows = computed(() => {
   return node ? (props.data.lists[node.source] ?? []) : []
 })
 
+function runRowAction(row: Record<string, string>, actionItem: PluginPanelRowAction): void {
+  const rowKey = typeof row.key === 'string' ? row.key : ''
+  emit('action', actionItem.command, { row_key: rowKey })
+}
+
 const task = computed(() => {
   const node = props.node.type === 'task' ? (props.node as PluginPanelTaskNode) : null
   return node ? props.data.tasks[node.source] : undefined
@@ -194,6 +238,111 @@ const taskDetail = computed(() => {
 
 .panel-text.is-warning {
   color: var(--warning);
+}
+
+.panel-heading {
+  margin: 4px 0 10px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.panel-heading.is-l1 {
+  font-size: 17px;
+}
+
+.panel-heading.is-l2 {
+  font-size: 15px;
+}
+
+.panel-heading.is-l3 {
+  font-size: 13px;
+}
+
+.panel-divider {
+  margin: 10px 0 14px;
+  border-top: 1px solid var(--border-tertiary);
+}
+
+.panel-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-tertiary);
+  border-radius: var(--r-md);
+  background: var(--bg-secondary);
+}
+
+.panel-metric-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.panel-metric-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.panel-metric-hint {
+  font-size: 12px;
+  color: var(--text-tertiary, var(--text-secondary));
+}
+
+.panel-metric.is-primary .panel-metric-value {
+  color: var(--primary);
+}
+
+.panel-metric.is-warning .panel-metric-value {
+  color: var(--warning);
+}
+
+.panel-metric.is-danger .panel-metric-value {
+  color: var(--error);
+}
+
+.panel-metric.is-success .panel-metric-value {
+  color: var(--success);
+}
+
+.panel-badge-row {
+  margin-bottom: 10px;
+}
+
+.panel-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--border-tertiary);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.panel-badge.is-primary {
+  color: var(--primary);
+}
+
+.panel-badge.is-warning {
+  color: var(--warning);
+}
+
+.panel-badge.is-danger {
+  color: var(--error);
+}
+
+.panel-badge.is-success {
+  color: var(--success);
+}
+
+.panel-table-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.panel-table-actions .n-button + .n-button {
+  margin-left: 6px;
 }
 
 .panel-group {

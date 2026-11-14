@@ -705,6 +705,7 @@
     "panelUnsupported": "このパネルには現在のバージョンで未対応のノードが含まれています。ランチャーを更新してください",
     "panelUnsupportedNode": "未対応のノード種別",
     "panelListEmpty": "データがありません",
+    "panelRowActions": "操作",
     "panelTaskProgress": "タスクの進捗",
     "panelTaskState_pending": "待機中",
     "panelTaskState_running": "実行中",
@@ -1945,9 +1946,7 @@
     "clearPluginsConfirmContent": "次回の起動時に、すべてのユーザープラグインとプラグイン設定が削除されます。続行しますか？",
     "confirmDangerAction": "確認して予定に追加",
     "maintenanceScheduled": "操作を予定しました。ランチャーを再起動すると反映されます。影響するデータは先にバックアップされ、必要に応じて復元できます。",
-    "maintenanceFailed": "操作の予定に失敗しました：{detail}",
-    "pluginUiInjection": "プラグインのUI挿入",
-    "pluginUiInjectionDesc": "オフにするとサードパーティプラグインが挿入したUIコンテンツを即座に取り消します。再度オンにすると挿入を許可されたプラグインを再読み込みし、ランチャーを再起動せずにUIが戻ります。"
+    "maintenanceFailed": "操作の予定に失敗しました：{detail}"
   },
   "loader": {
     "fabric": "Fabric",

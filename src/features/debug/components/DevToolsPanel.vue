@@ -138,18 +138,6 @@
         </div>
       </div>
 
-      <div class="tool-row">
-        <div class="tool-info">
-          <div class="tool-label-row">
-            <div class="tool-label">{{ t('dev.pluginUiInjection') }}</div>
-          </div>
-          <div class="tool-desc">{{ t('dev.pluginUiInjectionDesc') }}</div>
-        </div>
-        <div class="tool-control">
-          <NSwitch :value="uiInjectionAllowed" :loading="uiInjectionBusy" @update:value="setUiInjectionAllowed" />
-        </div>
-      </div>
-
       <div class="tool-row" :class="{ 'tool-row--disabled': !debugMode }">
         <div class="tool-info">
           <div class="tool-label-row">
@@ -443,34 +431,6 @@ const pendingAction = ref<'reset' | 'plugins' | null>(null)
 const processingAction = ref<'reset' | 'plugins' | null>(null)
 const spawning = ref(false)
 
-// ── 插件界面注入总开关：关闭立即撤销注入内容；重新打开不会自动恢复，需要重新启用插件 ──
-const uiInjectionAllowed = ref(true)
-const uiInjectionBusy = ref(false)
-
-async function loadUiInjection(): Promise<void> {
-  try {
-    const result = await backend.config.get<{ allow_ui_injection?: boolean }>('plugins')
-    if (result.success && result.data) uiInjectionAllowed.value = result.data.allow_ui_injection !== false
-  } catch {
-    uiInjectionAllowed.value = true
-  }
-}
-
-async function setUiInjectionAllowed(value: boolean): Promise<void> {
-  if (uiInjectionBusy.value || value === uiInjectionAllowed.value) return
-  uiInjectionBusy.value = true
-  const previous = uiInjectionAllowed.value
-  uiInjectionAllowed.value = value
-  try {
-    const result = await backend.config.set('plugins', { allow_ui_injection: value })
-    if (!result.success) uiInjectionAllowed.value = previous
-  } catch {
-    uiInjectionAllowed.value = previous
-  } finally {
-    uiInjectionBusy.value = false
-  }
-}
-
 const { flowDebug, setFlowDebug } = useFlowDebug()
 
 function handleFlowDebugChange(value: boolean): void {
@@ -632,7 +592,6 @@ function refreshComponents(): void {
 }
 
 onMounted(() => {
-  void loadUiInjection()
   refreshComponents()
   if (devMode) vueDevtoolsOpen.value = readVueDevToolsOpen()
 })

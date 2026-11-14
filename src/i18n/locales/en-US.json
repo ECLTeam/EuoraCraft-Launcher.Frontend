@@ -709,6 +709,7 @@
     "panelUnsupported": "This panel uses nodes this version does not support. Update the launcher",
     "panelUnsupportedNode": "Unsupported node type",
     "panelListEmpty": "No entries",
+    "panelRowActions": "Actions",
     "panelTaskProgress": "Task progress",
     "panelTaskState_pending": "Pending",
     "panelTaskState_running": "In progress",
@@ -1935,9 +1936,7 @@
     "clearPluginsConfirmContent": "On next launch, all user plugins and plugin settings will be deleted. Continue?",
     "confirmDangerAction": "Confirm and schedule",
     "maintenanceScheduled": "Action scheduled. Restart the launcher to apply it. Affected data will be backed up first and can be restored if needed.",
-    "maintenanceFailed": "Could not schedule the action: {detail}",
-    "pluginUiInjection": "Plugin UI injection",
-    "pluginUiInjectionDesc": "Turning this off immediately removes all third-party plugin UI content. Turning it back on reloads plugins that were granted injection so their UI returns, without restarting the launcher."
+    "maintenanceFailed": "Could not schedule the action: {detail}"
   },
   "loader": {
     "fabric": "Fabric",

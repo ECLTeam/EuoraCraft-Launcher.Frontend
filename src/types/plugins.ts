@@ -154,6 +154,7 @@ export interface PluginDevelopmentState {
 }
 
 export type PluginPanelTone = 'default' | 'primary' | 'danger'
+export type PluginPanelDisplayTone = 'default' | 'primary' | 'warning' | 'danger' | 'success'
 
 export interface PluginPanelTextNode {
   type: 'text'
@@ -186,11 +187,43 @@ export interface PluginPanelListNode {
   source: string
   columns: Array<{ key: string; label: string }>
   empty_text?: string
+  row_actions?: PluginPanelRowAction[]
+}
+
+export interface PluginPanelRowAction {
+  label: string
+  command: string
+  tone?: PluginPanelTone
+  confirm?: string
 }
 
 export interface PluginPanelTaskNode {
   type: 'task'
   source: string
+}
+
+export interface PluginPanelHeadingNode {
+  type: 'heading'
+  level: 1 | 2 | 3
+  text: string
+}
+
+export interface PluginPanelDividerNode {
+  type: 'divider'
+}
+
+export interface PluginPanelMetricNode {
+  type: 'metric'
+  label: string
+  value: string
+  tone?: PluginPanelDisplayTone
+  hint?: string
+}
+
+export interface PluginPanelBadgeNode {
+  type: 'badge'
+  text: string
+  tone?: PluginPanelDisplayTone
 }
 
 export type PluginPanelNode =
@@ -200,12 +233,17 @@ export type PluginPanelNode =
   | PluginPanelSettingNode
   | PluginPanelListNode
   | PluginPanelTaskNode
+  | PluginPanelHeadingNode
+  | PluginPanelDividerNode
+  | PluginPanelMetricNode
+  | PluginPanelBadgeNode
 
 export interface PluginPanelDefinition {
   key: string
   title: string
   description?: string
   nodes: PluginPanelNode[]
+  refresh_seconds?: number
 }
 
 export type PluginPanelTaskState = 'pending' | 'running' | 'succeeded' | 'failed'

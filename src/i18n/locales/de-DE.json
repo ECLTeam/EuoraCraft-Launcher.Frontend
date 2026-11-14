@@ -705,6 +705,7 @@
     "panelUnsupported": "Dieses Panel nutzt Knoten, die diese Version nicht unterstützt. Launcher aktualisieren",
     "panelUnsupportedNode": "Nicht unterstützter Knotentyp",
     "panelListEmpty": "Keine Einträge",
+    "panelRowActions": "Aktionen",
     "panelTaskProgress": "Fortschritt",
     "panelTaskState_pending": "Ausstehend",
     "panelTaskState_running": "Läuft",
@@ -1945,9 +1946,7 @@
     "clearPluginsConfirmContent": "Beim nächsten Start werden alle Nutzer-Plugins und Plugin-Konfigurationen gelöscht. Fortfahren?",
     "confirmDangerAction": "Bestätigen und planen",
     "maintenanceScheduled": "Aktion geplant. Bitte starte den Launcher neu, damit sie wirksam wird. Betroffene Daten werden zuvor gesichert und können bei Bedarf wiederhergestellt werden.",
-    "maintenanceFailed": "Aktion konnte nicht geplant werden: {detail}",
-    "pluginUiInjection": "Plugin-Oberflächeninjektion",
-    "pluginUiInjectionDesc": "Beim Ausschalten werden alle von Drittanbieter-Plugins eingefügten Oberflächeninhalte sofort entfernt. Beim erneuten Einschalten werden Plugins mit erteilter Berechtigung neu geladen, damit ihre Oberfläche ohne Neustart zurückkehrt."
+    "maintenanceFailed": "Aktion konnte nicht geplant werden: {detail}"
   },
   "loader": {
     "fabric": "Fabric",
