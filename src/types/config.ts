@@ -170,11 +170,12 @@ export interface ThemeScheduleConfig {
 
 export interface ThemeConfig {
   mode: 'light' | 'dark' | 'system'
-  /** 内置主题风格：经典 / 极光 / Absolutely / Catppuccin 四风味（latte、frappe、macchiato、mocha）。 */
+  /** 内置主题风格：经典 / 极光 / Absolutely / 墨白 / Catppuccin 四风味（latte、frappe、macchiato、mocha）。 */
   theme_id?:
     | 'classic'
     | 'folia'
     | 'absolutely'
+    | 'inkwhite'
     | 'catppuccin-latte'
     | 'catppuccin-frappe'
     | 'catppuccin-macchiato'

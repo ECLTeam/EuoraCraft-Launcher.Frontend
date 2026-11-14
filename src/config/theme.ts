@@ -39,8 +39,8 @@ export const THEME_MODE_OPTIONS: ThemeModeOption[] = [
 /** Catppuccin 主题风格标识，形如 `catppuccin-mocha`。 */
 export type CatppuccinThemeId = `catppuccin-${CatppuccinFlavor}`
 
-/** 内置主题风格：经典 / 极光 / Absolutely / Catppuccin 四风味。 */
-export type BuiltinThemeId = 'classic' | 'folia' | 'absolutely' | CatppuccinThemeId
+/** 内置主题风格：经典 / 极光 / Absolutely / 墨白 / Catppuccin 四风味。 */
+export type BuiltinThemeId = 'classic' | 'folia' | 'absolutely' | 'inkwhite' | CatppuccinThemeId
 
 /** 内置主题风格选项；labelKey 指向 settings.* 下的界面名称。 */
 export interface BuiltinThemeOption {
@@ -53,6 +53,7 @@ export const BUILTIN_THEMES: BuiltinThemeOption[] = [
   { id: 'classic', icon: 'palette', labelKey: 'themeClassic' },
   { id: 'folia', icon: 'sparkles', labelKey: 'themeFolia' },
   { id: 'absolutely', icon: 'bolt', labelKey: 'themeAbsolutely' },
+  { id: 'inkwhite', icon: 'terminal', labelKey: 'themeInkwhite' },
   { id: 'catppuccin-latte', icon: 'coffee', labelKey: 'themeCatppuccinLatte' },
   { id: 'catppuccin-frappe', icon: 'coffee', labelKey: 'themeCatppuccinFrappe' },
   { id: 'catppuccin-macchiato', icon: 'coffee', labelKey: 'themeCatppuccinMacchiato' },
@@ -73,7 +74,7 @@ export function isBuiltinThemeId(value: unknown): value is BuiltinThemeId {
 /**
  * 取主题风格对应的布局皮肤。
  *
- * Catppuccin 只替换配色，布局沿用经典皮肤；`data-ui-skin` 因此只写 classic/folia。
+ * 配色主题只替换配色，布局沿用经典皮肤；`data-ui-skin` 因此只写 classic/folia。
  * @param themeId - 主题风格标识
  * @returns 布局皮肤标识
  */

@@ -18,6 +18,7 @@ import {
   type CatppuccinFlavor,
 } from '@/config/catppuccin'
 import { hexToRgb, mix, normalizeHex, rgba, rgbToHex } from '@/config/color'
+import { inkwhiteAccentPresets, inkwhitePalette, inkwhitePaletteTokens } from '@/config/inkwhite'
 import { surfaceStyleOf, surfaceStyleVariables, surfaceVariableNames, type ThemeSurfaceStyle } from '@/config/surface'
 import {
   CARD_OPACITY_DEFAULT,
@@ -356,8 +357,8 @@ function createPrimaryScale(
 /**
  * 取当前主题的调色板语义令牌。
  *
- * 经典/极光沿用 tokens.css，不返回令牌；Catppuccin 按生效风味取，Absolutely
- * 按亮暗取。返回值只描述语义色，具体 CSS 变量由 themePaletteVariables 推导。
+ * 经典/极光沿用 tokens.css，不返回令牌；Catppuccin 按生效风味取，Absolutely 与
+ * 墨白按亮暗取。返回值只描述语义色，具体 CSS 变量由 themePaletteVariables 推导。
  * @param themeId - 主题风格标识
  * @param flavor - 生效的 Catppuccin 风味
  * @param isDark - 是否为深色外观
@@ -370,6 +371,38 @@ function paletteTokensOf(
 ): ThemePaletteTokens | null {
   if (flavor) return catppuccinPaletteTokens(CATPPUCCIN_PALETTES[flavor], flavor !== 'latte')
   if (themeId === 'absolutely') return absolutelyPaletteTokens(absolutelyPalette(isDark), isDark)
+  if (themeId === 'inkwhite') return inkwhitePaletteTokens(inkwhitePalette(isDark), isDark)
+  return null
+}
+
+/**
+ * 取主题的配色家族标识，供 data-theme-palette 与启动快照使用。
+ *
+ * 经典/极光的配色由 tokens.css 承担，返回空字符串表示不写该属性；
+ * Catppuccin 优先于风味，其余配色主题用自身标识。
+ * @param themeId - 主题风格标识
+ * @param flavor - 生效的 Catppuccin 风味
+ * @returns 配色家族标识；经典/极光返回空字符串
+ */
+function paletteFamilyOf(themeId: BuiltinThemeId, flavor: CatppuccinFlavor | null): string {
+  if (flavor) return 'catppuccin'
+  if (themeId === 'absolutely') return 'absolutely'
+  if (themeId === 'inkwhite') return 'inkwhite'
+  return ''
+}
+
+/**
+ * 取配色主题在指定外观下的官方强调色。
+ *
+ * Absolutely 与墨白的默认强调色随亮暗不同（墨白亮色为近黑、深色为品牌蓝），
+ * 切换外观时据此互换，避免残留另一态的主色。
+ * @param themeId - 主题风格标识
+ * @param isDark - 是否为深色外观
+ * @returns 官方强调色；非 Absolutely/墨白 返回 null
+ */
+function appearanceAccentOf(themeId: BuiltinThemeId, isDark: boolean): string | null {
+  if (themeId === 'absolutely') return absolutelyPalette(isDark).accent
+  if (themeId === 'inkwhite') return inkwhitePalette(isDark).accent
   return null
 }
 
@@ -760,6 +793,7 @@ export const useThemeStore = defineStore('theme', () => {
     const flavor = themeFlavor.value
     if (flavor) return catppuccinAccentPresets(flavor)
     if (themeId.value === 'absolutely') return absolutelyAccentPresets(isDark.value)
+    if (themeId.value === 'inkwhite') return inkwhiteAccentPresets(isDark.value)
     return PRESET_COLORS
   })
 
@@ -863,7 +897,7 @@ export const useThemeStore = defineStore('theme', () => {
           theme: isDark.value ? 'dark' : 'light',
           uiSkin: layoutSkinOf(themeId.value),
           flavor: themeFlavor.value,
-          palette: themeFlavor.value ? 'catppuccin' : themeId.value === 'absolutely' ? 'absolutely' : '',
+          palette: paletteFamilyOf(themeId.value, themeFlavor.value),
           primary: scale.primary,
           primaryRgb: scale.primaryRgb,
           primaryHover: scale.primaryHover,
@@ -885,7 +919,7 @@ export const useThemeStore = defineStore('theme', () => {
     const flavor = themeFlavor.value
     if (flavor) document.documentElement.dataset.themeFlavor = flavor
     else delete document.documentElement.dataset.themeFlavor
-    const paletteFamily = flavor ? 'catppuccin' : themeId.value === 'absolutely' ? 'absolutely' : ''
+    const paletteFamily = paletteFamilyOf(themeId.value, flavor)
     if (paletteFamily) document.documentElement.dataset.themePalette = paletteFamily
     else delete document.documentElement.dataset.themePalette
     applyPaletteVariables(paletteTokens.value, isDark.value)
@@ -912,9 +946,9 @@ export const useThemeStore = defineStore('theme', () => {
     // 极光开关及派生色：光斑显隐、模糊层显隐，色板由主色动态派生
     document.documentElement.dataset.aurora = auroraEnabled.value ? '1' : '0'
     document.documentElement.dataset.auroraBlur = blurLayerEnabled.value ? '1' : '0'
-    // Absolutely 追求绝对中性：光斑取灰阶，避免彩色光晕把中性底染成偏紫/偏蓝
-    const auroraBase =
-      themeId.value === 'absolutely' ? (isDark.value ? '#3a3a3a' : '#8a8a92') : primaryScale.value.primary
+    // Absolutely 与墨白追求绝对中性：光斑取灰阶，避免彩色光晕把中性底染成偏紫/偏蓝
+    const isNeutralPalette = themeId.value === 'absolutely' || themeId.value === 'inkwhite'
+    const auroraBase = isNeutralPalette ? (isDark.value ? '#3a3a3a' : '#8a8a92') : primaryScale.value.primary
     const aurora = createAuroraColors(auroraBase, isDark.value)
     document.documentElement.style.setProperty('--aurora-c1', aurora.c1)
     document.documentElement.style.setProperty('--aurora-c2', aurora.c2)
@@ -967,9 +1001,10 @@ export const useThemeStore = defineStore('theme', () => {
       if (translated && translated !== primaryColor.value) primaryColor.value = translated
       return
     }
-    if (themeId.value !== 'absolutely') return
-    const oppositeAccent = absolutelyPalette(!isDark.value).accent
-    if (primaryColor.value === oppositeAccent) primaryColor.value = absolutelyPalette(isDark.value).accent
+    const currentAccent = appearanceAccentOf(themeId.value, isDark.value)
+    if (!currentAccent) return
+    const oppositeAccent = appearanceAccentOf(themeId.value, !isDark.value)
+    if (oppositeAccent && primaryColor.value === oppositeAccent) primaryColor.value = currentAccent
   }
 
   /**
@@ -977,8 +1012,8 @@ export const useThemeStore = defineStore('theme', () => {
    *
    * 选择 Catppuccin 风味时同步亮暗模式（Latte 为亮色，其余为深色），首次进入
    * Catppuccin 会把主色换为该风味的官方 Mauve；之后仅把官方色随风味换乘，
-   * 用户自定义强调色保持不动。Absolutely 支持亮暗两种外观，不改变亮暗模式，
-   * 首次进入时改用其默认强调色。
+   * 用户自定义强调色保持不动。Absolutely 与墨白支持亮暗两种外观，不改变
+   * 亮暗模式，首次进入时改用其官方强调色。
    * @param id - 目标主题风格
    * @param persist - 是否持久化到后端配置
    */
@@ -998,8 +1033,9 @@ export const useThemeStore = defineStore('theme', () => {
       if (!previousFlavor) primaryColor.value = CATPPUCCIN_PALETTES[nextFlavor].mauve
       syncPaletteAccent()
       withThemeTransition(updateTheme)
-    } else if (id === 'absolutely') {
-      if (previousThemeId !== 'absolutely') primaryColor.value = absolutelyPalette(isDark.value).accent
+    } else if (id === 'absolutely' || id === 'inkwhite') {
+      const themeAccent = appearanceAccentOf(id, isDark.value)
+      if (previousThemeId !== id && themeAccent) primaryColor.value = themeAccent
       withThemeTransition(updateTheme)
     } else {
       updateTheme()

@@ -15,11 +15,12 @@ describe('theme defaults', () => {
 })
 
 describe('内置主题风格', () => {
-  it('包含两个布局皮肤、Absolutely 与四个 Catppuccin 风味', () => {
+  it('包含两个布局皮肤、Absolutely、墨白与四个 Catppuccin 风味', () => {
     expect(BUILTIN_THEMES.map((theme) => theme.id)).toEqual([
       'classic',
       'folia',
       'absolutely',
+      'inkwhite',
       'catppuccin-latte',
       'catppuccin-frappe',
       'catppuccin-macchiato',
@@ -30,6 +31,7 @@ describe('内置主题风格', () => {
   it('拒绝未登记的主题风格', () => {
     expect(isBuiltinThemeId('catppuccin-mocha')).toBe(true)
     expect(isBuiltinThemeId('absolutely')).toBe(true)
+    expect(isBuiltinThemeId('inkwhite')).toBe(true)
     expect(isBuiltinThemeId('catppuccin-espresso')).toBe(false)
     expect(isBuiltinThemeId(null)).toBe(false)
   })
@@ -39,6 +41,7 @@ describe('内置主题风格', () => {
     expect(layoutSkinOf('folia')).toBe('folia')
     expect(layoutSkinOf('catppuccin-frappe')).toBe('classic')
     expect(layoutSkinOf('absolutely')).toBe('classic')
+    expect(layoutSkinOf('inkwhite')).toBe('classic')
   })
 
   it('亮色固定 Latte，深色使用所选风味，Latte 选中时深色回退 Mocha', () => {

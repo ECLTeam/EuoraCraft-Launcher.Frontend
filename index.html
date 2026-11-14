@@ -91,6 +91,21 @@
         --boot-text: #fafafa;
         --boot-text-secondary: #a1a1aa;
       }
+      /* 墨白：墨与白的两端，亮色用近黑主色，深色换品牌蓝 */
+      [data-theme-palette='inkwhite'][data-theme='light'] {
+        --boot-primary: #0a0a0a;
+        --boot-ring: rgba(10, 10, 10, 0.28);
+        --boot-bg: #f4f4f5;
+        --boot-text: #0a0a0a;
+        --boot-text-secondary: #52525b;
+      }
+      [data-theme-palette='inkwhite'][data-theme='dark'] {
+        --boot-primary: #3b82f6;
+        --boot-ring: rgba(59, 130, 246, 0.35);
+        --boot-bg: #0a0a0a;
+        --boot-text: #fafafa;
+        --boot-text-secondary: #a1a1aa;
+      }
       @keyframes boot-spin {
         to {
           transform: rotate(360deg);

@@ -1,5 +1,6 @@
 import { absolutelyPalette } from './absolutely'
 import { CATPPUCCIN_PALETTES, catppuccinFlavorOfThemeId, type CatppuccinFlavor } from './catppuccin'
+import { inkwhitePalette } from './inkwhite'
 import type { BuiltinThemeId } from './theme'
 
 /**
@@ -136,6 +137,39 @@ function absolutelySurfaceStyle(isDark: boolean): ThemeSurfaceStyle {
 }
 
 /**
+ * 墨白表面：大圆角 + 发丝描边 + 无内高光。
+ *
+ * 辨识度来自几何而非配色——中性色板与 Absolutely 同源，因此用 14/10 的圆角、
+ * 更淡的静态阴影和悬停时的柔和扩散来区分。深色不加静态阴影，与站点的实色卡一致；
+ * 悬停阴影在近黑背景上改用纯黑，避免灰阴影把卡片边缘涂糊。
+ * @param isDark - 是否为深色外观
+ * @returns 该外观下的表面风格
+ */
+function inkwhiteSurfaceStyle(isDark: boolean): ThemeSurfaceStyle {
+  const palette = inkwhitePalette(isDark)
+  return {
+    cardRadius: 14,
+    controlRadius: 10,
+    borderWidth: '1px',
+    borderColor: 'var(--ecl-border)',
+    borderColorHover: 'var(--ecl-border-strong)',
+    shadow: isDark ? 'none' : '0 1px 2px rgba(10, 10, 10, 0.04)',
+    shadowHover: isDark ? '0 6px 20px rgba(0, 0, 0, 0.45)' : '0 6px 20px rgba(10, 10, 10, 0.07)',
+    highlight: 'inset 0 0 0 0 transparent',
+    backdrop: 'none',
+    control: {
+      fill: palette.controlFill,
+      fillHover: palette.controlFillHover,
+      fillActive: palette.controlFillActive,
+      borderColor: 'var(--ecl-border)',
+      borderColorHover: 'var(--ecl-border-strong)',
+      borderColorFocus: 'var(--primary)',
+      glow: 'none',
+    },
+  }
+}
+
+/**
  * 由风味色板生成 Catppuccin 的控件风格。
  *
  * 控件比卡片高一档底色（surface0），悬停再升一档，这样按钮、输入框在卡片上
@@ -168,13 +202,14 @@ const catppuccinSurfaceStyles: Record<CatppuccinFlavor, ThemeSurfaceStyle> = {
  * 取主题对应的表面风格。
  *
  * 极光皮肤的玻璃观感由 folia.css 覆盖 `--ecl-surface` 实现，几何沿用经典皮肤；
- * Absolutely 的控件填充随亮暗变化，因此需要传入当前外观。
+ * Absolutely 与墨白的控件填充随亮暗变化，因此需要传入当前外观。
  * @param themeId - 主题风格标识
  * @param isDark - 是否为深色外观
  * @returns 该主题的表面风格
  */
 export function surfaceStyleOf(themeId: BuiltinThemeId, isDark: boolean): ThemeSurfaceStyle {
   if (themeId === 'absolutely') return absolutelySurfaceStyle(isDark)
+  if (themeId === 'inkwhite') return inkwhiteSurfaceStyle(isDark)
   const flavor = catppuccinFlavorOfThemeId(themeId)
   if (flavor) return catppuccinSurfaceStyles[flavor]
   return CLASSIC_SURFACE_STYLE

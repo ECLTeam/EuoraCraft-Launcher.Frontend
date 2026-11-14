@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ABSOLUTELY_DARK, ABSOLUTELY_LIGHT } from './absolutely'
 import { CATPPUCCIN_PALETTES } from './catppuccin'
+import { INKWHITE_DARK, INKWHITE_LIGHT } from './inkwhite'
 import {
   CATPPUCCIN_SURFACE_STYLE,
   CLASSIC_SURFACE_STYLE,
@@ -62,6 +63,26 @@ describe('主题表面风格', () => {
     expect(dark.shadow).toBe('none')
     expect(light.shadow).toContain('0 1px 2px')
     expect(light.shadowHover).toContain('0 2px 6px')
+  })
+
+  it('墨白用更大圆角、无内高光，深色不加静态阴影', () => {
+    const dark = surfaceStyleOf('inkwhite', true)
+    const light = surfaceStyleOf('inkwhite', false)
+    expect(dark.cardRadius).toBe(14)
+    expect(dark.controlRadius).toBe(10)
+    expect(light.cardRadius).toBe(14)
+    expect(light.controlRadius).toBe(10)
+    expect(light.highlight).toBe('inset 0 0 0 0 transparent')
+    expect(light.backdrop).toBe('none')
+    expect(light.shadow).toContain('0 1px 2px')
+    expect(light.shadowHover).toContain('0 6px 20px')
+    expect(dark.shadow).toBe('none')
+    expect(dark.shadowHover).toContain('0 6px 20px')
+    // 控件填充随亮暗取该色板，与 Absolutely 同源但几何不同
+    expect(dark.control.fill).toBe(INKWHITE_DARK.controlFill)
+    expect(light.control.fill).toBe(INKWHITE_LIGHT.controlFill)
+    expect(light.control.fillHover).toBe(INKWHITE_LIGHT.controlFillHover)
+    expect(light.control.borderColorFocus).toBe('var(--primary)')
   })
 
   it('经典控件沿用现有令牌，不改变既有观感', () => {

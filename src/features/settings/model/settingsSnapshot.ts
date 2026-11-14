@@ -59,6 +59,7 @@ const themeIds = [
   'classic',
   'folia',
   'absolutely',
+  'inkwhite',
   'catppuccin-latte',
   'catppuccin-frappe',
   'catppuccin-macchiato',

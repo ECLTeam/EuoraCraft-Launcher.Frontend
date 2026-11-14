@@ -569,9 +569,13 @@ const lightDarkModeDescription = computed(() =>
   themeFlavor.value ? t('settings.lightDarkModeCatppuccinDesc') : t('settings.lightDarkModeDesc')
 )
 
-/** 极光效果区块：极光皮肤、Absolutely 与 Catppuccin 都使用极光光斑，可在此关闭。 */
+/** 极光效果区块：极光皮肤、Absolutely、墨白与 Catppuccin 都使用极光光斑，可在此关闭。 */
 const showEffectSettings = computed(
-  () => themeId.value === 'folia' || themeId.value === 'absolutely' || themeFlavor.value !== null
+  () =>
+    themeId.value === 'folia' ||
+    themeId.value === 'absolutely' ||
+    themeId.value === 'inkwhite' ||
+    themeFlavor.value !== null
 )
 
 async function updateUiConfig(partialTheme: Partial<{ mode: ThemeMode; primary_color: string; blur_amount: number }>) {
