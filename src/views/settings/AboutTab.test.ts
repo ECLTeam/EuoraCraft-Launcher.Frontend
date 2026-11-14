@@ -1,6 +1,6 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { defineComponent, nextTick, reactive, ref } from 'vue'
+import { defineComponent, nextTick, ref } from 'vue'
 import { URLS } from '@/config/urls'
 import { i18n } from '@/i18n'
 import type { PluginInfo } from '@/types/plugins'

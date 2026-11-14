@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
+import type { PluginInfo } from '@/types/plugins'
 import { usePluginStore } from './pluginStore'
 
 vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
@@ -18,12 +19,14 @@ vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
   },
 }))
 
-const plugin = {
+const plugin: PluginInfo = {
   name: 'demo',
   title: 'Demo',
   version: '1.0.0',
   description: '',
   author: '',
+  homepage: '',
+  license: '',
   icon: '',
   status: 'enabled',
   error: null,

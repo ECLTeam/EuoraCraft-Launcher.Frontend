@@ -661,6 +661,8 @@ export function createShowcaseTransport(): BackendTransport {
           version: '1.0.0',
           description: '由展示模式在内存中创建。',
           author: 'Showcase',
+          homepage: '',
+          license: '',
           icon: '',
           status: payload.confirm_unverified_source ? 'pending_restart' : 'enabled',
           pending_restart: !!payload.confirm_unverified_source,
