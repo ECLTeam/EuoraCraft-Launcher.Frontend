@@ -129,6 +129,25 @@ describe('plugin settings', () => {
       revision: 0,
     })
   })
+
+  it('在没有可配置插件时把空状态放进居中容器', async () => {
+    mocks.getSettings.mockResolvedValue({ schema: [], values: {}, revision: 0 })
+    const wrapper = mount(PluginSettingsModal, {
+      props: { visible: true, plugin, plugins: [plugin] },
+      global: { plugins: [i18n], stubs: { Teleport: true } },
+    })
+    try {
+      await flushPromises()
+      const empty = wrapper.get('.plugin-settings-empty')
+      expect(empty.find('.n-empty').exists()).toBe(true)
+      expect(empty.text()).toContain(i18n.global.t('plugins.selectPlugin'))
+      // 空状态容器是详情视图的直接子元素，由它撑满剩余高度并居中
+      expect(empty.element.parentElement?.classList.contains('plugin-settings-detail-view')).toBe(true)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('submits the edited text on blur and keeps the confirmed value', async () => {
     mocks.updateSetting.mockImplementationOnce(async () => {
       mocks.getSettings.mockResolvedValueOnce({

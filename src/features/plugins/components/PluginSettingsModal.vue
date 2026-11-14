@@ -142,7 +142,9 @@
                 <p v-else-if="saved" role="status" class="plugin-settings-feedback">{{ t('plugins.settingSaved') }}</p>
               </div>
             </template>
-            <NEmpty v-else :description="t('plugins.selectPlugin')" />
+            <div v-else class="plugin-settings-empty">
+              <NEmpty :description="t('plugins.selectPlugin')" />
+            </div>
           </div>
         </Transition>
       </section>
@@ -388,6 +390,14 @@ onUnmounted(() => unlisten?.())
   flex: 1;
   min-height: 0;
   flex-direction: column;
+}
+/* 未选中插件时详情区只有空状态：撑满剩余高度并居中，避免贴着卡片顶部 */
+.plugin-settings-empty {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
 }
 .plugin-settings-nav-title {
   display: flex;
