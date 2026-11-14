@@ -27,6 +27,7 @@ import type { DownloadConfig, GameConfig } from '@/types/config'
 import { parseInstallation } from '@/types/installation'
 import type { InstallProgress } from '@/types/instances'
 import { getErrorMessage } from '@/utils/error'
+import { resolveDisplayMessage } from '@/utils/errorCodeMessages'
 import { launcherErrorQueue } from './errorPresentation'
 import { installDesktopInteractionPolicy } from './interactionPolicy'
 import { launcherPopupQueue, notifyLauncherPopup } from './useLauncherPopupQueue'
@@ -197,7 +198,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
     }
 
     const phase = payload.phase || ''
-    const message = payload.message || ''
+    const message = resolveDisplayMessage(payload.message, '')
     const done = payload.done ?? 0
     const total = payload.total ?? 1
     const subtask = payload.subtask || ''
@@ -336,18 +337,19 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       }),
       backend.on('launcher:notify', (payload) => {
         const source = payload.source === 'plugin' ? 'plugin' : 'launcher'
+        const content = resolveDisplayMessage(payload.message, '')
         // 警告与错误影响功能使用，升级为弹窗按优先级排队展示；info 仍是瞬时通知。
         if (payload.type === 'warning' || payload.type === 'error') {
           popupQueue.enqueuePopup({
             id: `notify-${payload.type}-${Date.now()}-${notifySeq++}`,
             title: payload.title || (payload.type === 'error' ? '启动器错误' : '启动器警告'),
-            content: payload.message,
+            content,
             level: payload.type === 'error' ? 'critical' : 'warning',
             source,
           })
           return
         }
-        options.message.info(payload.message, { title: payload.title, duration: 8000 })
+        options.message.info(content, { title: payload.title, duration: 8000 })
       }),
       backend.on('launcher:agreement_required', () => {
         options.markAgreementNotAccepted()

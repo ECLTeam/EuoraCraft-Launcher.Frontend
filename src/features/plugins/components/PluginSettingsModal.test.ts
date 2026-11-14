@@ -26,6 +26,7 @@ const plugin: PluginInfo = {
   dependencies: {},
   services: [],
   is_system: false,
+  has_panels: false,
 }
 
 describe('plugin settings', () => {

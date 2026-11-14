@@ -30,6 +30,8 @@ export interface PluginInfo {
   services: string[]
   settings?: PluginSettingSchema[]
   is_system: boolean
+  /** 当前运行是否登记了声明式面板，由后端 plugin_list 回填；禁用或未启用时为 false。 */
+  has_panels: boolean
 }
 
 export interface PluginPackagePreflight {
@@ -51,6 +53,23 @@ export interface PluginPackagePreflight {
 export interface PluginPackageInstallResult {
   status: string
   message?: string
+}
+
+export interface PluginDirectoryPreflight {
+  name: string
+  version: string
+  entry_point: string
+  source_path: string
+  target_tag: string
+  python_dependencies: string[]
+  wheel_count: number
+  has_target_lock: boolean
+  dependencies_ready: boolean
+}
+
+export interface PluginDirectorySelection {
+  path: string
+  preflight: PluginDirectoryPreflight
 }
 
 export interface PluginPackageSelection {

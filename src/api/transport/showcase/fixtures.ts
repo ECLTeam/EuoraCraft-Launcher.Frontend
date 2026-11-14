@@ -204,6 +204,7 @@ export const showcasePlugins: PluginInfo[] = [
     dependencies: {},
     services: ['dashboard'],
     is_system: false,
+    has_panels: true,
   },
   {
     name: 'showcase-theme',
@@ -219,6 +220,7 @@ export const showcasePlugins: PluginInfo[] = [
     dependencies: {},
     services: ['theme'],
     is_system: false,
+    has_panels: false,
   },
   {
     name: 'ecl-system-bridge',
@@ -234,6 +236,7 @@ export const showcasePlugins: PluginInfo[] = [
     dependencies: {},
     services: ['system'],
     is_system: true,
+    has_panels: false,
   },
 ]
 

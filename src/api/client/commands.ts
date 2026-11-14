@@ -1,6 +1,7 @@
 import { launcherErrorQueue } from '@/app/runtime/errorPresentation'
 import type { ApiResponse, CommandPayloadMap, CommandResponseMap } from '@/types/api'
 import { getErrorMessage } from '@/utils/error'
+import { resolveDisplayMessage } from '@/utils/errorCodeMessages'
 import { Logger, SILENT_COMMANDS, checkEnv, transport } from './state'
 
 type CommandResponseObserver = (command: string, payload: unknown, response: ApiResponse<unknown>) => void
@@ -55,10 +56,8 @@ async function call<T = unknown>(command: string, payload: unknown = {}, timeout
       return { success: false, message: '后端返回了非对象响应', timestamp: Date.now() }
     }
     const response = raw as ApiResponse<T>
-    if (!response.success && !response.message?.trim()) {
-      const code = response.errorCode ? ` (${response.errorCode})` : ''
-      response.message = `${command} 执行失败${code}`
-    }
+    // 失败的 message 可能只是错误码：这里换成可读文案，空说明留给调用方兜底。
+    if (!response.success) response.message = resolveDisplayMessage(response.message, '')
     if (!response.success && response.presentation === 'modal' && response.errorId) {
       launcherErrorQueue.enqueue({
         error_id: response.errorId,

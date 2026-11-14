@@ -297,6 +297,7 @@ const enabledPlugin: PluginInfo = {
   dependencies: {},
   services: [],
   is_system: false,
+  has_panels: false,
 }
 
 const disabledPlugin: PluginInfo = { ...enabledPlugin, name: 'disabled-plugin', status: 'disabled' }

@@ -73,6 +73,7 @@ import type {
   PluginInfo,
   PluginDevelopmentState,
   PluginRuntimeInfo,
+  PluginDirectoryPreflight,
   PluginPackagePreflight,
   PluginPanelData,
   PluginPanelDefinition,
@@ -371,7 +372,7 @@ export interface CommandPayloadMap {
   background_video_open: undefined
 
   // 文件选择
-  select_directory: { purpose?: 'custom-download'; default_directory?: string } | undefined
+  select_directory: { purpose?: 'custom-download' | 'plugin-directory'; default_directory?: string } | undefined
   select_java: undefined
   select_image: { purpose?: 'background' | 'skin' | 'cape' | 'instance_icon' } | undefined
   select_background_video: undefined
@@ -603,6 +604,7 @@ export interface CommandPayloadMap {
     allow_network?: boolean
   }
   plugin_package_inspect: { plugin_path: string }
+  plugin_directory_inspect: { plugin_path: string }
   plugin_get_routes: { plugin_id?: string }
   plugin_get_slots: Record<string, never>
   plugin_get_vue_slots: Record<string, never>
@@ -703,7 +705,7 @@ export type CommandName = keyof CommandPayloadMap
 // 前端所有 IPC 调用必须引用这里的字符串，禁止硬编码散落。
 // 键与 CommandPayloadMap / CommandResponseMap 一一对应，
 // 由下方 commandNamesAlignedWithPayloadMap 编译期断言强制同步。
-// 后端对应权威：ECL/api/registry.py::COMMAND_NAMES。
+// 后端对应权威：ECL/api/registry.py::IpcCommandRegistry.command_names。
 
 export const COMMAND_NAMES = {
   custom_download_start: 'custom_download_start',
@@ -906,6 +908,7 @@ export const COMMAND_NAMES = {
   plugin_reload: 'plugin_reload',
   plugin_install: 'plugin_install',
   plugin_package_inspect: 'plugin_package_inspect',
+  plugin_directory_inspect: 'plugin_directory_inspect',
   plugin_get_routes: 'plugin_get_routes',
   plugin_get_slots: 'plugin_get_slots',
   plugin_get_vue_slots: 'plugin_get_vue_slots',
@@ -1196,6 +1199,7 @@ export interface CommandResponseMap {
   plugin_reload: void
   plugin_install: { status: string; message?: string } | undefined
   plugin_package_inspect: PluginPackagePreflight
+  plugin_directory_inspect: PluginDirectoryPreflight
   plugin_get_routes: PluginRoute[]
   plugin_get_slots: Record<string, PluginSlotItem[]>
   plugin_get_vue_slots: Record<string, VueSlotItem[]>

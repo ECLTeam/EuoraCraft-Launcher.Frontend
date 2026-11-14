@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type { ActionResult } from '@/composables/useAsyncAction'
 import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import type {
+  PluginDirectorySelection,
   PluginInfo,
   PluginPackageInstallResult,
   PluginPackageSelection,
@@ -107,10 +108,20 @@ export const usePluginStore = defineStore('plugins', () => {
     return runOperation(`unload:${pluginName}`, () => pluginManagementApi.unload(pluginName))
   }
 
-  async function install(): Promise<boolean> {
-    const installed = await pluginManagementApi.installFromDirectory()
-    if (installed) await load(true)
-    return installed
+  async function selectDirectory(): Promise<PluginDirectorySelection | null> {
+    const path = await pluginManagementApi.selectDirectory()
+    if (!path) return null
+    return { path, preflight: await pluginManagementApi.inspectDirectory(path) }
+  }
+
+  async function installDirectory(
+    selection: PluginDirectorySelection,
+    options: { allowNetwork: boolean }
+  ): Promise<PluginPackageInstallResult | undefined> {
+    const result = await runOperation(`install:${selection.preflight.name}`, () =>
+      pluginManagementApi.installDirectory(selection.path, options)
+    )
+    return result.status === 'success' ? result.value : undefined
   }
 
   async function selectPackage(): Promise<PluginPackageSelection | null> {
@@ -238,7 +249,8 @@ export const usePluginStore = defineStore('plugins', () => {
     toggle,
     reload,
     unload,
-    install,
+    selectDirectory,
+    installDirectory,
     selectPackage,
     installPackage,
     getSettings,

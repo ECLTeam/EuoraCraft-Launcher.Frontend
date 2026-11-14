@@ -1,43 +1,51 @@
 <template>
   <FullscreenModal :visible="visible" :title="panelTitle" :showFooter="false" :closable="!busy" @close="close">
-    <div ref="bodyRef" class="plugin-panel">
-      <UiLoading v-if="loading" mode="inline" />
+    <div ref="bodyRef" class="plugin-panel ecl-page">
+      <section class="plugin-panel-card ecl-surface ecl-page__body">
+        <div class="plugin-panel-content ecl-page__scroll">
+          <div v-if="loading" class="plugin-panel-state">
+            <UiLoading mode="inline" />
+          </div>
 
-      <NAlert v-else-if="error" type="error" :showIcon="false">
-        {{ error }}
-        <NButton text :disabled="busy" @click="load">{{ t('common.retry') }}</NButton>
-      </NAlert>
+          <NAlert v-else-if="error" type="error" :showIcon="false">
+            {{ error }}
+            <NButton text :disabled="busy" @click="load">{{ t('common.retry') }}</NButton>
+          </NAlert>
 
-      <NEmpty v-else-if="!panels.length" :description="t('plugins.panelEmpty')" />
+          <div v-else-if="!panels.length" class="plugin-panel-empty">
+            <NEmpty :description="t('plugins.panelEmpty')" />
+          </div>
 
-      <template v-else>
-        <p v-if="activePanel?.description" class="plugin-panel-description">{{ activePanel.description }}</p>
+          <template v-else>
+            <p v-if="activePanel?.description" class="plugin-panel-description">{{ activePanel.description }}</p>
 
-        <NTabs v-if="panels.length > 1" :value="activeKey" type="segment" @update:value="selectPanel">
-          <NTab v-for="item in panels" :key="item.key" :name="item.key">{{ item.title }}</NTab>
-        </NTabs>
+            <NTabs v-if="panels.length > 1" :value="activeKey" type="segment" @update:value="selectPanel">
+              <NTab v-for="item in panels" :key="item.key" :name="item.key">{{ item.title }}</NTab>
+            </NTabs>
 
-        <NAlert v-if="actionError" type="error" :showIcon="false" class="plugin-panel-error">
-          {{ actionError }}
-        </NAlert>
+            <NAlert v-if="actionError" type="error" :showIcon="false" class="plugin-panel-error">
+              {{ actionError }}
+            </NAlert>
 
-        <div class="plugin-panel-body" :aria-busy="busy">
-          <PluginPanelNodeView
-            v-for="(node, index) in activePanel?.nodes ?? []"
-            :key="index"
-            :node="node"
-            :data="data"
-            :settings="settings"
-            :busy="busy"
-            @action="runAction"
-            @setting="updateSetting"
-          />
+            <div class="plugin-panel-body" :aria-busy="busy">
+              <PluginPanelNodeView
+                v-for="(node, index) in activePanel?.nodes ?? []"
+                :key="index"
+                :node="node"
+                :data="data"
+                :settings="settings"
+                :busy="busy"
+                @action="runAction"
+                @setting="updateSetting"
+              />
+            </div>
+
+            <Transition name="fade">
+              <p v-if="busy" class="plugin-panel-busy">{{ t('plugins.panelRunning') }}</p>
+            </Transition>
+          </template>
         </div>
-
-        <Transition name="fade">
-          <p v-if="busy" class="plugin-panel-busy">{{ t('plugins.panelRunning') }}</p>
-        </Transition>
-      </template>
+      </section>
     </div>
   </FullscreenModal>
 </template>
@@ -186,11 +194,29 @@ watch(
 </script>
 
 <style scoped>
+/* 页面骨架与单卡片撑满由 .ecl-page / .ecl-page__body / .ecl-surface 负责，这里只补统一外边距与卡内间距 */
 .plugin-panel {
+  padding: var(--ecl-page-padding);
+}
+
+.plugin-panel-card {
+  padding: var(--s-lg);
+}
+
+.plugin-panel-content {
   display: flex;
+  min-height: 100%;
   flex-direction: column;
   gap: 12px;
-  min-height: 100%;
+}
+
+/* 加载与空状态撑满卡片剩余高度并双向居中，避免贴在卡片顶部 */
+.plugin-panel-state,
+.plugin-panel-empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .plugin-panel-description {

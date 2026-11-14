@@ -670,6 +670,7 @@ export function createShowcaseTransport(): BackendTransport {
           dependencies: {},
           services: [],
           is_system: false,
+          has_panels: false,
         } satisfies PluginInfo)
         emit('plugin:status_changed', { name: 'installed-showcase-plugin', action: 'install', result: 'success' })
         return success()
@@ -687,6 +688,18 @@ export function createShowcaseTransport(): BackendTransport {
           wheel_count: 0,
           has_target_lock: false,
           unverified_source: true,
+          dependencies_ready: true,
+        })
+      case 'plugin_directory_inspect':
+        return success({
+          name: 'installed-showcase-plugin',
+          version: '1.0.0',
+          entry_point: 'main:Plugin',
+          source_path: 'Showcase/SelectedDirectory',
+          target_tag: 'windows-x86_64-cp312',
+          python_dependencies: [],
+          wheel_count: 0,
+          has_target_lock: false,
           dependencies_ready: true,
         })
       case 'plugin_get_routes':

@@ -33,6 +33,7 @@ describe('plugin management entry points', () => {
         dependencies: {},
         services: [],
         is_system: false,
+        has_panels: false,
       },
     ]
     const wrapper = mount(Plugins, {
@@ -129,7 +130,7 @@ describe('plugin management entry points', () => {
       expect(store.selectPackage).toHaveBeenCalledOnce()
       dropdown.vm.$emit('select', 'directory')
       await flushPromises()
-      expect(store.install).toHaveBeenCalledOnce()
+      expect(store.selectDirectory).toHaveBeenCalledOnce()
     } finally {
       wrapper.unmount()
     }
@@ -151,6 +152,7 @@ describe('plugin management entry points', () => {
       dependencies: {},
       services: [],
       is_system: false,
+      has_panels: false,
     }
     store.plugins = [
       { ...base, name: 'first', title: 'First', status: 'enabled' },
@@ -185,6 +187,53 @@ describe('plugin management entry points', () => {
       expect(wrapper.get('.plugin-row').text()).toContain('First')
       await search.setValue('')
       expect(wrapper.findAll('.plugin-row')).toHaveLength(2)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('only provides the panel action for enabled plugins that declare panels', async () => {
+    const pinia = createTestingPinia({ createSpy: vi.fn })
+    const store = usePluginStore(pinia)
+    vi.mocked(store.start).mockResolvedValue()
+    const base = {
+      version: '1',
+      description: '',
+      author: '',
+      homepage: '',
+      license: '',
+      icon: '',
+      error: null,
+      dependencies: {},
+      services: [],
+      is_system: false,
+      has_panels: false,
+    }
+    store.plugins = [
+      { ...base, name: 'with-panel', title: 'With panel', status: 'enabled', has_panels: true },
+      { ...base, name: 'without-panel', title: 'Without panel', status: 'enabled' },
+      { ...base, name: 'disabled-panel', title: 'Disabled panel', status: 'disabled', has_panels: true },
+    ]
+    const wrapper = mount(Plugins, {
+      global: {
+        plugins: [pinia, i18n],
+        stubs: {
+          PluginSettingsModal: true,
+          PluginPanelModal: true,
+          PluginPackageInstallModal: true,
+          PluginSlotHost: true,
+        },
+      },
+    })
+    try {
+      await flushPromises()
+      const panelLabel = i18n.global.t('plugins.panel')
+      const panelButtons = wrapper.findAll(`button[aria-label="${panelLabel}"]`)
+      expect(panelButtons).toHaveLength(1)
+      const rows = wrapper.findAll('.plugin-row')
+      expect(rows[0]?.find(`button[aria-label="${panelLabel}"]`).exists()).toBe(true)
+      expect(rows[1]?.find(`button[aria-label="${panelLabel}"]`).exists()).toBe(false)
+      expect(rows[2]?.find(`button[aria-label="${panelLabel}"]`).exists()).toBe(false)
     } finally {
       wrapper.unmount()
     }

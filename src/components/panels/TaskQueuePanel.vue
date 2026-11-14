@@ -245,6 +245,7 @@ import { useModpackImportStore } from '@/features/instances/stores/modpackImport
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { currentInstallationStage, installationPercentage } from '@/types/installation'
+import { errorCodeMessageKeys, resolveDisplayMessage } from '@/utils/errorCodeMessages'
 
 defineOptions({ name: 'TaskQueuePanel' })
 
@@ -344,8 +345,9 @@ function taskMessage(task: TaskItem): string {
   if (task.operationKind?.startsWith('plugin_game_') && !installation) {
     const operation = task.operationId ? operationStore.operations[task.operationId] : undefined
     if (task.status !== 'running') {
-      const errorKey = `plugins.errors.${operation?.errorCode}`
-      if (task.status === 'error' && te(errorKey)) return t(errorKey)
+      const code = operation?.errorCode
+      const errorKey = code ? errorCodeMessageKeys(code).find((candidate) => te(candidate)) : undefined
+      if (task.status === 'error' && errorKey) return t(errorKey)
       if (task.status !== 'error') return t(`taskQueue.states.${task.status}`)
     }
     if (task.status === 'running' && task.operationKind === 'plugin_game_stop')
@@ -366,11 +368,14 @@ function taskMessage(task: TaskItem): string {
       }
     }
   }
-  if (!installation) return task.message
+  if (!installation) return resolveDisplayMessage(task.message, t('taskQueue.states.error'))
   if (installation.cancellationRequested && installation.status === 'running') return t('operations.cancelRequested')
-  if (installation.status === 'error' || installation.status === 'canceled') return installation.message
+  if (installation.status === 'error' || installation.status === 'canceled')
+    return resolveDisplayMessage(installation.message, t('taskQueue.states.error'))
   const stage = currentInstallationStage(installation)
-  return stage ? t(`taskQueue.installation.stages.${stage.id}`) : task.message
+  return stage
+    ? t(`taskQueue.installation.stages.${stage.id}`)
+    : resolveDisplayMessage(task.message, t('taskQueue.states.error'))
 }
 function stagePosition(task: TaskItem): string {
   const installation = task.installation

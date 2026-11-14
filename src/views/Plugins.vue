@@ -121,9 +121,9 @@
                 </NTag>
               </div>
 
-              <NSpace class="plugin-actions" justify="end" :size="3" :wrap="false">
+              <NSpace class="plugin-actions" justify="end" :size="3" :wrap="false" :wrapItem="false">
                 <NButton
-                  v-if="plugin.status === 'enabled' && !plugin.is_system"
+                  v-if="plugin.status === 'enabled' && !plugin.is_system && plugin.has_panels"
                   quaternary
                   size="tiny"
                   :title="t('plugins.panel')"
@@ -207,6 +207,11 @@
       :selection="packageSelection"
       @installed="packageModalVisible = false"
     />
+    <PluginDirectoryInstallModal
+      v-model:visible="directoryModalVisible"
+      :selection="directorySelection"
+      @installed="directoryModalVisible = false"
+    />
   </div>
 </template>
 
@@ -233,11 +238,13 @@ import { useI18n } from 'vue-i18n'
 import { UiIcon, UiLoading } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useUiSkin } from '@/composables/useUiSkin'
+import PluginDirectoryInstallModal from '@/features/plugins/components/PluginDirectoryInstallModal.vue'
 import PluginPackageInstallModal from '@/features/plugins/components/PluginPackageInstallModal.vue'
 import PluginPanelModal from '@/features/plugins/components/PluginPanelModal.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
-import type { PluginInfo, PluginPackageSelection } from '@/types/plugins'
+import type { PluginDirectorySelection, PluginInfo, PluginPackageSelection } from '@/types/plugins'
+import { errorCodeMessageKeys } from '@/utils/errorCodeMessages'
 
 const { t, te } = useI18n()
 const { isFolia } = useUiSkin()
@@ -264,6 +271,8 @@ const panelVisible = ref(false)
 const panelTarget = ref<PluginInfo | null>(null)
 const packageModalVisible = ref(false)
 const packageSelection = ref<PluginPackageSelection | null>(null)
+const directoryModalVisible = ref(false)
+const directorySelection = ref<PluginDirectorySelection | null>(null)
 
 const installOptions = computed<DropdownOption[]>(() => [
   { key: 'package', label: t('plugins.installPackage') },
@@ -313,8 +322,10 @@ function statusType(status: string): 'success' | 'error' | 'warning' | 'info' | 
 
 function pluginError(plugin: PluginInfo): string {
   if (!plugin.error) return ''
-  const key = `plugins.errors.${plugin.error}`
-  return te(key) ? t(key) : plugin.error.startsWith('PLUGIN_') ? t('plugins.runtimeError') : plugin.error
+  const key = errorCodeMessageKeys(plugin.error).find((candidate) => te(candidate))
+  if (key) return t(key)
+  console.warn(`[error] 未登记的错误码：${plugin.error}`)
+  return t('plugins.runtimeError')
 }
 
 function sessionDisabled(plugin: PluginInfo): boolean {
@@ -356,12 +367,13 @@ async function unloadPlugin(plugin: PluginInfo) {
 }
 
 async function installDirectory() {
-  await run(async () => pluginStore.install(), {
-    showSuccess: true,
-    successMessage: t('plugins.installSuccess'),
+  const selection = await run(() => pluginStore.selectDirectory(), {
     showError: true,
-    errorMessage: t('plugins.installFailed'),
+    errorMessage: t('plugins.directoryInspectFailed'),
   })
+  if (!selection) return
+  directorySelection.value = selection
+  directoryModalVisible.value = true
 }
 
 async function selectPackage() {

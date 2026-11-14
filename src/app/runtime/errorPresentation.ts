@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import type { ApiResponse } from '@/types/api'
 import type { LauncherErrorEvent } from '@/types/system'
+import { resolveDisplayMessage } from '@/utils/errorCodeMessages'
 import { launcherPopupQueue, type LauncherPopupQueue } from './useLauncherPopupQueue'
 
 const MAX_SEEN_ERRORS = 100
@@ -18,7 +19,7 @@ export class BackendCommandError extends Error {
   readonly detail?: string
 
   constructor(response: ApiResponse<unknown>, fallback: string) {
-    super(response.message?.trim() || fallback)
+    super(resolveDisplayMessage(response.message, fallback))
     this.name = 'BackendCommandError'
     this.errorCode = response.errorCode
     this.presentation = response.presentation ?? 'message'
@@ -30,7 +31,7 @@ export class BackendCommandError extends Error {
 
 function normalizeError(payload: LauncherErrorEvent): LauncherErrorEvent | null {
   const errorId = payload.error_id?.trim()
-  const message = payload.message?.trim()
+  const message = resolveDisplayMessage(payload.message, '').trim()
   if (!errorId || !message) return null
   return {
     error_id: errorId,

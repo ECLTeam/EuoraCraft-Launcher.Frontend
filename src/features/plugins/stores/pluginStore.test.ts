@@ -11,7 +11,9 @@ vi.mock('@/features/plugins/api/pluginManagementApi', () => ({
     disable: vi.fn(),
     reload: vi.fn(),
     unload: vi.fn(),
-    installFromDirectory: vi.fn(),
+    selectDirectory: vi.fn(),
+    inspectDirectory: vi.fn(),
+    installDirectory: vi.fn(),
     selectPackage: vi.fn(),
     inspectPackage: vi.fn(),
     installPackage: vi.fn(),
@@ -33,6 +35,7 @@ const plugin: PluginInfo = {
   dependencies: {},
   services: [],
   is_system: false,
+  has_panels: false,
 }
 
 describe('pluginStore', () => {
@@ -214,21 +217,42 @@ describe('pluginStore', () => {
     expect(store.reloadingPlugins).toEqual([])
   })
 
-  it('取消安装目录选择时不刷新插件列表', async () => {
-    vi.mocked(pluginManagementApi.installFromDirectory).mockResolvedValue(false)
+  it('取消目录选择时不预检也不刷新列表', async () => {
+    vi.mocked(pluginManagementApi.selectDirectory).mockResolvedValue(null)
     const store = usePluginStore()
 
-    await expect(store.install()).resolves.toBe(false)
+    await expect(store.selectDirectory()).resolves.toBeNull()
 
+    expect(pluginManagementApi.inspectDirectory).not.toHaveBeenCalled()
     expect(pluginManagementApi.list).not.toHaveBeenCalled()
   })
 
-  it('目录安装成功后重新读取列表', async () => {
-    vi.mocked(pluginManagementApi.installFromDirectory).mockResolvedValue(true)
+  it('选中目录后先预检，确认安装后刷新列表', async () => {
+    const preflight = {
+      name: 'demo',
+      version: '1.0.0',
+      entry_point: 'main:Plugin',
+      source_path: 'C:/demo',
+      target_tag: 'windows-x86_64-cp312',
+      python_dependencies: [],
+      wheel_count: 0,
+      has_target_lock: false,
+      dependencies_ready: true,
+    }
     const store = usePluginStore()
+    vi.mocked(pluginManagementApi.selectDirectory).mockResolvedValue('C:/demo')
+    vi.mocked(pluginManagementApi.inspectDirectory).mockResolvedValueOnce(preflight)
 
-    await expect(store.install()).resolves.toBe(true)
+    const selection = await store.selectDirectory()
+    expect(selection).toEqual({ path: 'C:/demo', preflight })
+    expect(pluginManagementApi.inspectDirectory).toHaveBeenCalledWith('C:/demo')
+    expect(pluginManagementApi.installDirectory).not.toHaveBeenCalled()
 
+    vi.mocked(pluginManagementApi.installDirectory).mockResolvedValue({ status: 'installed' })
+    await expect(store.installDirectory(selection!, { allowNetwork: true })).resolves.toEqual({
+      status: 'installed',
+    })
+    expect(pluginManagementApi.installDirectory).toHaveBeenCalledWith('C:/demo', { allowNetwork: true })
     expect(pluginManagementApi.list).toHaveBeenCalledOnce()
   })
 

@@ -1,6 +1,7 @@
 import backend from '@/api/client'
 import { unwrapResponse as assertSuccess } from '@/app/runtime/errorPresentation'
 import type {
+  PluginDirectoryPreflight,
   PluginInfo,
   PluginPackageInstallResult,
   PluginPackagePreflight,
@@ -43,12 +44,27 @@ export const pluginManagementApi = {
     assertSuccess(await backend.command('plugin_unload', { plugin_name: pluginName }), '卸载插件')
   },
 
-  async installFromDirectory(): Promise<boolean> {
-    const selected = await backend.command('select_directory')
+  async selectDirectory(): Promise<string | null> {
+    const selected = await backend.command('select_directory', { purpose: 'plugin-directory' })
     if (!selected.success) throw new Error(selected.message || '选择插件目录失败')
-    if (!selected.data?.path) return false
-    assertSuccess(await backend.command('plugin_install', { plugin_path: selected.data.path }), '安装插件')
-    return true
+    return selected.data?.path || null
+  },
+
+  async inspectDirectory(path: string): Promise<PluginDirectoryPreflight> {
+    return assertSuccess(await backend.command('plugin_directory_inspect', { plugin_path: path }), '预检插件目录')
+  },
+
+  async installDirectory(path: string, options: { allowNetwork: boolean }): Promise<PluginPackageInstallResult> {
+    return (
+      assertSuccess(
+        await backend.command('plugin_install', {
+          plugin_path: path,
+          confirm_unverified_source: true,
+          allow_network: options.allowNetwork,
+        }),
+        '安装插件目录'
+      ) ?? { status: 'installed' }
+    )
   },
 
   async selectPackage(): Promise<string | null> {

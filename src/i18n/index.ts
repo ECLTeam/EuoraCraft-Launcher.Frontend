@@ -3,6 +3,7 @@ import { createI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { configQuery, launcherInfoQuery } from '@/app/data'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
+import { errorCodeMessageKeys, setErrorCodeResolver } from '@/utils/errorCodeMessages'
 import deDE from './locales/de-DE.json'
 import enUS from './locales/en-US.json'
 import jaJP from './locales/ja-JP.json'
@@ -111,3 +112,13 @@ export function getCurrentLocale(): LocaleCode {
 }
 
 export default i18n
+
+/**
+ * 错误码文案查询：界面只展示文案，不展示错误码本身。
+ */
+setErrorCodeResolver((code) => {
+  for (const key of errorCodeMessageKeys(code)) {
+    if (i18n.global.te(key)) return i18n.global.t(key)
+  }
+  return null
+})

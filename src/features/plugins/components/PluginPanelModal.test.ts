@@ -28,6 +28,7 @@ const plugin: PluginInfo = {
   dependencies: {},
   services: [],
   is_system: false,
+  has_panels: true,
 }
 
 const panels: PluginPanelDefinition[] = [
@@ -84,11 +85,18 @@ describe('plugin panel', () => {
     wrapper.unmount()
   })
 
-  it('shows an empty state when the plugin registers no panel', async () => {
+  it('shows a centered empty state inside the standard surface card', async () => {
     mocks.getPanels.mockResolvedValue([])
     const wrapper = mountModal()
     await flushPromises()
-    expect(wrapper.text()).toContain(i18n.global.t('plugins.panelEmpty'))
+    expect(wrapper.get('.plugin-panel').classes()).toContain('ecl-page')
+    expect(wrapper.get('.plugin-panel-card').classes()).toEqual(
+      expect.arrayContaining(['ecl-surface', 'ecl-page__body'])
+    )
+    const empty = wrapper.get('.plugin-panel-empty')
+    expect(empty.find('.n-empty').exists()).toBe(true)
+    expect(empty.text()).toContain(i18n.global.t('plugins.panelEmpty'))
+    expect(empty.element.parentElement?.classList.contains('plugin-panel-content')).toBe(true)
     wrapper.unmount()
   })
 
