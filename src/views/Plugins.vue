@@ -124,7 +124,7 @@
 
               <NSpace class="plugin-actions" justify="end" :size="3" :wrap="false" :wrapItem="false">
                 <NButton
-                  v-if="plugin.status === 'enabled' && !plugin.is_system && plugin.has_panels"
+                  v-if="plugin.status === 'enabled' && plugin.has_panels"
                   quaternary
                   size="tiny"
                   :title="t('plugins.panel')"
@@ -288,7 +288,7 @@ const filters = computed(() => [
 ])
 
 const filteredPlugins = computed(() => {
-  let result = plugins.value.filter((plugin) => !plugin.is_system)
+  let result = plugins.value
   if (activeFilter.value === 'enabled') {
     result = result.filter((plugin) => plugin.status === 'enabled')
   } else if (activeFilter.value === 'disabled') {

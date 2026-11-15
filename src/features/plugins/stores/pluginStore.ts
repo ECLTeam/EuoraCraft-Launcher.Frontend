@@ -197,7 +197,7 @@ export const usePluginStore = defineStore('plugins', () => {
     const request = ++settingsRequest
     await load(true)
     if (request !== settingsRequest) return
-    if (pluginName !== null && !plugins.value.some((plugin) => plugin.name === pluginName && !plugin.is_system)) {
+    if (pluginName !== null && !plugins.value.some((plugin) => plugin.name === pluginName)) {
       throw new Error('PLUGIN_NOT_FOUND')
     }
     settingsTargetName.value = pluginName
