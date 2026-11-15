@@ -10,7 +10,7 @@ import {
   pluginSlots,
   pluginVueSlots,
   renderSlot,
-  scopePluginCss,
+  pluginCss,
 } from './usePluginBridge'
 
 beforeEach(() => {
@@ -53,10 +53,20 @@ describe('plugin frontend styles', () => {
       wrapper.unmount()
     }
   })
-  it('limits injected CSS to the plugin root', () => {
-    expect(scopePluginCss('demo', '.title { color: red; }')).toBe(
-      '@scope ([data-plugin="demo"]) {\n.title { color: red; }\n}'
-    )
+  it('passes injected CSS through unchanged', () => {
+    const css = '.title { color: red; }\\n@keyframes pulse { from { opacity: 0 } to { opacity: 1 } }'
+    expect(pluginCss(css)).toBe(css)
+  })
+
+  it('renders injected HTML unchanged without sanitizing scripts or handlers', () => {
+    document.body.innerHTML = '<div id="plugin-slot-sidebar-bottom"></div>'
+    const html =
+      '<div onclick="window.__clicked = true"><script>window.__ran = true</script><style>div{color:red}</style></div>'
+    pluginSlots.value = { 'sidebar-bottom': [{ plugin: 'demo', html }] }
+
+    renderSlot('sidebar-bottom')
+
+    expect(document.querySelector('[data-plugin="demo"]')?.innerHTML).toBe(html)
   })
 
   it('removes disabled plugin HTML while keeping other entries', () => {

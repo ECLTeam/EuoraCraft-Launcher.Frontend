@@ -5,7 +5,7 @@ import { configQuery, launcherInfoQuery } from '@/app/data'
 import { acceptConfigSnapshot, invalidateConfig } from '@/app/data/configQueries'
 import { desktopWindow } from '@/app/runtime/desktopWindow'
 import { reconcileAvatarAccounts } from '@/composables/useAvatarRenderer'
-import { initPluginBridge, destroyPluginBridge, scopePluginCss } from '@/composables/usePluginBridge'
+import { initPluginBridge, destroyPluginBridge, pluginCss } from '@/composables/usePluginBridge'
 import { globalTaskQueue } from '@/composables/useTaskQueue'
 import { initTheme } from '@/composables/useTheme'
 import { useAccountStore } from '@/features/accounts/stores/accountStore'
@@ -413,7 +413,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
           styleElement.setAttribute('data-plugin', pluginName)
           document.head.appendChild(styleElement)
         }
-        styleElement.textContent = scopePluginCss(pluginName, payload.css || '')
+        styleElement.textContent = pluginCss(payload.css || '')
       }),
       backend.on('game:operation_progress', (payload) => {
         if (!operationStore.operations[payload.operationId]) void operationStore.track(payload)

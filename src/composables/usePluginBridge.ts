@@ -1,5 +1,4 @@
 /* eslint-disable vue/one-component-per-file -- 动态工厂按需 createApp 生成组件，单文件多组件属必要设计 */
-import DOMPurify from 'dompurify'
 import { compile, computed, createApp, defineComponent, h, ref, watch } from 'vue'
 import { invalidatePluginRegistry, pluginRegistryQuery } from '@/app/data'
 import { pluginHostApi } from '@/features/plugins/api/pluginHostApi'
@@ -82,9 +81,12 @@ interface PluginSdkInstance {
 
 const sdkCache = new Map<string, PluginSdkInstance>()
 
-export function scopePluginCss(plugin: string, css: string): string {
-  const escapedPlugin = plugin.replaceAll('\\', '\\\\').replaceAll('"', '\\"')
-  return `@scope ([data-plugin="${escapedPlugin}"]) {\n${css}\n}`
+/**
+ * 插件样式原样透传：启用即信任，宿主不再用 @scope 包裹或裁剪内容。
+ * 插件归属仍由 style 元素与容器上的 data-plugin 标记维护，用于禁用时清理。
+ */
+export function pluginCss(css: string): string {
+  return css
 }
 
 function reportPluginError(plugin: string, err: unknown): void {
@@ -195,13 +197,6 @@ interface DynamicSlot {
 
 const dynamicSlots = new Map<string, DynamicSlot>()
 
-function sanitizeHtml(html: string): string {
-  // 使用 DOMPurify 替代手写正则：正则无法覆盖属性分隔符变体（如 <img/src=x/onerror=…>）、
-  // HTML 实体编码的 javascript: URL、formaction/meta 等注入手法。
-  // 保留 <style> 标签，兼容插件在插槽内注入样式的既有能力。
-  return DOMPurify.sanitize(html, { ADD_TAGS: ['style'] })
-}
-
 function renderSlot(slot: string) {
   const containers = findSlotContainers(slot)
   if (!containers.length) return
@@ -219,7 +214,8 @@ function renderSlot(slot: string) {
       wrapper.className = 'plugin-slot-item'
       wrapper.setAttribute('data-plugin', entry.plugin)
       if (entry.key !== undefined) wrapper.setAttribute('data-injection-key', entry.key)
-      wrapper.innerHTML = sanitizeHtml(entry.html)
+      // 启用即信任：HTML、内联样式与脚本原样交给主窗口，不做消毒。
+      wrapper.innerHTML = entry.html
       container.appendChild(wrapper)
     }
   }
@@ -398,7 +394,7 @@ function createVueComponent(componentName: string, def: VueComponentDef, plugin:
   })
 }
 
-function injectComponentStyle(componentName: string, plugin: string, style: string) {
+function injectComponentStyle(componentName: string, style: string) {
   if (!style.trim()) return
   const id = `plugin-vue-style-${componentName}`
   let styleEl = document.getElementById(id)
@@ -408,7 +404,7 @@ function injectComponentStyle(componentName: string, plugin: string, style: stri
     styleEl.setAttribute('data-plugin-vue-style', componentName)
     document.head.appendChild(styleEl)
   }
-  styleEl.textContent = scopePluginCss(plugin, style)
+  styleEl.textContent = pluginCss(style)
 }
 
 function removeComponentStyle(componentName: string) {
@@ -425,7 +421,7 @@ function createVueRouteComponent(componentName: string, def: VueComponentDef, pl
       return h('div', { class: 'plugin-vue-route', 'data-plugin': plugin }, [h(baseComponent)])
     },
     mounted() {
-      injectComponentStyle(componentName, plugin, def.style || '')
+      injectComponentStyle(componentName, def.style || '')
     },
     unmounted() {
       removeComponentStyle(componentName)
@@ -466,7 +462,7 @@ function renderVueSlot(slotId: string) {
         const component = createVueComponent(entry.component_name, def as VueComponentDef, entry.plugin)
         const app = createApp(component)
         app.mount(el)
-        injectComponentStyle(entry.component_name, entry.plugin, def.style || '')
+        injectComponentStyle(entry.component_name, def.style || '')
         vueSlotApps.push({
           slotId,
           hostKey: `${slotId}:${contextKey || hostIndex}`,

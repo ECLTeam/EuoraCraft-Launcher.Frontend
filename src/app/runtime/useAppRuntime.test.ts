@@ -38,7 +38,7 @@ vi.mock('@/composables/useTheme', () => ({ initTheme: vi.fn() }))
 vi.mock('@/composables/usePluginBridge', () => ({
   initPluginBridge: vi.fn(),
   destroyPluginBridge: vi.fn(),
-  scopePluginCss: vi.fn(),
+  pluginCss: vi.fn(),
 }))
 vi.mock('@/features/terminal/composables/useProcessInstances', () => ({
   globalProcessInstances: { init: vi.fn(), dispose: vi.fn() },
