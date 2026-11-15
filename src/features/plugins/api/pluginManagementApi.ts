@@ -8,6 +8,7 @@ import type {
   PluginPanelData,
   PluginPanelDefinition,
   PluginSettingsData,
+  PluginTechnologyEntryGroup,
 } from '@/types/plugins'
 import { parseDevelopment, parseSettings } from './pluginSettingsValidation'
 
@@ -109,6 +110,12 @@ export const pluginManagementApi = {
       '读取插件面板'
     ) as { panels?: PluginPanelDefinition[] } | undefined
     return Array.isArray(result?.panels) ? result.panels : []
+  },
+
+  async getTechnologyEntries(): Promise<PluginTechnologyEntryGroup[]> {
+    const result = assertSuccess(await backend.command('plugin_technology_entries_get', {}), '读取插件技术栈') as
+      { entries?: PluginTechnologyEntryGroup[] } | undefined
+    return Array.isArray(result?.entries) ? result.entries : []
   },
 
   async getPanelData(pluginName: string, key: string): Promise<PluginPanelData> {

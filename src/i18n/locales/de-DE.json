@@ -1003,7 +1003,8 @@
         "frontendUtilities": "Frontend-Werkzeuge & Animation",
         "rendering": "Rendering & Darstellung",
         "fontsAndIcons": "Schriften & Symbole",
-        "engineering": "Engineering & Qualität"
+        "engineering": "Engineering & Qualität",
+        "pluginTechnologyStack": "Plugin-Technologien"
       },
       "descriptions": {
         "aebc08": "Entwickler von ECLauncherCore, Florolding und EasyTier-PyO3; zuständig für den Spielstart-Kern, die externe Anmeldung und die Mehrspieler-Entwicklung",
@@ -1018,7 +1019,6 @@
         "naiveUi": "Vue-3-Komponentenbibliothek mit reichhaltigen Oberflächenkomponenten",
         "tailwind": "Atomic-CSS-Framework, das das Schreiben von Oberflächenstilen beschleunigt",
         "authlib": "Bietet Unterstützung für die externe Minecraft-Anmeldung (Yggdrasil)",
-        "easyTier": "Dezentrales Vernetzungswerkzeug mit Basissupport für die Mehrspieler-Funktion",
         "pinia": "Vue-State-Management-Bibliothek für den globalen Launcher-Zustand",
         "vueRouter": "Offizieller Vue-Router, der die Navigation zwischen Seiten realisiert",
         "vueI18n": "Internationalisierungs-Plugin, das den Launcher mehrsprachig macht",
@@ -1042,7 +1042,6 @@
         "mcstatusDesc": "Bibliothek zur Abfrage des Minecraft-Serverstatus, prüft die Serververfügbarkeit",
         "psutilDesc": "Plattformübergreifende Bibliothek für Systemprozesse und Ressourceninformationen, überwacht den Hardwarezustand",
         "packagingDesc": "Bibliothek zum Parsen und Vergleichen von Python-Paketversionen, behandelt Versionsnummern semantisch",
-        "easyTierPyo3Desc": "Python-Bindings für EasyTier, liefern die zugrunde liegende Vernetzung für die Mehrspieler-Funktion",
         "materialColors": "Googles Material-Farbwerkzeuge für Themenfarbenberechnung und dynamische Paletten",
         "sass": "In Node eingebettetes Dart Sass, kompiliert die Sass-/SCSS-Stile des Projekts",
         "iconify": "Vue-Icon-Komponente; das Projekt lädt Tabler-Symbole offline über Iconify",

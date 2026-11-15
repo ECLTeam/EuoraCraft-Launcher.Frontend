@@ -259,6 +259,21 @@ export interface PluginPanelData {
   tasks: Record<string, PluginPanelTask>
 }
 
+/** 插件向关于页技术栈声明的单条只读展示条目，由宿主统一渲染样式。 */
+export interface PluginTechnologyEntry {
+  key: string
+  name: string
+  description: string
+  url: string
+  license: string
+}
+
+/** 按插件分组的技术栈条目，plugin_name 对应插件安装名。 */
+export interface PluginTechnologyEntryGroup {
+  plugin_name: string
+  entries: PluginTechnologyEntry[]
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  进度事件
 // ═══════════════════════════════════════════════════════════════════

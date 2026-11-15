@@ -1003,7 +1003,8 @@
         "frontendUtilities": "フロントエンドツールとアニメーション",
         "rendering": "レンダリングと表示",
         "fontsAndIcons": "フォントとアイコン",
-        "engineering": "エンジニアリングと品質"
+        "engineering": "エンジニアリングと品質",
+        "pluginTechnologyStack": "プラグインの技術スタック"
       },
       "descriptions": {
         "aebc08": "ECLauncherCore、Florolding、EasyTier-PyO3 の開発者。ゲーム起動コア、外部ログイン、マルチプレイ開発を担当",
@@ -1018,7 +1019,6 @@
         "naiveUi": "Vue 3 コンポーネントライブラリ。豊富な UI コンポーネントを提供",
         "tailwind": "アトミック CSS フレームワーク。スタイルの記述を高速化",
         "authlib": "Minecraft の外部ログイン（Yggdrasil）サポートを提供",
-        "easyTier": "分散型ネットワーキングツール。マルチプレイ機能に低レベルのネットワークサポートを提供",
         "pinia": "Vue 状態管理ライブラリ。ランチャーのグローバル状態を管理",
         "vueRouter": "Vue 公式ルーター。ページ間のナビゲーションを実現",
         "vueI18n": "国際化プラグイン。ランチャーの多言語対応を実現",
@@ -1042,7 +1042,6 @@
         "mcstatusDesc": "Minecraft サーバー状態クエリライブラリ。サーバーのオンライン状態を検出",
         "psutilDesc": "クロスプラットフォームのシステムプロセス・リソース情報ライブラリ。ハードウェア状態の監視に使用",
         "packagingDesc": "Python パッケージのバージョン解析・比較ライブラリ。バージョン番号のセマンティクスを処理",
-        "easyTierPyo3Desc": "EasyTier の Python バインディング。マルチプレイ機能に低レベルのネットワーク機能を提供",
         "materialColors": "Google Material カラーツール。テーマカラーの計算とダイナミック配色に使用",
         "sass": "Dart Sass の Node 埋め込み版。プロジェクトの Sass/SCSS スタイルをコンパイル",
         "iconify": "Vue アイコンコンポーネント。Iconify 経由で Tabler アイコンをオフライン読み込み",

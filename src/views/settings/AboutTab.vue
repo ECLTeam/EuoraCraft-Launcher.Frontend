@@ -148,6 +148,44 @@
             </div>
           </CollapsiblePanel>
         </div>
+
+        <!-- 插件技术栈：已启用插件声明的条目，按插件分组合并展示 -->
+        <div v-if="pluginTechnologyGroups.length > 0" class="technology-category">
+          <button
+            type="button"
+            class="technology-category__toggle"
+            :aria-expanded="isTechnologyCategoryExpanded(PLUGIN_TECHNOLOGY_CATEGORY_ID)"
+            :aria-controls="`about-technology-${PLUGIN_TECHNOLOGY_CATEGORY_ID}`"
+            @click="toggleTechnologyCategory(PLUGIN_TECHNOLOGY_CATEGORY_ID)"
+          >
+            <span class="technology-category__name">
+              {{ t('settings.aboutTab.technologyCategories.pluginTechnologyStack') }}
+            </span>
+            <span class="technology-category__summary">
+              <span class="technology-category__count">{{ pluginTechnologyEntryCount }}</span>
+              <UiIcon
+                :name="isTechnologyCategoryExpanded(PLUGIN_TECHNOLOGY_CATEGORY_ID) ? 'chevron-up' : 'chevron-down'"
+                :size="14"
+              />
+            </span>
+          </button>
+          <CollapsiblePanel
+            :id="`about-technology-${PLUGIN_TECHNOLOGY_CATEGORY_ID}`"
+            :open="isTechnologyCategoryExpanded(PLUGIN_TECHNOLOGY_CATEGORY_ID)"
+          >
+            <div class="technology-category__entries">
+              <div v-for="group in pluginTechnologyGroups" :key="group.plugin_name" class="technology-plugin-group">
+                <div class="technology-plugin-group__title">{{ pluginTitleFor(group.plugin_name) }}</div>
+                <AboutPluginTechnologyRow
+                  v-for="entry in group.entries"
+                  :key="entry.key"
+                  :entry="entry"
+                  :pluginTitle="pluginTitleFor(group.plugin_name)"
+                />
+              </div>
+            </div>
+          </CollapsiblePanel>
+        </div>
       </div>
     </div>
 
@@ -197,13 +235,16 @@ import { CollapsiblePanel, UiIcon, UiLoading } from '@/components/ui'
 import { useDebugMode } from '@/composables/useDebugMode'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { URLS } from '@/config/urls'
+import { pluginManagementApi } from '@/features/plugins/api/pluginManagementApi'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { usePluginStore } from '@/features/plugins/stores/pluginStore'
 import { specialThanksEntries, teamMembers, technologyCategories } from '@/features/settings/about/aboutContent'
 import AboutPluginRow from '@/features/settings/components/AboutPluginRow.vue'
+import AboutPluginTechnologyRow from '@/features/settings/components/AboutPluginTechnologyRow.vue'
 import DebugInfoModal from '@/features/settings/components/DebugInfoModal.vue'
 import { useDebugModeUnlock } from '@/features/settings/composables/useDebugModeUnlock'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
+import type { PluginTechnologyEntryGroup } from '@/types/plugins'
 import type { LauncherInfo, UpdateCheckResult } from '@/types/system'
 import { openExternalUrl } from '@/utils/openExternal'
 
@@ -336,9 +377,39 @@ const versionText = computed(() => {
 const pluginStore = usePluginStore()
 const enabledPlugins = computed(() => pluginStore.plugins.filter((plugin) => plugin.status === 'enabled'))
 
+// 插件技术栈条目：由已启用插件声明，宿主聚合展示；拉取失败时分类隐藏，不阻塞宿主分类。
+const PLUGIN_TECHNOLOGY_CATEGORY_ID = 'plugin-technology'
+const pluginTechnologyGroups = ref<PluginTechnologyEntryGroup[]>([])
+const pluginTechnologyEntryCount = computed(() =>
+  pluginTechnologyGroups.value.reduce((total, group) => total + group.entries.length, 0)
+)
+
+const pluginTitleByName = computed(() => new Map(pluginStore.plugins.map((plugin) => [plugin.name, plugin.title])))
+
+function pluginTitleFor(pluginName: string): string {
+  return pluginTitleByName.value.get(pluginName) || pluginName
+}
+
+async function refreshPluginTechnology(): Promise<void> {
+  try {
+    pluginTechnologyGroups.value = await pluginManagementApi.getTechnologyEntries()
+  } catch {
+    pluginTechnologyGroups.value = []
+  }
+}
+
+// 插件启停会改变可见条目集合，按启用插件名集合变化重新拉取；条目本身由后端按会话生命周期维护。
+watch(
+  () => enabledPlugins.value.map((plugin) => plugin.name).join('\u0000'),
+  () => {
+    void refreshPluginTechnology()
+  }
+)
+
 onMounted(async () => {
   launcherInfo.value = await launcherInfoQuery()
   pluginStore.load().catch(() => undefined)
+  void refreshPluginTechnology()
 })
 
 // 调试信息弹窗：调试模式未开启时需要连续点击图标才能解锁，开启后单击直接打开
@@ -456,12 +527,6 @@ const licenseEntries: LicenseEntry[] = [
     license: URLS.authlibInjector.license,
   },
   {
-    name: 'EasyTier',
-    text: 'Copyright EasyTier Contributors. Licensed under LGPL-3.0.',
-    repo: URLS.easyTier.repo,
-    license: URLS.easyTier.license,
-  },
-  {
     name: 'HMCL',
     text: 'Copyright HMCL Contributors. Licensed under GPL-3.0.',
     repo: URLS.hmcl.repo,
@@ -470,12 +535,6 @@ const licenseEntries: LicenseEntry[] = [
 ]
 
 licenseEntries.push(
-  {
-    name: 'EasyTier-PyO3',
-    text: 'Copyright EasyTier-PyO3 contributors. Licensed under LGPL-3.0.',
-    repo: URLS.easyTierPyo3.repo,
-    license: URLS.easyTierPyo3.license,
-  },
   {
     name: 'sass-embedded',
     text: 'Licensed under MIT.',
@@ -782,7 +841,6 @@ const licenseByName = new Map(licenseEntries.map((entry) => [entry.name, entry])
 
 const licenseById: Record<string, LicenseEntry> = {
   pytaruix: licenseByName.get('PyTaruiX')!,
-  'easy-tier': licenseByName.get('EasyTier')!,
   'authlib-injector': licenseByName.get('Authlib-Injector')!,
   vue: licenseByName.get('Vue 3')!,
   vite: licenseByName.get('Vite')!,
@@ -796,7 +854,6 @@ const licenseById: Record<string, LicenseEntry> = {
   'vue-use': licenseByName.get('VueUse')!,
   skinview3d: licenseByName.get('skinview3d')!,
   hmcl: licenseByName.get('HMCL')!,
-  'easy-tier-pyo3': licenseByName.get('EasyTier-PyO3')!,
   'sass-embedded': licenseByName.get('sass-embedded')!,
   'material-colors': licenseByName.get('Material Color Utilities')!,
   iconify: licenseByName.get('Iconify')!,

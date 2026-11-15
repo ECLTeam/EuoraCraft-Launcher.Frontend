@@ -82,14 +82,6 @@ export const URLS = {
     repo: 'https://github.com/bs-community/skinview3d',
     license: 'https://github.com/bs-community/skinview3d/blob/master/LICENSE',
   },
-  easyTier: {
-    repo: 'https://github.com/EasyTier/EasyTier',
-    license: 'https://github.com/EasyTier/EasyTier/blob/main/LICENSE',
-  },
-  easyTierPyo3: {
-    repo: 'https://github.com/ECLTeam/EasyTier-PyO3',
-    license: 'https://github.com/ECLTeam/EasyTier-PyO3/blob/main/LICENSE',
-  },
   scaffoldingMC: {
     repo: 'https://github.com/Scaffolding-MC/Scaffolding-MC',
     license: 'https://github.com/Scaffolding-MC/Scaffolding-MC/blob/main/LICENSE',

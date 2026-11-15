@@ -79,6 +79,7 @@ import type {
   PluginRoute,
   PluginSettingsData,
   PluginSlotItem,
+  PluginTechnologyEntryGroup,
   VueComponentDef,
   VueSlotItem,
 } from '@/types/plugins'
@@ -620,6 +621,7 @@ export interface CommandPayloadMap {
     schema_revision: string
   }
   plugin_panels_get: { plugin_name: string }
+  plugin_technology_entries_get: Record<string, never>
   plugin_panel_data: { plugin_name: string; key: string }
   plugin_panel_action: { plugin_name: string; command: string; args: Record<string, unknown> }
   plugin_notify_sidebar_state: { collapsed: boolean }
@@ -917,6 +919,7 @@ export const COMMAND_NAMES = {
   plugin_get_settings: 'plugin_get_settings',
   plugin_update_setting: 'plugin_update_setting',
   plugin_panels_get: 'plugin_panels_get',
+  plugin_technology_entries_get: 'plugin_technology_entries_get',
   plugin_panel_data: 'plugin_panel_data',
   plugin_panel_action: 'plugin_panel_action',
   plugin_notify_sidebar_state: 'plugin_notify_sidebar_state',
@@ -1208,6 +1211,7 @@ export interface CommandResponseMap {
   plugin_get_settings: PluginSettingsData
   plugin_update_setting: { revision: number } | undefined
   plugin_panels_get: { panels: PluginPanelDefinition[] }
+  plugin_technology_entries_get: { entries: PluginTechnologyEntryGroup[] }
   plugin_panel_data: PluginPanelData
   plugin_panel_action: Record<string, unknown>
   plugin_notify_sidebar_state: void

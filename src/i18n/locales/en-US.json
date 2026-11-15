@@ -1007,7 +1007,8 @@
         "frontendUtilities": "Frontend Utilities & Animation",
         "rendering": "Rendering & Display",
         "fontsAndIcons": "Fonts & Icons",
-        "engineering": "Engineering & Quality"
+        "engineering": "Engineering & Quality",
+        "pluginTechnologyStack": "Plugin Technology Stack"
       },
       "descriptions": {
         "aebc08": "Author of ECLauncherCore, Florolding, EasyTier-Pyo3, responsible for game launch core, external auth and networking",
@@ -1022,7 +1023,6 @@
         "naiveUi": "Vue 3 component library offering rich UI components",
         "tailwind": "Atomic CSS framework that speeds up styling",
         "authlib": "Provides Minecraft external authentication (Yggdrasil) support",
-        "easyTier": "Decentralized networking tool providing low-level support for multiplayer",
         "pinia": "Vue state management library managing global launcher state",
         "vueRouter": "Official Vue router for page navigation",
         "vueI18n": "Internationalization plugin enabling multilingual support",
@@ -1046,7 +1046,6 @@
         "mcstatusDesc": "Minecraft server status query library for online checks",
         "psutilDesc": "Cross-platform system process and resource info library for hardware monitoring",
         "packagingDesc": "Python package version parsing and comparison for semantic versioning",
-        "easyTierPyo3Desc": "Python binding of EasyTier providing low-level networking for multiplayer",
         "materialColors": "Google Material color utilities used for theme color math and dynamic palettes",
         "sass": "Embedded Dart Sass for Node, compiling Sass/SCSS styles in the project",
         "iconify": "Vue icon component loading Tabler icons offline through Iconify",

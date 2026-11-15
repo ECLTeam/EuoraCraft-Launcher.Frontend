@@ -17,9 +17,14 @@ const pluginStoreMock = vi.hoisted(() => ({
   load: vi.fn<() => Promise<void>>(),
 }))
 
+const pluginApiMock = vi.hoisted(() => ({
+  getTechnologyEntries: vi.fn<() => Promise<unknown[]>>(),
+}))
+
 vi.mock('/favicon.ico', () => ({ default: '/favicon.ico' }))
 vi.mock('@/utils/openExternal', () => ({ openExternalUrl: vi.fn() }))
 vi.mock('@/app/data', () => ({ launcherInfoQuery: vi.fn().mockResolvedValue(null) }))
+vi.mock('@/features/plugins/api/pluginManagementApi', () => ({ pluginManagementApi: pluginApiMock }))
 vi.mock('@/features/plugins/stores/pluginStore', async () => {
   const { reactive } = await import('vue')
   pluginStoreMock.state = reactive({ plugins: [] as PluginInfo[] })
@@ -71,6 +76,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   debugModeMock.enabledRef!.value = false
   pluginStoreMock.state!.plugins = []
+  pluginApiMock.getTechnologyEntries.mockResolvedValue([])
   debugModeMock.setDebugMode.mockImplementation(async (value: boolean) => {
     debugModeMock.enabledRef!.value = value
   })
@@ -333,4 +339,74 @@ it('主页链接仅在 http(s) 地址时渲染，其他值被忽略', async () =
   const wrapper = mountAboutTab()
   await flushPromises()
   expect(wrapper.get('.about-plugins').find('.about-plugin-row__action').exists()).toBe(false)
+})
+
+const technologyEntry = {
+  key: 'easytier',
+  name: 'EasyTier',
+  description: '去中心化组网工具',
+  url: 'https://github.com/EasyTier/EasyTier',
+  license: 'LGPL-3.0',
+}
+
+function pluginTechnologyCategory(wrapper: ReturnType<typeof mountAboutTab>) {
+  const categories = wrapper.findAll('.technology-category')
+  return categories[categories.length - 1]!
+}
+
+it('插件声明的技术栈条目按插件分组展示并带插件名徽标', async () => {
+  pluginStoreMock.state!.plugins = [enabledPlugin]
+  pluginApiMock.getTechnologyEntries.mockResolvedValue([{ plugin_name: 'example-plugin', entries: [technologyEntry] }])
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  const category = pluginTechnologyCategory(wrapper)
+  expect(category.text()).toContain('插件技术栈')
+  expect(category.get('.technology-category__count').text()).toBe('1')
+  const group = category.get('.technology-plugin-group')
+  expect(group.get('.technology-plugin-group__title').text()).toBe('示例插件')
+  const row = group.get('.about-entry')
+  expect(row.text()).toContain('EasyTier')
+  expect(row.get('.about-plugin-technology__badge').text()).toBe('示例插件')
+  expect(row.text()).toContain('去中心化组网工具')
+  expect(row.text()).toContain('LGPL-3.0')
+  await row.get('.about-entry__action').trigger('click')
+  expect(openExternalUrl).toHaveBeenCalledWith('https://github.com/EasyTier/EasyTier')
+})
+
+it('插件技术栈分类与宿主分类一样默认收起并独立切换', async () => {
+  pluginStoreMock.state!.plugins = [enabledPlugin]
+  pluginApiMock.getTechnologyEntries.mockResolvedValue([{ plugin_name: 'example-plugin', entries: [technologyEntry] }])
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  const category = pluginTechnologyCategory(wrapper)
+  const toggle = category.get('button')
+  const panel = category.get('.collapsible-panel')
+  expect(toggle.attributes('aria-expanded')).toBe('false')
+  expect(panel.classes()).not.toContain('is-open')
+  await toggle.trigger('click')
+  expect(toggle.attributes('aria-expanded')).toBe('true')
+  expect(panel.classes()).toContain('is-open')
+})
+
+it('没有插件条目或拉取失败时插件技术栈分类隐藏，宿主分类不受影响', async () => {
+  pluginApiMock.getTechnologyEntries.mockRejectedValueOnce(new Error('boom'))
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  expect(wrapper.text()).not.toContain('插件技术栈')
+  expect(wrapper.findAll('.technology-category')).toHaveLength(9)
+  // 插件启停触发的重新拉取成功后分类恢复
+  pluginStoreMock.state!.plugins = [enabledPlugin]
+  pluginApiMock.getTechnologyEntries.mockResolvedValue([{ plugin_name: 'example-plugin', entries: [technologyEntry] }])
+  await flushPromises()
+  expect(wrapper.text()).toContain('插件技术栈')
+})
+
+it('宿主技术栈不再包含插件独占的 EasyTier 条目', async () => {
+  const wrapper = mountAboutTab()
+  await flushPromises()
+  const hostEntries = wrapper
+    .findAll('.technology-category')
+    .slice(0, 9)
+    .flatMap((category) => category.findAll('about-entry-row-stub').map((row) => row.text()))
+  expect(hostEntries.some((text) => text.includes('EasyTier'))).toBe(false)
 })

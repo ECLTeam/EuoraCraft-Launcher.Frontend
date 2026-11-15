@@ -179,6 +179,17 @@
   padding: 2px 0 10px;
 }
 
+.technology-plugin-group + .technology-plugin-group {
+  margin-top: 10px;
+}
+
+.technology-plugin-group__title {
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+}
+
 .launcher-summary__content {
   display: flex;
   flex-direction: column;
