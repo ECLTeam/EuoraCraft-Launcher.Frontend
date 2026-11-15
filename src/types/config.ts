@@ -193,14 +193,6 @@ export interface ThemeConfig {
   schedule?: ThemeScheduleConfig
 }
 
-export interface WindowBounds {
-  x?: number
-  y?: number
-  width?: number
-  height?: number
-  monitor?: string
-}
-
 export interface WindowMetadata {
   label: string
   descriptorId: string
@@ -211,7 +203,6 @@ export interface WindowMetadata {
   followMain: boolean
   dataSchema: { read?: string[]; write?: string[] }
   ready: boolean
-  bounds?: WindowBounds
 }
 
 export type NavigationMode = 'sidebar' | 'top'
@@ -240,7 +231,6 @@ export interface UiConfig {
   }
   theme?: Partial<ThemeConfig>
   background?: Partial<BackgroundConfig>
-  windows?: Record<string, WindowBounds>
   instanceManager?: {
     viewMode?: 'card' | 'list'
     sortKey?: InstanceSortKey

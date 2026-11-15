@@ -1,5 +1,4 @@
 import backend from '@/api/client'
-import type { WindowBounds } from '@/types/config'
 
 export const windowApi = {
   async open(descriptorId: string, sessionId?: string, instanceKey?: string) {
@@ -23,10 +22,5 @@ export const windowApi = {
   async focus(label: string) {
     const response = await backend.command('window_focus', { label })
     if (!response.success) throw new Error(response.message || '聚焦窗口失败')
-  },
-  async updateBounds(label: string, bounds: WindowBounds) {
-    const response = await backend.command('window_update_bounds', { label, ...bounds })
-    if (!response.success || !response.data) throw new Error(response.message || '保存窗口位置失败')
-    return response.data
   },
 }

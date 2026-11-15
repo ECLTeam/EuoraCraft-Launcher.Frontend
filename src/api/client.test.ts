@@ -85,16 +85,17 @@ describe('backend IPC client', () => {
     })
   })
 
-  it('reads local images as data URLs without relying on the Tauri asset protocol', async () => {
+  it('resolves local images through the token-bound protocol URL', async () => {
     transportMocks.invoke.mockResolvedValueOnce({
       success: true,
-      data: { dataUrl: 'data:image/webp;base64,UklGRg==' },
+      data: { url: 'http://ecl-img.localhost/abc/QmFzZTY0.png' },
     })
 
     await expect(backend.file.toUrl('E:\\ECL_data\\cache\\screenshots\\thumb.webp')).resolves.toBe(
-      'data:image/webp;base64,UklGRg=='
+      'http://ecl-img.localhost/abc/QmFzZTY0.png'
     )
-    expect(transportMocks.invoke).toHaveBeenCalledWith('image_read_file', {
+    expect(transportMocks.invoke).toHaveBeenCalledWith('image_url_resolve', {
+      kind: 'local',
       path: 'E:\\ECL_data\\cache\\screenshots\\thumb.webp',
     })
   })
@@ -112,22 +113,29 @@ describe('backend IPC client', () => {
     const second = backend.file.toUrl('e:/ecl_data/cache/logo.png/')
     expect(transportMocks.invoke).toHaveBeenCalledOnce()
 
-    resolveImage?.({ success: true, data: { dataUrl: 'data:image/png;base64,AAAA' } })
+    resolveImage?.({ success: true, data: { url: 'http://ecl-img.localhost/abc/logo.png' } })
     await expect(Promise.all([first, second])).resolves.toEqual([
-      'data:image/png;base64,AAAA',
-      'data:image/png;base64,AAAA',
+      'http://ecl-img.localhost/abc/logo.png',
+      'http://ecl-img.localhost/abc/logo.png',
     ])
 
-    await expect(backend.file.toUrl('E:/ECL_data/cache/logo.png')).resolves.toBe('data:image/png;base64,AAAA')
+    await expect(backend.file.toUrl('E:/ECL_data/cache/logo.png')).resolves.toBe(
+      'http://ecl-img.localhost/abc/logo.png'
+    )
     expect(transportMocks.invoke).toHaveBeenCalledOnce()
   })
 
   it('does not cache image failures and retries the next read', async () => {
     transportMocks.invoke.mockResolvedValueOnce({ success: false, message: 'not found' })
-    transportMocks.invoke.mockResolvedValueOnce({ success: true, data: { dataUrl: 'data:image/png;base64,BBBB' } })
+    transportMocks.invoke.mockResolvedValueOnce({
+      success: true,
+      data: { url: 'http://ecl-img.localhost/def/missing.png' },
+    })
 
     await expect(backend.file.toUrl('E:/ECL_data/cache/missing.png')).resolves.toBeNull()
-    await expect(backend.file.toUrl('E:/ECL_data/cache/missing.png')).resolves.toBe('data:image/png;base64,BBBB')
+    await expect(backend.file.toUrl('E:/ECL_data/cache/missing.png')).resolves.toBe(
+      'http://ecl-img.localhost/def/missing.png'
+    )
     expect(transportMocks.invoke).toHaveBeenCalledTimes(2)
   })
 

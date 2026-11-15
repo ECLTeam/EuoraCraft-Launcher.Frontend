@@ -348,7 +348,14 @@ export const useSettingsStore = defineStore('settings', () => {
       media_type: 'image',
       image: { type: 'custom', path: localPath, mode: 'single', image_base64: '' },
     })
-    return { path: localPath, imageUrl: result.dataUrl }
+    // 展示改用受令牌保护的协议地址；签发失败时回退后端返回的 data URL
+    let imageUrl: string | null = null
+    try {
+      imageUrl = await settingsApi.readImage(localPath)
+    } catch {
+      imageUrl = null
+    }
+    return { path: localPath, imageUrl: imageUrl ?? result.dataUrl ?? null }
   }
 
   return {

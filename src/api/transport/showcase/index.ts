@@ -205,7 +205,6 @@ export function createShowcaseTransport(): BackendTransport {
         return success([])
       case 'window_focus':
       case 'window_close':
-      case 'window_update_bounds':
         return success()
       case 'system_ping':
         return success({ status: 'ok', message: 'Showcase Transport 已连接' })
@@ -1305,6 +1304,15 @@ export function createShowcaseTransport(): BackendTransport {
         return success({
           paths: ['Showcase/Downloads/demo-resource.zip'],
         })
+      case 'image_url_resolve': {
+        // 展示模式无真实协议服务：签发地址直接复用内联 SVG 占位图
+        const placeholder =
+          'data:image/svg+xml;utf8,' +
+          encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#1f232b"/><text x="50%" y="50%" fill="#5c5c5c" font-family="sans-serif" font-size="14" text-anchor="middle" dominant-baseline="middle">Showcase 图片</text></svg>'
+          )
+        return success({ url: placeholder, cached: false, stale: false })
+      }
       case 'image_read_file':
         // 占位图：展示模式下所有本地图片读取均返回同一张内联 SVG
         return success({

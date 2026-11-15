@@ -217,6 +217,12 @@ describe('ShowcaseTransport', () => {
     }>
     expect(image.data?.dataUrl.startsWith('data:image/svg+xml')).toBe(true)
 
+    const resolved = (await transport.invoke('image_url_resolve', {
+      kind: 'local',
+      path: 'Showcase/x.png',
+    })) as ApiResponse<{ url: string }>
+    expect(resolved.data?.url.startsWith('data:image/svg+xml')).toBe(true)
+
     const shots = (await transport.invoke('game_screenshot_list', {})) as ApiResponse<
       Array<{ id: string; path: string }>
     >

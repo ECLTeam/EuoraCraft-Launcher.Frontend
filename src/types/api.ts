@@ -37,7 +37,6 @@ import type {
   LauncherConfig,
   SystemMemoryInfo,
   UiConfig,
-  WindowBounds,
   WindowMetadata,
 } from '@/types/config'
 import type { InstanceExportRequest } from '@/types/instanceExport'
@@ -243,7 +242,6 @@ export interface CommandPayloadMap {
   window_open: { descriptor_id: string; session_id?: string; instance_key?: string }
   window_focus: { label: string }
   window_close: { label: string }
-  window_update_bounds: { label: string } & WindowBounds
 
   // 前端日志上报
   frontend_log: { level: 'warn' | 'error'; message: string; detail?: string; logger?: string }
@@ -364,6 +362,7 @@ export interface CommandPayloadMap {
   user_agreement_clear: undefined
   // 文件 / 图片
   image_fetch_data_url: { url: string; refresh?: boolean }
+  image_url_resolve: { kind: 'local' | 'remote'; path?: string; url?: string; refresh?: boolean }
   image_save_url: { url: string }
   image_save_as: ImageSaveAsPayload
   skin_avatar_export: { data_url: string; size: 64 | 128 | 256 | 512; source_path: string }
@@ -721,7 +720,6 @@ export const COMMAND_NAMES = {
   window_open: 'window_open',
   window_focus: 'window_focus',
   window_close: 'window_close',
-  window_update_bounds: 'window_update_bounds',
   frontend_log: 'frontend_log',
   system_memory: 'system_memory',
   game_java_scan: 'game_java_scan',
@@ -795,6 +793,7 @@ export const COMMAND_NAMES = {
   user_agreement_save: 'user_agreement_save',
   user_agreement_clear: 'user_agreement_clear',
   image_fetch_data_url: 'image_fetch_data_url',
+  image_url_resolve: 'image_url_resolve',
   image_save_url: 'image_save_url',
   image_save_as: 'image_save_as',
   skin_avatar_export: 'skin_avatar_export',
@@ -977,7 +976,6 @@ export interface CommandResponseMap {
   window_open: WindowMetadata
   window_focus: void
   window_close: void
-  window_update_bounds: WindowMetadata
 
   frontend_log: void
 
@@ -1059,6 +1057,7 @@ export interface CommandResponseMap {
   user_agreement_clear: void
 
   image_fetch_data_url: ImageDataUrl
+  image_url_resolve: { url: string; url_source?: string; cached?: boolean; stale?: boolean }
   image_save_url: ImageSaveUrlResult
   image_save_as: SelectResult
   skin_avatar_export: SelectResult

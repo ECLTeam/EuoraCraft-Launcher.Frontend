@@ -7,42 +7,12 @@ import type { DownloadConfig, GameConfig, LauncherConfig, SystemMemoryInfo, UiCo
 import type { JavaInstallation } from '@/types/instances'
 import type { ImageSaveAsPayload } from '@/types/system'
 
-// 图片 URL 内存缓存：避免重复 IPC 读取与解码（按路径缓存，上限 32 条）
+// 图片 URL 内存缓存：避免重复签发协议地址（按路径缓存，上限 32 条）
 const IMAGE_URL_CACHE_LIMIT = 32
-const MAX_CACHED_DATA_URL_LENGTH = 2 * 1024 * 1024 // 超过 2MB 的 data URL 不缓存，防止内存膨胀
 const imageUrlCache = new Map<string, string>()
 
-function normalizeBackgroundDataUrl(dataUrl: string): Promise<string> {
-  return new Promise((resolve) => {
-    if (!dataUrl.startsWith('data:')) {
-      resolve(dataUrl)
-      return
-    }
-    const image = new Image()
-    image.onload = () => {
-      const scale = Math.min(1, 1920 / image.naturalWidth, 1080 / image.naturalHeight)
-      if (scale === 1 && dataUrl.length <= MAX_CACHED_DATA_URL_LENGTH) {
-        resolve(dataUrl)
-        return
-      }
-      const canvas = document.createElement('canvas')
-      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
-      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
-      const context = canvas.getContext('2d')
-      if (!context) {
-        resolve(dataUrl)
-        return
-      }
-      context.drawImage(image, 0, 0, canvas.width, canvas.height)
-      resolve(canvas.toDataURL('image/webp', 0.82))
-    }
-    image.onerror = () => resolve(dataUrl)
-    image.src = dataUrl
-  })
-}
-
 function cacheImageUrl(path: string, url: string | null): void {
-  if (!url || (url.startsWith('data:') && url.length > MAX_CACHED_DATA_URL_LENGTH)) return
+  if (!url) return
   if (imageUrlCache.size >= IMAGE_URL_CACHE_LIMIT) {
     const oldest = imageUrlCache.keys().next().value
     if (oldest !== undefined) imageUrlCache.delete(oldest)
@@ -51,27 +21,21 @@ function cacheImageUrl(path: string, url: string | null): void {
 }
 
 /**
- * 通过后端 IPC 读取图片为 data URL（带内存缓存）。
+ * 通过后端为本地图片签发 ecl-img 协议地址（带内存缓存）。
  */
 export async function readImageFile(path: string): Promise<string | null> {
   const cached = imageUrlCache.get(path)
   if (cached) return cached
-  const result = await backend.command('image_read_file', { path })
+  const result = await backend.command('image_url_resolve', { kind: 'local', path })
   if (!result.success) throw new Error(result.message || '读取图片失败')
-  const data = result.data ?? {}
-  let url: string | null = null
-  if (data.dataUrl) {
-    url = await normalizeBackgroundDataUrl(data.dataUrl)
-  } else if (data.base64) {
-    url = `data:image/png;base64,${data.base64}`
-  }
+  const url = result.data?.url ?? null
   cacheImageUrl(path, url)
   return url
 }
 
 /**
- * 通过后端读取本地图片并返回可展示的 Data URL。
- * 结果按路径缓存，避免同一运行周期重复传输。
+ * 通过后端读取本地图片并返回可在 <img> 中直接使用的协议地址。
+ * 结果按路径缓存，避免同一运行周期重复签发。
  */
 export async function resolveLocalImageUrl(path: string): Promise<string | null> {
   return readImageFile(path)
@@ -180,8 +144,7 @@ export const settingsApi = {
   async saveImageUrl(url: string): Promise<ImageSaveUrlResult | null> {
     const result = await backend.command('image_save_url', { url })
     if (!result.success) throw new Error(result.message || '保存远程图片失败')
-    if (!result.data) return null
-    return { ...result.data, dataUrl: await normalizeBackgroundDataUrl(result.data.dataUrl) }
+    return result.data ?? null
   },
 
   async saveImageAs(payload: ImageSaveAsPayload): Promise<string | null> {
