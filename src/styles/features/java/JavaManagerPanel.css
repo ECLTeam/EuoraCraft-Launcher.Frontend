@@ -180,7 +180,15 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   max-width: 100%;
-  gap: var(--s-xs);
+  gap: 2px;
+}
+.java-runtime-actions :deep(.ui-btn) {
+  --ui-button-height: 28px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+.java-runtime-actions :deep(.btn-square) {
+  padding: 0;
 }
 @container (max-width: 640px) {
   .java-manager-table-header {

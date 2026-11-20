@@ -118,7 +118,7 @@
           </div>
           <div class="java-runtime-actions">
             <UiButton
-              variant="secondary"
+              variant="text"
               size="sm"
               :disabled="!canUse(runtime) || isActing"
               @click="useRuntime(runtime)"
@@ -126,7 +126,7 @@
             >
             <UiButton
               v-if="runtime.validationStatus !== 'valid'"
-              variant="secondary"
+              variant="text"
               size="sm"
               :disabled="isRegistering"
               @click="register"
@@ -134,7 +134,7 @@
             >
             <UiButton
               v-if="updates[runtime.runtimeId]"
-              variant="secondary"
+              variant="text"
               size="sm"
               :disabled="isActing"
               @click="prepareInstall(updates[runtime.runtimeId]!)"

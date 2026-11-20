@@ -108,7 +108,7 @@ async function _verifyJavaManagerLayout(page) {
           if (!row) return null
           return {
             height: row.getBoundingClientRect().height,
-            heading: rect(row.querySelector('.java-runtime-heading')),
+            heading: rect(row.querySelector('.java-runtime-identity')),
             actions: rect(row.querySelector('.java-runtime-actions')),
           }
         })(),
@@ -158,7 +158,7 @@ async function _verifyJavaManagerLayout(page) {
                 const theme = useTheme()
                 theme.setThemeId(skin, false)
                 theme.setThemeMode(mode, false)
-                theme.setTransparentBg(true, false)
+                theme.setWindowSurface('translucent', false)
                 theme.setAppearance({ card_opacity: 70 }, false)
                 theme.setBlurLayerEnabled(blur, false)
               },
@@ -207,10 +207,10 @@ async function _verifyJavaManagerLayout(page) {
     await page.locator('.java-manager-content').evaluate((el) => {
       el.scrollTop = 0
     })
-    await page.locator('.java-manager-content input').fill('not-a-runtime')
+    await page.locator('.java-manager-toolbar input').fill('not-a-runtime')
     await page.locator('.java-manager-empty').waitFor({ state: 'visible' })
     await measure('search empty')
-    await page.locator('.java-manager-content input').fill('')
+    await page.locator('.java-manager-toolbar input').fill('')
     await page.evaluate(() => window.__javaLayoutRows(0))
     await page.locator('.java-manager-empty').waitFor({ state: 'visible' })
     await measure('empty inventory')
@@ -226,11 +226,6 @@ async function _verifyJavaManagerLayout(page) {
       const { i18n } = await import('/src/i18n/index.ts')
       i18n.global.locale.value = 'zh-CN'
     })
-    await page.locator('.java-manager-tabs button').nth(1).click()
-    await page.locator('.java-package-row').waitFor({ state: 'visible' })
-    await measure('download view')
-    await page.locator('.java-manager-tabs button').first().click()
-    await page.locator('.java-runtime-row').waitFor({ state: 'visible' })
     await page.evaluate(async () => {
       const { useTheme } = await import('/src/composables/useTheme.ts')
       const theme = useTheme()
