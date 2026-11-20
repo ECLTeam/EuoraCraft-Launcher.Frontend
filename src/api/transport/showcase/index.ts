@@ -765,7 +765,7 @@ export function createShowcaseTransport(): BackendTransport {
         return success()
       case 'plugin_get_settings': {
         const name = String(payload.plugin_name)
-        const state = pluginSettings.get(name) ?? { revision: 0, values: { greeting: 'Hello', notifications: true } }
+        const state = pluginSettings.get(name) ?? { revision: 0, values: { greeting: 'Hello', notifications: true, mode: 'auto' } }
         pluginSettings.set(name, state)
         return success({
           installation_id: 'a'.repeat(32),
@@ -776,8 +776,31 @@ export function createShowcaseTransport(): BackendTransport {
           revision: state.revision,
           values: state.values,
           schema: [
-            { key: 'greeting', description: 'Greeting', type: 'string', default: 'Hello' },
-            { key: 'notifications', description: 'Notifications', type: 'bool', default: true },
+            {
+              key: 'greeting',
+              type: 'string',
+              default: 'Hello',
+              label: '问候语',
+              description: '展示模式下面板卡片显示的问候文字。',
+            },
+            {
+              key: 'notifications',
+              type: 'bool',
+              default: true,
+              label: '通知',
+              description: '是否在任务完成时弹出提醒。',
+            },
+            {
+              key: 'mode',
+              type: 'select',
+              default: 'auto',
+              label: '刷新策略',
+              description: '卡片数据的刷新方式；切换立即生效。',
+              options: [
+                { value: 'auto', label: '自动刷新' },
+                { value: 'manual', label: '仅手动刷新' },
+              ],
+            },
           ],
         })
       }

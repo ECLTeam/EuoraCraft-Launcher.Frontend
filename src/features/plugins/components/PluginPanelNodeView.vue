@@ -192,7 +192,7 @@ const stringValue = computed(() => (typeof settingValue.value === 'string' ? set
 const numberValue = computed(() => (typeof settingValue.value === 'number' ? settingValue.value : 0))
 
 const selectOptions = computed(() =>
-  (settingSchema.value?.options ?? []).map((option) => ({ label: option, value: option }))
+  (settingSchema.value?.options ?? []).map((option) => ({ label: option.label || option.value, value: option.value }))
 )
 
 const rows = computed(() => {

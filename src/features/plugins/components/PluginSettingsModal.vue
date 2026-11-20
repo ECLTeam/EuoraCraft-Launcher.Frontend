@@ -34,7 +34,8 @@
             :title="`${item.title || item.name}\n${item.name}`"
             @click="select(item)"
           >
-            <UiIcon class="plugin-settings-choice-icon" :name="item.icon || 'plugin'" :size="22" />
+            <img v-if="item.icon" class="plugin-settings-choice-icon" :src="item.icon" alt="" />
+            <UiIcon v-else class="plugin-settings-choice-icon" name="plugin" :size="22" />
             <span class="plugin-settings-choice-name">{{ item.title || item.name }}</span>
           </button>
           <UiLoading v-if="catalogLoading" mode="inline" />
@@ -55,6 +56,8 @@
             <template v-if="selected">
               <header class="plugin-settings-heading">
                 <div class="plugin-settings-title">
+                  <img v-if="selected.icon" class="plugin-settings-avatar" :src="selected.icon" alt="" />
+                  <UiIcon v-else class="plugin-settings-avatar-fallback" name="plugin" :size="28" />
                   <h2 :title="`${selected.title || selected.name}\n${selected.name}`">
                     {{ selected.title || selected.name }}
                   </h2>
@@ -93,13 +96,14 @@
                     :title="item.key"
                   >
                     <div class="plugin-setting-label">
-                      <strong>{{ item.description || item.key }}</strong>
+                      <strong>{{ item.label || item.key }}</strong>
+                      <span v-if="item.description">{{ item.description }}</span>
                     </div>
                     <div class="plugin-setting-value">
                       <NSwitch
                         v-if="item.type === 'bool'"
                         size="small"
-                        :aria-label="item.description || item.key"
+                        :aria-label="item.label || item.key"
                         :disabled="isSaving"
                         :value="values[item.key] === true"
                         @update:value="save(item.key, $event)"
@@ -109,7 +113,7 @@
                         size="small"
                         class="setting-control"
                         :disabled="isSaving"
-                        :inputProps="{ 'aria-label': item.description || item.key }"
+                        :inputProps="{ 'aria-label': item.label || item.key }"
                         :value="numberValue(values[item.key])"
                         @update:value="saveNumber(item.key, $event)"
                       />
@@ -118,9 +122,9 @@
                         size="small"
                         class="setting-control"
                         :disabled="isSaving"
-                        :aria-label="item.description || item.key"
+                        :aria-label="item.label || item.key"
                         :value="stringValue(values[item.key])"
-                        :options="(item.options ?? []).map((value) => ({ label: value, value }))"
+                        :options="(item.options ?? []).map((option) => ({ label: option.label || option.value, value: option.value }))"
                         @update:value="save(item.key, $event)"
                       />
                       <NInput
@@ -130,7 +134,7 @@
                         :autosize="item.type === 'text' ? { minRows: 3, maxRows: 8 } : undefined"
                         class="setting-control"
                         :disabled="isSaving"
-                        :inputProps="{ 'aria-label': item.description || item.key }"
+                        :inputProps="{ 'aria-label': item.label || item.key }"
                         :value="stringValue(values[item.key])"
                         @update:value="values[item.key] = $event"
                         @change="save(item.key, $event)"
@@ -465,9 +469,6 @@ onUnmounted(() => unlisten?.())
   outline: 2px solid var(--primary);
   outline-offset: -2px;
 }
-.plugin-settings-choice-icon {
-  flex-shrink: 0;
-}
 .plugin-settings-choice-name {
   min-width: 0;
   overflow: hidden;
@@ -532,7 +533,7 @@ onUnmounted(() => unlisten?.())
   align-items: center;
   justify-content: space-between;
   gap: var(--s-md);
-  padding: var(--s-lg) 0;
+  padding: var(--s-md) 0;
   border-bottom: 1px solid var(--ecl-border);
 }
 .plugin-setting-row:last-child {
@@ -548,6 +549,31 @@ onUnmounted(() => unlisten?.())
 .plugin-setting-label strong {
   font-size: 13px;
   font-weight: 500;
+}
+.plugin-setting-label span {
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.plugin-settings-avatar,
+.plugin-settings-avatar-fallback {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: var(--ecl-radius-control);
+  object-fit: cover;
+}
+.plugin-settings-avatar-fallback {
+  color: var(--primary);
+}
+.plugin-settings-choice-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: var(--ecl-radius-control);
+  object-fit: cover;
 }
 .plugin-setting-value {
   min-width: 0;

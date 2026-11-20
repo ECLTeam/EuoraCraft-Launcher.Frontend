@@ -64,7 +64,8 @@
             <article v-for="plugin in filteredPlugins" :key="plugin.name" class="plugin-row">
               <div class="plugin-identity">
                 <div class="plugin-icon">
-                  <UiIcon :name="plugin.icon || 'plugin'" :size="40" />
+                  <img v-if="plugin.icon" :src="plugin.icon" alt="" />
+                  <UiIcon v-else name="plugin" :size="40" />
                 </div>
                 <div class="plugin-content">
                   <span class="plugin-name" :title="plugin.title || plugin.name">{{

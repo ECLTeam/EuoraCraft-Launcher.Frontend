@@ -17,6 +17,7 @@ export interface PluginInfo {
   author: string
   homepage: string
   license: string
+  /** 插件头像 data URL；清单未声明图标时为空串，界面回退拼图。 */
   icon: string
   status: string
   pending_restart?: boolean
@@ -282,10 +283,20 @@ export interface PluginDependency {
   name: string
   version: string
 }
+export interface PluginSettingOption {
+  /** 提交与持久化的原始值。 */
+  value: string
+  /** 界面展示名；空串时回退显示 value。 */
+  label: string
+}
+
 export interface PluginSettingSchema {
   key: string
-  options?: string[]
+  options?: PluginSettingOption[]
   default: unknown
+  /** 展示名；空串时界面回退显示 key。 */
+  label?: string
+  /** 渲染在展示名下方的补充说明。 */
   description: string
   type: 'bool' | 'string' | 'text' | 'number' | 'select' | 'readonly_file'
 }

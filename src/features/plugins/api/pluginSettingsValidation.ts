@@ -1,4 +1,5 @@
 import {
+  type PluginSettingOption,
   pluginDevelopmentStatuses,
   type PluginDevelopmentState,
   type PluginSettingSchema,
@@ -12,7 +13,8 @@ function record(value: unknown): value is Record<string, unknown> {
 function schemaItem(value: unknown): value is PluginSettingSchema {
   if (!record(value) || typeof value.key !== 'string' || !/^[A-Za-z_][A-Za-z0-9_.-]{0,63}$/.test(value.key))
     return false
-  if (typeof value.description !== 'string') return false
+  if (typeof value.description !== 'string' || (value.label !== undefined && typeof value.label !== 'string'))
+    return false
   if (value.type === 'bool') return typeof value.default === 'boolean'
   if (value.type === 'number') return typeof value.default === 'number' && Number.isFinite(value.default)
   if (value.type === 'string' || value.type === 'text' || value.type === 'readonly_file')
@@ -22,9 +24,13 @@ function schemaItem(value: unknown): value is PluginSettingSchema {
     typeof value.default === 'string' &&
     Array.isArray(value.options) &&
     value.options.length <= 64 &&
-    value.options.every((item) => typeof item === 'string') &&
-    value.options.includes(value.default)
+    value.options.every(optionItem) &&
+    value.options.some((item) => item.value === value.default)
   )
+}
+
+function optionItem(value: unknown): value is PluginSettingOption {
+  return record(value) && typeof value.value === 'string' && value.value !== '' && typeof value.label === 'string'
 }
 
 export function parseSettings(value: unknown): PluginSettingsData {
@@ -55,7 +61,7 @@ export function parseSettings(value: unknown): PluginSettingsData {
       const stored = values[item.key]
       if (item.type === 'bool') return typeof stored !== 'boolean'
       if (item.type === 'number') return typeof stored !== 'number' || !Number.isFinite(stored)
-      return typeof stored !== 'string' || (item.type === 'select' && !item.options?.includes(stored))
+      return typeof stored !== 'string' || (item.type === 'select' && !item.options?.some((option) => option.value === stored))
     })
   )
     throw new Error('PLUGIN_SCHEMA_INVALID')
