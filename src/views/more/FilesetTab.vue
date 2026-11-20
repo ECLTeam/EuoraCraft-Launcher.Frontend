@@ -40,6 +40,9 @@
                 preload="metadata"
               ></video>
               <UiIcon v-else name="photo" :size="26" />
+              <span v-if="item.kind === 'video'" class="fileset-kind" aria-hidden="true">
+                <UiIcon name="player-play" :size="11" />
+              </span>
             </div>
             <div class="fileset-info">
               <strong class="fileset-name" :title="item.name">{{ item.name }}</strong>
@@ -110,9 +113,11 @@ const deleteVisible = ref(false)
 const deleteTarget = ref<FileSetItem | null>(null)
 
 function detailOf(item: FileSetItem): string {
-  const size = formatSize(item.byteSize)
-  if (item.kind === 'image' && item.width && item.height) return `${item.width}×${item.height} · ${size}`
-  return size
+  // 首段固定为文件类型，图片再补尺寸：`PNG · 1920×1080 · 2.1 MB`、`MP4 · 12.3 MB`
+  const parts = [item.extension.replace('.', '').toUpperCase()]
+  if (item.kind === 'image' && item.width && item.height) parts.push(`${item.width}×${item.height}`)
+  parts.push(formatSize(item.byteSize))
+  return parts.join(' · ')
 }
 
 function formatSize(bytes: number): string {
@@ -332,6 +337,7 @@ onMounted(reload)
 }
 
 .fileset-preview {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,6 +346,20 @@ onMounted(reload)
   border-radius: var(--ecl-radius-control);
   background: var(--ecl-canvas);
   color: var(--ecl-text-tertiary);
+}
+
+/* 视频角标：不必悬停取流也能区分图片与视频 */
+.fileset-kind {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-radius-control);
+  background: var(--ecl-surface);
+  color: var(--ecl-text);
 }
 
 .fileset-preview img,

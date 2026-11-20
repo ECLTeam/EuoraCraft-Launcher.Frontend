@@ -24,9 +24,13 @@
       >
         <span class="fileset-picker-preview">
           <img v-if="item.kind === 'image' && thumbnails[item.id]" :src="thumbnails[item.id]" alt="" loading="lazy" />
-          <UiIcon v-else :name="item.kind === 'video' ? 'movie' : 'photo'" :size="22" />
+          <UiIcon v-else name="photo" :size="22" />
+          <span v-if="item.kind === 'video'" class="fileset-picker-kind" aria-hidden="true">
+            <UiIcon name="player-play" :size="11" />
+          </span>
         </span>
         <span class="fileset-picker-name">{{ item.name }}</span>
+        <span class="fileset-picker-type">{{ item.extension.replace('.', '').toUpperCase() }}</span>
       </button>
     </div>
   </Modal>
@@ -123,10 +127,10 @@ watch(
   flex-direction: column;
   gap: 4px;
   padding: 6px;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card, 8px);
+  border: var(--ecl-card-border-width) solid var(--ecl-border);
+  border-radius: var(--ecl-card-radius);
   background: var(--ecl-surface);
-  color: var(--ecl-text-primary);
+  color: var(--ecl-text);
   cursor: pointer;
   text-align: left;
 }
@@ -136,14 +140,29 @@ watch(
 }
 
 .fileset-picker-preview {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: var(--ecl-radius-control);
   background: var(--ecl-canvas);
-  color: var(--ecl-text-secondary);
+  color: var(--ecl-text-tertiary);
+}
+
+/* 视频角标：选择弹窗里同样要能区分图片与视频 */
+.fileset-picker-kind {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-radius-control);
+  background: var(--ecl-surface);
+  color: var(--ecl-text);
 }
 
 .fileset-picker-preview img {
@@ -157,5 +176,10 @@ watch(
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.fileset-picker-type {
+  color: var(--ecl-text-secondary);
+  font-size: 11px;
 }
 </style>

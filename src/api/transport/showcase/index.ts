@@ -427,12 +427,13 @@ export function createShowcaseTransport(): BackendTransport {
       case 'fileset_thumbnail': {
         const body = getPayload(payload)
         const target = filesetItems.find((item) => item.id === body.item_id)
-        const url = target ? (filesetAssets[target.id] ?? null) : null
-        if (!target || !url) return success(null)
+        if (!target) return success(null)
+        // 演示环境没有真实视频文件，视频条目返回空地址，界面回落到占位图标。
+        const url = filesetAssets[target.id] ?? ''
         if (command === 'fileset_resolve') {
           return success({ path: `Showcase/.ecl/filesets/${target.id}${target.extension}`, url, kind: target.kind })
         }
-        return success({ path: null, url })
+        return success({ path: null, url: target.kind === 'image' ? url : null })
       }
       case 'wardrobe_texture':
         return success({ dataUrl: `${import.meta.env.BASE_URL}img/skins/Alex.png`, mime: 'image/png' as const })

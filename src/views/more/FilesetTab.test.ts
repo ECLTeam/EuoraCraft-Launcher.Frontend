@@ -48,18 +48,31 @@ describe('文件集页面', () => {
     thumbnailMock.mockResolvedValue({ path: null, url: 'blob:thumb' })
   })
 
-  it('有条目时在面板内渲染卡片，不再落在透明背景上', async () => {
+  it('有条目时在面板内渲染卡片，并标注文件类型', async () => {
     listMock.mockResolvedValue([
       makeItem({ id: 'item-1', name: '背景图' }),
       makeItem({ id: 'item-2', name: '封面图', byteSize: 4096 }),
+      makeItem({
+        id: 'item-3',
+        name: '开场动画',
+        kind: 'video',
+        extension: '.mp4',
+        byteSize: 3_000_000,
+        width: null,
+        height: null,
+      }),
     ])
     const wrapper = mountTab()
     await flushPromises()
 
     expect(wrapper.find('.fileset-panel.ecl-surface').exists()).toBe(true)
-    expect(wrapper.findAll('.fileset-card')).toHaveLength(2)
+    expect(wrapper.findAll('.fileset-card')).toHaveLength(3)
     expect(wrapper.text()).toContain('背景图')
-    expect(wrapper.text()).toContain('1920×1080 · 4 KB')
+    expect(wrapper.text()).toContain('PNG · 1920×1080 · 2 KB')
+    expect(wrapper.text()).toContain('PNG · 1920×1080 · 4 KB')
+    expect(wrapper.text()).toContain('MP4 · 2.9 MB')
+    // 视频才有角标，图片不显示
+    expect(wrapper.findAll('.fileset-kind')).toHaveLength(1)
     wrapper.unmount()
   })
 

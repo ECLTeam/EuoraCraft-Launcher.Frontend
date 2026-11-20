@@ -496,6 +496,18 @@ export const showcaseFilesetItems: FileSetItem[] = [
     createdAt: '2026-11-14T18:42:00Z',
     updatedAt: '2026-11-14T18:42:00Z',
   },
+  {
+    id: 'fileset-trailer',
+    kind: 'video',
+    name: '开场动画',
+    sha256: 'd'.repeat(64),
+    extension: '.mp4',
+    byteSize: 8_600_000,
+    width: null,
+    height: null,
+    createdAt: '2026-11-15T20:10:00Z',
+    updatedAt: '2026-11-15T20:10:00Z',
+  },
 ]
 
 export const showcaseScreenshots: ScreenshotEntry[] = [
