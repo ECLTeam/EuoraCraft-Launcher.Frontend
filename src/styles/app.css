@@ -44,7 +44,8 @@ body:has(#app[data-window-chrome='custom']) {
 .app-background {
   position: fixed;
   inset: 0;
-  background: var(--bg-base);
+  /* 表面底色由 body 承载，这一层只负责背景媒体，避免 alpha 叠加。 */
+  background-color: transparent;
   background-image: var(--bg-image);
   background-size: cover;
   background-position: center;

@@ -39,6 +39,13 @@ import type {
   UiConfig,
   WindowMetadata,
 } from '@/types/config'
+import type {
+  FileSetDeleteResult,
+  FileSetImportResult,
+  FileSetItem,
+  FileSetResolved,
+  FileSetThumbnail,
+} from '@/types/fileset'
 import type { InstanceExportRequest } from '@/types/instanceExport'
 import type {
   CrashAnalysisResult,
@@ -103,6 +110,7 @@ import type {
   UpdateStatus,
   UserAgreement,
 } from '@/types/system'
+
 export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
@@ -350,6 +358,12 @@ export interface CommandPayloadMap {
   wardrobe_texture: { item_id: string }
   wardrobe_export: { item_id: string }
   wardrobe_apply_skin: { item_id: string; account_id: string }
+  fileset_list: undefined
+  fileset_import: { paths: string[] }
+  fileset_rename: { item_id: string; name: string }
+  fileset_delete: { item_ids: string[] }
+  fileset_resolve: { item_id: string }
+  fileset_thumbnail: { item_id: string }
   microsoft_reset_skin: { account_id: string }
   microsoft_set_cape: { account_id: string; cape_id: string }
   microsoft_reset_cape: { account_id: string }
@@ -382,7 +396,7 @@ export interface CommandPayloadMap {
           'crash-analysis' | 'modpack' | 'world-import' | 'world-import-folder' | 'theme-preset' | 'plugin-package'
       }
     | undefined
-  select_files: { purpose?: 'resource-files'; resource_type?: GameResourceType }
+  select_files: { purpose?: 'resource-files' | 'fileset-import'; resource_type?: GameResourceType }
   select_save_file: {
     purpose:
       | 'crash-report'
@@ -787,6 +801,12 @@ export const COMMAND_NAMES = {
   wardrobe_texture: 'wardrobe_texture',
   wardrobe_export: 'wardrobe_export',
   wardrobe_apply_skin: 'wardrobe_apply_skin',
+  fileset_list: 'fileset_list',
+  fileset_import: 'fileset_import',
+  fileset_rename: 'fileset_rename',
+  fileset_delete: 'fileset_delete',
+  fileset_resolve: 'fileset_resolve',
+  fileset_thumbnail: 'fileset_thumbnail',
   microsoft_reset_skin: 'microsoft_reset_skin',
   microsoft_set_cape: 'microsoft_set_cape',
   microsoft_reset_cape: 'microsoft_reset_cape',
@@ -1050,6 +1070,12 @@ export interface CommandResponseMap {
   wardrobe_texture: { dataUrl: string; mime: 'image/png' }
   wardrobe_export: SelectResult
   wardrobe_apply_skin: MinecraftAccount
+  fileset_list: FileSetItem[]
+  fileset_import: FileSetImportResult
+  fileset_rename: FileSetItem
+  fileset_delete: FileSetDeleteResult
+  fileset_resolve: FileSetResolved
+  fileset_thumbnail: FileSetThumbnail
   microsoft_reset_skin: MinecraftAccount
   microsoft_set_cape: MinecraftAccount
   microsoft_reset_cape: MinecraftAccount

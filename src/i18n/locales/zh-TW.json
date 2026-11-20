@@ -1318,6 +1318,13 @@
     "windowChromeNative": "系統原生標題欄",
     "windowChromeDesc": "重新啟動後生效",
     "windowChromeRestartRequired": "已儲存，重新啟動後生效",
+    "windowSurface": "視窗表面",
+    "windowSurfaceDesc": "半透明與毛玻璃需要重新啟動後生效；改用透明表面時，視窗邊緣由啟動器自繪。",
+    "windowSurfaceSolid": "實色",
+    "windowSurfaceTranslucent": "半透明",
+    "windowSurfaceMica": "毛玻璃（僅 Windows）",
+    "windowOpacity": "表面不透明度",
+    "windowOpacityDesc": "只作用於視窗最底層；卡片與面板的不透明度可在上方「外觀細節」單獨調整。",
     "windowChromeWindowsOnly": "系統邊緣僅支援 Windows",
     "auroraBackground": "極光流體背景",
     "auroraBackgroundDesc": "開啟後在背景顯示隨主題色浮動的極光光斑",
@@ -1366,8 +1373,6 @@
     "mouseEffectOpacityDesc": "調整粒子的不透明度",
     "mouseEffectSpeed": "粒子速度",
     "mouseEffectSpeedDesc": "調整粒子移動的速度",
-    "transparentBg": "透明背景",
-    "transparentBgDesc": "啟用後視窗背景變為透明，可透過視窗看到桌面",
     "developer": "開發者",
     "launcherProxy": "啟動器代理",
     "downloadProxy": "下載代理",
@@ -2198,7 +2203,8 @@
     "nav": {
       "room": "連線",
       "plugins": "外掛",
-      "tools": "工具"
+      "tools": "工具",
+      "fileset": "檔案集"
     }
   },
   "tools": {
@@ -2605,5 +2611,32 @@
     "updated": "角色材質已更新",
     "downloaded": "材質已下載至本機衣櫃",
     "updatedRefreshFailed": "材質已修改，但預覽更新失敗，請重新整理確認。"
+  },
+  "fileset": {
+    "title": "檔案集",
+    "import": "匯入檔案",
+    "refresh": "重新整理",
+    "hint": "匯入的圖片與影片會複製到啟動器資料目錄，可從背景設定與實例圖示中選用。",
+    "emptyTitle": "還沒有檔案",
+    "emptyDescription": "點擊「匯入檔案」新增圖片或影片。",
+    "rename": "重新命名",
+    "delete": "刪除",
+    "renameTitle": "重新命名",
+    "renamePlaceholder": "輸入新的名稱",
+    "deleteTitle": "刪除檔案",
+    "deleteContent": "將從檔案集移除該檔案，磁碟上的原始檔案不受影響。",
+    "deleteConfirm": "刪除",
+    "cancel": "取消",
+    "confirm": "確定",
+    "importResult": "已處理 {imported} 項，其中重複 {duplicated} 項，失敗 {failed} 項",
+    "importFailed": "匯入失敗",
+    "renameFailed": "重新命名失敗",
+    "deleteFailed": "刪除失敗",
+    "loadFailed": "讀取檔案集失敗",
+    "inUse": "有 {count} 項正被背景使用，已保留",
+    "pickerEmpty": "檔案集裡還沒有可用的檔案，請先在「更多 → 檔案集」匯入。",
+    "pickerImageTitle": "從檔案集選擇圖片",
+    "pickerVideoTitle": "從檔案集選擇影片",
+    "pickFromSet": "從檔案集選擇"
   }
 }

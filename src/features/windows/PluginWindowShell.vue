@@ -33,7 +33,8 @@ async function close(): Promise<void> {
 .plugin-window-shell {
   min-height: 100vh;
   color: var(--text-primary);
-  background: var(--bg-app, var(--bg-primary));
+  /* 跟随主窗口表面不透明度；插件子窗口没有透明标志时 alpha 不产生实际效果。 */
+  background: color-mix(in srgb, var(--bg-primary) calc(var(--window-surface-alpha, 1) * 100%), transparent);
 }
 header {
   display: flex;

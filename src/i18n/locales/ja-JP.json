@@ -1318,6 +1318,13 @@
     "windowChromeNative": "システムタイトルバー",
     "windowChromeDesc": "再起動後に反映されます",
     "windowChromeRestartRequired": "保存しました。再起動後に反映されます",
+    "windowSurface": "ウィンドウ表面",
+    "windowSurfaceDesc": "半透明とぼかしは再起動後に反映されます。透明な表面ではウィンドウの縁をランチャーが描画します。",
+    "windowSurfaceSolid": "単色",
+    "windowSurfaceTranslucent": "半透明",
+    "windowSurfaceMica": "ぼかし（Windows のみ）",
+    "windowOpacity": "表面の不透明度",
+    "windowOpacityDesc": "ウィンドウ最下層にのみ適用されます。カードとパネルの不透明度は「外観の詳細」で個別に調整します。",
     "windowChromeWindowsOnly": "システム枠は Windows のみ対応しています",
     "auroraBackground": "オーロラ流体背景",
     "auroraBackgroundDesc": "有効にするとテーマカラーに合わせて揺らめくオーロラの光斑が背景に表示されます",
@@ -1366,8 +1373,6 @@
     "mouseEffectOpacityDesc": "パーティクルの不透明度を調整",
     "mouseEffectSpeed": "パーティクルの速度",
     "mouseEffectSpeedDesc": "パーティクルの移動速度を調整",
-    "transparentBg": "透明背景",
-    "transparentBgDesc": "有効にするとウィンドウの背景が透明になり、デスクトップが透けて見えます",
     "developer": "開発者",
     "launcherProxy": "ランチャープロキシー",
     "downloadProxy": "ダウンロードプロキシー",
@@ -2315,7 +2320,8 @@
     "nav": {
       "room": "接続",
       "plugins": "プラグイン",
-      "tools": "ツール"
+      "tools": "ツール",
+      "fileset": "ファイルセット"
     }
   },
   "tools": {
@@ -2722,5 +2728,32 @@
     "updated": "テクスチャを更新しました",
     "downloaded": "ローカル衣装庫に保存しました",
     "updatedRefreshFailed": "変更は完了しましたが、プレビューを更新できません。再読み込みしてください。"
+  },
+  "fileset": {
+    "title": "ファイルセット",
+    "import": "ファイルを追加",
+    "refresh": "更新",
+    "hint": "追加した画像と動画はランチャーのデータフォルダーにコピーされ、背景やインスタンスのアイコンに使用できます。",
+    "emptyTitle": "ファイルがありません",
+    "emptyDescription": "「ファイルを追加」から画像や動画を追加してください。",
+    "rename": "名前を変更",
+    "delete": "削除",
+    "renameTitle": "名前を変更",
+    "renamePlaceholder": "新しい名前を入力",
+    "deleteTitle": "ファイルを削除",
+    "deleteContent": "ファイルセットから削除します。ディスク上の元のファイルは変更されません。",
+    "deleteConfirm": "削除",
+    "cancel": "キャンセル",
+    "confirm": "決定",
+    "importResult": "{imported} 件を処理しました（重複 {duplicated} 件、失敗 {failed} 件）",
+    "importFailed": "追加に失敗しました",
+    "renameFailed": "名前の変更に失敗しました",
+    "deleteFailed": "削除に失敗しました",
+    "loadFailed": "ファイルセットを読み込めませんでした",
+    "inUse": "{count} 件は背景で使用中のため保持しました",
+    "pickerEmpty": "ファイルセットにファイルがありません。「その他 → ファイルセット」で追加してください。",
+    "pickerImageTitle": "ファイルセットから画像を選択",
+    "pickerVideoTitle": "ファイルセットから動画を選択",
+    "pickFromSet": "ファイルセットから"
   }
 }

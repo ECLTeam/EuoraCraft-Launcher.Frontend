@@ -12,7 +12,7 @@ describe('More shell', () => {
     })
     await router.push('/more/plugins')
     const wrapper = mount({ template: '<RouterView />' }, { global: { plugins: [i18n, router] } })
-    expect(wrapper.findAll('.n-menu-item')).toHaveLength(2)
+    expect(wrapper.findAll('.n-menu-item')).toHaveLength(3)
     expect(wrapper.text()).not.toContain(i18n.global.t('more.nav.room'))
     wrapper.unmount()
   })

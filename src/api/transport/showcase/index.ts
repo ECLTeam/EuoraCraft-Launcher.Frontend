@@ -394,6 +394,17 @@ export function createShowcaseTransport(): BackendTransport {
         if (index >= 0) wardrobe.splice(index, 1)
         return success()
       }
+      case 'fileset_list':
+        // 展示模式没有本地媒体库，文件集页面显示空状态。
+        return success([])
+      case 'fileset_import':
+        return success({ imported: [], duplicated: [], failed: [] })
+      case 'fileset_delete':
+        return success({ deleted: [], inUse: [] })
+      case 'fileset_rename':
+      case 'fileset_resolve':
+      case 'fileset_thumbnail':
+        return success(null)
       case 'wardrobe_texture':
         return success({ dataUrl: `${import.meta.env.BASE_URL}img/skins/Alex.png`, mime: 'image/png' as const })
       case 'wardrobe_export':

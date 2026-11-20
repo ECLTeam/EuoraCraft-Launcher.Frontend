@@ -148,8 +148,10 @@
         <img :src="icon.image" alt="" /><span>{{ icon.label }}</span>
       </button>
       <button @click="chooseLocalProfileIcon"><UiIcon name="photo" :size="28" /><span>本地图片</span></button>
+      <button @click="openFilesetIconPicker"><UiIcon name="photo" :size="28" /><span>文件集</span></button>
     </div>
   </Modal>
+  <FileSetPicker v-model:visible="filesetIconPickerVisible" kind="image" @select="handleFilesetIconSelect" />
   <CrashLogPickerModal
     v-model:visible="showCrashPicker"
     :parentId="detailModalRef?.modalId"
@@ -181,6 +183,8 @@ import { UiIcon } from '@/components/ui'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { instanceKey } from '@/composables/useResourceInstallTarget'
 import { getLoaderName } from '@/config/version'
+import { filesetApi } from '@/features/fileset/api/filesetApi'
+import FileSetPicker from '@/features/fileset/components/FileSetPicker.vue'
 import { instanceInstallApi } from '@/features/instances/api/instanceInstallApi'
 import { instanceProfileApi, targetFromVersion } from '@/features/instances/api/instanceProfileApi'
 import { instanceRuntimeApi } from '@/features/instances/api/instanceRuntimeApi'
@@ -360,6 +364,27 @@ async function chooseLocalProfileIcon() {
     return
   }
   iconPickerVisible.value = false
+  emit('updated')
+}
+
+const filesetIconPickerVisible = ref(false)
+
+function openFilesetIconPicker() {
+  // 先收起内置图标选择，避免两个弹层叠加。
+  iconPickerVisible.value = false
+  filesetIconPickerVisible.value = true
+}
+
+async function handleFilesetIconSelect(item: { id: string }) {
+  const version = props.version
+  if (!version) return
+  try {
+    const resolved = await filesetApi.resolve(item.id)
+    await instanceProfileApi.setIcon(targetFromVersion(version), 'local', { sourcePath: resolved.path })
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : '设置实例图标失败')
+    return
+  }
   emit('updated')
 }
 

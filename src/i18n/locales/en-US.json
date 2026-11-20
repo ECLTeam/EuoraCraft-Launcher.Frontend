@@ -1322,6 +1322,13 @@
     "windowChromeNative": "System title bar",
     "windowChromeDesc": "Takes effect after restart",
     "windowChromeRestartRequired": "Saved. Restart to apply.",
+    "windowSurface": "Window surface",
+    "windowSurfaceDesc": "Translucent and blur surfaces apply after a restart. With a transparent surface the launcher draws the window edges itself.",
+    "windowSurfaceSolid": "Solid",
+    "windowSurfaceTranslucent": "Translucent",
+    "windowSurfaceMica": "Blur (Windows only)",
+    "windowOpacity": "Surface opacity",
+    "windowOpacityDesc": "Applies to the bottom-most window layer only; card and panel opacity is adjusted under \"Appearance details\".",
     "windowChromeWindowsOnly": "System frame is available only on Windows",
     "auroraBackground": "Aurora fluid background",
     "auroraBackgroundDesc": "Shows aurora gradients that drift with the theme color",
@@ -1370,8 +1377,6 @@
     "mouseEffectOpacityDesc": "Adjust the opacity of particles",
     "mouseEffectSpeed": "Particle Speed",
     "mouseEffectSpeedDesc": "Adjust the speed of particles",
-    "transparentBg": "Transparent Background",
-    "transparentBgDesc": "Make the window background transparent, allowing desktop to show through",
     "developer": "Developer",
     "launcherProxy": "Launcher Proxy",
     "downloadProxy": "Download Proxy",
@@ -2331,7 +2336,8 @@
     "nav": {
       "room": "Connect",
       "plugins": "Plugins",
-      "tools": "Tools"
+      "tools": "Tools",
+      "fileset": "File set"
     }
   },
   "tools": {
@@ -2739,5 +2745,32 @@
     "updated": "Character texture updated",
     "downloaded": "Texture saved to local wardrobe",
     "updatedRefreshFailed": "Texture changed, but the preview could not refresh. Refresh to check it."
+  },
+  "fileset": {
+    "title": "File set",
+    "import": "Import files",
+    "refresh": "Refresh",
+    "hint": "Imported images and videos are copied into the launcher data folder and can be used for backgrounds and instance icons.",
+    "emptyTitle": "No files yet",
+    "emptyDescription": "Select \"Import files\" to add images or videos.",
+    "rename": "Rename",
+    "delete": "Delete",
+    "renameTitle": "Rename item",
+    "renamePlaceholder": "Enter a new name",
+    "deleteTitle": "Delete file",
+    "deleteContent": "This removes the file from the file set; the original file on disk is not affected.",
+    "deleteConfirm": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "importResult": "Processed {imported} items: {duplicated} duplicates, {failed} failed",
+    "importFailed": "Import failed",
+    "renameFailed": "Rename failed",
+    "deleteFailed": "Delete failed",
+    "loadFailed": "Could not load the file set",
+    "inUse": "{count} item(s) are used as background and were kept",
+    "pickerEmpty": "The file set is empty. Import files from \"More → File set\" first.",
+    "pickerImageTitle": "Choose an image from the file set",
+    "pickerVideoTitle": "Choose a video from the file set",
+    "pickFromSet": "From file set"
   }
 }

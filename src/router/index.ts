@@ -56,6 +56,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: 'plugins', name: 'more-plugins', component: withErrorBoundary(() => import('@/views/Plugins.vue')) },
       { path: 'tools', name: 'more-tools', component: () => import('@/views/more/ToolsTab.vue') },
+      { path: 'fileset', name: 'more-fileset', component: () => import('@/views/more/FilesetTab.vue') },
     ],
   },
   { path: '/download', name: 'download', component: withErrorBoundary(() => import('@/views/Download.vue')) },

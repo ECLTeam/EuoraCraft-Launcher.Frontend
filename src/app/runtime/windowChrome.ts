@@ -6,6 +6,7 @@ export type ActiveWindowChrome = 'custom' | 'system_shadow' | 'native'
 
 const activeWindowChrome = ref<ActiveWindowChrome>('custom')
 const systemShadowSupported = ref(false)
+const windowEffectsSupported = ref(false)
 
 /** 在首次渲染前读取主窗口的实际装饰和启动快照，避免待重启设置提前改变当前布局。 */
 export async function detectActiveWindowChrome(): Promise<void> {
@@ -17,6 +18,7 @@ export async function detectActiveWindowChrome(): Promise<void> {
   }
   const info = await launcherInfoQuery().catch(() => null)
   systemShadowSupported.value = info?.system_shadow_supported === true
+  windowEffectsSupported.value = info?.window_effects_supported === true
   activeWindowChrome.value = isDecorated
     ? 'native'
     : info?.active_window_chrome === 'system_shadow'
@@ -31,4 +33,9 @@ export function useActiveWindowChrome() {
 
 export function useSystemShadowSupported() {
   return readonly(systemShadowSupported)
+}
+
+/** 原生窗口特效（mica 等毛玻璃）是否可用；仅 Windows 返回 true。 */
+export function useWindowEffectsSupported() {
+  return readonly(windowEffectsSupported)
 }

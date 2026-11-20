@@ -270,6 +270,14 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/*
+ * 窗口表面色单独铺在 body 上，透明度由 --window-surface-alpha 控制。
+ * 背景图片层自行保持不透明，避免与表面 alpha 叠加成双重透明。
+ */
+body {
+  background-color: color-mix(in srgb, var(--bg-base) calc(var(--window-surface-alpha, 1) * 100%), transparent);
+}
+
 h1 {
   font-size: 22px;
   font-weight: 700;

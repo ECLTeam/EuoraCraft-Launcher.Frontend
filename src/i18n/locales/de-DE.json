@@ -1318,6 +1318,13 @@
     "windowChromeNative": "Systemtitelleiste",
     "windowChromeDesc": "Wirksam nach einem Neustart",
     "windowChromeRestartRequired": "Gespeichert. Neustart erforderlich.",
+    "windowSurface": "Fensteroberfläche",
+    "windowSurfaceDesc": "Transparenz und Weichzeichnen wirken nach einem Neustart. Bei transparenter Oberfläche zeichnet der Launcher die Fensterränder selbst.",
+    "windowSurfaceSolid": "Deckend",
+    "windowSurfaceTranslucent": "Transparent",
+    "windowSurfaceMica": "Weichzeichnen (nur Windows)",
+    "windowOpacity": "Deckkraft der Oberfläche",
+    "windowOpacityDesc": "Gilt nur für die unterste Fensterebene; die Deckkraft von Karten und Panels wird unter \"Darstellungsdetails\" eingestellt.",
     "windowChromeWindowsOnly": "Systemrahmen nur unter Windows verfügbar",
     "auroraBackground": "Aurora-Hintergrund",
     "auroraBackgroundDesc": "Zeigt im Hintergrund Aurora-Lichtflecken, die mit der Akzentfarbe mitschweben",
@@ -1366,8 +1373,6 @@
     "mouseEffectOpacityDesc": "Deckkraft der Partikel anpassen",
     "mouseEffectSpeed": "Partikelgeschwindigkeit",
     "mouseEffectSpeedDesc": "Bewegungsgeschwindigkeit der Partikel anpassen",
-    "transparentBg": "Transparenter Hintergrund",
-    "transparentBgDesc": "Macht den Fensterhintergrund transparent, sodass der Schreibtisch sichtbar wird",
     "developer": "Entwickler",
     "launcherProxy": "Launcher-Proxy",
     "downloadProxy": "Download-Proxy",
@@ -2315,7 +2320,8 @@
     "nav": {
       "room": "Verbindung",
       "plugins": "Plugins",
-      "tools": "Werkzeuge"
+      "tools": "Werkzeuge",
+      "fileset": "Dateisatz"
     }
   },
   "tools": {
@@ -2722,5 +2728,32 @@
     "updated": "Textur aktualisiert",
     "downloaded": "Textur in lokaler Garderobe gespeichert",
     "updatedRefreshFailed": "Textur geändert, aber die Vorschau konnte nicht aktualisiert werden. Bitte erneut aktualisieren."
+  },
+  "fileset": {
+    "title": "Dateisatz",
+    "import": "Dateien importieren",
+    "refresh": "Aktualisieren",
+    "hint": "Importierte Bilder und Videos werden in den Datenordner des Launchers kopiert und stehen für Hintergründe und Instanz-Symbole bereit.",
+    "emptyTitle": "Noch keine Dateien",
+    "emptyDescription": "Über „Dateien importieren“ Bilder oder Videos hinzufügen.",
+    "rename": "Umbenennen",
+    "delete": "Löschen",
+    "renameTitle": "Eintrag umbenennen",
+    "renamePlaceholder": "Neuen Namen eingeben",
+    "deleteTitle": "Datei löschen",
+    "deleteContent": "Die Datei wird aus dem Dateisatz entfernt; die Originaldatei auf dem Datenträger bleibt unverändert.",
+    "deleteConfirm": "Löschen",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "importResult": "{imported} Einträge verarbeitet: {duplicated} Duplikate, {failed} fehlgeschlagen",
+    "importFailed": "Import fehlgeschlagen",
+    "renameFailed": "Umbenennen fehlgeschlagen",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "loadFailed": "Dateisatz konnte nicht geladen werden",
+    "inUse": "{count} Einträge werden als Hintergrund verwendet und bleiben erhalten",
+    "pickerEmpty": "Der Dateisatz ist leer. Importieren Sie zuerst Dateien unter „Mehr → Dateisatz“.",
+    "pickerImageTitle": "Bild aus dem Dateisatz wählen",
+    "pickerVideoTitle": "Video aus dem Dateisatz wählen",
+    "pickFromSet": "Aus Dateisatz"
   }
 }

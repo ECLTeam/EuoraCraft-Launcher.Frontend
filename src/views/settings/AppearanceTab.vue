@@ -78,6 +78,32 @@
       <SettingRow :label="t('settings.topNav')" :description="t('settings.topNavDesc')">
         <NSwitch :value="topNavEnabled" @update:value="toggleTopNav" />
       </SettingRow>
+      <SettingRow :label="t('settings.windowSurface')" :description="t('settings.windowSurfaceDesc')">
+        <NSelect
+          class="window-chrome-select"
+          :value="windowSurface"
+          :options="windowSurfaceOptions"
+          to="#app"
+          size="small"
+          @update:value="handleWindowSurfaceChange"
+        />
+      </SettingRow>
+      <SettingRow
+        v-if="windowSurface !== 'solid'"
+        :label="t('settings.windowOpacity')"
+        :description="t('settings.windowOpacityDesc')"
+      >
+        <div class="slider-control">
+          <NSlider
+            :value="windowOpacity"
+            :min="30"
+            :max="100"
+            :tooltip="false"
+            @update:value="handleWindowOpacityChange"
+          />
+          <span>{{ windowOpacity }}%</span>
+        </div>
+      </SettingRow>
     </SettingSection>
 
     <SettingSection v-if="showEffectSettings" :title="t('settings.appearanceSectionEffects')">
@@ -257,6 +283,7 @@
               @update:value="handleBgImageInput"
             />
             <NButton :loading="imagePickPending" @click="selectLocalImage">{{ t('common.browse') }}</NButton>
+            <NButton quaternary @click="openFilesetPicker('image')">{{ t('fileset.pickFromSet') }}</NButton>
           </NInputGroup>
           <input
             ref="showcaseImageInputRef"
@@ -291,6 +318,7 @@
           <NInputGroup class="background-input-group">
             <NInput :value="backgroundVideoPath" readonly :placeholder="t('settings.backgroundVideoEmpty')" />
             <NButton :loading="videoPickPending" @click="selectBackgroundVideo">{{ t('common.browse') }}</NButton>
+            <NButton quaternary @click="openFilesetPicker('video')">{{ t('fileset.pickFromSet') }}</NButton>
           </NInputGroup>
         </SettingRow>
         <SettingRow :label="t('settings.backgroundVideoPoster')" :description="t('settings.backgroundVideoPosterDesc')">
@@ -389,6 +417,8 @@
     </SettingSection>
 
     <PluginSlotHost slotId="plugin-slot-settings-appearance-section-after" class="plugin-slot-container" />
+
+    <FileSetPicker v-model:visible="filesetPickerVisible" :kind="filesetPickerKind" @select="handleFilesetSelect" />
   </div>
 </template>
 
@@ -396,7 +426,7 @@
 import { NButton, NInput, NInputGroup, NSelect, NSlider, NSwitch, NTab, NTabs, NTimePicker } from 'naive-ui'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useActiveWindowChrome, useSystemShadowSupported } from '@/app/runtime/windowChrome'
+import { useActiveWindowChrome, useSystemShadowSupported, useWindowEffectsSupported } from '@/app/runtime/windowChrome'
 import { CollapsiblePanel, UiIcon } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -412,6 +442,8 @@ import {
   THEME_MODE_OPTIONS,
   isBuiltinThemeId,
 } from '@/config/theme'
+import { filesetApi } from '@/features/fileset/api/filesetApi'
+import FileSetPicker from '@/features/fileset/components/FileSetPicker.vue'
 import PluginSlotHost from '@/features/plugins/slots/PluginSlotHost.vue'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import FontFamilySelect from '@/features/settings/components/FontFamilySelect.vue'
@@ -466,6 +498,31 @@ const windowChromeDescriptionKey = computed(() =>
       : 'settings.windowChromeRestartRequired'
 )
 
+const windowEffectsSupported = useWindowEffectsSupported()
+
+const windowSurfaceOptions = computed(() => [
+  { label: t('settings.windowSurfaceSolid'), value: 'solid' },
+  { label: t('settings.windowSurfaceTranslucent'), value: 'translucent' },
+  { label: t('settings.windowSurfaceMica'), value: 'mica', disabled: !windowEffectsSupported.value },
+])
+
+function handleWindowSurfaceChange(value: string | number | null): void {
+  if (value !== 'solid' && value !== 'translucent' && value !== 'mica') return
+  void run(async () => {
+    setWindowSurface(value, false)
+    await settingsStore.patchUiTheme({ window_surface: value })
+  })
+}
+
+const saveWindowOpacity = debounce(async (value: number) => {
+  await settingsStore.patchUiTheme({ window_opacity: value })
+}, 300)
+
+function handleWindowOpacityChange(value: number): void {
+  setWindowOpacity(value, false)
+  saveWindowOpacity(value)
+}
+
 function handleWindowChromeChange(value: string | number | null): void {
   if (value !== 'custom' && value !== 'system_shadow' && value !== 'native') return
   if (value === 'system_shadow' && !systemShadowSupported.value) return
@@ -508,6 +565,10 @@ const {
   applyBackgroundFolder,
   backgroundOpacity,
   blurAmount,
+  windowSurface,
+  windowOpacity,
+  setWindowSurface,
+  setWindowOpacity,
   appearance,
   schedule,
   themeFlavor,
@@ -793,6 +854,39 @@ function handleBrightnessChange(value: number) {
   const opacity = value / 100
   setBackgroundOpacity(opacity, false)
   saveBrightness(value)
+}
+
+const filesetPickerVisible = ref(false)
+const filesetPickerKind = ref<'image' | 'video'>('image')
+
+function openFilesetPicker(kind: 'image' | 'video') {
+  filesetPickerKind.value = kind
+  filesetPickerVisible.value = true
+}
+
+async function handleFilesetSelect(item: { id: string; kind: 'image' | 'video' }) {
+  const resolved = await run(async () => filesetApi.resolve(item.id))
+  if (!resolved) return
+  if (resolved.kind === 'image') {
+    await run(async () =>
+      settingsStore.patchUiBackground({
+        media_type: 'image',
+        image: { type: 'custom', path: resolved.path, image_base64: '', mode: 'single' },
+      })
+    )
+    setBackgroundImage(resolved.url, resolved.path, false)
+    backgroundInput.value = resolved.path
+  } else {
+    const options = { muted: true, volume: 0, fit: 'cover' as const, pause_when_inactive: true }
+    await run(async () =>
+      settingsStore.patchUiBackground({
+        media_type: 'video',
+        video: { path: resolved.path, options },
+      })
+    )
+    setBackgroundVideo(resolved.url, resolved.path, options, '', false)
+  }
+  message.success(t('common.success'))
 }
 
 async function selectLocalImage() {

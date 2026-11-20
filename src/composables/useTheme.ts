@@ -704,7 +704,10 @@ export const useThemeStore = defineStore('theme', () => {
   /** 当前展示的文件索引。 */
   const bgIndex = ref(0)
   let bgRotateTimer: ReturnType<typeof setInterval> | null = null
-  const transparentBg = ref(false)
+  /** 窗口表面模式；改后需重启才改变窗口透明标志，保存于 theme.window_surface。 */
+  const windowSurface = ref<'solid' | 'translucent' | 'mica'>('solid')
+  /** 窗口最底层表面的不透明度百分比，实时写入 CSS 变量。 */
+  const windowOpacity = ref(100)
   const sidebarStorageKey = 'euoracraft-sidebar-collapsed'
   let hasWarnedSidebarStorage = false
 
@@ -939,9 +942,8 @@ export const useThemeStore = defineStore('theme', () => {
     document.documentElement.style.setProperty('--primary-alpha', primaryScale.value.primaryLight)
     document.documentElement.style.setProperty('--bg-image', bgImageValue)
     document.documentElement.style.setProperty('--bg-opacity', String(backgroundOpacity.value))
-    document.documentElement.style.setProperty('--bg-app', transparentBg.value ? 'transparent' : '')
     document.documentElement.style.setProperty('--bg-blur', `${blurAmount.value}px`)
-    document.documentElement.style.setProperty('--main-bg-layer-opacity', transparentBg.value ? '1' : '0')
+    document.documentElement.style.setProperty('--window-surface-alpha', String(windowOpacity.value / 100))
 
     // 极光开关及派生色：光斑显隐、模糊层显隐，色板由主色动态派生
     document.documentElement.dataset.aurora = auroraEnabled.value ? '1' : '0'
@@ -1361,8 +1363,14 @@ export const useThemeStore = defineStore('theme', () => {
     bgFolderPath.value = ''
   }
 
-  function setTransparentBg(val: boolean, persist = true) {
-    transparentBg.value = val
+  function setWindowSurface(value: 'solid' | 'translucent' | 'mica', persist = true) {
+    windowSurface.value = value
+    updateTheme()
+    if (persist) saveThemeConfig()
+  }
+
+  function setWindowOpacity(value: number, persist = true) {
+    windowOpacity.value = Math.min(100, Math.max(0, Math.round(value)))
     updateTheme()
     if (persist) saveThemeConfig()
   }
@@ -1429,7 +1437,8 @@ export const useThemeStore = defineStore('theme', () => {
               blur_amount: blurAmount.value,
               navigation_mode: navigationMode.value,
               titlebar_hidden: titlebarHidden.value,
-              transparent_bg: transparentBg.value,
+              window_surface: windowSurface.value,
+              window_opacity: windowOpacity.value,
               background_opacity: backgroundOpacity.value,
               appearance: appearance.value,
               schedule: schedule.value,
@@ -1502,8 +1511,11 @@ export const useThemeStore = defineStore('theme', () => {
         if (typeof themeData.blur_amount === 'number') {
           blurAmount.value = themeData.blur_amount
         }
-        if (typeof themeData.transparent_bg === 'boolean') {
-          transparentBg.value = themeData.transparent_bg
+        if (themeData.window_surface === 'solid' || themeData.window_surface === 'translucent' || themeData.window_surface === 'mica') {
+          windowSurface.value = themeData.window_surface
+        }
+        if (typeof themeData.window_opacity === 'number') {
+          windowOpacity.value = Math.min(100, Math.max(0, Math.round(themeData.window_opacity)))
         }
         navigationMode.value = resolveNavigationMode(themeData)
       }
@@ -1613,7 +1625,8 @@ export const useThemeStore = defineStore('theme', () => {
     backgroundVideo,
     backgroundOpacity,
     blurAmount,
-    transparentBg,
+    windowSurface,
+    windowOpacity,
     sidebarCollapsed,
     navigationMode,
     titlebarHidden,
@@ -1648,7 +1661,8 @@ export const useThemeStore = defineStore('theme', () => {
     markBackgroundVideoUnavailable,
     setBlurAmount,
     setBackgroundOpacity,
-    setTransparentBg,
+    setWindowSurface,
+    setWindowOpacity,
     setAuroraEnabled,
     setBlurLayerEnabled,
     setDeriveMode,
@@ -1697,7 +1711,8 @@ export function useTheme() {
     backgroundVideo,
     backgroundOpacity,
     blurAmount,
-    transparentBg,
+    windowSurface,
+    windowOpacity,
     sidebarCollapsed,
     navigationMode,
     titlebarHidden,
@@ -1734,7 +1749,8 @@ export function useTheme() {
     backgroundVideo: readonly(backgroundVideo),
     backgroundOpacity: readonly(backgroundOpacity),
     blurAmount: readonly(blurAmount),
-    transparentBg: readonly(transparentBg),
+    windowSurface: readonly(windowSurface),
+    windowOpacity: readonly(windowOpacity),
     sidebarCollapsed: readonly(sidebarCollapsed),
     navigationMode: readonly(navigationMode),
     titlebarHidden: readonly(titlebarHidden),
@@ -1765,7 +1781,8 @@ export function useTheme() {
     activateVideoBackground: store.activateVideoBackground,
     markBackgroundVideoUnavailable: store.markBackgroundVideoUnavailable,
     setBlurAmount: store.setBlurAmount,
-    setTransparentBg: store.setTransparentBg,
+    setWindowSurface: store.setWindowSurface,
+    setWindowOpacity: store.setWindowOpacity,
     setAuroraEnabled: store.setAuroraEnabled,
     setBlurLayerEnabled: store.setBlurLayerEnabled,
     setDeriveMode: store.setDeriveMode,
