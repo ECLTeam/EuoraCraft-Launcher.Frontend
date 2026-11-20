@@ -1,6 +1,7 @@
 import type { TaskItem } from '@/composables/useTaskQueue'
 import type { AccountListData, AuthlibServer, MinecraftAccount } from '@/types/accounts'
 import type { SchematicPreviewData } from '@/types/api'
+import type { FileSetItem } from '@/types/fileset'
 import type {
   GameResource,
   GameResourceType,
@@ -450,6 +451,51 @@ export const showcaseServers: ServerEntry[] = [
   { id: 'srv-hypixel', name: 'Hypixel', address: 'mc.hypixel.net', icon: null, favorite: true, order: 0 },
   { id: 'srv-local', name: '本地开发服', address: '127.0.0.1:25565', icon: null, favorite: false, order: 1 },
   { id: 'srv-demo', name: 'ECL 演示生存服', address: 'demo.euoracraft.dev', icon: null, favorite: false, order: 2 },
+]
+
+/**
+ * 文件集演示条目。
+ *
+ * 展示模式没有真实媒体目录，这里用仓库内的皮肤图当作导入结果，
+ * 让媒体库网格、改名与删除在预览环境里可操作。
+ */
+export const showcaseFilesetItems: FileSetItem[] = [
+  {
+    id: 'fileset-alex',
+    kind: 'image',
+    name: 'Alex 立绘',
+    sha256: 'a'.repeat(64),
+    extension: '.png',
+    byteSize: 42_800,
+    width: 64,
+    height: 64,
+    createdAt: '2026-11-12T09:20:00Z',
+    updatedAt: '2026-11-12T09:20:00Z',
+  },
+  {
+    id: 'fileset-steve',
+    kind: 'image',
+    name: 'Steve 立绘',
+    sha256: 'b'.repeat(64),
+    extension: '.png',
+    byteSize: 39_120,
+    width: 64,
+    height: 64,
+    createdAt: '2026-11-13T14:05:00Z',
+    updatedAt: '2026-11-13T14:05:00Z',
+  },
+  {
+    id: 'fileset-sunny',
+    kind: 'image',
+    name: 'Sunny 立绘',
+    sha256: 'c'.repeat(64),
+    extension: '.png',
+    byteSize: 44_960,
+    width: 64,
+    height: 64,
+    createdAt: '2026-11-14T18:42:00Z',
+    updatedAt: '2026-11-14T18:42:00Z',
+  },
 ]
 
 export const showcaseScreenshots: ScreenshotEntry[] = [

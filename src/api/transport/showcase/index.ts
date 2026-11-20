@@ -20,6 +20,7 @@ import {
   showcaseResources,
   showcaseScannedVersions,
   showcaseScreenshots,
+  showcaseFilesetItems,
   showcaseSearchItemsByType,
   showcaseServers,
   showcaseSchematicPreview,
@@ -76,6 +77,13 @@ export function createShowcaseTransport(): BackendTransport {
   >(showcaseWorlds.map((world, index) => [world.id, makeShowcaseWorldBackups(index)]))
   const servers = structuredClone(showcaseServers)
   const screenshots = structuredClone(showcaseScreenshots)
+  // 文件集演示状态：与真实服务一样按条目增删改，预览环境可操作改名与删除
+  const filesetItems = structuredClone(showcaseFilesetItems)
+  const filesetAssets: Record<string, string> = {
+    'fileset-alex': `${import.meta.env.BASE_URL}img/skins/Alex.png`,
+    'fileset-steve': `${import.meta.env.BASE_URL}img/skins/Steve.png`,
+    'fileset-sunny': `${import.meta.env.BASE_URL}img/skins/Sunny.png`,
+  }
   const resources: Record<string, GameResource[]> = structuredClone(showcaseResources)
   let packVersionName = 'Showcase Pack'
   let packExcludedCount = 0
@@ -395,16 +403,37 @@ export function createShowcaseTransport(): BackendTransport {
         return success()
       }
       case 'fileset_list':
-        // 展示模式没有本地媒体库，文件集页面显示空状态。
-        return success([])
+        return success(structuredClone(filesetItems))
       case 'fileset_import':
         return success({ imported: [], duplicated: [], failed: [] })
-      case 'fileset_delete':
-        return success({ deleted: [], inUse: [] })
-      case 'fileset_rename':
+      case 'fileset_delete': {
+        const targets = new Set((getPayload(payload).item_ids as string[] | undefined) ?? [])
+        const deleted = filesetItems.filter((item) => targets.has(item.id)).map((item) => item.id)
+        for (const id of deleted) {
+          const index = filesetItems.findIndex((item) => item.id === id)
+          if (index >= 0) filesetItems.splice(index, 1)
+        }
+        return success({ deleted, inUse: [] })
+      }
+      case 'fileset_rename': {
+        const body = getPayload(payload)
+        const target = filesetItems.find((item) => item.id === body.item_id)
+        if (!target) return failure('文件集条目不存在', 'fileset_not_found')
+        target.name = String(body.name ?? target.name)
+        target.updatedAt = new Date().toISOString()
+        return success(structuredClone(target))
+      }
       case 'fileset_resolve':
-      case 'fileset_thumbnail':
-        return success(null)
+      case 'fileset_thumbnail': {
+        const body = getPayload(payload)
+        const target = filesetItems.find((item) => item.id === body.item_id)
+        const url = target ? (filesetAssets[target.id] ?? null) : null
+        if (!target || !url) return success(null)
+        if (command === 'fileset_resolve') {
+          return success({ path: `Showcase/.ecl/filesets/${target.id}${target.extension}`, url, kind: target.kind })
+        }
+        return success({ path: null, url })
+      }
       case 'wardrobe_texture':
         return success({ dataUrl: `${import.meta.env.BASE_URL}img/skins/Alex.png`, mime: 'image/png' as const })
       case 'wardrobe_export':

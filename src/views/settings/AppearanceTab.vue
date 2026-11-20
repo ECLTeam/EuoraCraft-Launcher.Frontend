@@ -67,7 +67,7 @@
         :description="t(windowChromeDescriptionKey)"
       >
         <NSelect
-          class="window-chrome-select"
+          class="setting-select"
           :value="windowChromePreference"
           :options="windowChromeOptions"
           to="#app"
@@ -80,7 +80,7 @@
       </SettingRow>
       <SettingRow :label="t('settings.windowSurface')" :description="t('settings.windowSurfaceDesc')">
         <NSelect
-          class="window-chrome-select"
+          class="setting-select"
           :value="windowSurface"
           :options="windowSurfaceOptions"
           to="#app"

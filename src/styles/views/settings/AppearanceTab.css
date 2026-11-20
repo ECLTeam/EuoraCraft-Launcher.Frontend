@@ -156,10 +156,6 @@
   }
 }
 
-.window-chrome-select {
-  width: 100%;
-}
-
 .folder-source-control {
   display: flex;
   align-items: center;

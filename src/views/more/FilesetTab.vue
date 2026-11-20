@@ -1,54 +1,58 @@
 <template>
   <div class="tab-pane fileset-page">
-    <header class="fileset-toolbar">
-      <div class="fileset-heading">
-        <UiIcon name="photo" :size="18" />
-        <span class="fileset-title">{{ t('fileset.title') }}</span>
-        <span v-if="items.length" class="fileset-count">{{ items.length }}</span>
-      </div>
-      <div class="fileset-toolbar-actions">
-        <UiButton :loading="importing" @click="importMedia">{{ t('fileset.import') }}</UiButton>
-        <UiButton variant="outline" :loading="loading" @click="reload">{{ t('fileset.refresh') }}</UiButton>
-      </div>
-    </header>
+    <section class="fileset-panel ecl-surface">
+      <header class="fileset-toolbar">
+        <div class="fileset-heading">
+          <UiIcon name="photo" :size="18" />
+          <span class="fileset-title">{{ t('fileset.title') }}</span>
+          <span v-if="items.length" class="fileset-count">{{ items.length }}</span>
+        </div>
+        <div class="fileset-toolbar-actions">
+          <UiButton size="sm" :loading="importing" @click="importMedia">{{ t('fileset.import') }}</UiButton>
+          <UiButton size="sm" variant="outline" :loading="loading" @click="reload">{{ t('fileset.refresh') }}</UiButton>
+        </div>
+      </header>
 
-    <p class="fileset-hint">{{ t('fileset.hint') }}</p>
-    <p v-if="notice" class="fileset-notice">{{ notice }}</p>
-
-    <div class="fileset-body">
-      <UiLoading v-if="loading && !items.length" />
-      <UiEmptyState
-        v-else-if="!items.length"
-        icon="photo"
-        :title="t('fileset.emptyTitle')"
-        :description="t('fileset.emptyDescription')"
-      />
-      <div v-else class="fileset-grid">
-        <article v-for="item in items" :key="item.id" class="fileset-card">
-          <div class="fileset-preview" @mouseenter="loadVideoPreview(item)">
-            <img v-if="item.kind === 'image' && thumbnails[item.id]" :src="thumbnails[item.id]" alt="" loading="lazy" />
-            <video
-              v-else-if="item.kind === 'video' && previews[item.id]"
-              :src="previews[item.id]"
-              class="fileset-preview-video"
-              muted
-              loop
-              playsinline
-              preload="metadata"
-            ></video>
-            <UiIcon v-else name="photo" :size="26" />
-          </div>
-          <div class="fileset-info">
-            <strong class="fileset-name" :title="item.name">{{ item.name }}</strong>
-            <span class="fileset-detail">{{ detailOf(item) }}</span>
-          </div>
-          <div class="fileset-card-actions">
-            <UiButton size="sm" variant="text" @click="openRename(item)">{{ t('fileset.rename') }}</UiButton>
-            <UiButton size="sm" variant="text" @click="askDelete(item)">{{ t('fileset.delete') }}</UiButton>
-          </div>
-        </article>
+      <div class="fileset-meta">
+        <p class="fileset-hint">{{ t('fileset.hint') }}</p>
+        <p v-if="notice" class="fileset-notice" role="status">{{ notice }}</p>
       </div>
-    </div>
+
+      <div class="fileset-body">
+        <UiLoading v-if="loading && !items.length" />
+        <UiEmptyState
+          v-else-if="!items.length"
+          icon="photo"
+          :title="t('fileset.emptyTitle')"
+          :description="t('fileset.emptyDescription')"
+        />
+        <div v-else class="fileset-grid">
+          <article v-for="item in items" :key="item.id" class="fileset-card">
+            <div class="fileset-preview" @mouseenter="loadVideoPreview(item)">
+              <img v-if="item.kind === 'image' && thumbnails[item.id]" :src="thumbnails[item.id]" alt="" loading="lazy" />
+              <video
+                v-else-if="item.kind === 'video' && previews[item.id]"
+                :src="previews[item.id]"
+                class="fileset-preview-video"
+                muted
+                loop
+                playsinline
+                preload="metadata"
+              ></video>
+              <UiIcon v-else name="photo" :size="26" />
+            </div>
+            <div class="fileset-info">
+              <strong class="fileset-name" :title="item.name">{{ item.name }}</strong>
+              <span class="fileset-detail">{{ detailOf(item) }}</span>
+            </div>
+            <div class="fileset-card-actions">
+              <UiButton size="sm" variant="text" @click="openRename(item)">{{ t('fileset.rename') }}</UiButton>
+              <UiButton size="sm" variant="text" @click="askDelete(item)">{{ t('fileset.delete') }}</UiButton>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
     <NModal v-model:show="renameVisible" preset="card" class="fileset-dialog" :title="t('fileset.renameTitle')">
       <NInput
@@ -222,73 +226,109 @@ onMounted(reload)
 
 <style scoped>
 .fileset-page {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   min-height: 0;
-  height: 100%;
+}
+
+/* 主表面：工具栏固定在卡片内，只有网格滚动 */
+.fileset-panel {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .fileset-toolbar {
   display: flex;
+  min-height: 48px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: var(--s-sm);
+  padding: var(--s-xs) var(--s-lg);
+  border-bottom: 1px solid var(--ecl-border);
 }
 
 .fileset-heading {
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 8px;
-  color: var(--ecl-text-primary);
-  font-weight: 600;
+  gap: 7px;
+  color: var(--ecl-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.fileset-heading :deep(svg) {
+  color: var(--primary);
 }
 
 .fileset-count {
   padding: 0 6px;
-  border-radius: 8px;
-  background: var(--ecl-surface);
+  border-radius: var(--ecl-radius-control);
+  background: var(--ecl-surface-muted);
   color: var(--ecl-text-secondary);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
 .fileset-toolbar-actions {
   display: flex;
-  gap: 8px;
+  flex-shrink: 0;
+  gap: var(--s-sm);
+}
+
+.fileset-meta {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-sm) var(--s-lg) 0;
 }
 
 .fileset-hint,
 .fileset-notice {
   margin: 0;
   color: var(--ecl-text-secondary);
-  font-size: 12px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.fileset-notice {
+  color: var(--ecl-text);
 }
 
 .fileset-body {
   display: flex;
-  flex: 1;
   min-height: 0;
+  flex: 1;
+  flex-direction: column;
   overflow: auto;
+  padding: var(--s-md) var(--s-lg) var(--s-lg);
+  contain: layout;
 }
 
 .fileset-grid {
   display: grid;
-  width: 100%;
   align-content: start;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--s-md);
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
 }
 
 .fileset-card {
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
-  border: 1px solid var(--ecl-border);
-  border-radius: var(--ecl-radius-card, 8px);
-  background: var(--ecl-surface);
+  gap: 7px;
+  padding: 7px;
+  border: var(--ecl-card-border-width) solid var(--ecl-card-border-color);
+  border-radius: var(--ecl-card-radius);
+  background: var(--ecl-surface-muted);
+  transition: border-color var(--duration-fast) var(--ease-emphasized);
+}
+
+.fileset-card:hover {
+  border-color: var(--ecl-card-border-color-hover);
 }
 
 .fileset-preview {
@@ -297,9 +337,9 @@ onMounted(reload)
   justify-content: center;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: var(--ecl-radius-control);
   background: var(--ecl-canvas);
-  color: var(--ecl-text-secondary);
+  color: var(--ecl-text-tertiary);
 }
 
 .fileset-preview img,
@@ -311,15 +351,16 @@ onMounted(reload)
 
 .fileset-info {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
   min-width: 0;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .fileset-name {
   overflow: hidden;
-  color: var(--ecl-text-primary);
-  font-size: 13px;
+  color: var(--ecl-text);
+  font-size: 12px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -331,12 +372,13 @@ onMounted(reload)
 
 .fileset-card-actions {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  margin-top: 1px;
 }
 
 .fileset-dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--s-sm);
 }
 </style>

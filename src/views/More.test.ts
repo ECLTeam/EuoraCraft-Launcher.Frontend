@@ -5,7 +5,7 @@ import { i18n } from '@/i18n'
 import More from './More.vue'
 
 describe('More shell', () => {
-  it('只提供插件与工具入口，不内置联机页面', async () => {
+  it('提供插件、工具与文件集三个入口，不内置联机页面', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [{ path: '/more/plugins', component: More }],
