@@ -9,7 +9,7 @@
     <div class="plugin-settings-center">
       <aside class="plugin-settings-navigation ecl-surface" :aria-label="t('plugins.pluginList')">
         <div class="plugin-settings-nav-title">
-          <UiIcon name="plugin" :size="18" />
+          <UiIcon name="settings" :size="18" />
           <span>{{ t('plugins.pluginList') }}</span>
         </div>
         <div class="plugin-settings-search">
@@ -86,9 +86,14 @@
                 </NAlert>
                 <NEmpty v-else-if="!data?.schema.length" :description="t('plugins.noSettings')" />
                 <ul v-else class="plugin-setting-list">
-                  <li v-for="item in data.schema" :key="item.key" class="plugin-setting-row">
+                  <li
+                    v-for="item in data.schema"
+                    :key="item.key"
+                    class="plugin-setting-row"
+                    :title="item.key"
+                  >
                     <div class="plugin-setting-label">
-                      <strong>{{ item.description || item.key }}</strong> <span>{{ item.key }}</span>
+                      <strong>{{ item.description || item.key }}</strong>
                     </div>
                     <div class="plugin-setting-value">
                       <NSwitch
@@ -468,10 +473,6 @@ onUnmounted(() => unlisten?.())
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.plugin-setting-label span {
-  font-size: 12px;
-  color: var(--ecl-text-secondary);
 }
 .plugin-settings-detail {
   display: flex;
