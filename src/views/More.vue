@@ -24,7 +24,7 @@ const navItems = computed(() => [
   { path: '/more/plugins', icon: 'puzzle', label: t('more.nav.plugins') },
   { path: '/more/tools', icon: 'toolbox', label: t('more.nav.tools') },
   { path: '/more/fileset', icon: 'photo', label: t('more.nav.fileset') },
-  { path: '/more/java', icon: 'package', label: t('javaManager.title') },
+  { path: '/more/java', icon: 'coffee', label: t('javaManager.title') },
 ])
 
 // 语言切换或插件撤销后，当前插件页若已不在可见入口内，回到插件管理页。
