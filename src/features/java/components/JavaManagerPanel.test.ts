@@ -46,15 +46,15 @@ async function render(props = {}) {
 }
 
 describe('Java 管理与拥有权提示', () => {
-  it('搜索位于标题栏，扫描和检查更新使用有名称的纯图标', async () => {
+  it('搜索位于工具栏，扫描和检查更新使用有名称的纯图标', async () => {
     const wrapper = await render()
     expect(wrapper.find('.java-manager-toolbar input').exists()).toBe(true)
-    expect(wrapper.find('.java-manager-content input').exists()).toBe(false)
+    expect(wrapper.find('.java-list-body input').exists()).toBe(false)
     for (const label of ['重新扫描', '检查更新']) {
       const button = wrapper.get(`.java-manager-toolbar button[aria-label="${label}"]`)
       expect(button.attributes('title')).toBe(label)
       expect(button.text()).toBe('')
-      expect(button.classes()).toContain('is-icon-only')
+      expect(button.classes()).toContain('n-button')
     }
   })
 
@@ -123,11 +123,11 @@ describe('Java 管理与拥有权提示', () => {
     })
     const install = vi.spyOn(javaApi, 'install')
     const wrapper = await render()
-    expect(wrapper.get('.ui-empty-state').text()).toContain('没有登记的 Java')
-    await wrapper.get('.ui-empty-state button').trigger('click')
+    expect(wrapper.get('.n-empty').text()).toContain('没有登记的 Java')
+    await wrapper.get('.n-empty button').trigger('click')
     await flushPromises()
     expect(wrapper.find('.java-manager-tabs').exists()).toBe(false)
-    expect(wrapper.find('.ui-empty-state').exists()).toBe(true)
+    expect(wrapper.find('.n-empty').exists()).toBe(true)
     expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(true)
     wrapper.getComponent(JavaDownloadModal).vm.$emit('close')
     await flushPromises()
@@ -138,8 +138,8 @@ describe('Java 管理与拥有权提示', () => {
   it('搜索无匹配时清除搜索恢复原有条目', async () => {
     const wrapper = await render()
     await wrapper.get('input').setValue('找不到这个版本')
-    expect(wrapper.get('.ui-empty-state').text()).toContain('没有匹配的 Java')
-    await wrapper.get('.ui-empty-state button').trigger('click')
+    expect(wrapper.get('.n-empty').text()).toContain('没有匹配的 Java')
+    await wrapper.get('.n-empty button').trigger('click')
     expect(wrapper.find('.java-runtime-row').exists()).toBe(true)
     expect(wrapper.get<HTMLInputElement>('input').element.value).toBe('')
   })

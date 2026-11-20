@@ -1,88 +1,93 @@
 <template>
   <section class="java-manager">
     <header class="java-manager-toolbar">
-      <div class="java-manager-title"><JavaRuntimeIcon :size="18" />{{ t('javaManager.title') }}</div>
-      <NInput
-        v-model:value="query"
-        class="java-manager-search"
-        clearable
+    <NInput
+      v-model:value="query"
+      class="java-manager-search"
+      clearable
+      size="small"
+      :placeholder="t('javaManager.search')"
+      :inputProps="{ 'aria-label': t('javaManager.search') }"
+    >
+      <template #prefix><UiIcon name="search" :size="14" /></template>
+    </NInput>
+
+    <div class="java-manager-toolbar-actions">
+      <NButton
+        class="java-manager-icon-button"
+        quaternary
+        circle
         size="small"
-        :placeholder="t('javaManager.search')"
-        :aria-label="t('javaManager.search')"
+        :loading="store.isLoading"
+        :title="t('javaManager.rescan')"
+        :aria-label="t('javaManager.rescan')"
+        @click="load(true)"
       >
-        <template #prefix><UiIcon name="search" :size="15" /></template>
-      </NInput>
-      <div class="java-manager-actions">
-        <UiButton
-          size="sm"
-          variant="ghost"
-          shape="square"
-          icon="refresh"
-          :loading="store.isLoading"
-          :title="t('javaManager.rescan')"
-          :aria-label="t('javaManager.rescan')"
-          @click="load(true)"
-        />
-        <UiButton
-          size="sm"
-          variant="ghost"
-          shape="square"
-          icon="download"
-          :loading="isCheckingUpdates"
-          :title="t('javaManager.checkUpdates')"
-          :aria-label="t('javaManager.checkUpdates')"
-          @click="checkUpdates"
-        />
-        <NDropdown
-          trigger="click"
-          placement="bottom-end"
-          :options="addJavaOptions"
-          :show="addMenuVisible"
-          to="#app"
-          @update:show="addMenuVisible = $event"
-          @select="handleAddJava"
+        <template #icon><UiIcon name="refresh" :size="16" /></template>
+      </NButton>
+      <NButton
+        class="java-manager-icon-button"
+        quaternary
+        circle
+        size="small"
+        :loading="isCheckingUpdates"
+        :title="t('javaManager.checkUpdates')"
+        :aria-label="t('javaManager.checkUpdates')"
+        @click="checkUpdates"
+      >
+        <template #icon><UiIcon name="download" :size="16" /></template>
+      </NButton>
+      <NDropdown
+        trigger="click"
+        placement="bottom-end"
+        :options="addJavaOptions"
+        :show="addMenuVisible"
+        to="#app"
+        @update:show="addMenuVisible = $event"
+        @select="handleAddJava"
+      >
+        <NButton
+          class="java-add-button"
+          type="primary"
+          size="small"
+          :loading="isRegistering"
+          :disabled="isActing"
+          aria-haspopup="menu"
+          :aria-expanded="addMenuVisible"
+          @keydown.esc="closeAddMenuOnEscape"
         >
-          <UiButton
-            class="java-add-button"
-            size="sm"
-            variant="primary"
-            icon="plus"
-            :loading="isRegistering"
-            :disabled="isActing"
-            aria-haspopup="menu"
-            :aria-expanded="addMenuVisible"
-            @keydown.esc="closeAddMenuOnEscape"
-          >
-            {{ t('javaManager.addJava') }}<UiIcon name="chevron-down" :size="14" />
-          </UiButton>
-        </NDropdown>
-      </div>
-    </header>
+          <template #icon><UiIcon name="add" :size="14" /></template>
+          {{ t('javaManager.addJava') }}
+        </NButton>
+      </NDropdown>
+    </div>
+  </header>
 
-    <div class="java-manager-content">
-      <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{ error || store.error }}</NAlert>
-      <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
-      <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
-        >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
-        <UiButton variant="secondary" size="sm" :disabled="isActing" @click="retryCleanup">{{
-          t('javaManager.retryCleanup')
-        }}</UiButton></NAlert
-      >
+    <div class="java-list-body">
+      <div class="java-list-content">
+        <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{ error || store.error }}</NAlert>
+        <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
+        <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
+          >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
+          <NButton text size="small" :disabled="isActing" @click="retryCleanup">{{
+            t('javaManager.retryCleanup')
+          }}</NButton></NAlert
+        >
 
-      <UiLoading v-if="store.isLoading && !store.runtimes.length" :label="t('javaManager.scanning')" />
-      <UiEmptyState
-        v-else-if="!filteredRuntimes.length"
-        class="java-manager-empty"
-        :icon="query.trim() ? 'search' : 'cube'"
-        :title="t(query.trim() ? 'javaManager.noMatch' : 'javaManager.empty')"
-      >
-        <UiButton v-if="query.trim()" variant="secondary" @click="query = ''">{{
-          t('javaManager.clearSearch')
-        }}</UiButton>
-        <UiButton v-else variant="secondary" icon="download" @click="downloadVisible = true">{{
-          t('javaManager.downloadJava')
-        }}</UiButton>
-      </UiEmptyState>
+        <UiLoading v-if="store.isLoading && !store.runtimes.length" mode="block" class="java-spin" />
+        <NEmpty
+          v-else-if="!filteredRuntimes.length"
+          class="java-manager-empty"
+          :description="t(query.trim() ? 'javaManager.noMatch' : 'javaManager.empty')"
+        >
+          <template #extra>
+            <NButton v-if="query.trim()" size="small" @click="query = ''">{{ t('javaManager.clearSearch') }}</NButton>
+            <NButton v-else type="primary" size="small" @click="downloadVisible = true">{{
+              t('javaManager.downloadJava')
+            }}</NButton>
+          </template>
+        </NEmpty>
+
       <div v-else class="java-runtime-list">
         <div class="java-manager-table-header">
           <span>{{ t('javaManager.columnName') }}</span>
@@ -92,17 +97,21 @@
         </div>
         <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
           <div class="java-runtime-identity">
-            <JavaRuntimeIcon class="java-runtime-icon" />
-            <div class="java-runtime-copy">
-              <strong>Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</strong>
-              <span :title="runtime.vendor || t('javaManager.unknownVendor')">{{
-                runtime.vendor || t('javaManager.unknownVendor')
-              }}</span>
+            <div class="java-runtime-icon"><JavaRuntimeIcon :size="40" /></div>
+            <div class="java-runtime-content">
+              <span class="java-runtime-name">Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</span>
+              <div
+                class="java-runtime-description"
+                :title="`${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`"
+              >
+                {{
+                  `${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`
+                }}
+              </div>
             </div>
           </div>
           <div class="java-runtime-version">
             <NTag size="small" :bordered="false" :title="runtime.fullVersion">{{ runtime.fullVersion }}</NTag>
-            <span>{{ runtime.architecture }} · {{ t(`javaManager.origins.${runtime.origin}`) }}</span>
           </div>
           <div class="java-runtime-status">
             <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
@@ -189,6 +198,7 @@
             </NButton>
           </NSpace>
         </article>
+        </div>
       </div>
     </div>
 
@@ -207,13 +217,13 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NButton, NDropdown, NInput, NSpace, NTag, type DropdownOption } from 'naive-ui'
+import { NAlert, NButton, NDropdown, NEmpty, NInput, NSpace, NTag, type DropdownOption } from 'naive-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
 import ConfirmDialog from '@/components/modals/ConfirmDialog.vue'
-import { UiButton, UiEmptyState, UiIcon, UiLoading } from '@/components/ui'
+import { UiIcon, UiLoading } from '@/components/ui'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { javaApi } from '@/features/java/api/javaApi'
 import JavaDownloadModal from '@/features/java/components/JavaDownloadModal.vue'

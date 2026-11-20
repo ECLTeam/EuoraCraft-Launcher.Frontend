@@ -96,8 +96,8 @@ async function _verifyJavaManagerLayout(page) {
         return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
       }
       const viewport = document.querySelector('.section-layout__viewport'),
-        card = document.querySelector('.java-settings-card'),
-        content = document.querySelector('.java-manager-content')
+        card = document.querySelector('.java-panel'),
+        content = document.querySelector('.java-list-body')
       return {
         viewport: rect(viewport),
         card: rect(card),
@@ -187,7 +187,7 @@ async function _verifyJavaManagerLayout(page) {
       .locator('.java-runtime-actions')
       .evaluate((el) => el.getBoundingClientRect().bottom)
     const contentBottom = await page
-      .locator('.java-manager-content')
+      .locator('.java-list-body')
       .evaluate((el) => el.getBoundingClientRect().bottom)
     assert(bottom <= contentBottom + 1, 'Last item actions unreachable')
     assert(
@@ -197,7 +197,7 @@ async function _verifyJavaManagerLayout(page) {
       'Toolbar scrolled away'
     )
     await measure('long list with last item reached')
-    await page.locator('.java-manager-content').evaluate((el) => {
+    await page.locator('.java-list-body').evaluate((el) => {
       el.scrollTop = 0
     })
     await page.locator('.java-manager-toolbar input').fill('not-a-runtime')

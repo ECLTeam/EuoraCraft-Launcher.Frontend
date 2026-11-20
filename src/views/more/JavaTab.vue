@@ -1,13 +1,12 @@
 <template>
-  <div class="tab-pane java-settings">
-    <UiCard class="java-settings-card" bodyClass="java-settings-card-body">
+  <div class="java-page ecl-page">
+    <section class="java-panel ecl-surface ecl-page__body">
       <JavaManagerPanel />
-    </UiCard>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { UiCard } from '@/components/ui'
 import JavaManagerPanel from '@/features/java/components/JavaManagerPanel.vue'
 </script>
 

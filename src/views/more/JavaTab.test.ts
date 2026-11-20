@@ -43,32 +43,32 @@ async function render(component: typeof JavaTab | typeof JavaManagerPanel = Java
   return wrapper
 }
 
-describe('Java 管理页卡片承托', () => {
-  it('空清单时仍以统一卡片包住工具栏、搜索与空状态', async () => {
+describe('Java 管理页表面承托', () => {
+  it('空清单时仍以统一表面包住工具栏、搜索与空状态', async () => {
     const wrapper = await render()
-    const card = wrapper.get('[data-theme-component="card"]')
-    expect(wrapper.findAll('[data-theme-component="card"]')).toHaveLength(1)
-    expect(card.find('.java-manager-toolbar').exists()).toBe(true)
-    expect(card.find('input').exists()).toBe(true)
-    expect(card.find('.ui-empty-state').exists()).toBe(true)
+    const panel = wrapper.get('.java-panel.ecl-surface')
+    expect(wrapper.findAll('.java-panel.ecl-surface')).toHaveLength(1)
+    expect(panel.find('.java-manager-toolbar').exists()).toBe(true)
+    expect(panel.find('input').exists()).toBe(true)
+    expect(panel.find('.n-empty').exists()).toBe(true)
   })
 
-  it('下载打开独立弹窗，原卡片和已安装列表保持不变', async () => {
+  it('下载打开独立弹窗，原表面和已安装列表保持不变', async () => {
     const wrapper = await render()
-    const card = wrapper.get('[data-theme-component="card"]').element
+    const panel = wrapper.get('.java-panel.ecl-surface').element
     wrapper.get('.java-manager-toolbar').getComponent(NDropdown).vm.$emit('select', 'download')
     await flushPromises()
-    expect(wrapper.get('[data-theme-component="card"]').element).toBe(card)
-    const content = wrapper.get('[data-theme-component="card"]')
+    expect(wrapper.get('.java-panel.ecl-surface').element).toBe(panel)
+    const content = wrapper.get('.java-panel.ecl-surface')
     expect(content.find('.java-catalog-controls').exists()).toBe(false)
     expect(wrapper.getComponent(JavaDownloadModal).props('visible')).toBe(true)
-    expect(content.find('.ui-empty-state').exists()).toBe(true)
+    expect(content.find('.n-empty').exists()).toBe(true)
   })
 
-  it('供弹窗复用的管理组件自身不增加卡片', async () => {
+  it('供弹窗复用的管理组件自身不增加表面', async () => {
     const wrapper = await render(JavaManagerPanel)
-    expect(wrapper.find('[data-theme-component="card"]').exists()).toBe(false)
+    expect(wrapper.find('.java-panel.ecl-surface').exists()).toBe(false)
     expect(wrapper.find('.java-manager-toolbar').exists()).toBe(true)
-    expect(wrapper.find('.ui-empty-state').exists()).toBe(true)
+    expect(wrapper.find('.n-empty').exists()).toBe(true)
   })
 })
