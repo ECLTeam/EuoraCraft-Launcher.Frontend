@@ -11,4 +11,4 @@ import { UiCard } from '@/components/ui'
 import JavaManagerPanel from '@/features/java/components/JavaManagerPanel.vue'
 </script>
 
-<style scoped src="@/styles/views/settings/JavaTab.css"></style>
+<style scoped src="@/styles/views/JavaTab.css"></style>

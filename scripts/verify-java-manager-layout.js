@@ -85,7 +85,7 @@ async function _verifyJavaManagerLayout(page) {
     }
     useTheme().setBackgroundImage(canvas.toDataURL(), undefined, false)
     await window.__javaLayoutRows(1)
-    location.hash = '/settings/java'
+    location.hash = '/more/java'
   })
   await page.locator('.java-runtime-row').waitFor({ state: 'visible' })
   const cases = []
@@ -167,27 +167,20 @@ async function _verifyJavaManagerLayout(page) {
             await measure(`${skin}/${mode}/blur-${blur}/${width}x${height}`)
           }
     await page.setViewportSize({ width: 960, height: 600 })
-    const pathTrigger = page.locator('.java-runtime-path-trigger').first()
-    await pathTrigger.focus()
-    await pathTrigger.press('Enter')
-    await page.locator('.java-runtime-full-path').waitFor({ state: 'visible' })
+    const rowActions = page.locator('.java-runtime-row').first().locator('.java-runtime-actions')
+    const actionButtons = rowActions.locator('button')
+    assert((await actionButtons.count()) >= 4, 'Row actions must be icon buttons')
+    assert((await rowActions.locator('.n-dropdown').count()) === 0, 'Row actions must not use a dropdown')
+    assert(((await rowActions.innerText()).trim()) === '', 'Row actions must not contain text')
+    const labels = await actionButtons.evaluateAll((els) => els.map((el) => el.getAttribute('aria-label') ?? ''))
     assert(
-      (await page.locator('.java-runtime-full-path').innerText()) === (await pathTrigger.getAttribute('title')),
-      'Full path is not available'
+      labels.every((label) => label.length > 0),
+      'Row action without aria-label: ' + JSON.stringify(labels)
     )
-    await measure('path popover')
-    await pathTrigger.press('Escape')
-    await page.locator('.java-runtime-full-path').waitFor({ state: 'hidden' })
-    const more = page.locator('.java-runtime-more').first()
-    await more.focus()
-    await more.press('Enter')
-    await page.locator('.n-dropdown-menu').waitFor({ state: 'visible' })
-    assert((await page.locator('.n-dropdown-menu').innerText()).includes('移除安装'), 'Missing removal action')
-    await page.keyboard.press('Escape')
-    await page.locator('.n-dropdown-menu').waitFor({ state: 'hidden' })
+    await measure('icon row actions')
     await page.evaluate(() => window.__javaLayoutRows(16))
     const toolbarTop = await page.locator('.java-manager-toolbar').evaluate((el) => el.getBoundingClientRect().top)
-    await page.locator('.java-runtime-row').last().locator('.java-runtime-more').scrollIntoViewIfNeeded()
+    await page.locator('.java-runtime-row').last().locator('.java-runtime-remove').scrollIntoViewIfNeeded()
     const bottom = await page
       .locator('.java-runtime-row')
       .last()

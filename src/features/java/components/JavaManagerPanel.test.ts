@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { NDropdown, NPopover } from 'naive-ui'
+import { NDropdown } from 'naive-ui'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { queryClient } from '@/app/queryClient'
@@ -144,87 +144,66 @@ describe('Java 管理与拥有权提示', () => {
     expect(wrapper.get<HTMLInputElement>('input').element.value).toBe('')
   })
 
-  it('在用且被设置引用的运行时保留条目，并禁用物理移除', async () => {
+  it('在用且被设置引用的运行时保留条目，并禁用移除按钮', async () => {
     const wrapper = await render()
     expect(wrapper.text()).toContain('使用中')
     expect(wrapper.text()).toContain('已被 1 项设置引用')
-    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
-    expect(menu.props('options')!.find((option) => option.key === 'remove')).toMatchObject({ disabled: true })
-    menu.vm.$emit('select', 'remove')
+    const remove = wrapper.get('.java-runtime-remove')
+    expect(remove.attributes('disabled')).toBeDefined()
+    await remove.trigger('click')
     await flushPromises()
     expect(wrapper.getComponent(ConfirmDialog).props('visible')).toBe(false)
   })
 
-  it('路径可展开查看，次要操作收进更多菜单', async () => {
-    const executablePath = 'C:/Launcher/very-long-managed-runtime-directory/temurin-25/bin/java.exe'
-    vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory([javaRuntime({ executablePath })]))
+  it('行内操作为纯图标按钮，不出现文字按钮与更多菜单', async () => {
     const wrapper = await render()
-    expect(wrapper.get('.java-runtime-path-trigger').attributes('title')).toBe(executablePath)
-    expect(wrapper.get('.java-runtime-path-trigger').attributes('aria-label')).toBe('查看完整路径')
-    const popover = wrapper.get('.java-runtime-actions').getComponent(NPopover)
-    popover.vm.$emit('update:show', true)
-    await flushPromises()
-    expect(popover.props('show')).toBe(true)
-    await wrapper.get('.java-runtime-path-trigger').trigger('keydown', { key: 'Escape' })
-    expect(popover.props('show')).toBe(false)
-    popover.vm.$emit('update:show', true)
-    await wrapper.get('input').setValue('no-matching-runtime')
-    await wrapper.get('input').setValue('')
-    expect(wrapper.get('.java-runtime-actions').getComponent(NPopover).props('show')).toBe(false)
     const actions = wrapper.get('.java-runtime-actions')
-    expect(actions.text()).toContain('设为全局 Java')
-    expect(wrapper.get('.java-runtime-more').attributes('aria-label')).toContain('更多操作')
-    expect(actions.findAll('button').some((button) => button.text() === '停用')).toBe(false)
-    expect(actions.findAll('button').some((button) => button.text() === '移除登记')).toBe(false)
+    expect(actions.findComponent(NDropdown).exists()).toBe(false)
+    const buttons = actions.findAll('button')
+    // 有效、已启用、托管来源：使用、打开文件夹、停用、移除
+    expect(buttons).toHaveLength(4)
+    for (const button of buttons) {
+      expect(button.text()).toBe('')
+      expect(button.attributes('title')).toBeTruthy()
+      expect(button.attributes('aria-label')).toBeTruthy()
+    }
+    expect(actions.get('.java-runtime-use').attributes('aria-label')).toBe(i18n.global.t('javaManager.useGlobal'))
+    expect(actions.get('.java-runtime-open').attributes('title')).toContain(i18n.global.t('javaManager.openFolder'))
+    expect(actions.get('.java-runtime-toggle').attributes('aria-label')).toBe(i18n.global.t('javaManager.disable'))
   })
 
-  it('更多菜单可用 Esc 关闭，搜索后不会重新展开', async () => {
-    const wrapper = await render()
-    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
-    menu.vm.$emit('update:show', true)
-    await flushPromises()
-    expect(menu.props('show')).toBe(true)
-    await wrapper.get('.java-runtime-more').trigger('keydown', { key: 'Escape' })
-    expect(menu.props('show')).toBe(false)
-    menu.vm.$emit('update:show', true)
-    await wrapper.get('input').setValue('no-matching-runtime')
-    await wrapper.get('input').setValue('')
-    expect(wrapper.get('.java-runtime-actions').getComponent(NDropdown).props('show')).toBe(false)
-  })
-
-  it.each(['managed', 'manual', 'system'] as const)('更多菜单保留 %s 来源的移除权限和确认流程', async (origin) => {
-    const runtime = javaRuntime({ origin })
+  it.each(['managed', 'manual', 'system'] as const)('移除按钮按 %s 来源决定可见性与确认流程', async (origin) => {
+    const runtime = javaRuntime({ origin, isInUse: false, references: [] })
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory([runtime]))
     const remove = vi.spyOn(javaApi, 'remove').mockResolvedValue({ operationId: 'remove-java', status: 'pending' })
     const forget = vi.spyOn(javaApi, 'forget').mockResolvedValue({ removed: true })
     const wrapper = await render()
-    const menu = wrapper.get('.java-runtime-actions').getComponent(NDropdown)
-    const removal = menu.props('options')!.find((option) => option.key === 'remove')
+
+    const button = wrapper.find('.java-runtime-remove')
     if (origin === 'system') {
-      expect(removal).toBeUndefined()
-      menu.vm.$emit('select', 'remove')
-      await flushPromises()
-      expect(wrapper.getComponent(ConfirmDialog).props('visible')).toBe(false)
-    } else {
-      expect(removal).toMatchObject({ disabled: false })
-      menu.vm.$emit('select', 'remove')
-      await flushPromises()
-      expect(wrapper.getComponent(ConfirmDialog).props('visible')).toBe(true)
+      expect(button.exists()).toBe(false)
       expect(remove).not.toHaveBeenCalled()
-      expect(forget).not.toHaveBeenCalled()
-      wrapper.getComponent(ConfirmDialog).vm.$emit('confirm')
-      await flushPromises()
-      if (origin === 'managed') expect(remove).toHaveBeenCalledWith(runtime.runtimeId)
-      else expect(forget).toHaveBeenCalledWith(runtime.runtimeId)
+      return
     }
+
+    expect(button.attributes('disabled')).toBeUndefined()
+    await button.trigger('click')
+    await flushPromises()
+    expect(wrapper.getComponent(ConfirmDialog).props('visible')).toBe(true)
+    expect(remove).not.toHaveBeenCalled()
+    expect(forget).not.toHaveBeenCalled()
+    wrapper.getComponent(ConfirmDialog).vm.$emit('confirm')
+    await flushPromises()
+    if (origin === 'managed') expect(remove).toHaveBeenCalledWith(runtime.runtimeId)
+    else expect(forget).toHaveBeenCalledWith(runtime.runtimeId)
   })
 
-  it('从更多菜单停用时沿用当前运行时并刷新列表', async () => {
+  it('开关按钮停用时沿用当前运行时并刷新列表', async () => {
     const runtime = javaRuntime()
     vi.mocked(javaApi.inventory).mockResolvedValue(javaInventory([runtime]))
     const setEnabled = vi.spyOn(javaApi, 'setEnabled').mockResolvedValue({ ...runtime, isEnabled: false })
     const wrapper = await render()
-    wrapper.get('.java-runtime-actions').getComponent(NDropdown).vm.$emit('select', 'toggle')
+    await wrapper.get('.java-runtime-toggle').trigger('click')
     await flushPromises()
     expect(setEnabled).toHaveBeenCalledWith(runtime.runtimeId, false)
     expect(javaApi.inventory).toHaveBeenCalledTimes(2)

@@ -36,12 +36,12 @@ describe('分区子页面记忆', () => {
   })
 
   it('重置后不再保留任何记忆', () => {
-    rememberSectionPath('/settings', '/settings/java')
-    rememberSectionScroll('/settings/java', 120)
+    rememberSectionPath('/settings', '/settings/game')
+    rememberSectionScroll('/settings/game', 120)
 
     resetSectionMemory()
 
     expect(recallSectionPath('/settings', '/settings/launcher')).toBe('/settings/launcher')
-    expect(recallSectionScroll('/settings/java')).toBe(0)
+    expect(recallSectionScroll('/settings/game')).toBe(0)
   })
 })

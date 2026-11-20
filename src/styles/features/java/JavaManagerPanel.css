@@ -13,8 +13,7 @@
 .java-manager-toolbar,
 .java-manager-title,
 .java-manager-actions,
-.java-runtime-identity,
-.java-runtime-actions {
+.java-runtime-identity {
   display: flex;
   align-items: center;
   gap: var(--s-sm);
@@ -167,27 +166,12 @@
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.java-runtime-full-path {
-  max-width: min(420px, calc(100vw - 64px));
-  color: var(--text-primary);
-  font-size: 12px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-  user-select: text;
-}
 .java-runtime-actions {
-  min-width: 0;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  max-width: 100%;
-  gap: 2px;
+  flex-shrink: 0;
 }
-.java-runtime-actions :deep(.ui-btn) {
-  --ui-button-height: 28px;
-  padding: 0 8px;
-  font-size: 12px;
-}
-.java-runtime-actions :deep(.btn-square) {
+.java-runtime-actions :deep(.n-button) {
+  width: 28px;
+  height: 28px;
   padding: 0;
 }
 @container (max-width: 640px) {

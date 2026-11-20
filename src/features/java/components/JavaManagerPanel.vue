@@ -51,7 +51,7 @@
             :disabled="isActing"
             aria-haspopup="menu"
             :aria-expanded="addMenuVisible"
-            @keydown.esc="closeRuntimeOverlayOnEscape"
+            @keydown.esc="closeAddMenuOnEscape"
           >
             {{ t('javaManager.addJava') }}<UiIcon name="chevron-down" :size="14" />
           </UiButton>
@@ -116,75 +116,78 @@
               t('javaManager.referenced', { count: runtime.references.length })
             }}</span>
           </div>
-          <div class="java-runtime-actions">
-            <UiButton
-              variant="text"
-              size="sm"
-              :disabled="!canUse(runtime) || isActing"
-              @click="useRuntime(runtime)"
-              >{{ t(selectable ? 'javaManager.use' : 'javaManager.useGlobal') }}</UiButton
-            >
-            <UiButton
+          <NSpace class="java-runtime-actions" justify="end" :size="3" :wrap="false" :wrapItem="false">
+            <NButton
               v-if="runtime.validationStatus !== 'valid'"
-              variant="text"
-              size="sm"
+              class="java-runtime-relocate"
+              quaternary
+              size="tiny"
               :disabled="isRegistering"
+              :title="t('javaManager.relocate')"
+              :aria-label="t('javaManager.relocate')"
               @click="register"
-              >{{ t('javaManager.relocate') }}</UiButton
             >
-            <UiButton
+              <template #icon><UiIcon name="refresh" :size="16" /></template>
+            </NButton>
+            <NButton
               v-if="updates[runtime.runtimeId]"
-              variant="text"
-              size="sm"
+              class="java-runtime-update"
+              quaternary
+              size="tiny"
               :disabled="isActing"
+              :title="t('javaManager.update')"
+              :aria-label="t('javaManager.update')"
               @click="prepareInstall(updates[runtime.runtimeId]!)"
-              >{{ t('javaManager.update') }}</UiButton
             >
-            <NPopover
-              trigger="click"
-              placement="bottom-end"
-              to="#app"
-              :show="visiblePathId === runtime.runtimeId"
-              @update:show="visiblePathId = $event ? runtime.runtimeId : null"
+              <template #icon><UiIcon name="download" :size="16" /></template>
+            </NButton>
+            <NButton
+              class="java-runtime-use"
+              quaternary
+              size="tiny"
+              :disabled="!canUse(runtime) || isActing"
+              :title="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
+              :aria-label="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
+              @click="useRuntime(runtime)"
             >
-              <template #trigger>
-                <UiButton
-                  class="java-runtime-path-trigger"
-                  variant="ghost"
-                  size="sm"
-                  shape="square"
-                  icon="folder"
-                  :title="runtime.executablePath"
-                  :aria-label="t('javaManager.showPath')"
-                  @keydown.esc="closeRuntimeOverlayOnEscape"
-                />
-              </template>
-              <div class="java-runtime-full-path" @keydown.esc="closeRuntimeOverlayOnEscape">
-                {{ runtime.executablePath }}
-              </div>
-            </NPopover>
-            <NDropdown
-              trigger="click"
-              placement="bottom-end"
-              :options="runtimeActions(runtime)"
-              :show="visibleMenuId === runtime.runtimeId"
-              to="#app"
-              @update:show="visibleMenuId = $event ? runtime.runtimeId : null"
-              @select="handleRuntimeAction($event, runtime)"
+              <template #icon><UiIcon name="check" :size="16" /></template>
+            </NButton>
+            <NButton
+              class="java-runtime-open"
+              quaternary
+              size="tiny"
+              :disabled="isActing"
+              :title="`${t('javaManager.openFolder')} · ${runtime.javaHomePath}`"
+              :aria-label="t('javaManager.openFolder')"
+              @click="openFolder(runtime)"
             >
-              <UiButton
-                class="java-runtime-more"
-                variant="ghost"
-                size="sm"
-                :disabled="isActing"
-                :aria-label="t('javaManager.moreActions', { version: runtime.fullVersion })"
-                shape="square"
-                icon="chevron-down"
-                :title="t('javaManager.moreActions', { version: runtime.fullVersion })"
-                @keydown.esc="closeRuntimeOverlayOnEscape"
-              />
-            </NDropdown>
-          </div>
+              <template #icon><UiIcon name="folder" :size="16" /></template>
+            </NButton>
+            <NButton
+              class="java-runtime-toggle"
+              quaternary
+              size="tiny"
+              :disabled="isActing"
+              :title="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
+              :aria-label="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
+              @click="toggleRuntime(runtime)"
+            >
+              <template #icon><UiIcon :name="runtime.isEnabled ? 'stop' : 'play'" :size="16" /></template>
+            </NButton>
+            <NButton
+              v-if="runtime.origin !== 'system'"
+              class="java-runtime-remove"
+              quaternary
+              size="tiny"
+              type="error"
+              :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
+              :title="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
+              :aria-label="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
+              @click="confirmRemoval(runtime)"
+            >
+              <template #icon><UiIcon name="trash" :size="16" /></template>
+            </NButton>
+          </NSpace>
         </article>
       </div>
     </div>
@@ -204,8 +207,8 @@
 </template>
 
 <script setup lang="ts">
-import { NAlert, NDropdown, NInput, NPopover, NTag, type DropdownOption } from 'naive-ui'
-import { computed, h, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { NAlert, NButton, NDropdown, NInput, NSpace, NTag, type DropdownOption } from 'naive-ui'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import backend from '@/api/client'
 import { unwrapResponse } from '@/app/runtime/errorPresentation'
@@ -240,8 +243,6 @@ const message = useLauncherMessage()
 const downloadVisible = ref(props.initialView === 'download')
 const query = ref('')
 const addMenuVisible = ref(false)
-const visiblePathId = ref<string | null>(null)
-const visibleMenuId = ref<string | null>(null)
 const error = ref('')
 const isActing = ref(false)
 const isRegistering = ref(false)
@@ -367,48 +368,10 @@ async function openFolder(runtime: JavaRuntime) {
   }
 }
 
-function closeRuntimeOverlayOnEscape(event: KeyboardEvent) {
-  if (!addMenuVisible.value && visiblePathId.value === null && visibleMenuId.value === null) return
+function closeAddMenuOnEscape(event: KeyboardEvent) {
+  if (!addMenuVisible.value) return
   event.stopPropagation()
   addMenuVisible.value = false
-  visiblePathId.value = null
-  visibleMenuId.value = null
-}
-
-function runtimeActions(runtime: JavaRuntime): DropdownOption[] {
-  const options: DropdownOption[] = [
-    {
-      key: 'toggle',
-      label: t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable'),
-      disabled: isActing.value,
-    },
-    { key: 'open', label: t('javaManager.openFolder'), disabled: isActing.value },
-  ]
-  if (runtime.origin !== 'system') {
-    options.push(
-      { key: 'remove-divider', type: 'divider' },
-      {
-        key: 'remove',
-        label: () =>
-          h(
-            'span',
-            { style: { color: 'var(--error)' } },
-            t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')
-          ),
-        disabled: isActing.value || runtime.isInUse || !!runtime.references?.length,
-      }
-    )
-  }
-  return options
-}
-
-function handleRuntimeAction(action: string, runtime: JavaRuntime) {
-  if (isActing.value) return
-  if (action === 'toggle') void toggleRuntime(runtime)
-  else if (action === 'open') void openFolder(runtime)
-  else if (action === 'remove' && runtime.origin !== 'system' && !runtime.isInUse && !runtime.references?.length) {
-    confirmRemoval(runtime)
-  }
 }
 
 async function prepareInstall(candidate: JavaPackage) {
@@ -485,8 +448,6 @@ async function retryCleanup() {
 }
 watch([downloadVisible, query], () => {
   addMenuVisible.value = false
-  visiblePathId.value = null
-  visibleMenuId.value = null
 })
 watch(
   () => JSON.stringify([props.scopeKey, props.gamePath, props.versionId, props.requiredMajor]),

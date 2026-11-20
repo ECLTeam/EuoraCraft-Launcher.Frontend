@@ -368,7 +368,7 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
           settings: '/settings',
           more: '/more',
           accounts: '/',
-          java: '/settings/java',
+          java: '/more/java',
           plugins: '/more/plugins',
         }
         if (!Object.hasOwn(routes, page)) return
