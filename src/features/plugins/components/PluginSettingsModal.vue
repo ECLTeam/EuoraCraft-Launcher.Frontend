@@ -9,7 +9,7 @@
     <div class="plugin-settings-center">
       <aside class="plugin-settings-navigation ecl-surface" :aria-label="t('plugins.pluginList')">
         <div class="plugin-settings-nav-title">
-          <UiIcon name="settings" :size="18" />
+          <UiIcon name="plugin" :size="18" />
           <span>{{ t('plugins.pluginList') }}</span>
         </div>
         <div class="plugin-settings-search">

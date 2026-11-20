@@ -97,7 +97,7 @@
         </div>
         <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
           <div class="java-runtime-identity">
-            <div class="java-runtime-icon"><JavaRuntimeIcon :size="40" /></div>
+            <div class="java-runtime-icon"><UiIcon name="coffee" :size="40" /></div>
             <div class="java-runtime-content">
               <span class="java-runtime-name">Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</span>
               <div
@@ -227,7 +227,6 @@ import { UiIcon, UiLoading } from '@/components/ui'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
 import { javaApi } from '@/features/java/api/javaApi'
 import JavaDownloadModal from '@/features/java/components/JavaDownloadModal.vue'
-import JavaRuntimeIcon from '@/features/java/components/JavaRuntimeIcon.vue'
 import { useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { settingsApi } from '@/features/settings/api/settingsApi'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
