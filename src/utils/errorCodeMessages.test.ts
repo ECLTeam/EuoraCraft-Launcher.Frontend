@@ -22,8 +22,8 @@ describe('错误码识别', () => {
 
 describe('错误提示解析', () => {
   it('本来就可读的说明原样返回', () => {
-    expect(resolveDisplayMessage('插件依赖未满足：ECL-Plugin-QomicexCompatible', '安装插件失败')).toBe(
-      '插件依赖未满足：ECL-Plugin-QomicexCompatible'
+    expect(resolveDisplayMessage('插件依赖未满足：示例插件', '安装插件失败')).toBe(
+      '插件依赖未满足：示例插件'
     )
   })
 
