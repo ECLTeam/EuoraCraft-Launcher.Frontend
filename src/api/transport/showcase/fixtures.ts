@@ -11,6 +11,7 @@ import type {
   ServerEntry,
   WorldEntry,
 } from '@/types/instances'
+import type { JavaInventory } from '@/types/java'
 import type { ModSearchItem } from '@/types/mods'
 import type { PluginInfo } from '@/types/plugins'
 import type { InfoCardAnnouncement } from '@/types/system'
@@ -452,6 +453,45 @@ export const showcaseServers: ServerEntry[] = [
   { id: 'srv-local', name: '本地开发服', address: '127.0.0.1:25565', icon: null, favorite: false, order: 1 },
   { id: 'srv-demo', name: 'ECL 演示生存服', address: 'demo.euoracraft.dev', icon: null, favorite: false, order: 2 },
 ]
+
+/** 展示模式的 Java 清单，覆盖托管与系统发现两种来源。 */
+export const showcaseJavaInventory: JavaInventory = {
+  platform: 'windows',
+  architecture: 'x64',
+  managedRootPath: 'Showcase/ECL_data/java',
+  cleanupPendingCount: 0,
+  runtimes: [
+    {
+      runtimeId: 'java-showcase-21',
+      executablePath: 'Showcase/ECL_data/java/temurin-21/bin/javaw.exe',
+      javaHomePath: 'Showcase/ECL_data/java/temurin-21',
+      vendor: 'Eclipse Adoptium',
+      runtimeKind: 'JDK',
+      majorVersion: 21,
+      fullVersion: '21.0.7+6-LTS',
+      architecture: 'x64',
+      origin: 'managed',
+      isEnabled: true,
+      validationStatus: 'valid',
+      discoverySources: ['managed'],
+      isInUse: true,
+    },
+    {
+      runtimeId: 'java-showcase-17',
+      executablePath: 'C:/Program Files/Java/jre-17/bin/javaw.exe',
+      javaHomePath: 'C:/Program Files/Java/jre-17',
+      vendor: 'Oracle Corporation',
+      runtimeKind: 'JRE',
+      majorVersion: 17,
+      fullVersion: '17.0.12',
+      architecture: 'x64',
+      origin: 'system',
+      isEnabled: true,
+      validationStatus: 'valid',
+      discoverySources: ['registry'],
+    },
+  ],
+}
 
 /** 展示模式的文件集条目，用仓库内皮肤图代替真实导入结果。 */
 export const showcaseFilesetItems: FileSetItem[] = [

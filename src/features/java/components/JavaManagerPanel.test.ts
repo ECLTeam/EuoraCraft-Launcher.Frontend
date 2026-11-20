@@ -58,6 +58,14 @@ describe('Java 管理与拥有权提示', () => {
     }
   })
 
+  it('列表带列头，版本列以标签呈现', async () => {
+    const wrapper = await render()
+    const header = wrapper.get('.java-manager-table-header')
+    expect(header.findAll('span').map((cell) => cell.text())).toEqual(['名称', '版本', '状态', ''])
+    expect(wrapper.findAll('.java-runtime-row')).toHaveLength(1)
+    expect(wrapper.get('.java-runtime-version .n-tag').text()).toBe('21.0.2')
+  })
+
   it('合并菜单可用 Esc 关闭，选择下载仅打开全屏目录', async () => {
     const wrapper = await render()
     const menu = wrapper.get('.java-manager-toolbar').getComponent(NDropdown)

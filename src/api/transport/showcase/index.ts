@@ -20,6 +20,7 @@ import {
   showcaseResources,
   showcaseScannedVersions,
   showcaseScreenshots,
+  showcaseJavaInventory,
   showcaseFilesetItems,
   showcaseSearchItemsByType,
   showcaseServers,
@@ -257,6 +258,16 @@ export function createShowcaseTransport(): BackendTransport {
         persistShowcaseConfig(config)
         return success(structuredClone(next))
       }
+      case 'game_java_inventory':
+        return success(structuredClone(showcaseJavaInventory))
+      case 'game_java_set_enabled': {
+        const runtime = showcaseJavaInventory.runtimes.find((item) => item.runtimeId === payload.runtime_id)
+        if (runtime) runtime.isEnabled = payload.is_enabled === true
+        return success(structuredClone(showcaseJavaInventory))
+      }
+      case 'game_java_forget':
+      case 'game_java_remove':
+        return success(structuredClone(showcaseJavaInventory))
       case 'game_java_scan':
         return success([
           {

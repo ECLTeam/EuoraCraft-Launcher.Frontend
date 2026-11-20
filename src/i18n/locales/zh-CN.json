@@ -2419,6 +2419,9 @@
   "javaManager": {
     "addJava": "添加 Java",
     "title": "Java 管理",
+    "columnName": "名称",
+    "columnVersion": "版本",
+    "columnStatus": "状态",
     "installed": "已安装",
     "download": "下载",
     "rescan": "重新扫描",

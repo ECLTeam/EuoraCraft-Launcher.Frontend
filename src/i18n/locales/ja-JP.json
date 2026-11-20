@@ -2507,6 +2507,9 @@
   "javaManager": {
     "addJava": "Java を追加",
     "title": "Java管理",
+    "columnName": "名前",
+    "columnVersion": "バージョン",
+    "columnStatus": "ステータス",
     "installed": "インストール済み",
     "download": "ダウンロード",
     "rescan": "再スキャン",

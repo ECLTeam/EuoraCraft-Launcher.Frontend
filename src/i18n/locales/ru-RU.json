@@ -2504,6 +2504,9 @@
   "javaManager": {
     "addJava": "Добавить Java",
     "title": "Управление Java",
+    "columnName": "Имя",
+    "columnVersion": "Версия",
+    "columnStatus": "Состояние",
     "installed": "Установленные",
     "download": "Загрузка",
     "rescan": "Повторить поиск",

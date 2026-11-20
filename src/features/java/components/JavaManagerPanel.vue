@@ -84,6 +84,12 @@
         }}</UiButton>
       </UiEmptyState>
       <div v-else class="java-runtime-list">
+        <div class="java-manager-table-header">
+          <span>{{ t('javaManager.columnName') }}</span>
+          <span>{{ t('javaManager.columnVersion') }}</span>
+          <span>{{ t('javaManager.columnStatus') }}</span>
+          <span></span>
+        </div>
         <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
           <div class="java-runtime-identity">
             <JavaRuntimeIcon class="java-runtime-icon" />
@@ -95,7 +101,7 @@
             </div>
           </div>
           <div class="java-runtime-version">
-            <strong :title="runtime.fullVersion">{{ runtime.fullVersion }}</strong>
+            <NTag size="small" :bordered="false" :title="runtime.fullVersion">{{ runtime.fullVersion }}</NTag>
             <span>{{ runtime.architecture }} · {{ t(`javaManager.origins.${runtime.origin}`) }}</span>
           </div>
           <div class="java-runtime-status">

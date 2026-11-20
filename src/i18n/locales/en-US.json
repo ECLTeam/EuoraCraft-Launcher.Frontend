@@ -2524,6 +2524,9 @@
   "javaManager": {
     "addJava": "Add Java",
     "title": "Java management",
+    "columnName": "Name",
+    "columnVersion": "Version",
+    "columnStatus": "Status",
     "installed": "Installed",
     "download": "Download",
     "rescan": "Rescan",

@@ -2390,6 +2390,9 @@
   "javaManager": {
     "addJava": "新增 Java",
     "title": "Java 管理",
+    "columnName": "名稱",
+    "columnVersion": "版本",
+    "columnStatus": "狀態",
     "installed": "已安裝",
     "download": "下載",
     "rescan": "重新掃描",

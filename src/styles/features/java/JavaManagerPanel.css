@@ -7,6 +7,8 @@
   min-width: 0;
   min-height: 0;
   container-type: inline-size;
+  /* 列头与行共用同一组轨道；最后一列给固定宽度，auto 会让两张网格算出不同列宽 */
+  --java-table-columns: minmax(140px, 1fr) 130px 110px 190px;
 }
 .java-manager-toolbar,
 .java-manager-title,
@@ -82,16 +84,28 @@
 .java-runtime-list {
   min-width: 0;
 }
+.java-manager-table-header {
+  display: grid;
+  height: 32px;
+  align-items: center;
+  grid-template-columns: var(--java-table-columns);
+  gap: var(--s-md);
+  padding: 0 var(--s-md);
+  border-bottom: 1px solid var(--border-strong);
+  color: var(--ecl-text-secondary);
+  font-size: 10px;
+  font-weight: 600;
+}
 .java-runtime-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) minmax(100px, 0.7fr) minmax(0, auto);
+  grid-template-columns: var(--java-table-columns);
   column-gap: var(--s-md);
   row-gap: var(--s-xs);
   align-items: center;
   min-width: 0;
   min-height: 60px;
-  padding: var(--s-xs) var(--s-md);
-  border-bottom: 1px solid var(--divider);
+  padding: 8px var(--s-md);
+  border-bottom: 1px solid var(--border-strong);
   transition: background var(--duration-fast) var(--ease-emphasized);
 }
 .java-runtime-row:last-child {
@@ -102,7 +116,7 @@
 }
 .java-runtime-identity {
   min-width: 0;
-  gap: var(--s-lg);
+  gap: var(--s-sm);
 }
 .java-runtime-icon {
   flex-shrink: 0;
@@ -117,16 +131,19 @@
 }
 .java-runtime-copy strong,
 .java-runtime-copy span,
-.java-runtime-version strong {
+.java-runtime-version span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.java-runtime-copy strong,
-.java-runtime-version strong {
+.java-runtime-copy strong {
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
+}
+.java-runtime-version :deep(.n-tag) {
+  align-self: flex-start;
+  max-width: 100%;
 }
 .java-runtime-copy span,
 .java-runtime-version span,
@@ -138,7 +155,7 @@
 .java-runtime-status {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: var(--s-xs);
 }
 .java-runtime-status :deep(.n-tag) {
@@ -162,20 +179,13 @@
   min-width: 0;
   flex-wrap: wrap;
   justify-content: flex-end;
-  max-width: 320px;
+  max-width: 100%;
   gap: var(--s-xs);
 }
-@container (max-width: 760px) {
-  .java-runtime-row:has(.java-runtime-status .n-tag + .n-tag) {
-    grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) auto;
-  }
-  .java-runtime-row:has(.java-runtime-status .n-tag + .n-tag) .java-runtime-status {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: flex-start;
-  }
-}
 @container (max-width: 640px) {
+  .java-manager-table-header {
+    display: none;
+  }
   .java-runtime-row {
     grid-template-columns: minmax(140px, 1fr) minmax(100px, 0.7fr) auto;
   }
