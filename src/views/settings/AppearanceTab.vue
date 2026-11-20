@@ -88,11 +88,7 @@
           @update:value="handleWindowSurfaceChange"
         />
       </SettingRow>
-      <SettingRow
-        v-if="windowSurface !== 'solid'"
-        :label="t('settings.windowOpacity')"
-        :description="t('settings.windowOpacityDesc')"
-      >
+      <SettingRow v-if="windowSurface !== 'solid'" :label="t('settings.windowOpacity')">
         <div class="slider-control">
           <NSlider
             :value="windowOpacity"

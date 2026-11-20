@@ -17,6 +17,7 @@ import { instanceWorkspaceApi } from '@/features/instances/api/instanceWorkspace
 import { useInstanceStore } from '@/features/instances/stores/instanceStore'
 import { useJavaRuntimeStore } from '@/features/java/stores/javaRuntimeStore'
 import { useApplicationOperationStore } from '@/features/operations/stores/applicationOperationStore'
+import { debugToolsApi } from '@/features/settings/api/debugToolsApi'
 import { useUpdateCheck } from '@/features/settings/composables/useUpdateCheck'
 import { shouldShowStartupUpdate } from '@/features/settings/model/updateNotice'
 import { useSettingsStore } from '@/features/settings/stores/settingsStore'
@@ -549,7 +550,11 @@ export function useAppRuntime(options: UseAppRuntimeOptions) {
       () => useInstanceStore().dispose(),
       () => instanceInstallApi.disposeChangeListeners()
     )
-    cleanupCallbacks.push(installDesktopInteractionPolicy(readonly(isDevMode)))
+    cleanupCallbacks.push(
+      installDesktopInteractionPolicy(readonly(isDevMode), {
+        openDevTools: () => void debugToolsApi.openDevTools().catch(() => undefined),
+      })
+    )
     initPluginBridge(options.router)
     await backend.waitForEventListeners()
     if (activeStart !== run) return

@@ -151,7 +151,6 @@ watch(
   color: var(--ecl-text-tertiary);
 }
 
-/* 视频角标：选择弹窗里同样要能区分图片与视频 */
 .fileset-picker-kind {
   position: absolute;
   top: 5px;

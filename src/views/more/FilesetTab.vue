@@ -13,19 +13,13 @@
         </div>
       </header>
 
-      <div class="fileset-meta">
-        <p class="fileset-hint">{{ t('fileset.hint') }}</p>
-        <p v-if="notice" class="fileset-notice" role="status">{{ notice }}</p>
+      <div v-if="notice" class="fileset-meta">
+        <p class="fileset-notice" role="status">{{ notice }}</p>
       </div>
 
       <div class="fileset-body">
         <UiLoading v-if="loading && !items.length" />
-        <UiEmptyState
-          v-else-if="!items.length"
-          icon="photo"
-          :title="t('fileset.emptyTitle')"
-          :description="t('fileset.emptyDescription')"
-        />
+        <UiEmptyState v-else-if="!items.length" icon="photo" :title="t('fileset.emptyTitle')" />
         <div v-else class="fileset-grid">
           <article v-for="item in items" :key="item.id" class="fileset-card">
             <div class="fileset-preview" @mouseenter="loadVideoPreview(item)">
@@ -101,7 +95,7 @@ const renaming = ref(false)
 const deleting = ref(false)
 const notice = ref('')
 
-// 缩略图与视频地址按条目缓存，避免滚动或重渲染时重复签发协议令牌。
+// 按条目缓存令牌，避免重渲染时重复签发。
 const thumbnails = reactive<Record<string, string>>({})
 const previews = reactive<Record<string, string>>({})
 
@@ -113,7 +107,6 @@ const deleteVisible = ref(false)
 const deleteTarget = ref<FileSetItem | null>(null)
 
 function detailOf(item: FileSetItem): string {
-  // 首段固定为文件类型，图片再补尺寸：`PNG · 1920×1080 · 2.1 MB`、`MP4 · 12.3 MB`
   const parts = [item.extension.replace('.', '').toUpperCase()]
   if (item.kind === 'image' && item.width && item.height) parts.push(`${item.width}×${item.height}`)
   parts.push(formatSize(item.byteSize))
@@ -134,7 +127,7 @@ async function loadThumbnails(list: FileSetItem[]): Promise<void> {
         const result = await filesetApi.thumbnail(item.id)
         if (result.url) thumbnails[item.id] = result.url
       } catch {
-        // 单张缩略图失败时保留占位图标，不影响其余条目。
+        // 单张失败时保留占位图标。
       }
     })
   )
@@ -146,7 +139,7 @@ async function loadVideoPreview(item: FileSetItem): Promise<void> {
     const result = await filesetApi.resolve(item.id)
     previews[item.id] = result.url
   } catch {
-    // 地址签发失败时保持占位，不打断页面。
+    // 签发失败时保持占位。
   }
 }
 
@@ -234,7 +227,6 @@ onMounted(reload)
   min-height: 0;
 }
 
-/* 主表面：工具栏固定在卡片内，只有网格滚动 */
 .fileset-panel {
   display: flex;
   min-height: 0;
@@ -291,16 +283,11 @@ onMounted(reload)
   padding: var(--s-sm) var(--s-lg) 0;
 }
 
-.fileset-hint,
 .fileset-notice {
   margin: 0;
-  color: var(--ecl-text-secondary);
+  color: var(--ecl-text);
   font-size: 11px;
   line-height: 1.5;
-}
-
-.fileset-notice {
-  color: var(--ecl-text);
 }
 
 .fileset-body {

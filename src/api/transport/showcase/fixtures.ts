@@ -453,12 +453,7 @@ export const showcaseServers: ServerEntry[] = [
   { id: 'srv-demo', name: 'ECL 演示生存服', address: 'demo.euoracraft.dev', icon: null, favorite: false, order: 2 },
 ]
 
-/**
- * 文件集演示条目。
- *
- * 展示模式没有真实媒体目录，这里用仓库内的皮肤图当作导入结果，
- * 让媒体库网格、改名与删除在预览环境里可操作。
- */
+/** 展示模式的文件集条目，用仓库内皮肤图代替真实导入结果。 */
 export const showcaseFilesetItems: FileSetItem[] = [
   {
     id: 'fileset-alex',
