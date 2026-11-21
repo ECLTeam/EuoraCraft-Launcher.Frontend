@@ -405,6 +405,7 @@ onMounted(reload)
 
 .fileset-card-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 2px;
   margin-top: 1px;
 }
