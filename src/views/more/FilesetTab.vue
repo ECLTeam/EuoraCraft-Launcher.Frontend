@@ -48,8 +48,26 @@
               <span class="fileset-detail">{{ detailOf(item) }}</span>
             </div>
             <div class="fileset-card-actions">
-              <UiButton size="sm" variant="text" @click="openRename(item)">{{ t('fileset.rename') }}</UiButton>
-              <UiButton size="sm" variant="text" @click="askDelete(item)">{{ t('fileset.delete') }}</UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                shape="square"
+                :title="t('fileset.rename')"
+                :aria-label="t('fileset.rename')"
+                @click="openRename(item)"
+              >
+                <UiIcon name="edit" :size="16" />
+              </UiButton>
+              <UiButton
+                variant="ghost"
+                size="sm"
+                shape="square"
+                :title="t('fileset.delete')"
+                :aria-label="t('fileset.delete')"
+                @click="askDelete(item)"
+              >
+                <UiIcon name="trash" :size="16" />
+              </UiButton>
             </div>
           </article>
         </div>
