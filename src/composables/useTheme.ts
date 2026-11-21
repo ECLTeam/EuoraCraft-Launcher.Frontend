@@ -705,7 +705,7 @@ export const useThemeStore = defineStore('theme', () => {
   const bgIndex = ref(0)
   let bgRotateTimer: ReturnType<typeof setInterval> | null = null
   /** 窗口表面模式；改后需重启才改变窗口透明标志，保存于 theme.window_surface。 */
-  const windowSurface = ref<'solid' | 'translucent' | 'mica'>('solid')
+  const windowSurface = ref<'solid' | 'translucent'>('solid')
   /** 窗口最底层表面的不透明度百分比，实时写入 CSS 变量。 */
   const windowOpacity = ref(100)
   const sidebarStorageKey = 'euoracraft-sidebar-collapsed'
@@ -1363,7 +1363,7 @@ export const useThemeStore = defineStore('theme', () => {
     bgFolderPath.value = ''
   }
 
-  function setWindowSurface(value: 'solid' | 'translucent' | 'mica', persist = true) {
+  function setWindowSurface(value: 'solid' | 'translucent', persist = true) {
     windowSurface.value = value
     updateTheme()
     if (persist) saveThemeConfig()
@@ -1511,12 +1511,9 @@ export const useThemeStore = defineStore('theme', () => {
         if (typeof themeData.blur_amount === 'number') {
           blurAmount.value = themeData.blur_amount
         }
-        if (
-          themeData.window_surface === 'solid' ||
-          themeData.window_surface === 'translucent' ||
-          themeData.window_surface === 'mica'
-        ) {
-          windowSurface.value = themeData.window_surface
+        // 仅接受 translucent；solid 是默认值，已移除的 mica 等历史值按未知配置回落为不透明，与后端启动解析一致。
+        if (themeData.window_surface === 'translucent') {
+          windowSurface.value = 'translucent'
         }
         if (typeof themeData.window_opacity === 'number') {
           windowOpacity.value = Math.min(100, Math.max(0, Math.round(themeData.window_opacity)))

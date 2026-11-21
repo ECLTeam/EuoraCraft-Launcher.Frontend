@@ -186,7 +186,7 @@ export interface ThemeConfig {
   /** 主窗口装饰模式，保存后下次启动生效。 */
   window_chrome?: 'custom' | 'system_shadow' | 'native'
   /** 窗口表面模式，保存后下次启动生效：实色 / 半透明 / 毛玻璃（仅 Windows）。 */
-  window_surface?: 'solid' | 'translucent' | 'mica'
+  window_surface?: 'solid' | 'translucent'
   /** 窗口表面不透明度 0-100；只控制最底层表面，卡片不透明度由 appearance.card_opacity 独立控制。 */
   window_opacity?: number
   /** @deprecated 兼容旧配置；true 对应 sidebar，false 对应 top。 */

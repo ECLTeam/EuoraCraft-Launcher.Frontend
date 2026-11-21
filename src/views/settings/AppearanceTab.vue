@@ -78,15 +78,8 @@
       <SettingRow :label="t('settings.topNav')" :description="t('settings.topNavDesc')">
         <NSwitch :value="topNavEnabled" @update:value="toggleTopNav" />
       </SettingRow>
-      <SettingRow :label="t('settings.windowSurface')" :description="t('settings.windowSurfaceDesc')">
-        <NSelect
-          class="setting-select"
-          :value="windowSurface"
-          :options="windowSurfaceOptions"
-          to="#app"
-          size="small"
-          @update:value="handleWindowSurfaceChange"
-        />
+      <SettingRow :label="t('settings.windowTransparent')" :description="t('settings.windowTransparentDesc')">
+        <NSwitch :value="windowSurface === 'translucent'" @update:value="handleWindowTransparentChange" />
       </SettingRow>
       <SettingRow v-if="windowSurface !== 'solid'" :label="t('settings.windowOpacity')">
         <div class="slider-control">
@@ -278,8 +271,21 @@
               clearable
               @update:value="handleBgImageInput"
             />
-            <NButton :loading="imagePickPending" @click="selectLocalImage">{{ t('common.browse') }}</NButton>
-            <NButton quaternary @click="openFilesetPicker('image')">{{ t('fileset.pickFromSet') }}</NButton>
+            <NButton
+              :loading="imagePickPending"
+              :title="t('common.browse')"
+              :aria-label="t('common.browse')"
+              @click="selectLocalImage"
+            >
+              <UiIcon name="folder-open" :size="16" />
+            </NButton>
+            <NButton
+              :title="t('fileset.pickFromSet')"
+              :aria-label="t('fileset.pickFromSet')"
+              @click="openFilesetPicker('image')"
+            >
+              <UiIcon name="photo" :size="16" />
+            </NButton>
           </NInputGroup>
           <input
             ref="showcaseImageInputRef"
@@ -313,8 +319,21 @@
         <SettingRow :label="t('settings.backgroundVideo')" :description="t('settings.backgroundVideoDesc')">
           <NInputGroup class="background-input-group">
             <NInput :value="backgroundVideoPath" readonly :placeholder="t('settings.backgroundVideoEmpty')" />
-            <NButton :loading="videoPickPending" @click="selectBackgroundVideo">{{ t('common.browse') }}</NButton>
-            <NButton quaternary @click="openFilesetPicker('video')">{{ t('fileset.pickFromSet') }}</NButton>
+            <NButton
+              :loading="videoPickPending"
+              :title="t('common.browse')"
+              :aria-label="t('common.browse')"
+              @click="selectBackgroundVideo"
+            >
+              <UiIcon name="folder-open" :size="16" />
+            </NButton>
+            <NButton
+              :title="t('fileset.pickFromSet')"
+              :aria-label="t('fileset.pickFromSet')"
+              @click="openFilesetPicker('video')"
+            >
+              <UiIcon name="photo" :size="16" />
+            </NButton>
           </NInputGroup>
         </SettingRow>
         <SettingRow :label="t('settings.backgroundVideoPoster')" :description="t('settings.backgroundVideoPosterDesc')">
@@ -324,9 +343,14 @@
               readonly
               :placeholder="t('settings.backgroundVideoPosterEmpty')"
             />
-            <NButton :loading="posterPickPending" @click="selectBackgroundVideoPoster">{{
-              t('common.browse')
-            }}</NButton>
+            <NButton
+              :loading="posterPickPending"
+              :title="t('common.browse')"
+              :aria-label="t('common.browse')"
+              @click="selectBackgroundVideoPoster"
+            >
+              <UiIcon name="folder-open" :size="16" />
+            </NButton>
           </NInputGroup>
         </SettingRow>
         <SettingRow :label="t('settings.backgroundVideoPlay')" :description="t('settings.backgroundVideoPlayDesc')">
@@ -422,7 +446,7 @@
 import { NButton, NInput, NInputGroup, NSelect, NSlider, NSwitch, NTab, NTabs, NTimePicker } from 'naive-ui'
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useActiveWindowChrome, useSystemShadowSupported, useWindowEffectsSupported } from '@/app/runtime/windowChrome'
+import { useActiveWindowChrome, useSystemShadowSupported } from '@/app/runtime/windowChrome'
 import { CollapsiblePanel, UiIcon } from '@/components/ui'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useLauncherMessage } from '@/composables/useLauncherMessage'
@@ -494,19 +518,11 @@ const windowChromeDescriptionKey = computed(() =>
       : 'settings.windowChromeRestartRequired'
 )
 
-const windowEffectsSupported = useWindowEffectsSupported()
-
-const windowSurfaceOptions = computed(() => [
-  { label: t('settings.windowSurfaceSolid'), value: 'solid' },
-  { label: t('settings.windowSurfaceTranslucent'), value: 'translucent' },
-  { label: t('settings.windowSurfaceMica'), value: 'mica', disabled: !windowEffectsSupported.value },
-])
-
-function handleWindowSurfaceChange(value: string | number | null): void {
-  if (value !== 'solid' && value !== 'translucent' && value !== 'mica') return
+function handleWindowTransparentChange(value: boolean): void {
+  const surface = value ? 'translucent' : 'solid'
   void run(async () => {
-    setWindowSurface(value, false)
-    await settingsStore.patchUiTheme({ window_surface: value })
+    setWindowSurface(surface, false)
+    await settingsStore.patchUiTheme({ window_surface: surface })
   })
 }
 

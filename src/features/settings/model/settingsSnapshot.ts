@@ -72,7 +72,7 @@ const theme = looseObject({
   blur_amount: optionalNumber,
   navigation_mode: optional(picklist(['sidebar', 'top'])),
   window_chrome: optional(picklist(['custom', 'system_shadow', 'native'])),
-  window_surface: optional(picklist(['solid', 'translucent', 'mica'])),
+  window_surface: optional(picklist(['solid', 'translucent'])),
   window_opacity: optionalNumber,
   titlebar_hidden: optionalBoolean,
   background_opacity: optionalNumber,

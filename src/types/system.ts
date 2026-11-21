@@ -29,8 +29,6 @@ export interface LauncherInfo {
   debug: boolean
   active_window_chrome?: 'custom' | 'system_shadow' | 'native'
   system_shadow_supported?: boolean
-  /** 原生窗口特效（mica 等毛玻璃）是否可用；仅 Windows 为 true。 */
-  window_effects_supported?: boolean
   /** 浏览器与演示模式下没有后端系统信息 */
   system?: SystemSummary
 }
