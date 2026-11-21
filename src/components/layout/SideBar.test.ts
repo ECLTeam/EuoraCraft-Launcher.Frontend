@@ -54,6 +54,32 @@ describe('侧栏插件状态通知', () => {
   })
 })
 
+describe('侧栏插件路由过滤', () => {
+  it('宿主容器导航（container=more）不进入主侧边栏，独立页面正常展示', async () => {
+    const theme = useTheme()
+    theme.setSidebarCollapsed(false)
+    pluginRoutes.value = [
+      {
+        plugin: 'online',
+        path: '/room',
+        title: '联机',
+        container: 'more',
+        nav: { path: 'room', label_key: 'more.nav.room', icon: 'wifi' },
+      },
+      { plugin: 'example', path: '/page', title: 'Example' },
+    ]
+    const wrapper = mount(SideBar, { global: { stubs: { UiIcon: true, PluginSlotHost: true } } })
+    try {
+      const paths = wrapper.findAll('.sidebar-item[data-path]').map((item) => item.attributes('data-path'))
+      expect(paths).toContain('/plugin/example/page')
+      expect(paths.some((path) => path?.includes('online'))).toBe(false)
+    } finally {
+      wrapper.unmount()
+      pluginRoutes.value = []
+    }
+  })
+})
+
 describe('侧栏激活位置', () => {
   it('切换内置和插件菜单，折叠或目标消失时隐藏，展开后恢复', async () => {
     const route = useRoute()

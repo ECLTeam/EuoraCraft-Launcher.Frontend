@@ -126,8 +126,14 @@ const isCollapsed = computed({
   set: (val) => setSidebarCollapsed(val),
 })
 const isExpanded = ref(false)
+// 宿主容器导航（container=more）的入口由「更多」页侧栏展示，路径注册在 /more/* 下；
+// 主侧边栏只展示注册在 /plugin/* 下的独立页面，避免出现点击无效的重复入口。
 const pluginRoutesList = computed(() =>
-  pluginRoutes.value.filter((item) => !item.locales?.length || item.locales.includes(i18n.global.locale.value))
+  pluginRoutes.value.filter(
+    (item) =>
+      !(item.container === 'more' && item.nav) &&
+      (!item.locales?.length || item.locales.includes(i18n.global.locale.value))
+  )
 )
 const route = useRoute()
 const router = useRouter()
