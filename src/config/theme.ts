@@ -140,7 +140,8 @@ export const LIGHT_THEME_COLORS: ThemeColorPalette = {
   surface: '#FFFFFF',
   cardBackground: 'rgba(255,255,255,0.88)',
   text: '#1D2433',
-  textSecondary: '#596275',
+  // 与 tokens.css 的 --ecl-text-secondary 保持一致；#596275 在部分弹层表面对比度仅 4.09。
+  textSecondary: '#4C556A',
   border: 'rgba(29,36,51,0.10)',
 }
 

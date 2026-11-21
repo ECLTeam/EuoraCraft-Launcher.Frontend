@@ -9,7 +9,8 @@
   --ecl-surface-backdrop: none;
   --ecl-overlay-backdrop: blur(16px) saturate(1.2);
   --ecl-text: #1d2433;
-  --ecl-text-secondary: #596275;
+  /* 次级文本需在最差表面上达到 4.5:1（WCAG 1.4.3）；#596275 在部分弹层表面仅 4.09。 */
+  --ecl-text-secondary: #4c556a;
   --ecl-text-tertiary: #8a94a8;
   --ecl-text-primary: var(--ecl-text);
   --ecl-border: rgba(29, 36, 51, 0.1);
