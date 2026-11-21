@@ -56,7 +56,7 @@
       </div>
     </section>
 
-    <NModal v-model:show="renameVisible" preset="card" class="fileset-dialog" :title="t('fileset.renameTitle')">
+    <Modal v-model:visible="renameVisible" :title="t('fileset.renameTitle')" titlebarInteractive width="420px">
       <NInput
         v-model:value="renameValue"
         :maxlength="80"
@@ -69,10 +69,10 @@
           <UiButton :loading="renaming" @click="submitRename">{{ t('fileset.confirm') }}</UiButton>
         </div>
       </template>
-    </NModal>
+    </Modal>
 
-    <NModal v-model:show="deleteVisible" preset="card" class="fileset-dialog" :title="t('fileset.deleteTitle')">
-      <p>{{ t('fileset.deleteContent') }}</p>
+    <Modal v-model:visible="deleteVisible" :title="t('fileset.deleteTitle')" titlebarInteractive width="420px">
+      <p class="fileset-delete-content">{{ t('fileset.deleteContent') }}</p>
       <template #footer>
         <div class="fileset-dialog-footer">
           <UiButton variant="outline" @click="deleteVisible = false">{{ t('fileset.cancel') }}</UiButton>
@@ -81,14 +81,15 @@
           }}</UiButton>
         </div>
       </template>
-    </NModal>
+    </Modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { NInput, NModal } from 'naive-ui'
+import { NInput } from 'naive-ui'
 import { onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Modal from '@/components/modals/Modal.vue'
 import { UiButton, UiEmptyState, UiIcon, UiLoading } from '@/components/ui'
 import { filesetApi } from '@/features/fileset/api/filesetApi'
 import type { FileSetItem } from '@/types/fileset'
@@ -388,6 +389,13 @@ onMounted(reload)
   display: flex;
   gap: 2px;
   margin-top: 1px;
+}
+
+.fileset-delete-content {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .fileset-dialog-footer {
