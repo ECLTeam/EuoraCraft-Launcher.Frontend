@@ -23,7 +23,12 @@
         <div v-else class="fileset-grid">
           <article v-for="item in items" :key="item.id" class="fileset-card">
             <div class="fileset-preview" @mouseenter="loadVideoPreview(item)">
-              <img v-if="item.kind === 'image' && thumbnails[item.id]" :src="thumbnails[item.id]" alt="" loading="lazy" />
+              <img
+                v-if="item.kind === 'image' && thumbnails[item.id]"
+                :src="thumbnails[item.id]"
+                alt=""
+                loading="lazy"
+              />
               <video
                 v-else-if="item.kind === 'video' && previews[item.id]"
                 :src="previews[item.id]"
@@ -71,7 +76,9 @@
       <template #footer>
         <div class="fileset-dialog-footer">
           <UiButton variant="outline" @click="deleteVisible = false">{{ t('fileset.cancel') }}</UiButton>
-          <UiButton variant="danger" :loading="deleting" @click="submitDelete">{{ t('fileset.deleteConfirm') }}</UiButton>
+          <UiButton variant="danger" :loading="deleting" @click="submitDelete">{{
+            t('fileset.deleteConfirm')
+          }}</UiButton>
         </div>
       </template>
     </NModal>

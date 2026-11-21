@@ -1,71 +1,73 @@
 <template>
   <section class="java-manager">
     <header class="java-manager-toolbar">
-    <NInput
-      v-model:value="query"
-      class="java-manager-search"
-      clearable
-      size="small"
-      :placeholder="t('javaManager.search')"
-      :inputProps="{ 'aria-label': t('javaManager.search') }"
-    >
-      <template #prefix><UiIcon name="search" :size="14" /></template>
-    </NInput>
+      <NInput
+        v-model:value="query"
+        class="java-manager-search"
+        clearable
+        size="small"
+        :placeholder="t('javaManager.search')"
+        :inputProps="{ 'aria-label': t('javaManager.search') }"
+      >
+        <template #prefix><UiIcon name="search" :size="14" /></template>
+      </NInput>
 
-    <div class="java-manager-toolbar-actions">
-      <NButton
-        class="java-manager-icon-button"
-        quaternary
-        circle
-        size="small"
-        :loading="store.isLoading"
-        :title="t('javaManager.rescan')"
-        :aria-label="t('javaManager.rescan')"
-        @click="load(true)"
-      >
-        <template #icon><UiIcon name="refresh" :size="16" /></template>
-      </NButton>
-      <NButton
-        class="java-manager-icon-button"
-        quaternary
-        circle
-        size="small"
-        :loading="isCheckingUpdates"
-        :title="t('javaManager.checkUpdates')"
-        :aria-label="t('javaManager.checkUpdates')"
-        @click="checkUpdates"
-      >
-        <template #icon><UiIcon name="download" :size="16" /></template>
-      </NButton>
-      <NDropdown
-        trigger="click"
-        placement="bottom-end"
-        :options="addJavaOptions"
-        :show="addMenuVisible"
-        to="#app"
-        @update:show="addMenuVisible = $event"
-        @select="handleAddJava"
-      >
+      <div class="java-manager-toolbar-actions">
         <NButton
-          class="java-add-button"
-          type="primary"
+          class="java-manager-icon-button"
+          quaternary
+          circle
           size="small"
-          :loading="isRegistering"
-          :disabled="isActing"
-          aria-haspopup="menu"
-          :aria-expanded="addMenuVisible"
-          @keydown.esc="closeAddMenuOnEscape"
+          :loading="store.isLoading"
+          :title="t('javaManager.rescan')"
+          :aria-label="t('javaManager.rescan')"
+          @click="load(true)"
         >
-          <template #icon><UiIcon name="add" :size="14" /></template>
-          {{ t('javaManager.addJava') }}
+          <template #icon><UiIcon name="refresh" :size="16" /></template>
         </NButton>
-      </NDropdown>
-    </div>
-  </header>
+        <NButton
+          class="java-manager-icon-button"
+          quaternary
+          circle
+          size="small"
+          :loading="isCheckingUpdates"
+          :title="t('javaManager.checkUpdates')"
+          :aria-label="t('javaManager.checkUpdates')"
+          @click="checkUpdates"
+        >
+          <template #icon><UiIcon name="download" :size="16" /></template>
+        </NButton>
+        <NDropdown
+          trigger="click"
+          placement="bottom-end"
+          :options="addJavaOptions"
+          :show="addMenuVisible"
+          to="#app"
+          @update:show="addMenuVisible = $event"
+          @select="handleAddJava"
+        >
+          <NButton
+            class="java-add-button"
+            type="primary"
+            size="small"
+            :loading="isRegistering"
+            :disabled="isActing"
+            aria-haspopup="menu"
+            :aria-expanded="addMenuVisible"
+            @keydown.esc="closeAddMenuOnEscape"
+          >
+            <template #icon><UiIcon name="add" :size="14" /></template>
+            {{ t('javaManager.addJava') }}
+          </NButton>
+        </NDropdown>
+      </div>
+    </header>
 
     <div class="java-list-body">
       <div class="java-list-content">
-        <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{ error || store.error }}</NAlert>
+        <NAlert v-if="error || store.error" type="error" closable @close="error = ''">{{
+          error || store.error
+        }}</NAlert>
         <NAlert v-if="requiredMajor" type="info">{{ t('javaManager.requirement', { major: requiredMajor }) }}</NAlert>
         <NAlert v-if="store.inventory?.cleanupPendingCount" type="warning"
           >{{ t('javaManager.cleanupPending', { count: store.inventory.cleanupPendingCount }) }}
@@ -88,116 +90,118 @@
           </template>
         </NEmpty>
 
-      <div v-else class="java-runtime-list">
-        <div class="java-manager-table-header">
-          <span>{{ t('javaManager.columnName') }}</span>
-          <span>{{ t('javaManager.columnVersion') }}</span>
-          <span>{{ t('javaManager.columnStatus') }}</span>
-          <span></span>
-        </div>
-        <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
-          <div class="java-runtime-identity">
-            <div class="java-runtime-icon"><UiIcon name="coffee" :size="40" /></div>
-            <div class="java-runtime-content">
-              <span class="java-runtime-name">Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</span>
-              <div
-                class="java-runtime-description"
-                :title="`${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`"
-              >
-                {{
-                  `${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`
-                }}
+        <div v-else class="java-runtime-list">
+          <div class="java-manager-table-header">
+            <span>{{ t('javaManager.columnName') }}</span>
+            <span>{{ t('javaManager.columnVersion') }}</span>
+            <span>{{ t('javaManager.columnStatus') }}</span>
+            <span></span>
+          </div>
+          <article v-for="runtime in filteredRuntimes" :key="runtime.runtimeId" class="java-runtime-row">
+            <div class="java-runtime-identity">
+              <div class="java-runtime-icon"><UiIcon name="coffee" :size="40" /></div>
+              <div class="java-runtime-content">
+                <span class="java-runtime-name"
+                  >Java {{ runtime.majorVersion || '?' }} · {{ runtime.runtimeKind }}</span
+                >
+                <div
+                  class="java-runtime-description"
+                  :title="`${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`"
+                >
+                  {{
+                    `${runtime.vendor || t('javaManager.unknownVendor')} · ${runtime.architecture} · ${t(`javaManager.origins.${runtime.origin}`)}`
+                  }}
+                </div>
               </div>
             </div>
-          </div>
-          <div class="java-runtime-version">
-            <NTag size="small" :bordered="false" :title="runtime.fullVersion">{{ runtime.fullVersion }}</NTag>
-          </div>
-          <div class="java-runtime-status">
-            <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
-              t(`javaManager.validation.${runtime.validationStatus}`)
-            }}</NTag>
-            <NTag v-if="!runtime.isEnabled" size="small" type="warning">{{ t('javaManager.disabled') }}</NTag>
-            <NTag v-if="runtime.isInUse" size="small" type="info">{{
-              t(runtime.usageUnknown ? 'javaManager.usageUnknown' : 'javaManager.inUse')
-            }}</NTag>
-            <span v-if="runtime.references?.length">{{
-              t('javaManager.referenced', { count: runtime.references.length })
-            }}</span>
-          </div>
-          <NSpace class="java-runtime-actions" justify="end" :size="3" :wrap="false" :wrapItem="false">
-            <NButton
-              v-if="runtime.validationStatus !== 'valid'"
-              class="java-runtime-relocate"
-              quaternary
-              size="tiny"
-              :disabled="isRegistering"
-              :title="t('javaManager.relocate')"
-              :aria-label="t('javaManager.relocate')"
-              @click="register"
-            >
-              <template #icon><UiIcon name="refresh" :size="16" /></template>
-            </NButton>
-            <NButton
-              v-if="updates[runtime.runtimeId]"
-              class="java-runtime-update"
-              quaternary
-              size="tiny"
-              :disabled="isActing"
-              :title="t('javaManager.update')"
-              :aria-label="t('javaManager.update')"
-              @click="prepareInstall(updates[runtime.runtimeId]!)"
-            >
-              <template #icon><UiIcon name="download" :size="16" /></template>
-            </NButton>
-            <NButton
-              class="java-runtime-use"
-              quaternary
-              size="tiny"
-              :disabled="!canUse(runtime) || isActing"
-              :title="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
-              :aria-label="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
-              @click="useRuntime(runtime)"
-            >
-              <template #icon><UiIcon name="check" :size="16" /></template>
-            </NButton>
-            <NButton
-              class="java-runtime-open"
-              quaternary
-              size="tiny"
-              :disabled="isActing"
-              :title="`${t('javaManager.openFolder')} · ${runtime.javaHomePath}`"
-              :aria-label="t('javaManager.openFolder')"
-              @click="openFolder(runtime)"
-            >
-              <template #icon><UiIcon name="folder" :size="16" /></template>
-            </NButton>
-            <NButton
-              class="java-runtime-toggle"
-              quaternary
-              size="tiny"
-              :disabled="isActing"
-              :title="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
-              :aria-label="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
-              @click="toggleRuntime(runtime)"
-            >
-              <template #icon><UiIcon :name="runtime.isEnabled ? 'stop' : 'play'" :size="16" /></template>
-            </NButton>
-            <NButton
-              v-if="runtime.origin !== 'system'"
-              class="java-runtime-remove"
-              quaternary
-              size="tiny"
-              type="error"
-              :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
-              :title="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
-              :aria-label="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
-              @click="confirmRemoval(runtime)"
-            >
-              <template #icon><UiIcon name="trash" :size="16" /></template>
-            </NButton>
-          </NSpace>
-        </article>
+            <div class="java-runtime-version">
+              <NTag size="small" :bordered="false" :title="runtime.fullVersion">{{ runtime.fullVersion }}</NTag>
+            </div>
+            <div class="java-runtime-status">
+              <NTag v-if="runtime.validationStatus !== 'valid'" size="small" type="error">{{
+                t(`javaManager.validation.${runtime.validationStatus}`)
+              }}</NTag>
+              <NTag v-if="!runtime.isEnabled" size="small" type="warning">{{ t('javaManager.disabled') }}</NTag>
+              <NTag v-if="runtime.isInUse" size="small" type="info">{{
+                t(runtime.usageUnknown ? 'javaManager.usageUnknown' : 'javaManager.inUse')
+              }}</NTag>
+              <span v-if="runtime.references?.length">{{
+                t('javaManager.referenced', { count: runtime.references.length })
+              }}</span>
+            </div>
+            <NSpace class="java-runtime-actions" justify="end" :size="3" :wrap="false" :wrapItem="false">
+              <NButton
+                v-if="runtime.validationStatus !== 'valid'"
+                class="java-runtime-relocate"
+                quaternary
+                size="tiny"
+                :disabled="isRegistering"
+                :title="t('javaManager.relocate')"
+                :aria-label="t('javaManager.relocate')"
+                @click="register"
+              >
+                <template #icon><UiIcon name="refresh" :size="16" /></template>
+              </NButton>
+              <NButton
+                v-if="updates[runtime.runtimeId]"
+                class="java-runtime-update"
+                quaternary
+                size="tiny"
+                :disabled="isActing"
+                :title="t('javaManager.update')"
+                :aria-label="t('javaManager.update')"
+                @click="prepareInstall(updates[runtime.runtimeId]!)"
+              >
+                <template #icon><UiIcon name="download" :size="16" /></template>
+              </NButton>
+              <NButton
+                class="java-runtime-use"
+                quaternary
+                size="tiny"
+                :disabled="!canUse(runtime) || isActing"
+                :title="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
+                :aria-label="t(selectable ? 'javaManager.use' : 'javaManager.useGlobal')"
+                @click="useRuntime(runtime)"
+              >
+                <template #icon><UiIcon name="check" :size="16" /></template>
+              </NButton>
+              <NButton
+                class="java-runtime-open"
+                quaternary
+                size="tiny"
+                :disabled="isActing"
+                :title="`${t('javaManager.openFolder')} · ${runtime.javaHomePath}`"
+                :aria-label="t('javaManager.openFolder')"
+                @click="openFolder(runtime)"
+              >
+                <template #icon><UiIcon name="folder" :size="16" /></template>
+              </NButton>
+              <NButton
+                class="java-runtime-toggle"
+                quaternary
+                size="tiny"
+                :disabled="isActing"
+                :title="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
+                :aria-label="t(runtime.isEnabled ? 'javaManager.disable' : 'javaManager.enable')"
+                @click="toggleRuntime(runtime)"
+              >
+                <template #icon><UiIcon :name="runtime.isEnabled ? 'stop' : 'play'" :size="16" /></template>
+              </NButton>
+              <NButton
+                v-if="runtime.origin !== 'system'"
+                class="java-runtime-remove"
+                quaternary
+                size="tiny"
+                type="error"
+                :disabled="isActing || runtime.isInUse || !!runtime.references?.length"
+                :title="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
+                :aria-label="t(runtime.origin === 'managed' ? 'javaManager.remove' : 'javaManager.forget')"
+                @click="confirmRemoval(runtime)"
+              >
+                <template #icon><UiIcon name="trash" :size="16" /></template>
+              </NButton>
+            </NSpace>
+          </article>
         </div>
       </div>
     </div>

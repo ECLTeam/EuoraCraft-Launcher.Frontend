@@ -61,7 +61,10 @@ export function parseSettings(value: unknown): PluginSettingsData {
       const stored = values[item.key]
       if (item.type === 'bool') return typeof stored !== 'boolean'
       if (item.type === 'number') return typeof stored !== 'number' || !Number.isFinite(stored)
-      return typeof stored !== 'string' || (item.type === 'select' && !item.options?.some((option) => option.value === stored))
+      return (
+        typeof stored !== 'string' ||
+        (item.type === 'select' && !item.options?.some((option) => option.value === stored))
+      )
     })
   )
     throw new Error('PLUGIN_SCHEMA_INVALID')

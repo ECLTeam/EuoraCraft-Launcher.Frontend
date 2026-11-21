@@ -765,7 +765,10 @@ export function createShowcaseTransport(): BackendTransport {
         return success()
       case 'plugin_get_settings': {
         const name = String(payload.plugin_name)
-        const state = pluginSettings.get(name) ?? { revision: 0, values: { greeting: 'Hello', notifications: true, mode: 'auto' } }
+        const state = pluginSettings.get(name) ?? {
+          revision: 0,
+          values: { greeting: 'Hello', notifications: true, mode: 'auto' },
+        }
         pluginSettings.set(name, state)
         return success({
           installation_id: 'a'.repeat(32),

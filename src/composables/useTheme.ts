@@ -1511,7 +1511,11 @@ export const useThemeStore = defineStore('theme', () => {
         if (typeof themeData.blur_amount === 'number') {
           blurAmount.value = themeData.blur_amount
         }
-        if (themeData.window_surface === 'solid' || themeData.window_surface === 'translucent' || themeData.window_surface === 'mica') {
+        if (
+          themeData.window_surface === 'solid' ||
+          themeData.window_surface === 'translucent' ||
+          themeData.window_surface === 'mica'
+        ) {
           windowSurface.value = themeData.window_surface
         }
         if (typeof themeData.window_opacity === 'number') {

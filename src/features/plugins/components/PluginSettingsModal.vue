@@ -89,12 +89,7 @@
                 </NAlert>
                 <NEmpty v-else-if="!data?.schema.length" :description="t('plugins.noSettings')" />
                 <ul v-else class="plugin-setting-list">
-                  <li
-                    v-for="item in data.schema"
-                    :key="item.key"
-                    class="plugin-setting-row"
-                    :title="item.key"
-                  >
+                  <li v-for="item in data.schema" :key="item.key" class="plugin-setting-row" :title="item.key">
                     <div class="plugin-setting-label">
                       <strong>{{ item.label || item.key }}</strong>
                       <span v-if="item.description">{{ item.description }}</span>
@@ -124,7 +119,12 @@
                         :disabled="isSaving"
                         :aria-label="item.label || item.key"
                         :value="stringValue(values[item.key])"
-                        :options="(item.options ?? []).map((option) => ({ label: option.label || option.value, value: option.value }))"
+                        :options="
+                          (item.options ?? []).map((option) => ({
+                            label: option.label || option.value,
+                            value: option.value,
+                          }))
+                        "
                         @update:value="save(item.key, $event)"
                       />
                       <NInput

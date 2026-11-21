@@ -65,7 +65,11 @@ const loading = ref(false)
 const thumbnails = reactive<Record<string, string>>({})
 
 const title = computed(() =>
-  props.kind === 'image' ? t('fileset.pickerImageTitle') : props.kind === 'video' ? t('fileset.pickerVideoTitle') : t('fileset.title')
+  props.kind === 'image'
+    ? t('fileset.pickerImageTitle')
+    : props.kind === 'video'
+      ? t('fileset.pickerVideoTitle')
+      : t('fileset.title')
 )
 
 const visibleItems = computed(() =>

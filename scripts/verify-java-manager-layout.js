@@ -171,7 +171,7 @@ async function _verifyJavaManagerLayout(page) {
     const actionButtons = rowActions.locator('button')
     assert((await actionButtons.count()) >= 4, 'Row actions must be icon buttons')
     assert((await rowActions.locator('.n-dropdown').count()) === 0, 'Row actions must not use a dropdown')
-    assert(((await rowActions.innerText()).trim()) === '', 'Row actions must not contain text')
+    assert((await rowActions.innerText()).trim() === '', 'Row actions must not contain text')
     const labels = await actionButtons.evaluateAll((els) => els.map((el) => el.getAttribute('aria-label') ?? ''))
     assert(
       labels.every((label) => label.length > 0),
@@ -186,9 +186,7 @@ async function _verifyJavaManagerLayout(page) {
       .last()
       .locator('.java-runtime-actions')
       .evaluate((el) => el.getBoundingClientRect().bottom)
-    const contentBottom = await page
-      .locator('.java-list-body')
-      .evaluate((el) => el.getBoundingClientRect().bottom)
+    const contentBottom = await page.locator('.java-list-body').evaluate((el) => el.getBoundingClientRect().bottom)
     assert(bottom <= contentBottom + 1, 'Last item actions unreachable')
     assert(
       Math.abs(
